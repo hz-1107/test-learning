@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者總覽 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 256px 1fr;
+      min-height: 100vh;
+      background: #f9f9f9;
+    }
+
+    /* 側邊欄 */
+    .admin-sidebar {
+      background: #e8e8e8;
+      padding: var(--spacing-lg) 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .admin-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .admin-sidebar__avatar {
+      width: 40px;
+      height: 40px;
+      background: #ffdb58;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-sidebar__avatar svg {
+      width: 18px;
+      height: 18px;
+      color: #715c00;
+    }
+
+    .admin-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-sidebar__name {
+      font-size: 18px;
+      font-weight: 400;
+      color: #715c00;
+    }
+
+    .admin-sidebar__subtitle {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .admin-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 4px;
+    }
+
+    .admin-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 12px var(--spacing-lg);
+      font-size: 14px;
+      color: #475569;
+      text-decoration: none;
+      transition: all 0.2s;
+      letter-spacing: 0.35px;
+    }
+
+    .admin-sidebar__nav-item:hover {
+      background: rgba(255, 219, 88, 0.3);
+      color: #755f00;
+    }
+
+    .admin-sidebar__nav-item--active {
+      background: #ffdb58;
+      border-radius: 0 12px 12px 0;
+      color: #755f00;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    }
+
+    .admin-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 主內容區 */
+    .admin-main {
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* 頂部導覽 */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: #f9f9f9;
+    }
+
+    .admin-header__title {
+      font-size: 20px;
+      font-weight: 400;
+      color: #715c00;
+      letter-spacing: -0.5px;
+    }
+
+    .admin-header__actions {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .admin-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 9px 24px 8px;
+      background: #e2e2e2;
+      border: none;
+      border-radius: 12px;
+      width: 256px;
+      position: relative;
+    }
+
+    .admin-header__search input {
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .admin-header__search input::placeholder {
+      color: #6b7280;
+    }
+
+    .admin-header__search svg {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .admin-header__icon-btn {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .admin-header__icon-btn:hover {
+      color: #475569;
+    }
+
+    .admin-header__badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 8px;
+      height: 8px;
+      background: #ba1a1a;
+      border-radius: 50%;
+    }
+
+    .admin-header__avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      border: 2px solid #ffdb58;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .admin-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .admin-header__icons {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* 頁面內容 */
+    .admin-content {
+      padding: 32px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* 今日課程區塊 */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 400;
+      color: #1a1c1c;
+    }
+
+    .section-date {
+      font-size: 15px;
+      color: #444747;
+      margin-left: 12px;
+    }
+
+    .section-icon-btn {
+      width: 42px;
+      height: 31px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffe179;
+      border: none;
+      border-radius: 8px;
+      color: #715c00;
+      cursor: pointer;
+    }
+
+    .section-icon-btn svg {
+      width: 20px;
+      height: 21px;
+    }
+
+    /* 主要內容網格 - 左側課程卡片，右側日誌面板 */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 330px;
+      gap: 40px;
+      margin-top: 24px;
+    }
+
+    /* 課程卡片網格 - 2列 */
+    .course-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .teacher-schedule-card {
+      background: white;
+      border-radius: 8px;
+      padding: 32px;
+      box-shadow: 0 3px 2px rgba(0,0,0,0.25);
+    }
+
+    .teacher-schedule-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .teacher-schedule-card__name {
+      font-size: 12px;
+      font-weight: 700;
+      color: black;
+    }
+
+    .teacher-schedule-card__count {
+      font-size: 12px;
+      color: #7f7d7d;
+    }
+
+    .teacher-schedule-card__item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .teacher-schedule-card__course {
+      font-size: 15px;
+      color: black;
+    }
+
+    .teacher-schedule-card__time {
+      font-size: 15px;
+      color: black;
+    }
+
+    /* 今日教師日誌 */
+    .journal-panel {
+      background: white;
+      border-radius: 8px;
+      padding: 32px;
+      box-shadow: 0 4px 2px rgba(0,0,0,0.25);
+      height: fit-content;
+    }
+
+    .journal-panel__title {
+      font-size: 24px;
+      font-weight: 400;
+      color: #1a1c1c;
+      margin-bottom: 27px;
+    }
+
+    .journal-progress {
+      background: rgba(255, 225, 121, 0.54);
+      border-radius: 8px;
+      padding: 11px 16px 16px;
+      margin-bottom: 27px;
+      position: relative;
+      height: 90px;
+    }
+
+    .journal-progress__label {
+      font-size: 14px;
+      color: #231b00;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .journal-progress__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .journal-progress__value {
+      font-size: 14px;
+      font-weight: 400;
+      color: #231b00;
+    }
+
+    .journal-progress__count {
+      font-size: 14px;
+      color: #231b00;
+    }
+
+    .journal-progress__bar {
+      height: 6px;
+      background: white;
+      border-radius: 3px;
+      overflow: hidden;
+      position: absolute;
+      bottom: 11px;
+      left: 25px;
+      width: 180px;
+    }
+
+    .journal-progress__fill {
+      height: 100%;
+      background: #ffdb58;
+      border-radius: 3px;
+    }
+
+    /* 教師日誌列表 */
+    .journal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .journal-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+      padding: 4px 0;
+    }
+
+    .journal-item:hover {
+      opacity: 0.8;
+    }
+
+    .journal-item--selected {
+      background: rgba(255, 219, 88, 0.2);
+      border-radius: 8px;
+      padding: 4px 8px;
+      margin: 0 -8px;
+    }
+
+    .journal-item__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .journal-item__name {
+      font-size: 20px;
+      font-weight: 400;
+      color: black;
+    }
+
+    .journal-item__course {
+      font-size: 12px;
+      color: #787878;
+    }
+
+    .journal-item__status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 400;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .journal-item__status--complete {
+      color: #41e654;
+    }
+
+    .journal-item__status--incomplete {
+      color: #fe7560;
+    }
+
+    .journal-item__status svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* 左側區塊 */
+    .dashboard-left-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 右側區塊 */
+    .dashboard-right-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .journal-section-title {
+      font-size: 24px;
+      font-weight: 400;
+      color: #1a1c1c;
+      margin-bottom: 24px;
+    }
+
+    /* 頁腳 */
+    .admin-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 33px 32px 32px;
+      background: transparent;
+      border-top: 1px solid #f1f5f9;
+      font-size: 12px;
+      font-weight: 500;
+      color: #94a3b8;
+      margin-top: auto;
+    }
+
+    .admin-footer__links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .admin-footer__link {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .admin-footer__link:hover {
+      color: #715c00;
+    }
+
+    /* 響應式 */
+    @media (max-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .journal-panel {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar {
+        display: none;
+      }
+
+      .course-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- 側邊欄 -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__profile">
+        <div class="admin-sidebar__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+        <div class="admin-sidebar__info">
+          <span class="admin-sidebar__name">嚴大明 老師</span>
+          <span class="admin-sidebar__subtitle">管理者系統</span>
+        </div>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <a href="dashboard.html" class="admin-sidebar__nav-item admin-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          首頁
+        </a>
+        <a href="students.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          教師管理
+        </a>
+        <a href="schedule.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          課表排程
+        </a>
+        <a href="announcements.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 17H2a3 3 0 003 3h14a3 3 0 003-3zm0-3H2v-2l2-5h16l2 5v2zM12 5V3"/>
+            <circle cx="12" cy="6" r="1"/>
+          </svg>
+          公告管理
+        </a>
+        <a href="settings.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="admin-main">
+      <!-- 頂部導覽 -->
+      <header class="admin-header">
+        <h1 class="admin-header__title">智慧學習歷程系統</h1>
+        <div class="admin-header__actions">
+          <div class="admin-header__search">
+            <input type="text" placeholder="搜尋系統功能...">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+          <div class="admin-header__icons">
+            <button class="admin-header__icon-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+              </svg>
+            </button>
+            <button class="admin-header__icon-btn">
+              <svg width="16" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0"/>
+              </svg>
+              <span class="admin-header__badge"></span>
+            </button>
+            <div class="admin-header__avatar">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="頭像">
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="admin-content">
+        <!-- 主要內容網格 -->
+        <div class="dashboard-grid">
+          <!-- 左側：今日課程 -->
+          <div class="dashboard-left-column">
+            <!-- 今日課程標題 -->
+            <div class="section-header">
+              <div style="display: flex; align-items: baseline;">
+                <h2 class="section-title">今日課程</h2>
+                <span class="section-date" id="currentDate">2026 / 04 / 22 (三)</span>
+              </div>
+              <button class="section-icon-btn">
+                <svg width="20" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- 課程卡片 -->
+            <div class="course-cards-grid">
+              <!-- 嚴老師 -->
+              <div class="teacher-schedule-card">
+                <div class="teacher-schedule-card__header">
+                  <span class="teacher-schedule-card__name">嚴老師</span>
+                  <span class="teacher-schedule-card__count">今日２堂課</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">動力機械</span>
+                  <span class="teacher-schedule-card__time">17：30</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">科創機器人</span>
+                  <span class="teacher-schedule-card__time">19：00</span>
+                </div>
+              </div>
+
+              <!-- 張老師 -->
+              <div class="teacher-schedule-card">
+                <div class="teacher-schedule-card__header">
+                  <span class="teacher-schedule-card__name">張老師</span>
+                  <span class="teacher-schedule-card__count">今日２堂課</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">動力機械</span>
+                  <span class="teacher-schedule-card__time">17：30</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">科創機器人</span>
+                  <span class="teacher-schedule-card__time">19：00</span>
+                </div>
+              </div>
+
+              <!-- 陳老師 -->
+              <div class="teacher-schedule-card">
+                <div class="teacher-schedule-card__header">
+                  <span class="teacher-schedule-card__name">陳老師</span>
+                  <span class="teacher-schedule-card__count">今日２堂課</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">動力機械</span>
+                  <span class="teacher-schedule-card__time">17：30</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">科創機器人</span>
+                  <span class="teacher-schedule-card__time">19：00</span>
+                </div>
+              </div>
+
+              <!-- 李老師 -->
+              <div class="teacher-schedule-card">
+                <div class="teacher-schedule-card__header">
+                  <span class="teacher-schedule-card__name">李老師</span>
+                  <span class="teacher-schedule-card__count">今日２堂課</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">動力機械</span>
+                  <span class="teacher-schedule-card__time">17：30</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">科創機器人</span>
+                  <span class="teacher-schedule-card__time">19：00</span>
+                </div>
+              </div>
+
+              <!-- 黃老師 -->
+              <div class="teacher-schedule-card">
+                <div class="teacher-schedule-card__header">
+                  <span class="teacher-schedule-card__name">黃老師</span>
+                  <span class="teacher-schedule-card__count">今日２堂課</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">動力機械</span>
+                  <span class="teacher-schedule-card__time">17：30</span>
+                </div>
+                <div class="teacher-schedule-card__item">
+                  <span class="teacher-schedule-card__course">科創機器人</span>
+                  <span class="teacher-schedule-card__time">19：00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右側：今日教師日誌 -->
+          <div class="dashboard-right-column">
+            <h3 class="journal-section-title">今日教師日誌</h3>
+            <div class="journal-panel">
+              <!-- 完成率 -->
+              <div class="journal-progress">
+                <div class="journal-progress__label">完成率</div>
+                <div class="journal-progress__row">
+                  <span class="journal-progress__value">60％</span>
+                  <span class="journal-progress__count">3 / 5</span>
+                </div>
+                <div class="journal-progress__bar">
+                  <div class="journal-progress__fill" style="width: 60%;"></div>
+                </div>
+              </div>
+
+              <!-- 日誌列表 -->
+              <div class="journal-list">
+                <div class="journal-item" onclick="goToJournalDetail(this, '嚴老師', '動力機械', 2)">
+                  <div class="journal-item__info">
+                    <div class="journal-item__name">嚴老師</div>
+                    <div class="journal-item__course">動力機械</div>
+                  </div>
+                  <span class="journal-item__status journal-item__status--complete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    已完成
+                  </span>
+                </div>
+
+                <div class="journal-item" onclick="goToJournalDetail(this, '陳老師', '程式機械', 1)">
+                  <div class="journal-item__info">
+                    <div class="journal-item__name">陳老師</div>
+                    <div class="journal-item__course">程式機械</div>
+                  </div>
+                  <span class="journal-item__status journal-item__status--complete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    已完成
+                  </span>
+                </div>
+
+                <div class="journal-item" onclick="goToJournalDetail(this, '黃老師', '動力機械', 5)">
+                  <div class="journal-item__info">
+                    <div class="journal-item__name">黃老師</div>
+                    <div class="journal-item__course">動力機械</div>
+                  </div>
+                  <span class="journal-item__status journal-item__status--complete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    已完成
+                  </span>
+                </div>
+
+                <div class="journal-item" onclick="goToJournalDetail(this, '張老師', '科創機器人', 4)">
+                  <div class="journal-item__info">
+                    <div class="journal-item__name">張老師</div>
+                    <div class="journal-item__course">科創機器人</div>
+                  </div>
+                  <span class="journal-item__status journal-item__status--incomplete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    未完成
+                  </span>
+                </div>
+
+                <div class="journal-item" onclick="goToJournalDetail(this, '李老師', '幼兒簡易機械', 3)">
+                  <div class="journal-item__info">
+                    <div class="journal-item__name">李老師</div>
+                    <div class="journal-item__course">幼兒簡易機械</div>
+                  </div>
+                  <span class="journal-item__status journal-item__status--incomplete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    未完成
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 頁腳 -->
+      <footer class="admin-footer">
+        <span>© 2023 智慧學習歷程系統 | 版權所有</span>
+        <div class="admin-footer__links">
+          <a href="#" class="admin-footer__link">服務條款</a>
+          <a href="#" class="admin-footer__link">隱私政策</a>
+          <a href="#" class="admin-footer__link">系統日誌</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // 更新日期
+    const dateEl = document.getElementById('currentDate');
+    const now = new Date();
+    const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const weekDay = weekDays[now.getDay()];
+    dateEl.textContent = `${year} / ${month} / ${day} (${weekDay})`;
+
+    // ===== 今日教師日誌：點擊項目後標記選取並導向 teachers.html 教師日誌分頁的該筆詳情 =====
+    function goToJournalDetail(el, teacher, course, logId) {
+      document.querySelectorAll('.journal-item').forEach(item => item.classList.remove('journal-item--selected'));
+      el.classList.add('journal-item--selected');
+
+      setTimeout(() => {
+        const params = new URLSearchParams({ tab: 'logs', teacher, course, logId });
+        window.location.href = `teachers.html?${params.toString()}`;
+      }, 150);
+    }
+  </script>
+</body>
+</html>

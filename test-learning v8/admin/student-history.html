@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>完整學習歷程 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .admin-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .admin-sidebar__avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-sidebar__avatar svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .admin-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .admin-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 14px var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .admin-sidebar__nav-item:hover {
+      background: rgba(117, 95, 0, 0.1);
+      color: var(--color-text-primary);
+    }
+
+    .admin-sidebar__nav-item--active {
+      background: var(--color-primary);
+      border-left-color: var(--color-primary-dark);
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 主內容區 */
+    .admin-main {
+      background: var(--color-background);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導覽 */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-xl);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .admin-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-header__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      overflow: hidden;
+    }
+
+    .admin-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 頁面內容 */
+    .admin-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-decoration: none;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .back-link:hover {
+      color: var(--color-primary-dark);
+    }
+
+    .back-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .page-header {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-muted);
+    }
+
+    /* 分頁切換（課程紀錄／競賽經歷） */
+    .page-tabs {
+      display: flex;
+      gap: var(--spacing-sm);
+      border-bottom: 1px solid var(--color-surface-alt);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .page-tab {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .page-tab:hover {
+      color: var(--color-text-primary);
+    }
+
+    .page-tab--active {
+      color: var(--color-primary-dark);
+      border-bottom-color: var(--color-primary-dark);
+    }
+
+    /* 課程紀錄表格 */
+    .data-table-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .data-table td {
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-surface-alt);
+      vertical-align: top;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .course-tag {
+      display: inline-block;
+      padding: 4px 8px;
+      background: var(--color-primary-light);
+      border-radius: 4px;
+      font-size: var(--font-size-xs);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .record-comment {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .attendance-status-badge {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .attendance-status-badge--present {
+      background: rgba(34, 197, 94, 0.15);
+      color: #16803d;
+    }
+
+    .attendance-status-badge--absent {
+      background: rgba(239, 68, 68, 0.15);
+      color: #b91c1c;
+    }
+
+    .attendance-status-badge--makeup {
+      background: rgba(249, 115, 22, 0.15);
+      color: #c2410c;
+    }
+
+    .points-cell {
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    /* 分頁 */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-top: 1px solid var(--color-surface-alt);
+    }
+
+    .pagination__info {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .pagination__controls {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .pagination__btn {
+      padding: 6px 12px;
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+      cursor: pointer;
+    }
+
+    .pagination__btn:hover:not(:disabled) {
+      background: var(--color-surface-alt);
+    }
+
+    .pagination__btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pagination__btn--active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    /* 競賽名次／成績標籤 */
+    .rank-badge {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      background: var(--color-primary-light);
+      color: var(--color-primary-dark);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      font-size: var(--font-size-md);
+      color: var(--color-text-muted);
+      text-align: center;
+      padding: var(--spacing-xl);
+    }
+
+    /* 學習經歷／競賽經歷：可點擊清單 */
+    .clickable-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-lg);
+    }
+
+    .clickable-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clickable-item:hover {
+      background: var(--color-primary-light);
+    }
+
+    .clickable-item__date {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      width: 96px;
+      flex-shrink: 0;
+    }
+
+    .clickable-item__main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .clickable-item__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .clickable-item__chevron {
+      width: 16px;
+      height: 16px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    /* 完整檔案 PDF 樣式文件 Modal */
+    .modal__content--doc {
+      max-width: 720px;
+    }
+
+    .doc-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-md) var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border-bottom: 1px dashed var(--color-border);
+    }
+
+    .doc-info-item__label {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+    }
+
+    .doc-info-item__value {
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    .doc-section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .doc-section__label {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .doc-section__text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      line-height: 1.7;
+    }
+
+    .doc-photo-grid {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+
+    .doc-photo-placeholder {
+      width: 140px;
+      height: 100px;
+      background: var(--color-background);
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+    }
+
+    .doc-photo-placeholder svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .doc-photo-placeholder span {
+      font-size: var(--font-size-xs);
+    }
+
+    .doc-footer-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+
+    .doc-qr-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .doc-qr-block span {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .modal.active,
+      .modal.active * {
+        visibility: visible;
+      }
+      .modal.active {
+        position: absolute;
+        inset: 0;
+        background: none;
+        padding: 0;
+      }
+      /* 列印/另存PDF時，隱藏操作性按鈕，只保留正式文件內容 */
+      .modal.active .modal__close,
+      .modal.active .form-actions {
+        display: none;
+      }
+    }
+
+    /* 頁腳 */
+    .admin-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-surface-alt);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .admin-footer__links {
+      display: flex;
+      gap: var(--spacing-lg);
+    }
+
+    .admin-footer__link {
+      color: var(--color-text-muted);
+      text-decoration: none;
+    }
+
+    /* 響應式 */
+    @media (max-width: 992px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar {
+        display: none;
+      }
+    }
+
+    /* Modal 基本樣式 */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-lg);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal__content {
+      background: var(--color-surface);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      background: var(--color-primary);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+
+    .modal__title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .modal__close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-primary);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .modal__body {
+      padding: var(--spacing-xl);
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- 側邊欄 -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__profile">
+        <div class="admin-sidebar__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+        <div class="admin-sidebar__info">
+          <span class="admin-sidebar__name">嚴大明 老師</span>
+          <span class="admin-sidebar__subtitle">管理者系統</span>
+        </div>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <a href="dashboard.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          首頁
+        </a>
+        <a href="students.html" class="admin-sidebar__nav-item admin-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          教師管理
+        </a>
+        <a href="schedule.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          課表排程
+        </a>
+        <a href="announcements.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 17H2a3 3 0 003 3h14a3 3 0 003-3zm0-3H2v-2l2-5h16l2 5v2zM12 5V3"/>
+            <circle cx="12" cy="6" r="1"/>
+          </svg>
+          公告管理
+        </a>
+        <a href="settings.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="admin-main">
+      <!-- 頂部導覽 -->
+      <header class="admin-header">
+        <h1 class="admin-header__title">智慧學習歷程系統</h1>
+        <div class="admin-header__avatar">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="頭像">
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="admin-content">
+        <a href="students.html" class="back-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          返回學生列表
+        </a>
+
+        <div class="page-header">
+          <h2 class="page-title" id="pageStudentName">學生的完整學習歷程</h2>
+          <p class="page-subtitle" id="pageStudentId">學號：-</p>
+        </div>
+
+        <!-- 分頁切換 -->
+        <div class="page-tabs">
+          <button class="page-tab page-tab--active" id="tabRecordsBtn" onclick="switchHistoryTab('records')">課程紀錄</button>
+          <button class="page-tab" id="tabExperienceBtn" onclick="switchHistoryTab('experience')">學習經歷</button>
+          <button class="page-tab" id="tabCompetitionsBtn" onclick="switchHistoryTab('competitions')">競賽經歷</button>
+        </div>
+
+        <!-- 課程紀錄 -->
+        <div id="tabPanelRecords">
+          <div class="data-table-card">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>課程</th>
+                  <th>出席狀態</th>
+                  <th>獲得點數</th>
+                  <th>備註</th>
+                </tr>
+              </thead>
+              <tbody id="recordsTableBody"></tbody>
+            </table>
+
+            <div class="pagination">
+              <span class="pagination__info" id="recordsPageInfo">顯示 0 筆</span>
+              <div class="pagination__controls" id="recordsPaginationControls"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 學習經歷（可點擊開啟學習歷程 PDF 樣式文件） -->
+        <div id="tabPanelExperience" style="display: none;">
+          <div class="data-table-card">
+            <div class="clickable-list" id="experienceList"></div>
+          </div>
+        </div>
+
+        <!-- 競賽經歷（可點擊開啟競賽經歷 PDF 樣式文件） -->
+        <div id="tabPanelCompetitions" style="display: none;">
+          <div class="data-table-card">
+            <div class="clickable-list" id="competitionList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 學習歷程 PDF 樣式文件 Modal -->
+      <div class="modal" id="courseDocModal">
+        <div class="modal__content modal__content--doc">
+          <div class="modal__header">
+            <h3 class="modal__title" id="courseDocTitle">學習歷程－課程名稱</h3>
+            <button class="modal__close" onclick="closeModal('courseDocModal')">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="modal__body" id="courseDocBody"></div>
+        </div>
+      </div>
+
+      <!-- 競賽經歷 PDF 樣式文件 Modal -->
+      <div class="modal" id="competitionDocModal">
+        <div class="modal__content modal__content--doc">
+          <div class="modal__header">
+            <h3 class="modal__title" id="competitionDocTitle">競賽經歷－競賽名稱</h3>
+            <button class="modal__close" onclick="closeModal('competitionDocModal')">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="modal__body" id="competitionDocBody"></div>
+        </div>
+      </div>
+
+      <!-- 頁腳 -->
+      <footer class="admin-footer">
+        <span>© 2023 智慧學習歷程系統 | 版權所有</span>
+        <div class="admin-footer__links">
+          <a href="#" class="admin-footer__link">服務條款</a>
+          <a href="#" class="admin-footer__link">隱私政策</a>
+          <a href="#" class="admin-footer__link">系統日誌</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // 學生基本資料＋修課課程（供產生出席紀錄使用；示範用假資料，與 students.html 邏輯一致）
+    const STUDENTS_BASIC = {
+      S001: { name: '張小明', courses: ['程式機械'] },
+      S002: { name: '李美華', courses: ['程式機械', '科創機器人'] },
+      S003: { name: '王大明', courses: ['科創機器人'] },
+      S004: { name: '陳小芳', courses: [] },
+      S005: { name: '林志豪', courses: ['科創機器人', '幼兒簡易機械'] }
+    };
+
+    // 競賽經歷（示範用假資料）
+    const COMPETITIONS = {
+      S001: [
+        { name: '全國創客程式設計賽', date: '2026/05/10', organizer: '教育部資訊教育推動辦公室', level: '縣市賽', rank: '第二名', description: '本次競賽以創意機械與程式積木設計為主題，該生展現優異的邏輯思考與臨場應變能力，於決賽中脫穎而出，獲得評審一致肯定。' }
+      ],
+      S002: [
+        { name: '科技創意機器人競賽', date: '2026/04/20', organizer: '中華民國科技教育學會', level: '全國賽', rank: '優勝', description: '該生與團隊合作設計之機器人於全國賽中完成指定任務，展現良好的團隊默契與問題排除能力，獲得優勝殊榮。' },
+        { name: '程式設計小達人', date: '2026/02/15', organizer: '縣政府教育處', level: '縣市賽', rank: '第一名', description: '該生於程式設計小達人競賽中，運用所學邏輯概念完成關卡挑戰，以最快時間破關，榮獲第一名。' }
+      ],
+      S003: [],
+      S004: [
+        { name: '科技創意機器人競賽', date: '2026/04/20', organizer: '中華民國科技教育學會', level: '全國賽', rank: '優勝', description: '該生表現穩定，於團隊任務中負責程式除錯與流程協調，協助團隊順利完成挑戰並獲得優勝。' }
+      ],
+      S005: [
+        { name: '幼兒創意機械展演', date: '2026/03/08', organizer: '沙鹿幼兒教育促進會', level: '校內賽', rank: '入選', description: '該生於幼兒創意機械展演中展示自製的簡易機械作品，動手實作能力受到評審肯定，獲選為優秀作品之一。' }
+      ]
+    };
+
+    // 課程說明（教學大綱重點，示範用假資料）
+    const COURSE_DESCRIPTIONS = {
+      '程式機械': '本課程以基礎程式邏輯與機械結構為主軸，透過積木式程式設計操作機器人動作與感測器應用，培養學生的邏輯思考、問題拆解與除錯能力。',
+      '科創機器人': '課程結合機構組裝與程式控制，帶領學生從零件組裝到自主編寫控制邏輯，完成具備感測與互動功能的機器人專題，強化創意發想與團隊合作能力。',
+      '動力機械': '透過齒輪、傳動與動力裝置的組裝實作，理解基礎機械原理與力學概念，培養學生的空間結構思維與手作精細度。',
+      '幼兒簡易機械': '以遊戲化的方式引導幼兒認識簡單機械組件與因果關係，透過操作積木與簡易齒輪組，啟蒙孩子的觀察力與動手操作能力。',
+      '一般課程': '本課程涵蓋機械結構與程式控制的基礎概念，透過實作引導學生建立邏輯思考與動手操作能力。'
+    };
+
+    const ATTENDANCE_STATUS_META = {
+      present: { label: '出席', cls: 'attendance-status-badge--present' },
+      absent: { label: '請假', cls: 'attendance-status-badge--absent' },
+      makeup: { label: '補課', cls: 'attendance-status-badge--makeup' }
+    };
+
+    const ATTENDANCE_COMMENTS = ['表現優異，樂於助人', '專注力佳，樂於分享想法', '完成度高', '需加強耐心與細心', '主動協助同學', '穩定進步中', '團隊合作良好', '略顯分心，仍完成基本目標', '邏輯思考清晰', '創意發想活躍'];
+
+    // 依字串產生 -0.5 ~ 0.5 的可重現亂數（與 students.html 相同演算法，確保同一位學生的紀錄前後一致）
+    function seededNoise(seedStr) {
+      let h = 0;
+      for (let i = 0; i < seedStr.length; i++) h = (h * 31 + seedStr.charCodeAt(i)) >>> 0;
+      return ((h % 1000) / 1000) - 0.5;
+    }
+
+    // 產生 N 筆假的出席紀錄（由近到遠）
+    function buildAttendanceRecords(studentId, courseList, weeksCount) {
+      const refDate = new Date(2026, 6, 24);
+      const courses = courseList && courseList.length ? courseList : ['一般課程'];
+      const records = [];
+      for (let i = 0; i < weeksCount; i++) {
+        const d = new Date(refDate.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+        const date = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+        const course = courses[i % courses.length];
+        const seed = seededNoise(studentId + 'att' + i);
+        let status = 'present';
+        if (seed < -0.35) status = 'absent';
+        else if (seed < -0.2) status = 'makeup';
+        const points = status === 'absent' ? 0 : Math.max(2, Math.min(5, Math.round(3 + (seed + 0.5) * 4)));
+        const comment = ATTENDANCE_COMMENTS[Math.abs(Math.floor(seed * 1000)) % ATTENDANCE_COMMENTS.length];
+        records.push({ date, course, status, points, comment });
+      }
+      return records;
+    }
+
+    const PAGE_SIZE = 5;
+    let currentPage = 1;
+    let currentStudentId = 'S002';
+    let currentRecords = [];
+
+    function getStudentIdFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      return (id && STUDENTS_BASIC[id]) ? id : 'S002';
+    }
+
+    function renderRecordsPage() {
+      const totalPages = Math.max(1, Math.ceil(currentRecords.length / PAGE_SIZE));
+      currentPage = Math.min(currentPage, totalPages);
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const pageRecords = currentRecords.slice(start, start + PAGE_SIZE);
+
+      const tbody = document.getElementById('recordsTableBody');
+      if (!pageRecords.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">尚無課程紀錄</div></td></tr>`;
+      } else {
+        tbody.innerHTML = pageRecords.map(r => {
+          const meta = ATTENDANCE_STATUS_META[r.status] || ATTENDANCE_STATUS_META.present;
+          const pointsText = r.points > 0 ? `+${r.points}` : r.points;
+          return `
+            <tr>
+              <td>${r.date}</td>
+              <td><span class="course-tag">${r.course}</span></td>
+              <td><span class="attendance-status-badge ${meta.cls}">${meta.label}</span></td>
+              <td class="points-cell">${pointsText} 點</td>
+              <td><span class="record-comment">${r.comment}</span></td>
+            </tr>`;
+        }).join('');
+      }
+
+      document.getElementById('recordsPageInfo').textContent = `共 ${currentRecords.length} 筆，第 ${currentPage} / ${totalPages} 頁`;
+
+      const controls = document.getElementById('recordsPaginationControls');
+      let html = `<button class="pagination__btn" onclick="goToRecordsPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>上一頁</button>`;
+      for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="pagination__btn${p === currentPage ? ' pagination__btn--active' : ''}" onclick="goToRecordsPage(${p})">${p}</button>`;
+      }
+      html += `<button class="pagination__btn" onclick="goToRecordsPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一頁</button>`;
+      controls.innerHTML = html;
+    }
+
+    function goToRecordsPage(page) {
+      const totalPages = Math.max(1, Math.ceil(currentRecords.length / PAGE_SIZE));
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderRecordsPage();
+    }
+
+    // 學習經歷：與「課程紀錄」共用同一份資料，改成可點擊清單，點擊開啟學習歷程 PDF 樣式文件
+    function renderExperienceList() {
+      const container = document.getElementById('experienceList');
+      if (!currentRecords.length) {
+        container.innerHTML = '<div class="empty-state">尚無學習經歷</div>';
+        return;
+      }
+      container.innerHTML = currentRecords.map((r, index) => `
+        <div class="clickable-item" onclick="openCoursePdf(${index})">
+          <span class="clickable-item__date">${r.date}</span>
+          <div class="clickable-item__main">
+            <span class="clickable-item__name">${r.course}</span>
+            <span class="course-tag">學習歷程</span>
+          </div>
+          <svg class="clickable-item__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>`).join('');
+    }
+
+    // 競賽經歷清單：每筆顯示競賽名稱／日期／名次成績，點擊開啟競賽經歷 PDF 樣式文件
+    function renderCompetitionList() {
+      const container = document.getElementById('competitionList');
+      const list = COMPETITIONS[currentStudentId] || [];
+      if (!list.length) {
+        container.innerHTML = '<div class="empty-state">尚無競賽紀錄</div>';
+        return;
+      }
+      container.innerHTML = list.map((c, index) => `
+        <div class="clickable-item" onclick="openCompetitionPdf(${index})">
+          <span class="clickable-item__date">${c.date}</span>
+          <div class="clickable-item__main">
+            <span class="clickable-item__name">${c.name}</span>
+            <span class="rank-badge">${c.rank}</span>
+          </div>
+          <svg class="clickable-item__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>`).join('');
+    }
+
+    function switchHistoryTab(tab) {
+      document.getElementById('tabRecordsBtn').classList.toggle('page-tab--active', tab === 'records');
+      document.getElementById('tabExperienceBtn').classList.toggle('page-tab--active', tab === 'experience');
+      document.getElementById('tabCompetitionsBtn').classList.toggle('page-tab--active', tab === 'competitions');
+      document.getElementById('tabPanelRecords').style.display = tab === 'records' ? '' : 'none';
+      document.getElementById('tabPanelExperience').style.display = tab === 'experience' ? '' : 'none';
+      document.getElementById('tabPanelCompetitions').style.display = tab === 'competitions' ? '' : 'none';
+    }
+
+    // 產生一個「像 QR code」的示意圖案（非可掃描條碼，僅供文件視覺呈現，依字串可重現產生）
+    function buildQRCodeSVG(seedStr) {
+      const modules = 15;
+      const cell = 6;
+      const size = modules * cell;
+      const dark = '#2b2b2b';
+
+      function finderPattern(baseR, baseC) {
+        let out = '';
+        for (let r = 0; r < 7; r++) {
+          for (let c = 0; c < 7; c++) {
+            const isBorder = r === 0 || r === 6 || c === 0 || c === 6;
+            const isCenter = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+            if (isBorder || isCenter) {
+              out += `<rect x="${(baseC + c) * cell}" y="${(baseR + r) * cell}" width="${cell}" height="${cell}" fill="${dark}"/>`;
+            }
+          }
+        }
+        return out;
+      }
+
+      function isFinderZone(r, c) {
+        return (r < 7 && c < 7) || (r < 7 && c >= modules - 7) || (r >= modules - 7 && c < 7);
+      }
+
+      let rects = finderPattern(0, 0) + finderPattern(0, modules - 7) + finderPattern(modules - 7, 0);
+      for (let r = 0; r < modules; r++) {
+        for (let c = 0; c < modules; c++) {
+          if (isFinderZone(r, c)) continue;
+          if (seededNoise(seedStr + r + '-' + c) > 0) {
+            rects += `<rect x="${c * cell}" y="${r * cell}" width="${cell}" height="${cell}" fill="${dark}"/>`;
+          }
+        }
+      }
+
+      return `<svg viewBox="0 0 ${size} ${size}" width="88" height="88" style="background:#fff;">${rects}</svg>`;
+    }
+
+    function buildDocPhotoPlaceholder(label) {
+      return `
+        <div class="doc-photo-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="5" width="18" height="14" rx="2" ry="2"/>
+            <circle cx="9" cy="11" r="2"/>
+            <path d="M21 15l-4.5-4.5a2 2 0 00-2.83 0L5 19"/>
+          </svg>
+          <span>${label}</span>
+        </div>`;
+    }
+
+    // 開啟「學習歷程 PDF」樣式文件（品牌化證明文件呈現）
+    function openCoursePdf(index) {
+      const r = currentRecords[index];
+      if (!r) return;
+      const student = STUDENTS_BASIC[currentStudentId];
+      const meta = ATTENDANCE_STATUS_META[r.status] || ATTENDANCE_STATUS_META.present;
+
+      document.getElementById('courseDocTitle').textContent = `學習歷程－${r.course}`;
+      document.getElementById('courseDocBody').innerHTML = `
+        <div class="doc-info-grid">
+          <div>
+            <div class="doc-info-item__label">學生姓名</div>
+            <div class="doc-info-item__value">${student.name}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">學習時間</div>
+            <div class="doc-info-item__value">${r.date}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">課程名稱</div>
+            <div class="doc-info-item__value">${r.course}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">出席狀態</div>
+            <div class="doc-info-item__value"><span class="attendance-status-badge ${meta.cls}">${meta.label}</span></div>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <div class="doc-section__label">課程說明（教學大綱重點）</div>
+          <div class="doc-section__text">${COURSE_DESCRIPTIONS[r.course] || '無課程說明資料。'}</div>
+        </div>
+
+        <div class="doc-section">
+          <div class="doc-section__label">學習照片</div>
+          <div class="doc-photo-grid">
+            ${buildDocPhotoPlaceholder('課堂實作照片')}
+            ${buildDocPhotoPlaceholder('作品成果照片')}
+          </div>
+        </div>
+
+        <div class="doc-footer-row">
+          <div class="doc-qr-block">
+            ${buildQRCodeSVG('course' + currentStudentId + r.course + r.date)}
+            <span>掃描驗證</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--secondary" onclick="closeModal('courseDocModal')">返回</button>
+          <button type="button" class="btn btn--primary" onclick="window.print()">列印或儲存成PDF</button>
+        </div>`;
+
+      document.getElementById('courseDocModal').classList.add('active');
+    }
+
+    // 開啟「競賽經歷 PDF」樣式文件（品牌化證明文件呈現）
+    function openCompetitionPdf(index) {
+      const list = COMPETITIONS[currentStudentId] || [];
+      const c = list[index];
+      if (!c) return;
+      const student = STUDENTS_BASIC[currentStudentId];
+
+      document.getElementById('competitionDocTitle').textContent = `競賽經歷－${c.name}`;
+      document.getElementById('competitionDocBody').innerHTML = `
+        <div class="doc-info-grid">
+          <div>
+            <div class="doc-info-item__label">學生姓名</div>
+            <div class="doc-info-item__value">${student.name}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">競賽日期</div>
+            <div class="doc-info-item__value">${c.date}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">競賽名稱</div>
+            <div class="doc-info-item__value">${c.name}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">主辦單位</div>
+            <div class="doc-info-item__value">${c.organizer}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">競賽等級</div>
+            <div class="doc-info-item__value">${c.level}</div>
+          </div>
+          <div>
+            <div class="doc-info-item__label">競賽名次</div>
+            <div class="doc-info-item__value">${c.rank}</div>
+          </div>
+        </div>
+
+        <div class="doc-section">
+          <div class="doc-section__label">競賽說明</div>
+          <div class="doc-section__text">${c.description}</div>
+        </div>
+
+        <div class="doc-section">
+          <div class="doc-section__label">參賽證明照片</div>
+          <div class="doc-photo-grid">
+            ${buildDocPhotoPlaceholder('參賽現場照片')}
+          </div>
+        </div>
+
+        <div class="doc-footer-row">
+          <div class="doc-qr-block">
+            ${buildQRCodeSVG('competition' + currentStudentId + c.name + c.date)}
+            <span>掃描驗證</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--secondary" onclick="closeModal('competitionDocModal')">返回</button>
+          <button type="button" class="btn btn--primary" onclick="window.print()">列印或儲存成PDF</button>
+        </div>`;
+
+      document.getElementById('competitionDocModal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 點擊 Modal 外部關閉
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+
+    // 初始化：依網址查詢字串 ?id=S00X 載入對應學生的完整學習歷程
+    currentStudentId = getStudentIdFromQuery();
+    const currentStudent = STUDENTS_BASIC[currentStudentId];
+    document.getElementById('pageStudentName').textContent = `${currentStudent.name} 的完整學習歷程`;
+    document.getElementById('pageStudentId').textContent = `學號：${currentStudentId}`;
+    currentRecords = buildAttendanceRecords(currentStudentId, currentStudent.courses, 14);
+    renderRecordsPage();
+    renderExperienceList();
+    renderCompetitionList();
+  </script>
+</body>
+</html>

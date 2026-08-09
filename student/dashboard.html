@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學習概況 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .student-dashboard {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .student-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) 0;
+    }
+
+    .student-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
+      border-bottom: 1px solid var(--color-surface-alt);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .student-sidebar__avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .student-sidebar__avatar svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary-dark);
+    }
+
+    .student-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .student-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .student-sidebar__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .student-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .student-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 12px var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .student-sidebar__nav-item:hover {
+  background: rgba(255, 219, 88, 0.3);
+}
+
+    .student-sidebar__nav-item--active {
+  background: var(--color-primary);
+  color: var(--color-primary-dark);
+  border-left: none;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+}
+
+    .student-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 子導覽項目 */
+    .student-sidebar__nav-sub {
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    /* 主內容區 */
+    .student-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導覽 */
+    .student-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .student-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .student-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .student-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 16px;
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      width: 240px;
+    }
+
+    .student-header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .student-header__search input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .student-header__icon-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .student-header__icon-btn:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .student-header__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      overflow: hidden;
+    }
+
+    .student-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 儀表板內容 */
+    .dashboard-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* 頂部統計卡片 */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      align-items: stretch;
+    }
+
+    .stat-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    padding-left: calc(var(--spacing-lg) - 4px); /* 扣掉邊條寬度，讓內距視覺一致 */
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--color-primary);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    }
+
+    .stat-card--dark {
+    background: #5c5a40;
+    color: white;
+    border-left: none;
+    padding-left: var(--spacing-lg); /* 補回被扣掉的內距 */
+    flex: 1;
+    }
+
+    .stat-card__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .stat-card--dark .stat-card__label {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .stat-card__value {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1;
+    }
+
+    .stat-card--dark .stat-card__value {
+      color: white;
+    }
+
+    .stat-card__unit {
+      font-size: var(--font-size-lg);
+      font-weight: 400;
+      margin-left: var(--spacing-xs);
+    }
+
+    .stat-card__badges {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+
+    .attendance-badge {
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+    }
+
+    .attendance-badge--present {
+      background: rgba(65, 230, 84, 0.15);
+      color: #22c55e;
+    }
+
+    .attendance-badge--absent {
+      background: rgba(254, 117, 96, 0.15);
+      color: #fe7560;
+    }
+
+    .attendance-badge--leave {
+      background: rgba(255, 219, 88, 0.3);
+      color: var(--color-primary-dark);
+    }
+
+    /* 翻轉卡片容器 */
+    .flip-card {
+      perspective: 1000px;
+      height: 100%;
+    }
+
+    .flip-card__inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .flip-card--flipped .flip-card__inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card__front,
+    .flip-card__back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: var(--radius-lg);
+    }
+
+    .flip-card__back {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card__link {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-align: right;
+      cursor: pointer;
+      margin-top: auto;
+      transition: color 0.2s;
+    }
+
+    .flip-card__link:hover {
+      color: var(--color-primary-dark);
+    }
+
+    /* 班級卡片 */
+    .class-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      height: 100%;
+    }
+
+    .class-card__header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-top: -30px;
+    }
+
+    .class-card__tag {
+      padding: 4px 15px;          
+      background: var(--color-primary);
+      border-radius: 18px;        
+      font-size: 15px;            
+      font-weight: 600;          
+      color: var(--color-primary-dark);
+    }
+
+    .class-card__title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .class-card__subtitle {
+      font-size: 16px;
+      color: var(--color-text-secondary);
+    }
+
+    .class-card__meta {
+      font-size: 17px;
+      color: var(--color-text-muted);
+      color: var(--color-text-primary);
+    }
+
+    .class-card__link {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-align: right;
+      margin-top: auto;
+      cursor: pointer;
+    }
+
+    .class-card__link:hover {
+      color: var(--color-primary-dark);
+    }
+
+    /* 班級卡片背面 - 近期表現 */
+    .class-card-back {
+      display: flex;
+      flex-direction: column;
+      padding: var(--spacing-lg);
+      height: 100%;
+    }
+
+    .class-card-back__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-md);
+      margin-top: -32px;
+    }
+
+    .class-card-back__tag {
+      padding: 4px 15px;
+      background: var(--color-primary);
+      border-radius: 18px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .class-card-back__date {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .class-card-back__content {
+      flex: 1;
+      font-size: 17px;
+      color: var(--color-text-primary);
+      line-height: 1.7;
+      margin-left: 12px;
+    }
+
+    /* 點數卡片 */
+    .points-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .points-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .points-card__chevron {
+      width: 24px;
+      height: 24px;
+      color: rgba(255, 255, 255, 0.7);
+      transition: transform 0.3s;
+    }
+
+    .points-card--expanded .points-card__chevron {
+      transform: rotate(180deg);
+    }
+
+    /* 點數詳細清單 */
+    .points-detail {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-lg);
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s;
+    }
+
+    .points-card--expanded + .points-detail {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .points-detail__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-md);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .points-detail__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .points-detail__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 6px 12px;
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+    }
+
+    .points-detail__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      width: 120px;
+    }
+
+    .points-detail__close {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      margin-left: var(--spacing-sm);
+    }
+
+    .points-detail__list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .points-detail__item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-sm) 0;
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .points-detail__item:last-child {
+      border-bottom: none;
+    }
+
+    .points-detail__date {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      min-width: 90px;
+    }
+
+    .points-detail__reason {
+      flex: 1;
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      margin: 0 var(--spacing-md);
+    }
+
+    .points-detail__value {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+    }
+
+    .points-detail__value--positive {
+      color: #22c55e;
+    }
+
+    .points-detail__value--negative {
+      color: #fe7560;
+    }
+
+    .stat-card--points-wrapper {
+      position: relative;
+      display: flex;
+    }
+
+    /* 能力分析區塊 */
+    .analysis-section {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .analysis-section__header {
+      display: flex;
+      gap: var(--spacing-xl);
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .analysis-section__title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    /* 切換開關 */
+    .analysis-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 4px;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      border-radius: 999px;
+    }
+
+    .analysis-toggle__btn {
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+    }
+
+    .analysis-toggle__btn--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .analysis-toggle__btn:hover:not(.analysis-toggle__btn--active) {
+      background: rgba(255, 219, 88, 0.2);
+    }
+
+    .analysis-section__btn {
+      padding: 8px 16px;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .analysis-section__btn:hover {
+      background: var(--color-primary-light);
+    }
+
+    /* 學習趨勢區塊 */
+    .trend-section {
+      display: none;
+    }
+
+    .trend-section--active {
+      display: block;
+    }
+
+    .radar-section {
+      display: block;
+    }
+
+    .radar-section--hidden {
+      display: none;
+    }
+
+    .trend-filters {
+      display: flex;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      flex-wrap: wrap;
+    }
+
+    .trend-filter {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .trend-filter__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .trend-filter__options {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    .trend-filter__btn {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      background: var(--color-surface-alt);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .trend-filter__btn--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .trend-filter__btn:hover:not(.trend-filter__btn--active) {
+      border-color: var(--color-primary);
+    }
+    
+    .trend-date-input {
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-surface-alt);
+        background: var(--color-surface);
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+    }
+
+    .trend-date-separator {
+        color: var(--color-text-muted);
+        font-size: var(--font-size-sm);
+    }
+
+    .trend-apply-btn {
+        padding: 6px 16px;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: var(--color-primary);
+        color: var(--color-primary-dark);
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .trend-apply-btn:hover {
+        filter: brightness(0.95);
+    }
+
+    .trend-indicator-tags {
+      display: flex;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
+    }
+
+    .trend-indicator-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: var(--font-size-sm);
+      background: var(--color-surface-alt);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .trend-indicator-tag--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .trend-indicator-tag__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .trend-chart-container {
+      height: 300px;
+      margin-top: var(--spacing-lg);
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--spacing-lg);
+    }
+    .analysis-main {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+
+    .radar-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .radar-card__header {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .radar-card__content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-xl);
+      align-items: center;
+    }
+
+    .course-dropdown {
+  position: relative;
+  min-width: 140px;
+}
+
+.course-dropdown__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-alt);
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: #2c3e50;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.course-dropdown__arrow {
+  transition: transform 0.2s;
+  color: #2c3e50;
+}
+
+.course-dropdown--open .course-dropdown__arrow {
+  transform: rotate(180deg);
+}
+
+.course-dropdown__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 50;
+  display: none;
+}
+
+.course-dropdown--open .course-dropdown__list {
+  display: block;
+}
+
+.course-dropdown__item {
+  padding: 12px 16px;
+  font-size: var(--font-size-sm);
+  color: #2c3e50;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-surface-alt);
+  transition: background 0.2s;
+}
+
+.course-dropdown__item:last-child {
+  border-bottom: none;
+}
+
+.course-dropdown__item:hover {
+  background: rgba(255, 219, 88, 0.15);
+}
+
+    .radar-chart-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .radar-chart-container canvas {
+      max-width: 280px;
+      max-height: 280px;
+      width: 280px !important;
+      height: 280px !important;
+    }
+
+    .score-bars {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .score-bar {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .score-bar__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .score-bar__label {
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .score-bar__value {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .score-bar__track {
+      height: 8px;
+      background: var(--color-surface-alt);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .score-bar__fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .score-bar__fill--yellow { background: var(--color-primary); }
+    .score-bar__fill--green { background: #41e654; }
+    .score-bar__fill--red { background: #ff6b6b; }
+    .score-bar__fill--blue { background: #54a0ff; }
+    .score-bar__fill--pink { background: #ff9ff3; }
+
+    /* 右側推薦卡片 */
+    .recommendation-cards {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .recommendation-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .recommendation-card__tag {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 4px 15px;
+      background: var(--color-primary);
+      border-radius: 18px;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .recommendation-card__title {
+      font-size: var(--font-size-2xl);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .recommendation-card__link {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-align: right;
+    }
+
+    .recommendation-card__description {
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    /* 響應式 */
+    @media (max-width: 1200px) {
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .recommendation-cards {
+        flex-direction: row;
+      }
+
+      .recommendation-card {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .student-dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .student-sidebar {
+        display: none;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .radar-card__content {
+        grid-template-columns: 1fr;
+      }
+
+      .recommendation-cards {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-dashboard">
+    <!-- 側邊欄 -->
+    <aside class="student-sidebar">
+      <div class="student-sidebar__profile">
+        <div class="student-sidebar__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="student-sidebar__info">
+          <span class="student-sidebar__name" id="sidebarStudentName">載入中...</span>
+          <span class="student-sidebar__subtitle">智慧學習門戶</span>
+        </div>
+      </div>
+
+      <nav class="student-sidebar__nav">
+        <a href="dashboard.html" class="student-sidebar__nav-item student-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          學習概況
+        </a>
+        <div class="student-sidebar__nav-sub">
+          <a href="student-portfolio.html" class="student-sidebar__nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            學習歷程
+          </a>
+          <a href="student-competition.html" class="student-sidebar__nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
+              <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+              <path d="M4 22h16"/>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+              <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+            </svg>
+            競賽歷程
+          </a>
+        </div>
+        <a href="#" class="student-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="student-main">
+      <!-- 頂部導覽 -->
+ <header class="student-header">
+        <h1 class="student-header__title">智慧學習歷程系統</h1>
+        <div class="student-header__actions">
+
+          <button class="student-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <div class="student-header__avatar" style="cursor: pointer;" onclick="window.location.href='student-profile.html'" title="查看完整檔案">
+            <img id="headerAvatarImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=student" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <!-- 儀表板內容 -->
+      <div class="dashboard-content">
+        <!-- 頂部統計卡片 -->
+        <div class="stats-row">
+          <!-- 出缺勤卡片 -->
+          <div class="stat-card">
+          <div class="stat-card__label">
+            學習階段　<span style="color: var(--color-text-primary); font-weight: 700; font-size: 20px;" id="stageCourseTypeName">—</span></div>
+            <div class="stat-card__value">
+              <span style="font-size: 18px; font-weight: 400; color: var(--color-text-secondary);">第</span>
+              <span style="font-size: 40px; font-weight: 700;" id="stageLessonCount">0</span>
+              <span class="stat-card__unit" style="font-size: 18px; font-weight: 400;">堂</span>
+            </div>
+            <div class="stat-card__badges">
+            <span class="attendance-badge attendance-badge--leave">請假 <span id="badgeLeaveCount">0</span></span>
+            <span class="attendance-badge attendance-badge--absent">待補課 <span id="badgeAbsentCount">0</span></span>
+            </div>
+          </div>
+
+          <!-- 班級資訊卡片 (翻轉) -->
+          <div class="stat-card flip-card" id="classFlipCard">
+            <div class="flip-card__inner">
+              <!-- 正面 -->
+              <div class="flip-card__front class-card" style="background: var(--color-surface); padding: var(--spacing-lg);">
+                <div class="class-card__header">
+                  <span class="class-card__tag">所屬班級</span>
+                </div>
+                <div class="class-card__title" id="classCardTitle">尚未分班<span class="class-card__subtitle" style="margin-left: 8px; font-weight: 400;"></span></div>
+                <div class="class-card__meta" id="classCardSchedule"></div>
+                <div class="class-card__meta" id="classCardTeacher"></div>
+                <div class="flip-card__link" onclick="toggleFlipCard('classFlipCard')">翻閱近期表現</div>
+              </div>
+              <!-- 背面 -->
+              <div class="flip-card__back class-card-back">
+                <div class="class-card-back__header">
+                  <span class="class-card-back__tag">近期表現</span>
+                  <span class="class-card-back__date" id="classCardBackDate">—</span>
+                </div>
+                <div class="class-card-back__content" id="classCardBackContent">
+                  尚無課堂紀錄
+                </div>
+                <div class="flip-card__link" onclick="toggleFlipCard('classFlipCard')">返回班級資訊</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 點數卡片 (可展開) -->
+          <div class="stat-card--points-wrapper">
+            <div class="stat-card stat-card--dark points-card" id="pointsCard" onclick="togglePointsDetail()">
+              <div>
+                <div class="stat-card__label">點數</div>
+                <div class="stat-card__value"><span id="pointsBalance">0</span><span class="stat-card__unit">點</span></div>
+              </div>
+              <svg class="points-card__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+            <!-- 點數詳細清單 -->
+            <div class="points-detail" id="pointsDetail">
+              <div class="points-detail__header">
+                <span class="points-detail__title">點數紀錄</span>
+                <div style="display: flex; align-items: center;">
+                  <div class="points-detail__search">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" placeholder="搜尋..." id="pointsSearchInput">
+                  </div>
+                  <div class="points-detail__close" onclick="event.stopPropagation(); togglePointsDetail()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="points-detail__list" id="pointsDetailList">
+                <div class="points-detail__item"><span class="points-detail__reason">載入中...</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 能力分析區塊 -->
+        <section class="analysis-section">
+          <div class="analysis-section__header">
+            <h2 class="analysis-section__title">能力分析評估</h2>
+            <div class="analysis-toggle">
+              <button class="analysis-toggle__btn analysis-toggle__btn--active" onclick="switchAnalysisMode('radar')" id="radarToggleBtn">能力評估</button>
+              <button class="analysis-toggle__btn" onclick="switchAnalysisMode('trend')" id="trendToggleBtn">學習趨勢</button>
+            </div>
+          </div>
+
+          <div class="analysis-grid">
+            <!-- 左側：雷達圖 / 趨勢圖 切換區 -->
+            <div class="analysis-main">
+              <!-- 雷達圖卡片 -->
+              <div class="radar-card radar-section">
+                <div class="radar-card__header">＊更新時間：2026 / 4 / 24(五)</div>
+                <div class="radar-card__content">
+                  <div class="radar-chart-container">
+                    <canvas id="radarChart"></canvas>
+                  </div>
+                  <div class="score-bars">
+                    <div class="score-bar">
+                      <div class="score-bar__header">
+                        <span class="score-bar__label">程式</span>
+                        <span class="score-bar__value" id="scoreValue-programming">0 / 5</span>
+                      </div>
+                      <div class="score-bar__track">
+                        <div class="score-bar__fill score-bar__fill--yellow" id="scoreFill-programming" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                    <div class="score-bar">
+                      <div class="score-bar__header">
+                        <span class="score-bar__label">除錯</span>
+                        <span class="score-bar__value" id="scoreValue-debugging">0 / 5</span>
+                      </div>
+                      <div class="score-bar__track">
+                        <div class="score-bar__fill score-bar__fill--green" id="scoreFill-debugging" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                    <div class="score-bar">
+                      <div class="score-bar__header">
+                        <span class="score-bar__label">創意</span>
+                        <span class="score-bar__value" id="scoreValue-creativity">0 / 5</span>
+                      </div>
+                      <div class="score-bar__track">
+                        <div class="score-bar__fill score-bar__fill--red" id="scoreFill-creativity" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                    <div class="score-bar">
+                      <div class="score-bar__header">
+                        <span class="score-bar__label">結構</span>
+                        <span class="score-bar__value" id="scoreValue-structure">0 / 5</span>
+                      </div>
+                      <div class="score-bar__track">
+                        <div class="score-bar__fill score-bar__fill--blue" id="scoreFill-structure" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                    <div class="score-bar">
+                      <div class="score-bar__header">
+                        <span class="score-bar__label">團隊合作</span>
+                        <span class="score-bar__value" id="scoreValue-teamwork">0 / 5</span>
+                      </div>
+                      <div class="score-bar__track">
+                        <div class="score-bar__fill score-bar__fill--pink" id="scoreFill-teamwork" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 學習趨勢卡片 -->
+              <div class="radar-card trend-section">
+                <div class="radar-card__header" style="display: flex; justify-content: space-between; align-items: center;">
+  <span>＊選擇指標查看學習趨勢變化</span>
+  <div class="course-dropdown" id="courseDropdown">
+  <div class="course-dropdown__trigger" onclick="toggleCourseDropdown()">
+    <span id="courseDropdownLabel">—</span>
+    <svg class="course-dropdown__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+  <div class="course-dropdown__list" id="courseDropdownList">
+    <!-- 依學生實際修課紀錄動態產生 -->
+  </div>
+</div>
+</div>
+
+                <!-- 篩選器 -->
+                <div class="trend-filters">
+                  <div class="trend-filter">
+                    <span class="trend-filter__label">日期區間：</span>
+                    <div class="trend-filter__options">
+                      <button class="trend-filter__btn trend-filter__btn--active" onclick="setTrendTimeRange(this, '6w')">近6週</button>
+                      <button class="trend-filter__btn" onclick="setTrendTimeRange(this, '12w')">近12週</button>
+                    </div>
+                    <input type="date" class="trend-date-input" id="trendDateStart">
+                    <span class="trend-date-separator">—</span>
+                    <input type="date" class="trend-date-input" id="trendDateEnd">
+                    <button class="trend-apply-btn" onclick="applyCustomDateRange()">套用</button>
+                  </div>
+                </div>
+
+                <!-- 指標標籤 -->
+                <div class="trend-indicator-tags">
+                  <div class="trend-indicator-tag trend-indicator-tag--active" onclick="toggleTrendIndicator(this)">
+                    <span class="trend-indicator-tag__dot" style="background: #ffdb58;"></span>
+                    程式
+                  </div>
+                  <div class="trend-indicator-tag trend-indicator-tag--active" onclick="toggleTrendIndicator(this)">
+                    <span class="trend-indicator-tag__dot" style="background: #41e654;"></span>
+                    除錯
+                  </div>
+                  <div class="trend-indicator-tag trend-indicator-tag--active" onclick="toggleTrendIndicator(this)">
+                    <span class="trend-indicator-tag__dot" style="background: #ff6b6b;"></span>
+                    創意
+                  </div>
+                  <div class="trend-indicator-tag trend-indicator-tag--active" onclick="toggleTrendIndicator(this)">
+                    <span class="trend-indicator-tag__dot" style="background: #54a0ff;"></span>
+                    結構
+                  </div>
+                  <div class="trend-indicator-tag trend-indicator-tag--active" onclick="toggleTrendIndicator(this)">
+                    <span class="trend-indicator-tag__dot" style="background: #ff9ff3;"></span>
+                    團隊合作
+                  </div>
+                </div>
+
+                <!-- 趨勢圖表 -->
+                <div class="trend-chart-container">
+                  <canvas id="trendChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右側：推薦卡片，固定顯示不受切換影響 -->
+            <div class="recommendation-cards">
+              <!-- 適性科系推薦翻轉卡 -->
+              <div class="flip-card recommendation-flip" id="careerFlipCard" style="min-height: 180px;">
+                <div class="flip-card__inner">
+                  <div class="flip-card__front recommendation-card" style="position: absolute; width: 100%; height: 100%;">
+                    <span class="recommendation-card__tag">適性科系推薦</span>
+                    <h3 class="recommendation-card__title">電機工程學系</h3>
+                    <div class="flip-card__link" onclick="toggleFlipCard('careerFlipCard')">翻閱完整分析</div>
+                  </div>
+                  <div class="flip-card__back recommendation-card" style="position: absolute; width: 100%; height: 100%;">
+                    <span class="recommendation-card__tag">完整分析</span>
+                    <p class="recommendation-card__description" style="font-size: 13px;">
+                      依據您的程式設計與除錯能力表現，電機工程系是最適合的選擇。建議加強結構設計與團隊合作能力。
+                    </p>
+                    <div class="flip-card__link" onclick="toggleFlipCard('careerFlipCard')">返回推薦</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 學類介紹翻轉卡 -->
+              <div class="flip-card recommendation-flip" id="introFlipCard" style="min-height: 200px;">
+                <div class="flip-card__inner">
+                  <div class="flip-card__front recommendation-card" style="position: absolute; width: 100%; height: 100%;">
+                    <span class="recommendation-card__tag">學類介紹</span>
+                    <p class="recommendation-card__description">
+                      電機工程是現代科技的基石，涵蓋從微觀的晶片設計到巨觀的通訊網路與人工智慧。課程橫跨軟硬體，以電路、電子、電磁為基礎，延伸至訊號處理、自動控制與計算機科學，著重培養強大的邏輯運算與系統整合能力。
+                    </p>
+                    <div class="flip-card__link" onclick="toggleFlipCard('introFlipCard')">翻閱出路分析</div>
+                  </div>
+                  <div class="flip-card__back recommendation-card" style="position: absolute; width: 100%; height: 100%;">
+                    <span class="recommendation-card__tag">出路分析</span>
+                    <p class="recommendation-card__description" style="font-size: 13px;">
+                      <strong>就業方向：</strong>半導體工程師、軟體工程師、系統整合工程師、AI研究員、通訊工程師等。<br><br>
+                      <strong>薪資範圍：</strong>新鮮人起薪約 45,000-60,000 元
+                    </p>
+                    <div class="flip-card__link" onclick="toggleFlipCard('introFlipCard')">返回介紹</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // ========================================
+    // 登入檢查 (未登入或非學生角色一律導回登入頁)
+    // ========================================
+    if (!isLoggedIn() || getUserRole() !== 'student') {
+      window.location.href = '../login.html';
+    }
+
+    // ========================================
+    // 互動功能函數
+    // ========================================
+
+    // 翻轉卡片功能
+    function toggleFlipCard(cardId) {
+      const card = document.getElementById(cardId);
+      if (card) {
+        card.classList.toggle('flip-card--flipped');
+      }
+    }
+
+    // 點數詳細展開功能
+    function togglePointsDetail() {
+      const pointsCard = document.getElementById('pointsCard');
+      if (pointsCard) {
+        pointsCard.classList.toggle('points-card--expanded');
+      }
+    }
+    function toggleCourseDropdown() {
+      document.getElementById('courseDropdown').classList.toggle('course-dropdown--open');
+    }
+
+    document.addEventListener('click', function(e) {
+      const dropdown = document.getElementById('courseDropdown');
+      if (dropdown && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('course-dropdown--open');
+      }
+    });
+
+    // 點擊外部關閉點數詳細
+    document.addEventListener('click', function(e) {
+      const pointsWrapper = document.querySelector('.stat-card--points-wrapper');
+      if (pointsWrapper && !pointsWrapper.contains(e.target)) {
+        const pointsCard = document.getElementById('pointsCard');
+        if (pointsCard) {
+          pointsCard.classList.remove('points-card--expanded');
+        }
+      }
+    });
+
+    // 分析模式切換 (雷達圖 / 學習趨勢)
+    function switchAnalysisMode(mode) {
+      const radarSection = document.querySelector('.radar-section');
+      const trendSection = document.querySelector('.trend-section');
+      const radarBtn = document.getElementById('radarToggleBtn');
+      const trendBtn = document.getElementById('trendToggleBtn');
+
+      if (mode === 'radar') {
+        radarSection.classList.remove('radar-section--hidden');
+        trendSection.classList.remove('trend-section--active');
+        radarBtn.classList.add('analysis-toggle__btn--active');
+        trendBtn.classList.remove('analysis-toggle__btn--active');
+      } else {
+        radarSection.classList.add('radar-section--hidden');
+        trendSection.classList.add('trend-section--active');
+        radarBtn.classList.remove('analysis-toggle__btn--active');
+        trendBtn.classList.add('analysis-toggle__btn--active');
+
+        if (!trendChart) {
+          fetchAndRenderTrend({ weeks: currentTrendRange });
+        }
+      }
+    }
+
+    // ========================================
+    // 真實資料串接 (取代原本寫死的模擬資料)
+    // ========================================
+    const SKILL_KEYS = ['程式', '除錯', '創意', '結構', '團隊合作'];
+    const SKILL_FIELD_MAP = { 程式: 'programming', 除錯: 'debugging', 創意: 'creativity', 結構: 'structure', 團隊合作: 'teamwork' };
+    const trendColors = {
+      程式: { border: '#ffdb58', bg: 'rgba(255, 219, 88, 0.1)' },
+      除錯: { border: '#41e654', bg: 'rgba(65, 230, 84, 0.1)' },
+      創意: { border: '#ff6b6b', bg: 'rgba(255, 107, 107, 0.1)' },
+      結構: { border: '#54a0ff', bg: 'rgba(84, 160, 255, 0.1)' },
+      團隊合作: { border: '#ff9ff3', bg: 'rgba(255, 159, 243, 0.1)' }
+    };
+    const WEEKDAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+
+    let radarChart = null;
+    let trendChart = null;
+    let currentTrendRange = 6; // 週數
+
+    function formatMD(dateStr) {
+      // 'YYYY-MM-DD' -> 'M/D'
+      const parts = dateStr.split('-');
+      return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+    }
+
+    function formatTimeHM(timeStr) {
+      if (!timeStr) return '';
+      return timeStr.slice(0, 5);
+    }
+
+    // 渲染側邊欄/頂部使用者資訊
+    function renderUserHeader(me) {
+      document.getElementById('sidebarStudentName').textContent = me.student.name || getUserName() || '學生';
+      if (me.student.avatar) {
+        document.getElementById('headerAvatarImg').src = me.student.avatar;
+      } else {
+        document.getElementById('headerAvatarImg').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(me.student.username)}`;
+      }
+    }
+
+    // 渲染出缺勤 / 學習階段卡片
+    function renderStageCard(me) {
+      document.getElementById('stageCourseTypeName').textContent = me.enrollment ? me.enrollment.course_type_name : '尚未分班';
+      document.getElementById('stageLessonCount').textContent = me.attendance.totalLessons;
+      document.getElementById('badgeLeaveCount').textContent = me.attendance.stats.excused;
+      // 「待補課」以缺席堂數估算 (資料庫暫無獨立補課欄位)
+      document.getElementById('badgeAbsentCount').textContent = me.attendance.stats.absent;
+    }
+
+    // 渲染班級資訊翻轉卡
+    function renderClassCard(me) {
+      const titleEl = document.getElementById('classCardTitle');
+      const scheduleEl = document.getElementById('classCardSchedule');
+      const teacherEl = document.getElementById('classCardTeacher');
+      const backDateEl = document.getElementById('classCardBackDate');
+      const backContentEl = document.getElementById('classCardBackContent');
+
+      if (me.enrollment) {
+        const e = me.enrollment;
+        titleEl.innerHTML = `${e.course_type_name}<span class="class-card__subtitle" style="margin-left: 8px; font-weight: 400;">課程</span>`;
+        if (e.day_of_week !== null && e.day_of_week !== undefined) {
+          scheduleEl.textContent = `星期${WEEKDAY_NAMES[e.day_of_week]} ${formatTimeHM(e.start_time)} ${e.classroom_name || ''}`;
+        } else {
+          scheduleEl.textContent = e.classroom_name || '';
+        }
+        teacherEl.textContent = e.teacher_name ? `${e.teacher_name} 老師` : '尚未指派老師';
+      } else {
+        titleEl.textContent = '尚未分班';
+        scheduleEl.textContent = '';
+        teacherEl.textContent = '';
+      }
+
+      if (me.recentRecord) {
+        backDateEl.textContent = me.recentRecord.log_date;
+        backContentEl.textContent = me.recentRecord.performance || '尚無課堂表現紀錄';
+      } else {
+        backDateEl.textContent = '—';
+        backContentEl.textContent = '尚無課堂紀錄';
+      }
+    }
+
+    // 渲染點數卡片
+    function renderPointsCard(me) {
+      document.getElementById('pointsBalance').textContent = me.points.balance;
+
+      const listEl = document.getElementById('pointsDetailList');
+      if (!me.points.transactions.length) {
+        listEl.innerHTML = '<div class="points-detail__item"><span class="points-detail__reason">尚無點數紀錄</span></div>';
+        return;
+      }
+
+      listEl.innerHTML = me.points.transactions.map(t => {
+        const isPositive = t.points >= 0;
+        const date = new Date(t.created_at);
+        const dateStr = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+        return `
+          <div class="points-detail__item">
+            <span class="points-detail__date">${dateStr}</span>
+            <span class="points-detail__reason">${t.reason || ''}</span>
+            <span class="points-detail__value points-detail__value--${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${t.points}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染能力雷達圖
+    function renderRadar(me) {
+      const skills = me.skills;
+      SKILL_KEYS.forEach(label => {
+        const value = skills[SKILL_FIELD_MAP[label]] || 0;
+        document.getElementById(`scoreValue-${SKILL_FIELD_MAP[label]}`).textContent = `${value} / 5`;
+        document.getElementById(`scoreFill-${SKILL_FIELD_MAP[label]}`).style.width = `${(value / 5) * 100}%`;
+      });
+
+      const radarCtx = document.getElementById('radarChart').getContext('2d');
+      const data = SKILL_KEYS.map(label => skills[SKILL_FIELD_MAP[label]] || 0);
+      if (radarChart) {
+        radarChart.data.datasets[0].data = data;
+        radarChart.update();
+        return;
+      }
+      radarChart = new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+          labels: SKILL_KEYS,
+          datasets: [{
+            label: '能力值',
+            data,
+            backgroundColor: 'rgba(255, 219, 88, 0.4)',
+            borderColor: '#ffdb58',
+            borderWidth: 2,
+            pointBackgroundColor: '#ffdb58',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 5,
+              min: 0,
+              ticks: { stepSize: 1, display: false },
+              grid: { color: '#e5e7eb' },
+              angleLines: { color: '#e5e7eb' },
+              pointLabels: { font: { size: 13, weight: '500' }, color: '#1a1c1c' }
+            }
+          },
+          plugins: { legend: { display: false } },
+          maintainAspectRatio: true
+        }
+      });
+    }
+
+    // 渲染課程下拉選單 (依學生實際修課紀錄)
+    function renderCourseDropdown(me) {
+      const listEl = document.getElementById('courseDropdownList');
+      const labelEl = document.getElementById('courseDropdownLabel');
+      const history = me.courseHistory && me.courseHistory.length
+        ? me.courseHistory
+        : (me.enrollment ? [{ course_id: me.enrollment.course_id, course_name: me.enrollment.course_type_name }] : []);
+
+      if (!history.length) {
+        labelEl.textContent = '尚無課程';
+        listEl.innerHTML = '';
+        return;
+      }
+
+      labelEl.textContent = history[0].course_name;
+      listEl.innerHTML = history.map(c =>
+        `<div class="course-dropdown__item" onclick="selectCourse('${c.course_name.replace(/'/g, "\\'")}')">${c.course_name}</div>`
+      ).join('');
+    }
+
+    function selectCourse(courseName) {
+      document.getElementById('courseDropdownLabel').textContent = courseName;
+      document.getElementById('courseDropdown').classList.remove('course-dropdown--open');
+    }
+
+    // 建立趨勢圖表資料集
+    function buildTrendDatasets(trendData) {
+      return SKILL_KEYS.map(label => ({
+        label,
+        data: trendData[label] || [],
+        borderColor: trendColors[label].border,
+        backgroundColor: trendColors[label].bg,
+        tension: 0,
+        fill: false
+      }));
+    }
+
+    async function fetchAndRenderTrend(params) {
+      try {
+        const result = await api.students.getMyTrend(params);
+        const trendData = result.data;
+        const labels = trendData.labels.map(formatMD);
+
+        if (!trendChart) {
+          initTrendChart(labels, trendData);
+        } else {
+          trendChart.data.labels = labels;
+          trendChart.data.datasets = buildTrendDatasets(trendData);
+          trendChart.update();
+        }
+      } catch (error) {
+        console.error('取得學習趨勢失敗', error);
+      }
+    }
+
+    function initTrendChart(labels, trendData) {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels || [],
+          datasets: buildTrendDatasets(trendData || {})
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 }, grid: { color: '#e5e7eb' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // 趨勢指標切換
+    function toggleTrendIndicator(indicatorEl) {
+      indicatorEl.classList.toggle('trend-indicator-tag--active');
+      const label = indicatorEl.textContent.trim();
+      const datasetIndex = SKILL_KEYS.indexOf(label);
+      if (trendChart && datasetIndex >= 0) {
+        const meta = trendChart.getDatasetMeta(datasetIndex);
+        meta.hidden = !indicatorEl.classList.contains('trend-indicator-tag--active');
+        trendChart.update();
+      }
+    }
+
+    // 趨勢時間範圍切換 (向後端重新查詢真實資料)
+    function setTrendTimeRange(btn, range) {
+      document.querySelectorAll('.trend-filter__btn').forEach(b => b.classList.remove('trend-filter__btn--active'));
+      btn.classList.add('trend-filter__btn--active');
+      currentTrendRange = range === '12w' ? 12 : 6;
+      fetchAndRenderTrend({ weeks: currentTrendRange });
+    }
+
+    function applyCustomDateRange() {
+      const startDate = document.getElementById('trendDateStart').value;
+      const endDate = document.getElementById('trendDateEnd').value;
+
+      if (!startDate || !endDate) {
+        alert('請選擇開始與結束日期');
+        return;
+      }
+      if (new Date(startDate) > new Date(endDate)) {
+        alert('開始日期不能晚於結束日期');
+        return;
+      }
+
+      document.querySelectorAll('.trend-filter__btn').forEach(b => b.classList.remove('trend-filter__btn--active'));
+      fetchAndRenderTrend({ start_date: startDate, end_date: endDate });
+    }
+
+    // ========================================
+    // 頁面初始化：向後端取得本人資料並渲染
+    // ========================================
+    async function initDashboard() {
+      try {
+        const result = await api.students.getMe();
+        const me = result.data;
+
+        renderUserHeader(me);
+        renderStageCard(me);
+        renderClassCard(me);
+        renderPointsCard(me);
+        renderRadar(me);
+        renderCourseDropdown(me);
+      } catch (error) {
+        console.error('載入學生儀表板資料失敗', error);
+        if (error.response && error.response.status === 404) {
+          showMessage('尚未建立學生檔案，請聯絡管理人員', 'error');
+        }
+      }
+    }
+
+    initDashboard();
+  </script>
+</body>
+</html>

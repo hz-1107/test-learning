@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課表 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* 頁面標題區 */
+    .page-header {
+      padding: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+    }
+
+    .page-header__top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--spacing-lg);
+    }
+
+    .page-header__info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .page-header__title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .page-header__subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-muted);
+    }
+
+    /* 控制區 */
+    .schedule-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .teacher-filter {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .teacher-filter select {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      appearance: none;
+      padding-right: 24px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0 center;
+    }
+
+    .date-picker {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      cursor: pointer;
+    }
+
+    .date-picker__icon {
+      width: 18px;
+      height: 18px;
+      color: var(--color-text-muted);
+    }
+
+    /* 星期選擇器 */
+    .day-tabs {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    .day-tab {
+      padding: 8px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .day-tab:hover {
+      background: var(--color-background);
+    }
+
+    .day-tab--active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    /* 課表容器 */
+    .schedule-container {
+      padding: 0 var(--spacing-xl) var(--spacing-xl);
+      overflow-x: auto;
+    }
+
+    .schedule-table {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-surface-alt);
+      min-width: 1200px;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(7, 1fr);
+    }
+
+    /* 表頭 */
+    .schedule-header {
+      display: contents;
+    }
+
+    .schedule-header-cell {
+      padding: var(--spacing-md) var(--spacing-sm);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+      text-align: center;
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .schedule-header-cell:first-child {
+      background: transparent;
+      border-right: 1px solid var(--color-surface-alt);
+    }
+
+    .schedule-header-cell:not(:last-child) {
+      border-right: 1px solid var(--color-surface-alt);
+    }
+
+    /* 時間欄 */
+    .schedule-time-cell {
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-right: 1px solid var(--color-surface-alt);
+      border-bottom: 1px solid var(--color-surface-alt);
+      text-align: right;
+      font-size: var(--font-size-sm);
+      background: var(--color-surface);
+      position: relative;
+    }
+
+    .schedule-time-main {
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .schedule-time-sub {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    /* 課程格子 */
+    .schedule-cell {
+      min-height: 50px;
+      border-bottom: 1px solid var(--color-surface-alt);
+      border-right: 1px solid var(--color-surface-alt);
+      position: relative;
+      padding: 2px;
+    }
+
+    .schedule-cell:last-child {
+      border-right: none;
+    }
+
+    /* 虛線標示 */
+    .schedule-cell::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      border-left: 1px dashed #e5e7eb;
+      pointer-events: none;
+    }
+
+    /* 課程區塊 */
+    .course-block {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: var(--font-size-xs);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 1;
+    }
+
+    .course-block:hover {
+      transform: scale(1.02);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+
+    .course-block--yellow {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .course-block--orange {
+      background: #fed7aa;
+      color: #c2410c;
+    }
+
+    .course-block--blue {
+      background: #ddd6fe;
+      color: #6d28d9;
+    }
+
+    .course-block--green {
+      background: #bbf7d0;
+      color: #15803d;
+    }
+
+    .course-block__title {
+      font-weight: 600;
+      font-size: 11px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .course-block__location {
+      font-size: 10px;
+      opacity: 0.8;
+    }
+
+    .course-block__teacher {
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    /* 響應式 */
+    @media (max-width: 1400px) {
+      .schedule-grid {
+        grid-template-columns: 70px repeat(7, 1fr);
+      }
+    }
+
+    @media (max-width: 992px) {
+      .page-header__top {
+        flex-direction: column;
+      }
+
+      .schedule-controls {
+        flex-wrap: wrap;
+      }
+
+      .day-tabs {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- 頂部導覽列 -->
+    <header class="header">
+      <h1 class="header__logo">智慧學習歷程系統</h1>
+
+      <div class="header__search">
+        <svg class="header__search-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="currentColor"/>
+        </svg>
+        <input type="text" class="header__search-input" placeholder="搜尋...">
+      </div>
+
+      <div class="header__actions">
+        <button class="header__icon-btn" aria-label="語言設定">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM9 17.93C5.05 17.44 2 14.08 2 10C2 9.38 2.08 8.79 2.21 8.21L7 13V14C7 15.1 7.9 16 9 16V17.93ZM15.9 15.39C15.64 14.58 14.9 14 14 14H13V11C13 10.45 12.55 10 12 10H6V8H8C8.55 8 9 7.55 9 7V5H11C12.1 5 13 4.1 13 3V2.59C15.93 3.78 18 6.65 18 10C18 12.08 17.2 13.97 15.9 15.39Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <button class="header__icon-btn" aria-label="通知">
+          <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 20C9.1 20 10 19.1 10 18H6C6 19.1 6.9 20 8 20ZM14 14V9C14 5.93 12.37 3.36 9.5 2.68V2C9.5 1.17 8.83 0.5 8 0.5C7.17 0.5 6.5 1.17 6.5 2V2.68C3.64 3.36 2 5.92 2 9V14L0 16V17H16V16L14 14ZM12 15H4V9C4 6.52 5.51 4.5 8 4.5C10.49 4.5 12 6.52 12 9V15Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="header__avatar">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=teacher" alt="使用者頭像">
+        </div>
+      </div>
+    </header>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar">
+      <div class="sidebar__profile">
+        <div class="sidebar__profile-inner">
+          <div class="sidebar__profile-avatar">
+            <svg class="sidebar__profile-avatar-icon" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H20C21.1 18 22 17.1 22 16V2C22 0.9 21.1 0 20 0ZM20 16H2V2H20V16Z" fill="#755f00"/>
+            </svg>
+          </div>
+          <div class="sidebar__profile-info">
+            <span class="sidebar__profile-name">王小明 老師</span>
+            <span class="sidebar__profile-role">教師系統</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 10H8V0H0V10ZM0 18H8V12H0V18ZM10 18H18V8H10V18ZM10 0V6H18V0H10Z" fill="currentColor"/>
+          </svg>
+          <span>首頁</span>
+        </a>
+        <a href="schedule.html" class="sidebar__nav-item sidebar__nav-item--active">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2H15V0H13V2H5V0H3V2H2C0.89 2 0 2.9 0 4V18C0 19.1 0.89 20 2 20H16C17.1 20 18 19.1 18 18V4C18 2.9 17.1 2 16 2ZM16 18H2V7H16V18ZM4 9H9V14H4V9Z" fill="currentColor"/>
+          </svg>
+          <span>課表</span>
+        </a>
+        <a href="records.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2H14V0H6V2H2C0.9 2 0 2.9 0 4V18C0 19.1 0.9 20 2 20H18C19.1 20 20 19.1 20 18V4C20 2.9 19.1 2 18 2ZM8 2H12V4H8V2ZM18 18H2V4H6V6H14V4H18V18ZM4 10H16V12H4V10ZM4 14H12V16H4V14Z" fill="currentColor"/>
+          </svg>
+          <span>教師日誌</span>
+        </a>
+        <a href="students.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5 0C4.7 0 0 4.7 0 10.5C0 16.3 4.7 21 10.5 21C16.3 21 21 16.3 21 10.5C21 4.7 16.3 0 10.5 0ZM10.5 3.15C12.24 3.15 13.65 4.56 13.65 6.3C13.65 8.04 12.24 9.45 10.5 9.45C8.76 9.45 7.35 8.04 7.35 6.3C7.35 4.56 8.76 3.15 10.5 3.15ZM10.5 18.06C7.875 18.06 5.544 16.716 4.2 14.7C4.2 12.6 8.4 11.445 10.5 11.445C12.6 11.445 16.8 12.6 16.8 14.7C15.456 16.716 13.125 18.06 10.5 18.06Z" fill="currentColor"/>
+          </svg>
+          <span>學生管理</span>
+        </a>
+        <a href="settings.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.14 10.94C17.18 10.64 17.2 10.33 17.2 10C17.2 9.68 17.18 9.36 17.13 9.06L19.16 7.48C19.34 7.34 19.39 7.07 19.28 6.87L17.36 3.55C17.24 3.33 16.99 3.26 16.77 3.33L14.38 4.29C13.88 3.91 13.35 3.59 12.76 3.35L12.4 0.81C12.36 0.57 12.16 0.4 11.92 0.4H8.08C7.84 0.4 7.65 0.57 7.61 0.81L7.25 3.35C6.66 3.59 6.12 3.92 5.63 4.29L3.24 3.33C3.02 3.25 2.77 3.33 2.65 3.55L0.74 6.87C0.62 7.08 0.66 7.34 0.86 7.48L2.89 9.06C2.84 9.36 2.8 9.69 2.8 10C2.8 10.31 2.82 10.64 2.87 10.94L0.84 12.52C0.66 12.66 0.61 12.93 0.72 13.13L2.64 16.45C2.76 16.67 3.01 16.74 3.23 16.67L5.62 15.71C6.12 16.09 6.65 16.41 7.24 16.65L7.6 19.19C7.65 19.43 7.84 19.6 8.08 19.6H11.92C12.16 19.6 12.36 19.43 12.39 19.19L12.75 16.65C13.34 16.41 13.88 16.09 14.37 15.71L16.76 16.67C16.98 16.75 17.23 16.67 17.35 16.45L19.27 13.13C19.39 12.91 19.34 12.66 19.15 12.52L17.14 10.94ZM10 13.6C8.02 13.6 6.4 11.98 6.4 10C6.4 8.02 8.02 6.4 10 6.4C11.98 6.4 13.6 8.02 13.6 10C13.6 11.98 11.98 13.6 10 13.6Z" fill="currentColor"/>
+          </svg>
+          <span>系統設定</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="main-content" style="padding: 0; overflow-y: auto;">
+      <!-- 頁面標題區 -->
+      <div class="page-header">
+        <div class="page-header__top">
+          <div class="page-header__info">
+            <h2 class="page-header__title">課表</h2>
+            <p class="page-header__subtitle">查看今日所有課程安排</p>
+          </div>
+          <div class="schedule-controls">
+            <div class="teacher-filter">
+              <select id="teacherFilter">
+                <option>全部老師</option>
+                <option>顏老師</option>
+                <option>王老師</option>
+                <option>陳老師</option>
+                <option>廖老師</option>
+                <option>何老師</option>
+                <option>羅老師</option>
+                <option>柯老師</option>
+              </select>
+            </div>
+            <div class="date-picker" id="datePicker">
+              <span id="currentDateDisplay">115/05/26(二)</span>
+              <svg class="date-picker__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div class="day-tabs">
+              <button class="day-tab" data-day="1">週一</button>
+              <button class="day-tab day-tab--active" data-day="2">週二</button>
+              <button class="day-tab" data-day="3">週三</button>
+              <button class="day-tab" data-day="4">週四</button>
+              <button class="day-tab" data-day="5">週五</button>
+              <button class="day-tab" data-day="6">週六</button>
+              <button class="day-tab" data-day="0">週日</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 課表 -->
+      <div class="schedule-container">
+        <div class="schedule-table">
+          <div class="schedule-grid" id="scheduleGrid">
+            <!-- Header -->
+            <div class="schedule-header">
+              <div class="schedule-header-cell"></div>
+              <div class="schedule-header-cell">顏老師</div>
+              <div class="schedule-header-cell">王老師</div>
+              <div class="schedule-header-cell">陳老師</div>
+              <div class="schedule-header-cell">廖老師</div>
+              <div class="schedule-header-cell">何老師</div>
+              <div class="schedule-header-cell">羅老師</div>
+              <div class="schedule-header-cell">柯老師</div>
+            </div>
+            <!-- Time slots will be generated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // 產生課表時間格
+    const scheduleGrid = document.getElementById('scheduleGrid');
+    const dayTabs = document.querySelectorAll('.day-tab');
+    const dateDisplay = document.getElementById('currentDateDisplay');
+
+    // 教師列表
+    const teachers = ['顏老師', '王老師', '陳老師', '廖老師', '何老師', '羅老師', '柯老師'];
+
+    // 課程資料 (按星期)
+    const coursesByDay = {
+      2: [ // 週二
+        { teacher: 0, start: 14, duration: 4, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 0, start: 18, duration: 4, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 1, start: 14.5, duration: 3, title: '程式機械', location: '沙鹿', color: 'orange' },
+        { teacher: 3, start: 17, duration: 2, title: '科創機器人', location: '西屯', color: 'blue' },
+        { teacher: 2, start: 18, duration: 4, title: '程式機械', location: '西屯', color: 'orange' },
+        { teacher: 4, start: 17, duration: 2, title: '程式機械', location: '西屯', color: 'blue' },
+        { teacher: 5, start: 16, duration: 2, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 5, start: 19, duration: 3, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 6, start: 17, duration: 2, title: '動力機械', location: '沙鹿', color: 'green' },
+      ],
+      3: [ // 週三
+        { teacher: 0, start: 15, duration: 3, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 1, start: 14, duration: 2, title: '程式機械', location: '沙鹿', color: 'orange' },
+        { teacher: 2, start: 17, duration: 3, title: '程式機械', location: '西屯', color: 'orange' },
+        { teacher: 3, start: 18, duration: 2, title: '科創機器人', location: '西屯', color: 'blue' },
+      ],
+      4: [ // 週四
+        { teacher: 0, start: 14, duration: 3, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 1, start: 15, duration: 2, title: '程式機械', location: '沙鹿', color: 'orange' },
+        { teacher: 2, start: 18, duration: 3, title: '程式機械', location: '西屯', color: 'orange' },
+        { teacher: 4, start: 17, duration: 2, title: '程式機械', location: '西屯', color: 'blue' },
+        { teacher: 5, start: 16, duration: 3, title: '動力機械', location: '西屯', color: 'yellow' },
+      ],
+      5: [ // 週五
+        { teacher: 0, start: 17, duration: 3, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 1, start: 14, duration: 3, title: '程式機械', location: '沙鹿', color: 'orange' },
+        { teacher: 3, start: 18, duration: 2, title: '科創機器人', location: '西屯', color: 'blue' },
+        { teacher: 5, start: 19, duration: 2, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 6, start: 17, duration: 3, title: '動力機械', location: '沙鹿', color: 'green' },
+      ],
+      6: [ // 週六
+        { teacher: 0, start: 9, duration: 3, title: '幼兒簡易機械', location: '西屯', color: 'yellow' },
+        { teacher: 0, start: 14, duration: 3, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 1, start: 10, duration: 2, title: '程式機械', location: '沙鹿', color: 'orange' },
+        { teacher: 2, start: 13, duration: 3, title: '程式機械', location: '西屯', color: 'orange' },
+        { teacher: 3, start: 15, duration: 2, title: '科創機器人', location: '西屯', color: 'blue' },
+        { teacher: 4, start: 11, duration: 2, title: '程式機械', location: '西屯', color: 'blue' },
+        { teacher: 5, start: 9, duration: 2, title: '動力機械', location: '西屯', color: 'yellow' },
+        { teacher: 6, start: 10, duration: 3, title: '動力機械', location: '沙鹿', color: 'green' },
+      ]
+    };
+
+    // 日期對應
+    const dateMap = {
+      1: '115/05/25(一)',
+      2: '115/05/26(二)',
+      3: '115/05/27(三)',
+      4: '115/05/28(四)',
+      5: '115/05/29(五)',
+      6: '115/05/30(六)',
+      0: '115/05/31(日)'
+    };
+
+    // 定義時間段 (9:00-21:00)
+    const timeSlots = [];
+    for (let hour = 9; hour <= 21; hour++) {
+      timeSlots.push({ hour, minute: 0 });
+      if (hour < 21) {
+        timeSlots.push({ hour, minute: 30 });
+      }
+    }
+
+    let currentDay = 2; // 預設週二
+
+    // 渲染課表
+    function renderSchedule(day) {
+      // 清除現有的時間格和課程
+      const existingRows = scheduleGrid.querySelectorAll('.schedule-time-cell, .schedule-cell');
+      existingRows.forEach(el => el.remove());
+
+      // 產生時間格
+      timeSlots.forEach((slot, index) => {
+        // 時間欄
+        const timeCell = document.createElement('div');
+        timeCell.className = 'schedule-time-cell';
+        if (slot.minute === 0) {
+          timeCell.innerHTML = `<div class="schedule-time-main">${String(slot.hour).padStart(2, '0')}:00</div>`;
+        } else {
+          timeCell.innerHTML = `<div class="schedule-time-sub">${String(slot.hour).padStart(2, '0')}:30</div>`;
+        }
+        scheduleGrid.appendChild(timeCell);
+
+        // 7位老師的格子
+        for (let t = 0; t < 7; t++) {
+          const cell = document.createElement('div');
+          cell.className = 'schedule-cell';
+          cell.dataset.teacher = t;
+          cell.dataset.slot = index;
+          cell.dataset.hour = slot.hour;
+          cell.dataset.minute = slot.minute;
+          scheduleGrid.appendChild(cell);
+        }
+      });
+
+      // 放置課程區塊
+      const courses = coursesByDay[day] || [];
+      courses.forEach((course, courseIndex) => {
+        const startSlot = (course.start - 9) * 2;
+        const cells = document.querySelectorAll(`.schedule-cell[data-teacher="${course.teacher}"][data-slot="${startSlot}"]`);
+
+        if (cells.length > 0) {
+          const cell = cells[0];
+          const block = document.createElement('div');
+          block.className = `course-block course-block--${course.color}`;
+          block.style.top = '2px';
+          block.style.height = `calc(${course.duration * 50}px - 4px)`;
+          block.dataset.courseIndex = courseIndex;
+
+          block.innerHTML = `
+            <div class="course-block__title">${course.title}</div>
+            <div class="course-block__location">[${course.location}]</div>
+            <div class="course-block__teacher">${teachers[course.teacher]}</div>
+          `;
+
+          cell.appendChild(block);
+        }
+      });
+
+      // 更新日期顯示
+      dateDisplay.textContent = dateMap[day];
+    }
+
+    // 初始渲染
+    renderSchedule(currentDay);
+
+    // 星期切換
+    dayTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        dayTabs.forEach(t => t.classList.remove('day-tab--active'));
+        this.classList.add('day-tab--active');
+        currentDay = parseInt(this.dataset.day);
+        renderSchedule(currentDay);
+      });
+    });
+
+    // 教師篩選
+    document.getElementById('teacherFilter').addEventListener('change', function() {
+      const selectedTeacher = this.value;
+      const allCells = document.querySelectorAll('.schedule-cell');
+      const headers = document.querySelectorAll('.schedule-header-cell');
+
+      if (selectedTeacher === '全部老師') {
+        // 顯示所有
+        allCells.forEach(cell => cell.style.display = '');
+        headers.forEach(header => header.style.display = '');
+        document.querySelector('.schedule-grid').style.gridTemplateColumns = '80px repeat(7, 1fr)';
+      } else {
+        // 篩選特定教師
+        const teacherIndex = teachers.indexOf(selectedTeacher);
+        allCells.forEach(cell => {
+          if (parseInt(cell.dataset.teacher) === teacherIndex) {
+            cell.style.display = '';
+          } else {
+            cell.style.display = 'none';
+          }
+        });
+        // 暫時顯示全部以維持佈局
+      }
+    });
+  </script>
+</body>
+</html>

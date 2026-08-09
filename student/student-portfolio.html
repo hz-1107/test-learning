@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學習歷程 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .student-dashboard {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .student-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) 0;
+    }
+
+    .student-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
+      border-bottom: 1px solid var(--color-surface-alt);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .student-sidebar__avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .student-sidebar__avatar svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary-dark);
+    }
+
+    .student-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .student-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .student-sidebar__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .student-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .student-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 12px var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .student-sidebar__nav-item:hover {
+      background: rgba(255, 219, 88, 0.3);
+    }
+
+    .student-sidebar__nav-item--active {
+  background: var(--color-primary);
+  color: var(--color-primary-dark);
+  border-left: none;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+ }
+
+    .student-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 子導覽項目 */
+    .student-sidebar__nav-sub {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 主內容區 */
+    .student-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導覽 */
+    .student-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .student-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .student-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .student-header__icon-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .student-header__icon-btn:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .student-header__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      overflow: hidden;
+    }
+
+    .student-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 頁面內容 */
+    .page-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* 頁面標題區 */
+    .page-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .page-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .student-header__search {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 8px 16px;
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  width: 240px;
+}
+
+.student-header__search input {
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  width: 100%;
+}
+
+.student-header__search input::placeholder {
+  color: var(--color-text-muted);
+}
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn--outline {
+      background: var(--color-surface);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .action-btn--outline:hover {
+      background: var(--color-primary-light);
+    }
+
+    .action-btn--primary {
+      background: var(--color-primary);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .action-btn--primary:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    .action-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 學習歷程卡片列表 */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .history-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .history-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .history-card__title {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .history-card__subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .history-card__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xl);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .history-card__meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-primary-dark);
+    }
+
+    .history-card__meta-item svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-primary);
+    }
+
+    .history-card__description {
+      background: var(--color-background);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* 響應式 */
+    @media (max-width: 992px) {
+      .student-dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .student-sidebar {
+        display: none;
+      }
+
+      .page-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+      }
+
+      .page-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        flex: 1;
+        min-width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-dashboard">
+    <!-- 側邊欄 -->
+    <aside class="student-sidebar">
+      <div class="student-sidebar__profile">
+        <div class="student-sidebar__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="student-sidebar__info">
+          <span class="student-sidebar__name">李美華</span>
+          <span class="student-sidebar__subtitle">智慧學習門戶</span>
+        </div>
+      </div>
+
+      <nav class="student-sidebar__nav">
+        <a href="dashboard.html" class="student-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          學習概況
+        </a>
+        <div class="student-sidebar__nav-sub">
+          <a href="student-portfolio.html" class="student-sidebar__nav-item student-sidebar__nav-item--active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            學習歷程
+          </a>
+          <a href="student-competition.html" class="student-sidebar__nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
+              <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+              <path d="M4 22h16"/>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+              <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+            </svg>
+            競賽歷程
+          </a>
+        </div>
+        <a href="#" class="student-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="student-main">
+      <!-- 頂部導覽 -->
+<header class="student-header">
+        <h1 class="student-header__title">智慧學習歷程系統</h1>
+        <div class="student-header__actions">
+          <button class="student-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <div class="student-header__avatar" style="cursor: pointer;" onclick="window.location.href='student-profile.html'" title="查看完整檔案">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=student" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="page-content">
+        <!-- 頁面標題區 -->
+        <div class="page-title-row">
+          <h2 class="page-title">學習歷程</h2>
+          <div class="page-actions">
+            <button class="action-btn action-btn--outline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              篩選條件
+            </button>
+            <button class="action-btn action-btn--primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              批量匯出
+            </button>
+          </div>
+        </div>
+
+        <!-- 學習歷程列表 -->
+        <div class="history-list">
+          <!-- 歷程卡片 1 -->
+          <div class="history-card">
+            <h3 class="history-card__title">動力機械</h3>
+            <p class="history-card__subtitle">齒輪理論 — 戰鬥陀螺</p>
+            <div class="history-card__meta">
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                </svg>
+                2026-05-20
+              </span>
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                2小時
+              </span>
+            </div>
+            <div class="history-card__description">
+              課程大綱：本堂課以樂高積木為實作媒介，引導學生組裝戰鬥陀螺與發射器。教學核心聚焦於「齒輪理論」...
+            </div>
+          </div>
+
+          <!-- 歷程卡片 2 -->
+          <div class="history-card">
+            <h3 class="history-card__title">程式機械</h3>
+            <p class="history-card__subtitle">Scratch入門</p>
+            <div class="history-card__meta">
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                </svg>
+                2026-05-15
+              </span>
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                2小時
+              </span>
+            </div>
+            <div class="history-card__description">
+              製作互動式遊戲專案，理解事件驅動程式設計概念
+            </div>
+          </div>
+
+          <!-- 歷程卡片 3 -->
+          <div class="history-card">
+            <h3 class="history-card__title">科創機器人</h3>
+            <p class="history-card__subtitle">感測器整合應用</p>
+            <div class="history-card__meta">
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                </svg>
+                2026-05-10
+              </span>
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                3小時
+              </span>
+            </div>
+            <div class="history-card__description">
+              結合超音波感測器與馬達控制，完成自動避障機器人
+            </div>
+          </div>
+
+          <!-- 歷程卡片 4 -->
+          <div class="history-card">
+            <h3 class="history-card__title">動力機械</h3>
+            <p class="history-card__subtitle">問題解決與團隊合作</p>
+            <div class="history-card__meta">
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                </svg>
+                2026-05-05
+              </span>
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                2小時
+              </span>
+            </div>
+            <div class="history-card__description">
+              分組完成創意挑戰任務，學習腦力激盪與協作技巧
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // 搜尋功能
+    const searchInput = document.querySelector('.search-box input');
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase();
+      const cards = document.querySelectorAll('.history-card');
+
+      cards.forEach(card => {
+        const title = card.querySelector('.history-card__title').textContent.toLowerCase();
+        const subtitle = card.querySelector('.history-card__subtitle').textContent.toLowerCase();
+        const description = card.querySelector('.history-card__description').textContent.toLowerCase();
+
+        if (title.includes(query) || subtitle.includes(query) || description.includes(query)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+
+    // 篩選按鈕
+    document.querySelector('.action-btn--outline').addEventListener('click', function() {
+      showMessage('篩選功能開發中...', 'warning');
+    });
+
+    // 匯出按鈕
+    document.querySelector('.action-btn--primary').addEventListener('click', function() {
+      showMessage('正在匯出學習歷程...', 'success');
+    });
+  </script>
+</body>
+</html>

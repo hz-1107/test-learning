@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系統設定 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .staff-layout {
+      display: grid;
+      grid-template-columns: 224px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .staff-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .staff-sidebar__header {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .staff-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .staff-sidebar__avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .staff-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .staff-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .staff-sidebar__role {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .staff-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .staff-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 10px 12px;
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s;
+    }
+
+    .staff-sidebar__nav-item:hover {
+      background: rgba(117, 95, 0, 0.08);
+      color: var(--color-text-primary);
+    }
+
+    .staff-sidebar__nav-item--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .staff-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .staff-sidebar__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      margin-top: auto;
+    }
+
+    /* 主內容區 */
+    .staff-main {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .staff-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-xl);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .staff-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .staff-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .staff-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 14px;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-md);
+    }
+
+    .staff-header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 200px;
+    }
+
+    .staff-header__search svg {
+      color: var(--color-text-muted);
+    }
+
+    .staff-header__icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .staff-header__icon-btn:hover {
+      background: var(--color-surface-alt);
+      color: var(--color-text-primary);
+    }
+
+    .staff-header__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .staff-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .staff-content {
+      flex: 1;
+      padding: var(--spacing-xl);
+      overflow-y: auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .page-subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+
+    /* 設定區塊 */
+    .settings-section {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .settings-section__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .settings-section__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    /* 快速匯入按鈕 */
+    .btn-import {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-import:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .btn-import svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 新增假日表單 */
+    .holiday-form {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: flex-end;
+      padding: var(--spacing-lg);
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field--date {
+      flex: 0 0 160px;
+    }
+
+    .form-field--type {
+      flex: 0 0 120px;
+    }
+
+    .form-field--name {
+      flex: 1;
+    }
+
+    .form-field__label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .form-field__input,
+    .form-field__select {
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border: 1px solid #e0e0e0;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+    }
+
+    .form-field__input:focus,
+    .form-field__select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .btn-add {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 20px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      background: #f5d038;
+    }
+
+    .btn-add svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 假日列表 */
+    .holiday-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .holiday-table th,
+    .holiday-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .holiday-table th {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-muted);
+      background: var(--color-surface-alt);
+    }
+
+    .holiday-table th:first-child {
+      border-radius: var(--radius-md) 0 0 var(--radius-md);
+    }
+
+    .holiday-table th:last-child {
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .holiday-table td {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+    }
+
+    .holiday-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .holiday-type {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: var(--font-size-xs);
+      font-weight: 500;
+    }
+
+    .holiday-type--national {
+      background: #FFF3E0;
+      color: #E65100;
+    }
+
+    .holiday-type--custom {
+      background: #E3F2FD;
+      color: #1565C0;
+    }
+
+    .holiday-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--color-surface-alt);
+      color: var(--color-text-primary);
+    }
+
+    .icon-btn--delete:hover {
+      background: #FFEBEE;
+      color: #C62828;
+      border-color: #FFCDD2;
+    }
+
+    /* 通知設定 */
+    .notification-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: var(--spacing-lg);
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .notification-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .notification-item__content {
+      flex: 1;
+      margin-right: var(--spacing-xl);
+    }
+
+    .notification-item__title {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 6px;
+    }
+
+    .notification-item__settings {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .notification-setting {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .notification-setting__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .notification-setting__select {
+      padding: 6px 10px;
+      background: var(--color-surface);
+      border: 1px solid #e0e0e0;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      min-width: 80px;
+    }
+
+    .notification-setting__input {
+      padding: 6px 10px;
+      background: var(--color-surface);
+      border: 1px solid #e0e0e0;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 60px;
+      text-align: center;
+    }
+
+    .notification-item__control {
+      flex-shrink: 0;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      display: inline-block;
+      position: relative;
+      width: 48px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: #22c55e;
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(22px);
+    }
+
+    .notification-setting__input:disabled,
+    .notification-setting__select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: var(--color-surface-alt);
+    }
+
+    .notification-setting__input--time {
+      width: 90px;
+      text-align: center;
+    }
+
+    /* 設定區塊標題（含圖示與說明） */
+    .settings-section__heading {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+    }
+
+    .settings-section__icon {
+      width: 20px;
+      height: 20px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .settings-section__subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    /* 設定已儲存提示 */
+    .settings-toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      background: #22c55e;
+      color: #fff;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.25s;
+      pointer-events: none;
+    }
+
+    .settings-toast--visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 儲存按鈕區 */
+    .save-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 12px 24px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #f5d038;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 12px 24px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-surface-alt);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    /* 假日選擇彈窗（獨立命名，避免與 css/styles.css 中同名的 .modal 系列類別衝突） */
+    .holiday-modal {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .holiday-modal__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .holiday-modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .holiday-modal__subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    .holiday-modal__close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .holiday-modal__close:hover {
+      background: var(--color-surface-alt);
+      color: var(--color-text-primary);
+    }
+
+    .holiday-modal__body {
+      padding: var(--spacing-xl);
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .holiday-modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      border-top: 1px solid var(--color-surface-alt);
+    }
+
+    /* 國定假日列表（格狀排列，日期與名稱分行顯示，較易辨識） */
+    .holiday-select-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .holiday-grid-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      cursor: pointer;
+    }
+
+    .holiday-grid-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-top: 3px;
+      flex-shrink: 0;
+      accent-color: var(--color-primary-dark);
+      cursor: pointer;
+    }
+
+    .holiday-grid-item__text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .holiday-grid-item__name {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+    }
+
+    .holiday-grid-item__date {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .holiday-grid-item--disabled {
+      cursor: not-allowed;
+    }
+
+    .holiday-grid-item--disabled input[type="checkbox"] {
+      accent-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .holiday-grid-item--disabled .holiday-grid-item__name,
+    .holiday-grid-item--disabled .holiday-grid-item__date {
+      color: #b0b0b0;
+    }
+
+    .select-all-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .select-all-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary-dark);
+    }
+
+    .select-all-row label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    @media (max-width: 768px) {
+      .staff-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .staff-sidebar {
+        display: none;
+      }
+
+      .holiday-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-field--date,
+      .form-field--type,
+      .form-field--name {
+        flex: 1;
+      }
+
+      .notification-item {
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+
+      .notification-item__content {
+        margin-right: 0;
+      }
+
+      .notification-item__settings {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="../css/admin-notifications.css">
+</head>
+<body>
+  <div class="staff-layout">
+    <!-- 側邊欄 -->
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          老師管理
+        </a>
+        <a href="logs.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          日誌管理
+        </a>
+        <a href="courses.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          課程資訊
+        </a>
+        <a href="schedule.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          課表排程
+        </a>
+        <a href="points.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          點數管理
+        </a>
+        <a href="settings.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span id="currentDate">2026年7月13日</span>
+      </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="staff-main">
+      <!-- 頂部導覽 -->
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <div class="staff-header__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="搜尋歷程或資源...">
+          </div>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+            </svg>
+          </button>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <div class="staff-header__avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="staff-content">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">系統設定</h2>
+            <p class="page-subtitle">管理系統參數與偏好設定</p>
+          </div>
+        </div>
+
+        <!-- 國定假日與休假日設定 -->
+        <section class="settings-section">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">國定假日與休假日設定</h3>
+            <button class="btn-import" id="importHolidayBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              快速匯入國定假日
+            </button>
+          </div>
+
+          <!-- 新增假日表單 -->
+          <div class="holiday-form">
+            <div class="form-field form-field--date">
+              <label class="form-field__label">日期</label>
+              <input type="date" class="form-field__input" id="holidayDate">
+            </div>
+            <div class="form-field form-field--type">
+              <label class="form-field__label">類型</label>
+              <select class="form-field__select" id="holidayType">
+                <option value="national">國定假日</option>
+                <option value="custom">自訂休假</option>
+              </select>
+            </div>
+            <div class="form-field form-field--name">
+              <label class="form-field__label">假日名稱</label>
+              <input type="text" class="form-field__input" id="holidayName" placeholder="請輸入假日名稱">
+            </div>
+            <button class="btn-add" id="addHolidayBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              新增
+            </button>
+          </div>
+
+          <!-- 假日列表 -->
+          <table class="holiday-table">
+            <thead>
+              <tr>
+                <th>日期</th>
+                <th>假日名稱</th>
+                <th>類型</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="holidayTableBody">
+              <tr>
+                <td>2026/01/01</td>
+                <td>元旦</td>
+                <td><span class="holiday-type holiday-type--national">國定假日</span></td>
+                <td>
+                  <div class="holiday-actions">
+                    <button class="icon-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn icon-btn--delete">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>2026/01/28</td>
+                <td>除夕</td>
+                <td><span class="holiday-type holiday-type--national">國定假日</span></td>
+                <td>
+                  <div class="holiday-actions">
+                    <button class="icon-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn icon-btn--delete">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>2026/01/29</td>
+                <td>春節</td>
+                <td><span class="holiday-type holiday-type--national">國定假日</span></td>
+                <td>
+                  <div class="holiday-actions">
+                    <button class="icon-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn icon-btn--delete">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>2026/04/05</td>
+                <td>清明節</td>
+                <td><span class="holiday-type holiday-type--national">國定假日</span></td>
+                <td>
+                  <div class="holiday-actions">
+                    <button class="icon-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn icon-btn--delete">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>2026/08/15</td>
+                <td>教室整修</td>
+                <td><span class="holiday-type holiday-type--custom">自訂休假</span></td>
+                <td>
+                  <div class="holiday-actions">
+                    <button class="icon-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="icon-btn icon-btn--delete">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- 自動通知與提醒機制 -->
+        <section class="settings-section">
+          <div class="settings-section__header">
+            <div class="settings-section__heading">
+              <svg class="settings-section__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <div>
+                <h3 class="settings-section__title">自動通知與提醒機制</h3>
+                <p class="settings-section__subtitle">系統定時發送公告，提醒教師與學生相關待辦事項</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="notification-item">
+            <div class="notification-item__content">
+              <div class="notification-item__title">教師未填日誌提醒</div>
+              <div class="notification-item__settings">
+                <div class="notification-setting">
+                  <span class="notification-setting__label">課程結束後達</span>
+                  <input type="number" class="notification-setting__input" id="teacherLogDaysInput" value="3" min="1" max="30">
+                  <span class="notification-setting__label">天未填寫，於每日</span>
+                  <input type="time" class="notification-setting__input notification-setting__input--time" id="teacherLogTimeInput" value="09:00">
+                  <span class="notification-setting__label">發送系統公告提醒授課教師。</span>
+                </div>
+              </div>
+            </div>
+            <div class="notification-item__control">
+              <label class="toggle-switch">
+                <input type="checkbox" id="teacherLogToggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="notification-item">
+            <div class="notification-item__content">
+              <div class="notification-item__title">學生待補課提醒</div>
+              <div class="notification-item__settings">
+                <div class="notification-setting">
+                  <span class="notification-setting__label">缺席後達</span>
+                  <input type="number" class="notification-setting__input" id="studentMakeupDaysInput" value="14" min="1" max="90">
+                  <span class="notification-setting__label">天未安排補課，於每日</span>
+                  <input type="time" class="notification-setting__input notification-setting__input--time" id="studentMakeupTimeInput" value="10:00">
+                  <span class="notification-setting__label">發送提醒公告。</span>
+                </div>
+              </div>
+            </div>
+            <div class="notification-item__control">
+              <label class="toggle-switch">
+                <input type="checkbox" id="studentMakeupToggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 儲存按鈕 -->
+        <div class="save-actions">
+          <button class="btn-secondary" id="cancelSettingsBtn">取消變更</button>
+          <button class="btn-primary" id="saveSettingsBtn">儲存設定</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 選擇國定假日 Modal -->
+  <div class="modal-overlay" id="holidayModal">
+    <div class="holiday-modal">
+      <div class="holiday-modal__header">
+        <div>
+          <h3 class="holiday-modal__title">選擇國定假日</h3>
+          <p class="holiday-modal__subtitle">可多選，選取後匯入假期列表</p>
+        </div>
+        <button class="holiday-modal__close" id="closeHolidayModal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="holiday-modal__body">
+        <div class="select-all-row">
+          <input type="checkbox" id="selectAllHolidays">
+          <label for="selectAllHolidays">全選</label>
+        </div>
+        <div class="holiday-select-list" id="holidaySelectList">
+          <label class="holiday-grid-item" data-name="元旦" data-date="01-01">
+            <input type="checkbox" name="holiday" value="new-year">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">元旦</span>
+              <span class="holiday-grid-item__date">01-01</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="除夕" data-date="01-28">
+            <input type="checkbox" name="holiday" value="cny-eve">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">除夕</span>
+              <span class="holiday-grid-item__date">01-28</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="和平紀念日" data-date="02-28">
+            <input type="checkbox" name="holiday" value="228">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">和平紀念日</span>
+              <span class="holiday-grid-item__date">02-28</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="兒童節" data-date="04-04">
+            <input type="checkbox" name="holiday" value="children">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">兒童節</span>
+              <span class="holiday-grid-item__date">04-04</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="清明節" data-date="04-05">
+            <input type="checkbox" name="holiday" value="qingming">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">清明節</span>
+              <span class="holiday-grid-item__date">04-05</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="勞動節" data-date="05-01">
+            <input type="checkbox" name="holiday" value="labor">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">勞動節</span>
+              <span class="holiday-grid-item__date">05-01</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="端午節" data-date="06-06">
+            <input type="checkbox" name="holiday" value="dragon">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">端午節</span>
+              <span class="holiday-grid-item__date">06-06</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="中秋節" data-date="09-25">
+            <input type="checkbox" name="holiday" value="moon">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">中秋節</span>
+              <span class="holiday-grid-item__date">09-25</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="國慶日" data-date="10-10">
+            <input type="checkbox" name="holiday" value="national">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">國慶日</span>
+              <span class="holiday-grid-item__date">10-10</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="光復節" data-date="10-25">
+            <input type="checkbox" name="holiday" value="retrocession">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">光復節</span>
+              <span class="holiday-grid-item__date">10-25</span>
+            </span>
+          </label>
+          <label class="holiday-grid-item" data-name="行憲紀念日" data-date="12-25">
+            <input type="checkbox" name="holiday" value="constitution">
+            <span class="holiday-grid-item__text">
+              <span class="holiday-grid-item__name">行憲紀念日</span>
+              <span class="holiday-grid-item__date">12-25</span>
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="holiday-modal__footer">
+        <button class="btn-secondary" id="cancelHolidayImport">取消</button>
+        <button class="btn-primary" id="confirmHolidayImport">確認新增</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // 更新當前日期
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+    document.getElementById('currentDate').textContent = dateStr;
+
+    // 國定假日 Modal 控制
+    const holidayModal = document.getElementById('holidayModal');
+    const importHolidayBtn = document.getElementById('importHolidayBtn');
+    const closeHolidayModal = document.getElementById('closeHolidayModal');
+    const cancelHolidayImport = document.getElementById('cancelHolidayImport');
+    const confirmHolidayImport = document.getElementById('confirmHolidayImport');
+    const selectAllHolidays = document.getElementById('selectAllHolidays');
+
+    importHolidayBtn.addEventListener('click', () => {
+      refreshHolidayGridState();
+      holidayModal.classList.add('active');
+    });
+
+    closeHolidayModal.addEventListener('click', () => {
+      holidayModal.classList.remove('active');
+    });
+
+    cancelHolidayImport.addEventListener('click', () => {
+      holidayModal.classList.remove('active');
+    });
+
+    holidayModal.addEventListener('click', (e) => {
+      if (e.target === holidayModal) {
+        holidayModal.classList.remove('active');
+      }
+    });
+
+    const HOLIDAY_IMPORT_YEAR = 2026;
+    const holidayTableBody = document.getElementById('holidayTableBody');
+
+    function getExistingHolidayKeys() {
+      const keys = new Set();
+      holidayTableBody.querySelectorAll('tr').forEach(row => {
+        const dateText = row.children[0]?.textContent.trim() || '';
+        const nameText = row.children[1]?.textContent.trim() || '';
+        const parts = dateText.split('/');
+        if (parts.length === 3) {
+          keys.add(`${nameText}_${parts[1]}-${parts[2]}`);
+        }
+      });
+      return keys;
+    }
+
+    // 依目前已設定假期列表，將已匯入的項目標示為停用，避免重複匯入
+    function refreshHolidayGridState() {
+      const existingKeys = getExistingHolidayKeys();
+      document.querySelectorAll('#holidaySelectList .holiday-grid-item').forEach(item => {
+        const key = `${item.dataset.name}_${item.dataset.date}`;
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const isDuplicate = existingKeys.has(key);
+        checkbox.disabled = isDuplicate;
+        if (isDuplicate) checkbox.checked = false;
+        item.classList.toggle('holiday-grid-item--disabled', isDuplicate);
+      });
+      updateSelectAllState();
+    }
+
+    function updateSelectAllState() {
+      const checkboxes = Array.from(document.querySelectorAll('input[name="holiday"]:not(:disabled)'));
+      const checkedCount = checkboxes.filter(cb => cb.checked).length;
+      selectAllHolidays.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+    }
+
+    // 全選功能（僅套用至未停用的項目）
+    selectAllHolidays.addEventListener('change', function() {
+      document.querySelectorAll('input[name="holiday"]:not(:disabled)').forEach(cb => {
+        cb.checked = this.checked;
+      });
+    });
+
+    document.querySelectorAll('input[name="holiday"]').forEach(cb => {
+      cb.addEventListener('change', updateSelectAllState);
+    });
+
+    function createHolidayRow(dateStr, name, typeClass, typeText) {
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>${dateStr}</td>
+        <td>${name}</td>
+        <td><span class="holiday-type ${typeClass}">${typeText}</span></td>
+        <td>
+          <div class="holiday-actions">
+            <button class="icon-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="icon-btn icon-btn--delete">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          </div>
+        </td>
+      `;
+      holidayTableBody.appendChild(newRow);
+      bindDeleteEvents();
+      return newRow;
+    }
+
+    // 確認新增（將勾選的國定假日匯入假期列表）
+    confirmHolidayImport.addEventListener('click', () => {
+      const selected = document.querySelectorAll('input[name="holiday"]:checked:not(:disabled)');
+      if (selected.length === 0) {
+        holidayModal.classList.remove('active');
+        return;
+      }
+
+      selected.forEach(cb => {
+        const item = cb.closest('.holiday-grid-item');
+        const [month, day] = item.dataset.date.split('-');
+        createHolidayRow(`${HOLIDAY_IMPORT_YEAR}/${month}/${day}`, item.dataset.name, 'holiday-type--national', '國定假日');
+      });
+
+      holidayModal.classList.remove('active');
+      showSettingsToast(`已新增 ${selected.length} 個國定假日`);
+    });
+
+    // 新增假日
+    const addHolidayBtn = document.getElementById('addHolidayBtn');
+
+    addHolidayBtn.addEventListener('click', () => {
+      const date = document.getElementById('holidayDate').value;
+      const type = document.getElementById('holidayType').value;
+      const name = document.getElementById('holidayName').value;
+
+      if (!date || !name) {
+        alert('請填寫日期和假日名稱');
+        return;
+      }
+
+      const formattedDate = date.replace(/-/g, '/');
+      const typeClass = type === 'national' ? 'holiday-type--national' : 'holiday-type--custom';
+      const typeText = type === 'national' ? '國定假日' : '自訂休假';
+
+      createHolidayRow(formattedDate, name, typeClass, typeText);
+
+      // 清空表單
+      document.getElementById('holidayDate').value = '';
+      document.getElementById('holidayName').value = '';
+
+      // 綁定刪除事件
+      bindDeleteEvents();
+    });
+
+    // 刪除假日
+    function bindDeleteEvents() {
+      document.querySelectorAll('.icon-btn--delete').forEach(btn => {
+        btn.onclick = function() {
+          if (confirm('確定要刪除此假日嗎？')) {
+            this.closest('tr').remove();
+          }
+        };
+      });
+    }
+
+    bindDeleteEvents();
+
+    // ============ 自動通知與提醒機制 ============
+    const NOTIFICATION_SETTINGS_KEY = 'slh_notification_settings_v1';
+
+    const DEFAULT_NOTIFICATION_SETTINGS = {
+      teacherLog: { enabled: true, days: 3, time: '09:00' },
+      studentMakeup: { enabled: false, days: 14, time: '10:00' },
+    };
+
+    function loadNotificationSettings() {
+      try {
+        const raw = localStorage.getItem(NOTIFICATION_SETTINGS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.teacherLog && parsed.studentMakeup) return parsed;
+        }
+      } catch (e) {
+        console.warn('讀取通知設定失敗，改用預設值', e);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_NOTIFICATION_SETTINGS));
+    }
+
+    function saveNotificationSettingsData(settings) {
+      localStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    const teacherLogToggle = document.getElementById('teacherLogToggle');
+    const teacherLogDaysInput = document.getElementById('teacherLogDaysInput');
+    const teacherLogTimeInput = document.getElementById('teacherLogTimeInput');
+    const studentMakeupToggle = document.getElementById('studentMakeupToggle');
+    const studentMakeupDaysInput = document.getElementById('studentMakeupDaysInput');
+    const studentMakeupTimeInput = document.getElementById('studentMakeupTimeInput');
+
+    function applyToggleState(toggleEl, fieldEls) {
+      fieldEls.forEach(el => { el.disabled = !toggleEl.checked; });
+    }
+
+    function applyNotificationSettingsToForm(settings) {
+      teacherLogToggle.checked = settings.teacherLog.enabled;
+      teacherLogDaysInput.value = settings.teacherLog.days;
+      teacherLogTimeInput.value = settings.teacherLog.time;
+      studentMakeupToggle.checked = settings.studentMakeup.enabled;
+      studentMakeupDaysInput.value = settings.studentMakeup.days;
+      studentMakeupTimeInput.value = settings.studentMakeup.time;
+
+      applyToggleState(teacherLogToggle, [teacherLogDaysInput, teacherLogTimeInput]);
+      applyToggleState(studentMakeupToggle, [studentMakeupDaysInput, studentMakeupTimeInput]);
+    }
+
+    let savedNotificationSettings = loadNotificationSettings();
+    applyNotificationSettingsToForm(savedNotificationSettings);
+
+    teacherLogToggle.addEventListener('change', () => applyToggleState(teacherLogToggle, [teacherLogDaysInput, teacherLogTimeInput]));
+    studentMakeupToggle.addEventListener('change', () => applyToggleState(studentMakeupToggle, [studentMakeupDaysInput, studentMakeupTimeInput]));
+
+    function collectNotificationSettingsFromForm() {
+      return {
+        teacherLog: {
+          enabled: teacherLogToggle.checked,
+          days: parseInt(teacherLogDaysInput.value, 10) || 1,
+          time: teacherLogTimeInput.value || '09:00',
+        },
+        studentMakeup: {
+          enabled: studentMakeupToggle.checked,
+          days: parseInt(studentMakeupDaysInput.value, 10) || 1,
+          time: studentMakeupTimeInput.value || '10:00',
+        },
+      };
+    }
+
+    let settingsToastTimer = null;
+
+    function showSettingsToast(message) {
+      let toast = document.querySelector('.settings-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'settings-toast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      requestAnimationFrame(() => toast.classList.add('settings-toast--visible'));
+      clearTimeout(settingsToastTimer);
+      settingsToastTimer = setTimeout(() => {
+        toast.classList.remove('settings-toast--visible');
+      }, 2500);
+    }
+
+    // 儲存設定
+    document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+      savedNotificationSettings = collectNotificationSettingsFromForm();
+      saveNotificationSettingsData(savedNotificationSettings);
+      showSettingsToast('設定已儲存');
+    });
+
+    // 取消變更
+    document.getElementById('cancelSettingsBtn').addEventListener('click', () => {
+      applyNotificationSettingsToForm(savedNotificationSettings);
+      showSettingsToast('已還原變更');
+    });
+  </script>
+  <script src="../js/admin-notifications.js"></script>
+</body>
+</html>

@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教師日誌 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .journal-page {
+      min-height: 100vh;
+      background: #f9fafb;
+      padding: 24px 64px;
+    }
+
+    .journal-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* 頁面標題 */
+    .journal-header {
+      background: var(--color-primary);
+      padding: 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .journal-header__title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #1e2939;
+      margin: 0;
+    }
+
+    /* 主要內容卡片 */
+    .journal-content {
+      background: white;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* 區塊標題 */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e2939;
+      margin: 0;
+    }
+
+    .section-title svg {
+      width: 24px;
+      height: 24px;
+      color: #755f00;
+    }
+
+    /* 課程資訊區塊 */
+    .course-info-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group--span-row {
+      grid-row: span 2;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #364153;
+    }
+
+    .form-label--required::after {
+      content: ' *';
+      color: #fb2c36;
+    }
+
+    .form-input {
+      padding: 8px 16px;
+      border: 0.8px solid #d1d5dc;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #1e2939;
+      background: white;
+      min-height: 42px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .form-input--readonly {
+      background: #f1f2f4;
+      cursor: not-allowed;
+    }
+
+    .form-input--placeholder {
+      color: rgba(10, 10, 10, 0.5);
+    }
+
+    .form-textarea {
+      padding: 8px 16px;
+      border: 0.8px solid #d1d5dc;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #1e2939;
+      min-height: 93px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    /* 課程備註選項 */
+    .course-notes {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+
+    .course-note-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .course-note-option input[type="checkbox"] {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--color-primary-dark);
+    }
+
+    .course-note-option span {
+      font-size: 11.25px;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    /* 日誌完成進度統計 */
+    .progress-section {
+      background: #ffeca6;
+      border-radius: 10px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .progress-section__title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e2939;
+      margin: 0;
+    }
+
+    .progress-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .progress-card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-card__label {
+      font-size: 14px;
+      color: #4a5565;
+      margin-bottom: 8px;
+    }
+
+    .progress-card__value {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .progress-card__percentage {
+      font-size: 30px;
+      font-weight: 700;
+      color: #1e2939;
+    }
+
+    .progress-card__count {
+      font-size: 14px;
+      color: #6a7282;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar__fill {
+      height: 100%;
+      background: #00c950;
+      border-radius: 999px;
+      transition: width 0.3s;
+    }
+
+    .progress-details {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .progress-detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .progress-detail-item__left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-detail-item__icon {
+      width: 16px;
+      height: 16px;
+      color: #6a7282;
+    }
+
+    .progress-detail-item__label {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+
+    .progress-detail-item__value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #0a0a0a;
+    }
+
+    /* 學生出缺席登記 */
+    .attendance-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .attendance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .attendance-legend {
+      display: flex;
+      gap: 16px;
+    }
+
+    .attendance-legend__item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .attendance-legend__dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .attendance-legend__dot--present { background: #00c950; }
+    .attendance-legend__dot--makeup { background: #2b7fff; }
+    .attendance-legend__dot--absent { background: #fb2c36; }
+
+    .attendance-legend__label {
+      font-size: 14px;
+      color: #0a0a0a;
+    }
+
+    /* 學生列表 */
+    .student-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .student-card {
+      border: 0.8px solid #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f9fafb;
+    }
+
+    .student-card__main {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      gap: 16px;
+    }
+
+    .student-card__name {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1e2939;
+      min-width: 60px;
+    }
+
+    /* 出缺席按鈕組 */
+    .attendance-buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .attendance-btn {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #e5e7eb;
+      color: #4a5565;
+    }
+
+    .attendance-btn:hover {
+      opacity: 0.8;
+    }
+
+    .attendance-btn--active.attendance-btn--present {
+      background: #00c950;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .attendance-btn--active.attendance-btn--absent {
+      background: #fb2c36;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .attendance-btn--active.attendance-btn--makeup {
+      background: #2b7fff;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .student-card__expand {
+      margin-left: auto;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #6a7282;
+      transition: transform 0.2s;
+    }
+
+    .student-card--expanded .student-card__expand {
+      transform: rotate(180deg);
+    }
+
+    /* 學生進度指標 */
+    .student-card__footer {
+      display: flex;
+      align-items: center;
+      padding: 0 12px 12px 16px;
+      gap: 8px;
+    }
+
+    .student-indicators {
+      display: flex;
+      gap: 8px;
+    }
+
+    .student-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .student-indicator__icon {
+      width: 14px;
+      height: 14px;
+      color: #9ca3af;
+    }
+
+    .student-indicator__icon--completed {
+      color: #00c950;
+    }
+
+    .student-progress {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 16px;
+    }
+
+    .student-progress__bar {
+      flex: 1;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .student-progress__fill {
+      height: 100%;
+      background: #99a1af;
+      border-radius: 999px;
+    }
+
+    .student-progress__text {
+      font-size: 12px;
+      font-weight: 500;
+      color: #4a5565;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* 展開詳情 */
+    .student-card__details {
+      display: none;
+      padding: 16px;
+      border-top: 1px solid #e5e7eb;
+      background: white;
+    }
+
+    .student-card--expanded .student-card__details {
+      display: block;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .detail-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .detail-group__label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #364153;
+    }
+
+    .detail-group__label svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-primary-dark);
+    }
+
+    .detail-input {
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1e2939;
+    }
+
+    .detail-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .photo-upload {
+      border: 2px dashed #d1d5dc;
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 80px;
+    }
+
+    .photo-upload:hover {
+      border-color: var(--color-primary);
+      background: rgba(255, 219, 88, 0.05);
+    }
+
+    .photo-upload__icon {
+      width: 24px;
+      height: 24px;
+      color: #9ca3af;
+    }
+
+    .photo-upload__text {
+      font-size: 12px;
+      color: #6a7282;
+    }
+
+    .points-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .points-input input {
+      width: 60px;
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .points-input__arrows {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .points-input__arrow {
+      width: 24px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #6a7282;
+      transition: color 0.2s;
+    }
+
+    .points-input__arrow:hover {
+      color: var(--color-primary-dark);
+    }
+
+    /* 統計區 */
+    .attendance-stats {
+      background: #f9fafb;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #364153;
+    }
+
+    .attendance-stats span {
+      font-weight: 500;
+    }
+
+    /* 按鈕區 */
+    .journal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      padding-top: 16px;
+    }
+
+    .btn {
+      padding: 8px 24px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn--outline {
+      background: transparent;
+      border: 0.8px solid #d1d5dc;
+      color: #364153;
+    }
+
+    .btn--outline:hover {
+      background: #f3f4f6;
+    }
+
+    .btn--primary {
+      background: var(--color-primary);
+      border: none;
+      color: #1e2939;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn--primary:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    /* 返回按鈕 */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #6a7282;
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .back-link:hover {
+      color: var(--color-primary-dark);
+    }
+
+    /* 響應式 */
+    @media (max-width: 1200px) {
+      .journal-page {
+        padding: 24px 32px;
+      }
+
+      .progress-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .journal-page {
+        padding: 16px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .attendance-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="journal-page">
+    <a href="records.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      返回教師日誌
+    </a>
+
+    <div class="journal-container">
+      <!-- 頁面標題 -->
+      <div class="journal-header">
+        <h1 class="journal-header__title">教師日誌</h1>
+      </div>
+
+      <!-- 主要內容 -->
+      <div class="journal-content">
+        <!-- 課程資訊區塊 -->
+        <section class="course-info-section">
+          <h2 class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            課程資訊
+          </h2>
+
+          <div class="form-grid">
+            <!-- 隱藏欄位儲存課程資訊 -->
+            <input type="hidden" id="journalCourseId" value="">
+            <input type="hidden" id="journalScheduleId" value="">
+            <input type="hidden" id="journalClassroomId" value="">
+            <input type="hidden" id="journalTeacherId" value="">
+            <input type="hidden" id="journalLogDate" value="">
+            <input type="hidden" id="journalStartTime" value="">
+            <input type="hidden" id="journalEndTime" value="">
+
+            <div class="form-group">
+              <label class="form-label form-label--required">選擇班級</label>
+              <select id="journalScheduleSelect" class="form-input" onchange="onScheduleChange()">
+                <option value="">-- 請選擇班級 --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">上課日期</label>
+              <input type="date" id="journalDateInput" class="form-input" value="">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">課程名稱</label>
+              <input type="text" id="journalCourseName" class="form-input form-input--readonly" value="" placeholder="選擇班級後自動填入" readonly>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">課程時間</label>
+              <input type="text" id="journalDateTime" class="form-input form-input--readonly" value="" placeholder="選擇班級後自動填入" readonly>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label--required">課程主題</label>
+              <input type="text" id="journalTopic" class="form-input" placeholder="請輸入本堂課程主題">
+            </div>
+
+            <div class="form-group form-group--span-row">
+              <label class="form-label form-label--required">課程大綱</label>
+              <textarea id="journalOutline" class="form-textarea" placeholder="請詳細描述本堂課程大綱與教學內容" onclick="openOutlineModal()"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label--required">課程備註</label>
+              <div class="course-notes" id="journalNotes">
+                <label class="course-note-option">
+                  <input type="checkbox" name="courseNote" value="正常上課" checked>
+                  <span>正常上課</span>
+                </label>
+                <label class="course-note-option">
+                  <input type="checkbox" name="courseNote" value="時段異動">
+                  <span>時段異動：＿＿＿＿＿＿＿＿＿＿</span>
+                </label>
+                <label class="course-note-option">
+                  <input type="checkbox" name="courseNote" value="師資異動">
+                  <span>師資異動：＿＿＿＿＿＿＿＿＿</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 日誌完成進度統計 -->
+        <section class="progress-section">
+          <h2 class="progress-section__title">日誌完成進度統計</h2>
+
+          <div class="progress-cards">
+            <div class="progress-card">
+              <div class="progress-card__label">整體完成度</div>
+              <div class="progress-card__value">
+                <span class="progress-card__percentage" id="overallPercentage">0%</span>
+                <span class="progress-card__count" id="overallCount">0/12 項目</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar__fill" id="overallProgressBar" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <div class="progress-card__label">完成項目明細</div>
+              <div class="progress-details">
+                <div class="progress-detail-item">
+                  <div class="progress-detail-item__left">
+                    <svg class="progress-detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                    <span class="progress-detail-item__label">評語與評分</span>
+                  </div>
+                  <span class="progress-detail-item__value" id="commentCount">0/4</span>
+                </div>
+                <div class="progress-detail-item">
+                  <div class="progress-detail-item__left">
+                    <svg class="progress-detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span class="progress-detail-item__label">上傳照片</span>
+                  </div>
+                  <span class="progress-detail-item__value" id="photoCount">0/4</span>
+                </div>
+                <div class="progress-detail-item">
+                  <div class="progress-detail-item__left">
+                    <svg class="progress-detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                    <span class="progress-detail-item__label">給予點數</span>
+                  </div>
+                  <span class="progress-detail-item__value" id="pointsCount">0/4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 學生出缺席登記 -->
+        <section class="attendance-section">
+          <div class="attendance-header">
+            <h2 class="section-title">學生出缺席登記</h2>
+            <div class="attendance-legend">
+              <div class="attendance-legend__item">
+                <div class="attendance-legend__dot attendance-legend__dot--present"></div>
+                <span class="attendance-legend__label">出席</span>
+              </div>
+              <div class="attendance-legend__item">
+                <div class="attendance-legend__dot attendance-legend__dot--makeup"></div>
+                <span class="attendance-legend__label">補課</span>
+              </div>
+              <div class="attendance-legend__item">
+                <div class="attendance-legend__dot attendance-legend__dot--absent"></div>
+                <span class="attendance-legend__label">請假</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="student-list" id="studentList">
+            <!-- 學生列表將由 JavaScript 動態載入 -->
+            <p style="text-align:center;color:#666;padding:40px 20px;">請先選擇班級以載入學生列表</p>
+          </div>
+
+          <!-- 以下為原本的靜態學生範本，已改為動態載入 -->
+          <div style="display:none;">
+            <!-- 學生 1 (隱藏) -->
+            <div class="student-card" data-student="S001" data-student-id="1">
+              <div class="student-card__main">
+                <span class="student-card__name">張小明</span>
+                <div class="attendance-buttons">
+                  <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
+                  <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
+                  <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
+                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                </div>
+                <div class="student-card__expand" onclick="toggleStudentDetails(this)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="student-card__footer">
+                <div class="student-indicators">
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="student-progress">
+                  <div class="student-progress__bar">
+                    <div class="student-progress__fill" style="width: 0%;"></div>
+                  </div>
+                  <span class="student-progress__text">0/3</span>
+                </div>
+              </div>
+              <div class="student-card__details">
+                <div class="detail-grid">
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                      </svg>
+                      教師評語
+                    </label>
+                    <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('張小明')"></textarea>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      上傳照片
+                    </label>
+                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                      <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span class="photo-upload__text">點擊上傳照片</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">給予點數</label>
+                    <div class="points-input">
+                      <input type="number" value="1" min="0" max="10">
+                      <div class="points-input__arrows">
+                        <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
+                        <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">備註事項 <span style="font-weight: normal; color: #6a7282;">*僅限教師/行政端查閱、補課日期</span></label>
+                    <textarea class="detail-input" rows="2" placeholder="其他需要記錄的事項、特殊狀況、家長聯繫事項等..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 學生 2 -->
+            <div class="student-card" data-student="S002" data-student-id="2">
+              <div class="student-card__main">
+                <span class="student-card__name">李美華</span>
+                <div class="attendance-buttons">
+                  <button class="attendance-btn attendance-btn--present attendance-btn--active" onclick="setAttendance(this, 'present')">出席</button>
+                  <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
+                  <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
+                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                </div>
+                <div class="student-card__expand" onclick="toggleStudentDetails(this)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="student-card__footer">
+                <div class="student-indicators">
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="student-progress">
+                  <div class="student-progress__bar">
+                    <div class="student-progress__fill" style="width: 0%;"></div>
+                  </div>
+                  <span class="student-progress__text">0/3</span>
+                </div>
+              </div>
+              <div class="student-card__details">
+                <div class="detail-grid">
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                      </svg>
+                      教師評語
+                    </label>
+                    <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('李美華')"></textarea>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      上傳照片
+                    </label>
+                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                      <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span class="photo-upload__text">點擊上傳照片</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">給予點數</label>
+                    <div class="points-input">
+                      <input type="number" value="1" min="0" max="10">
+                      <div class="points-input__arrows">
+                        <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
+                        <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">備註事項</label>
+                    <textarea class="detail-input" rows="2" placeholder="其他需要記錄的事項、特殊狀況、家長聯繫事項等..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 學生 3 -->
+            <div class="student-card" data-student="S003" data-student-id="3">
+              <div class="student-card__main">
+                <span class="student-card__name">王大明</span>
+                <div class="attendance-buttons">
+                  <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
+                  <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
+                  <button class="attendance-btn attendance-btn--makeup attendance-btn--active" onclick="setAttendance(this, 'makeup')">補課</button>
+                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                </div>
+                <div class="student-card__expand" onclick="toggleStudentDetails(this)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="student-card__footer">
+                <div class="student-indicators">
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="student-progress">
+                  <div class="student-progress__bar">
+                    <div class="student-progress__fill" style="width: 0%;"></div>
+                  </div>
+                  <span class="student-progress__text">0/3</span>
+                </div>
+              </div>
+              <div class="student-card__details">
+                <div class="detail-grid">
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                      </svg>
+                      教師評語
+                    </label>
+                    <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('王大明')"></textarea>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      上傳照片
+                    </label>
+                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                      <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span class="photo-upload__text">點擊上傳照片</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">給予點數</label>
+                    <div class="points-input">
+                      <input type="number" value="1" min="0" max="10">
+                      <div class="points-input__arrows">
+                        <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
+                        <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">備註事項</label>
+                    <textarea class="detail-input" rows="2" placeholder="其他需要記錄的事項、特殊狀況、家長聯繫事項等..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 學生 4 -->
+            <div class="student-card" data-student="S004" data-student-id="4">
+              <div class="student-card__main">
+                <span class="student-card__name">林志豪</span>
+                <div class="attendance-buttons">
+                  <button class="attendance-btn attendance-btn--present attendance-btn--active" onclick="setAttendance(this, 'present')">出席</button>
+                  <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
+                  <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
+                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                </div>
+                <div class="student-card__expand" onclick="toggleStudentDetails(this)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="student-card__footer">
+                <div class="student-indicators">
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="student-progress">
+                  <div class="student-progress__bar">
+                    <div class="student-progress__fill" style="width: 0%;"></div>
+                  </div>
+                  <span class="student-progress__text">0/3</span>
+                </div>
+              </div>
+              <div class="student-card__details">
+                <div class="detail-grid">
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                      </svg>
+                      教師評語
+                    </label>
+                    <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('林志豪')"></textarea>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      上傳照片
+                    </label>
+                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                      <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span class="photo-upload__text">點擊上傳照片</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">給予點數</label>
+                    <div class="points-input">
+                      <input type="number" value="1" min="0" max="10">
+                      <div class="points-input__arrows">
+                        <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
+                        <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">備註事項</label>
+                    <textarea class="detail-input" rows="2" placeholder="其他需要記錄的事項、特殊狀況、家長聯繫事項等..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 學生 5 -->
+            <div class="student-card" data-student="S005" data-student-id="5">
+              <div class="student-card__main">
+                <span class="student-card__name">陳小芳</span>
+                <div class="attendance-buttons">
+                  <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
+                  <button class="attendance-btn attendance-btn--absent attendance-btn--active" onclick="setAttendance(this, 'absent')">請假</button>
+                  <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
+                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                </div>
+                <div class="student-card__expand" onclick="toggleStudentDetails(this)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="student-card__footer">
+                <div class="student-indicators">
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <div class="student-indicator">
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 6v6l4 2"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="student-progress">
+                  <div class="student-progress__bar">
+                    <div class="student-progress__fill" style="width: 0%;"></div>
+                  </div>
+                  <span class="student-progress__text">0/3</span>
+                </div>
+              </div>
+              <div class="student-card__details">
+                <div class="detail-grid">
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                      </svg>
+                      教師評語
+                    </label>
+                    <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('陳小芳')"></textarea>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      上傳照片
+                    </label>
+                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                      <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span class="photo-upload__text">點擊上傳照片</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">給予點數</label>
+                    <div class="points-input">
+                      <input type="number" value="1" min="0" max="10">
+                      <div class="points-input__arrows">
+                        <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
+                        <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <label class="detail-group__label">備註事項</label>
+                    <textarea class="detail-input" rows="2" placeholder="其他需要記錄的事項、特殊狀況、家長聯繫事項等..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 隱藏的靜態範本結束 -->
+
+          <!-- 統計 -->
+          <div class="attendance-stats">
+            統計：出席 <span id="presentCount">0</span> 人 | 請假 <span id="absentCount">0</span> 人 | 補課 <span id="makeupCount">0</span> 人
+          </div>
+
+          <!-- 按鈕 -->
+          <div class="journal-actions">
+            <button class="btn btn--outline" onclick="clearForm()">清除</button>
+            <button class="btn btn--primary" onclick="submitJournal()">提交出席記錄</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI 課程大綱生成 Modal -->
+  <div class="ai-modal" id="outlineModal">
+    <div class="ai-modal__overlay" onclick="closeOutlineModal()"></div>
+    <div class="ai-modal__content">
+      <div class="ai-modal__header">
+        <h3 class="ai-modal__title">AI 課程大綱生成</h3>
+        <button class="ai-modal__close" onclick="closeOutlineModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="ai-modal__body">
+        <div class="ai-modal__grid">
+          <div class="ai-modal__section">
+            <h4 class="ai-modal__section-title">課程使用原理 <span style="color: #888; font-weight: normal;">*可複選多項</span></h4>
+            <div class="principle-grid">
+              <label class="principle-option"><input type="checkbox" name="principle"> 槓桿原理</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 齒輪原理</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 滑輪原理</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 輪軸原理</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 連桿機構</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 對稱平衡</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 三角形結構</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 馬達正反轉控制</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 光源感測</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 超音波感測</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 迴圈控制</label>
+              <label class="principle-option"><input type="checkbox" name="principle"> 條件判斷</label>
+            </div>
+          </div>
+          <div class="ai-modal__section">
+            <h4 class="ai-modal__section-title">手動補充內容：課程上做了什麼</h4>
+            <textarea class="ai-modal__textarea" id="outlineInput" placeholder="例如：今天讓學生用積木組裝簡易吊車，體驗槓桿與滑輪如何省力，並讓他們動手調整支點位置觀察差異"></textarea>
+            <button class="ai-modal__generate-btn" onclick="generateOutline()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+              立即智能生成課程大綱
+            </button>
+            <div class="ai-modal__result">
+              <h4 class="ai-modal__section-title">AI 生成課程大綱 (可直接編輯)</h4>
+              <textarea class="ai-modal__textarea ai-modal__textarea--result" id="outlineResult" placeholder="點擊上側「立即生成課程大綱」按鈕，系統將根據您選擇的原理標籤和補充內容，自動生成。生成後可在此處直接編輯修改。"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ai-modal__footer">
+        <button class="ai-modal__btn ai-modal__btn--outline" onclick="saveDraft('outline')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          存為草稿
+        </button>
+        <button class="ai-modal__btn ai-modal__btn--primary" onclick="saveOutline()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          全部儲存
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI 個人化評語生成 Modal -->
+  <div class="ai-modal" id="commentModal">
+    <div class="ai-modal__overlay" onclick="closeCommentModal()"></div>
+    <div class="ai-modal__content ai-modal__content--large">
+      <div class="ai-modal__header">
+        <h3 class="ai-modal__title">AI 智能個人化評語生成工具 - <span id="commentStudentName">學生姓名</span></h3>
+        <button class="ai-modal__close" onclick="closeCommentModal()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="ai-modal__body">
+        <div class="ai-modal__grid ai-modal__grid--three">
+          <div class="ai-modal__section">
+            <h4 class="ai-modal__section-title">正面特質表現 <span style="color: #888; font-weight: normal;">*可複選 1-3 項</span></h4>
+            <div class="trait-grid">
+              <label class="trait-option"><input type="checkbox" name="trait"> 課堂專注高</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 主動積極</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 抗挫折力強</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 學習熱忱高</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 思維邏輯靈活</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 觀察細膩</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 空間感敏銳</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 開創性十足</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 同儕小老師</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> 組裝效率高</label>
+              <label class="trait-option"><input type="checkbox" name="trait"> Debug 大師</label>
+            </div>
+            <h4 class="ai-modal__section-title" style="margin-top: 16px;">成長觀測指標 <span style="color: #888; font-weight: normal;">*可複選 1 項</span></h4>
+            <div class="trait-grid">
+              <label class="trait-option"><input type="checkbox" name="growth"> 社交能量充沛</label>
+              <label class="trait-option"><input type="checkbox" name="growth"> 情緒容易波動</label>
+              <label class="trait-option"><input type="checkbox" name="growth"> 偏好獨立探索</label>
+              <label class="trait-option"><input type="checkbox" name="growth"> 合作默契培養中</label>
+              <label class="trait-option"><input type="checkbox" name="growth"> 動手操作熟練度培養中</label>
+              <label class="trait-option"><input type="checkbox" name="growth"> 挫折容忍度引導中</label>
+              <label class="trait-option"><input type="checkbox" name="growth"> 耐心涵養培養中</label>
+            </div>
+          </div>
+          <div class="ai-modal__section">
+            <h4 class="ai-modal__section-title">手動補充內容 (選填)：主題、課程、具體事例</h4>
+            <textarea class="ai-modal__textarea" id="commentInput" placeholder="例如：今天學生A協助同學的解決數學問題，主動..."></textarea>
+            <button class="ai-modal__generate-btn" onclick="generateComment()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+              立即智能生成評語與雷達圖
+            </button>
+            <div class="ai-modal__result">
+              <h4 class="ai-modal__section-title">AI 生成評語 (可直接編輯)</h4>
+              <textarea class="ai-modal__textarea ai-modal__textarea--result" id="commentResult" placeholder="點擊上側「立即智能生成評語」按鈕，系統將根據您選擇的特質標籤和補充內容，自動生成個人化評語。生成後可在此處直接編輯修改。"></textarea>
+            </div>
+          </div>
+          <div class="ai-modal__section">
+            <h4 class="ai-modal__section-title">雷達圖 <span style="color: #888; font-weight: normal;">*僅智能生成1次，可手動修改分數</span></h4>
+            <div class="radar-chart-container">
+              <svg class="radar-chart" viewBox="0 0 200 200">
+                <!-- 背景網格 -->
+                <polygon points="100,20 170,60 170,140 100,180 30,140 30,60" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <polygon points="100,40 150,70 150,130 100,160 50,130 50,70" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <polygon points="100,60 130,80 130,120 100,140 70,120 70,80" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <polygon points="100,80 110,90 110,110 100,120 90,110 90,90" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <!-- 軸線 -->
+                <line x1="100" y1="100" x2="100" y2="20" stroke="#e5e7eb"/>
+                <line x1="100" y1="100" x2="170" y2="60" stroke="#e5e7eb"/>
+                <line x1="100" y1="100" x2="170" y2="140" stroke="#e5e7eb"/>
+                <line x1="100" y1="100" x2="100" y2="180" stroke="#e5e7eb"/>
+                <line x1="100" y1="100" x2="30" y2="140" stroke="#e5e7eb"/>
+                <line x1="100" y1="100" x2="30" y2="60" stroke="#e5e7eb"/>
+                <!-- 數據區域 -->
+                <polygon id="radarData" points="100,40 150,70 130,120 100,140 70,120 50,70" fill="rgba(255,219,88,0.3)" stroke="#ffdb58" stroke-width="2"/>
+                <!-- 標籤 -->
+                <text x="100" y="12" text-anchor="middle" font-size="11" fill="#364153">程式</text>
+                <text x="180" y="60" text-anchor="start" font-size="11" fill="#364153">除錯</text>
+                <text x="180" y="145" text-anchor="start" font-size="11" fill="#364153">創意</text>
+                <text x="100" y="195" text-anchor="middle" font-size="11" fill="#364153">結構</text>
+                <text x="20" y="145" text-anchor="end" font-size="11" fill="#364153">團隊合作</text>
+                <text x="20" y="60" text-anchor="end" font-size="11" fill="#364153">?</text>
+              </svg>
+            </div>
+            <div class="radar-scores">
+              <div class="radar-score-item">
+                <span>程式</span>
+                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+              </div>
+              <div class="radar-score-item">
+                <span>除錯</span>
+                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+              </div>
+              <div class="radar-score-item">
+                <span>創意</span>
+                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+              </div>
+              <div class="radar-score-item">
+                <span>結構</span>
+                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+              </div>
+              <div class="radar-score-item">
+                <span>團隊合作</span>
+                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ai-modal__footer">
+        <button class="ai-modal__btn ai-modal__btn--outline" onclick="saveDraft('comment')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          存為草稿
+        </button>
+        <button class="ai-modal__btn ai-modal__btn--primary" onclick="saveComment()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          全部儲存
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* AI Modal 樣式 */
+    .ai-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .ai-modal.active {
+      display: flex;
+    }
+
+    .ai-modal__overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .ai-modal__content {
+      position: relative;
+      background: white;
+      border-radius: 16px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .ai-modal__content--large {
+      max-width: 1100px;
+    }
+
+    .ai-modal__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .ai-modal__title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e2939;
+    }
+
+    .ai-modal__close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #6a7282;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ai-modal__close:hover {
+      background: #f3f4f6;
+    }
+
+    .ai-modal__body {
+      padding: 24px;
+    }
+
+    .ai-modal__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .ai-modal__grid--three {
+      grid-template-columns: 1fr 1fr 280px;
+    }
+
+    .ai-modal__section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e2939;
+      margin-bottom: 12px;
+    }
+
+    .principle-grid, .trait-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .principle-option, .trait-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #364153;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .principle-option:hover, .trait-option:hover {
+      background: #fff7d6;
+    }
+
+    .principle-option input, .trait-option input {
+      accent-color: var(--color-primary-dark);
+    }
+
+    .ai-modal__textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      margin-bottom: 16px;
+    }
+
+    .ai-modal__textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .ai-modal__textarea--result {
+      min-height: 120px;
+      background: #fffef5;
+      border-style: dashed;
+    }
+
+    .ai-modal__generate-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .ai-modal__generate-btn:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    .ai-modal__result {
+      margin-top: 8px;
+    }
+
+    .ai-modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .ai-modal__btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-modal__btn--outline {
+      background: white;
+      border: 1px solid #d1d5dc;
+      color: #364153;
+    }
+
+    .ai-modal__btn--outline:hover {
+      background: #f3f4f6;
+    }
+
+    .ai-modal__btn--primary {
+      background: var(--color-primary);
+      border: none;
+      color: var(--color-primary-dark);
+    }
+
+    .ai-modal__btn--primary:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    /* 雷達圖樣式 */
+    .radar-chart-container {
+      display: flex;
+      justify-content: center;
+      padding: 16px 0;
+    }
+
+    .radar-chart {
+      width: 180px;
+      height: 180px;
+    }
+
+    .radar-scores {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radar-score-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #364153;
+    }
+
+    .radar-score-input {
+      width: 50px;
+      padding: 4px 8px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .radar-score-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    @media (max-width: 992px) {
+      .ai-modal__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-modal__grid--three {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // 當前編輯的學生
+    let currentStudent = null;
+    // 班級資料快取
+    let schedulesData = [];
+    // 當前選擇的班級學生
+    let currentStudents = [];
+
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      initJournalPage();
+    });
+
+    // 初始化日誌頁面
+    async function initJournalPage() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        showMessage('請先登入', 'error');
+        window.location.href = '../login.html';
+        return;
+      }
+
+      // 設定今天日期為預設
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('journalDateInput').value = today;
+      document.getElementById('journalLogDate').value = today;
+
+      // 載入教師的班級列表
+      await loadMySchedules();
+    }
+
+    // 載入教師的班級列表
+    async function loadMySchedules() {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('/api/schedules/my-classes', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showMessage(result.message || '載入班級失敗', 'error');
+          return;
+        }
+
+        schedulesData = result.data.schedules;
+        const teacherId = result.data.teacher_id;
+
+        // 儲存教師 ID
+        document.getElementById('journalTeacherId').value = teacherId;
+
+        // 填充班級下拉選單
+        const select = document.getElementById('journalScheduleSelect');
+        select.innerHTML = '<option value="">-- 請選擇班級 --</option>';
+
+        const dayNames = ['', '週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+
+        schedulesData.forEach(schedule => {
+          const option = document.createElement('option');
+          option.value = schedule.schedule_id;
+          const dayName = dayNames[schedule.day_of_week] || `星期${schedule.day_of_week}`;
+          const timeStr = `${schedule.start_time.slice(0,5)} - ${schedule.end_time.slice(0,5)}`;
+          option.textContent = `${schedule.course_name} (${dayName} ${timeStr}) - ${schedule.classroom_name || '未指定教室'}`;
+          select.appendChild(option);
+        });
+
+        if (schedulesData.length === 0) {
+          showMessage('您目前沒有負責的班級', 'warning');
+        }
+
+      } catch (error) {
+        console.error('載入班級錯誤:', error);
+        showMessage('載入班級列表失敗', 'error');
+      }
+    }
+
+    // 班級選擇變更
+    async function onScheduleChange() {
+      const scheduleId = document.getElementById('journalScheduleSelect').value;
+
+      if (!scheduleId) {
+        // 清空表單
+        document.getElementById('journalCourseId').value = '';
+        document.getElementById('journalScheduleId').value = '';
+        document.getElementById('journalClassroomId').value = '';
+        document.getElementById('journalStartTime').value = '';
+        document.getElementById('journalEndTime').value = '';
+        document.getElementById('journalCourseName').value = '';
+        document.getElementById('journalDateTime').value = '';
+        document.getElementById('studentList').innerHTML = '<p style="text-align:center;color:#666;padding:20px;">請先選擇班級</p>';
+        return;
+      }
+
+      // 找到選中的班級資料
+      const schedule = schedulesData.find(s => s.schedule_id == scheduleId);
+      if (!schedule) return;
+
+      // 填入隱藏欄位
+      document.getElementById('journalCourseId').value = schedule.course_id;
+      document.getElementById('journalScheduleId').value = schedule.schedule_id;
+      document.getElementById('journalClassroomId').value = schedule.classroom_id || '';
+      document.getElementById('journalStartTime').value = schedule.start_time;
+      document.getElementById('journalEndTime').value = schedule.end_time;
+
+      // 填入顯示欄位
+      document.getElementById('journalCourseName').value = schedule.course_name;
+
+      const dateInput = document.getElementById('journalDateInput').value;
+      // 使用 T00:00:00 避免時區轉換問題
+      const dateStr = dateInput ? new Date(dateInput + 'T00:00:00').toLocaleDateString('zh-TW') : '請選擇日期';
+      const timeStr = `${schedule.start_time.slice(0,5)} - ${schedule.end_time.slice(0,5)}`;
+      document.getElementById('journalDateTime').value = `${dateStr}  ${timeStr}`;
+
+      // 載入該班級的學生
+      await loadScheduleStudents(scheduleId);
+    }
+
+    // 載入班級學生
+    async function loadScheduleStudents(scheduleId) {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`/api/schedules/${scheduleId}/students`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showMessage(result.message || '載入學生失敗', 'error');
+          return;
+        }
+
+        currentStudents = result.data.students;
+
+        // 渲染學生列表
+        renderStudentList(currentStudents);
+
+        // 更新統計
+        updateAttendanceStats();
+        updateProgressStats();
+
+      } catch (error) {
+        console.error('載入學生錯誤:', error);
+        showMessage('載入學生列表失敗', 'error');
+      }
+    }
+
+    // 渲染學生列表
+    function renderStudentList(students) {
+      const container = document.getElementById('studentList');
+
+      if (students.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">此班級目前沒有學生</p>';
+        return;
+      }
+
+      container.innerHTML = students.map((student, index) => `
+        <div class="student-card" data-student="S${String(index + 1).padStart(3, '0')}" data-student-id="${student.id}">
+          <div class="student-card__main">
+            <span class="student-card__name">${student.name}</span>
+            <div class="attendance-buttons">
+              <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
+              <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
+              <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
+              <button class="attendance-btn" onclick="setAttendance(this, 'no_class')">未約課</button>
+            </div>
+            <div class="student-card__expand" onclick="toggleStudentDetails(this)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+          <div class="student-card__footer">
+            <div class="student-indicators">
+              <div class="student-indicator">
+                <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                </svg>
+              </div>
+              <div class="student-indicator">
+                <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
+              <div class="student-indicator">
+                <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+            </div>
+            <div class="student-progress">
+              <div class="student-progress__bar">
+                <div class="student-progress__fill" style="width: 0%;"></div>
+              </div>
+              <span class="student-progress__text">0/3</span>
+            </div>
+          </div>
+          <div class="student-card__details">
+            <div class="detail-grid">
+              <div class="detail-group">
+                <label class="detail-group__label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                  教師評語
+                </label>
+                <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('${student.name}')"></textarea>
+              </div>
+              <div class="detail-group">
+                <label class="detail-group__label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  上傳照片
+                </label>
+                <div class="photo-upload" onclick="uploadPhoto(this)">
+                  <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span class="photo-upload__text">點擊上傳照片</span>
+                </div>
+              </div>
+              <div class="detail-group">
+                <label class="detail-group__label">給予點數</label>
+                <div class="points-input">
+                  <input type="number" value="1" min="0" max="10">
+                  <div class="points-input__arrows">
+                    <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
+                    <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
+                  </div>
+                </div>
+              </div>
+              <div class="detail-group">
+                <label class="detail-group__label">備註事項 <span style="font-weight: normal; color: #6a7282;">*僅限教師/行政端查閱、補課日期</span></label>
+                <textarea class="detail-input" rows="2" placeholder="其他需要記錄的事項、特殊狀況、家長聯繫事項等..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 日期變更時更新顯示
+    document.getElementById('journalDateInput')?.addEventListener('change', function() {
+      document.getElementById('journalLogDate').value = this.value;
+      // 重新觸發班級選擇以更新時間顯示
+      const scheduleId = document.getElementById('journalScheduleSelect').value;
+      if (scheduleId) {
+        const schedule = schedulesData.find(s => s.schedule_id == scheduleId);
+        if (schedule) {
+          const dateStr = new Date(this.value + 'T00:00:00').toLocaleDateString('zh-TW');
+          const timeStr = `${schedule.start_time.slice(0,5)} - ${schedule.end_time.slice(0,5)}`;
+          document.getElementById('journalDateTime').value = `${dateStr}  ${timeStr}`;
+        }
+      }
+    });
+
+    // 開啟課程大綱 Modal
+    function openOutlineModal() {
+      document.getElementById('outlineModal').classList.add('active');
+    }
+
+    // 關閉課程大綱 Modal
+    function closeOutlineModal() {
+      document.getElementById('outlineModal').classList.remove('active');
+    }
+
+    // 開啟評語 Modal
+    function openCommentModal(studentName) {
+      currentStudent = studentName;
+      document.getElementById('commentStudentName').textContent = studentName;
+      document.getElementById('commentModal').classList.add('active');
+    }
+
+    // 關閉評語 Modal
+    function closeCommentModal() {
+      document.getElementById('commentModal').classList.remove('active');
+      currentStudent = null;
+    }
+
+    // 生成課程大綱
+    function generateOutline() {
+      const input = document.getElementById('outlineInput').value;
+      const principles = Array.from(document.querySelectorAll('input[name="principle"]:checked'))
+        .map(cb => cb.parentElement.textContent.trim());
+
+      if (principles.length === 0 && !input) {
+        if (typeof showMessage === 'function') {
+          showMessage('請至少選擇一個原理或輸入補充內容', 'warning');
+        }
+        return;
+      }
+
+      // 模擬 AI 生成
+      const result = `【課程大綱】
+
+一、課程主題
+本堂課程以${principles.join('、') || '機械原理'}為核心，透過實作體驗讓學生理解基礎物理原理。
+
+二、教學目標
+1. 認識${principles[0] || '機械原理'}的基本概念
+2. 能夠動手組裝並調整機械結構
+3. 培養觀察力與問題解決能力
+
+三、課程內容
+${input || '透過積木組裝體驗力學原理，讓學生在實作中學習。'}
+
+四、學習成果
+學生能夠理解並應用所學原理，完成指定的機械作品。`;
+
+      document.getElementById('outlineResult').value = result;
+
+      if (typeof showMessage === 'function') {
+        showMessage('課程大綱已生成', 'success');
+      }
+    }
+
+    // 生成評語
+    function generateComment() {
+      const input = document.getElementById('commentInput').value;
+      const traits = Array.from(document.querySelectorAll('input[name="trait"]:checked'))
+        .map(cb => cb.parentElement.textContent.trim());
+      const growth = Array.from(document.querySelectorAll('input[name="growth"]:checked'))
+        .map(cb => cb.parentElement.textContent.trim());
+
+      if (traits.length === 0) {
+        if (typeof showMessage === 'function') {
+          showMessage('請至少選擇一個正面特質', 'warning');
+        }
+        return;
+      }
+
+      // 模擬 AI 生成
+      const result = `${currentStudent}同學在本次課程中表現優異，展現出${traits.join('、')}等特質。在團隊合作環節中積極參與，能夠獨立完成機器人組裝任務，展現出良好的邏輯思維能力。${growth.length > 0 ? '在' + growth.join('、') + '方面持續進步中，' : ''}建議繼續保持這樣的學習態度。`;
+
+      document.getElementById('commentResult').value = result;
+
+      if (typeof showMessage === 'function') {
+        showMessage('個人化評語已生成', 'success');
+      }
+    }
+
+    // 存為草稿
+    function saveDraft(type) {
+      if (typeof showMessage === 'function') {
+        showMessage('已存為草稿', 'success');
+      }
+    }
+
+    // 儲存課程大綱
+    function saveOutline() {
+      const result = document.getElementById('outlineResult').value;
+      if (!result) {
+        if (typeof showMessage === 'function') {
+          showMessage('請先生成課程大綱', 'warning');
+        }
+        return;
+      }
+
+      // 將大綱填入主表單
+      const outlineTextarea = document.querySelector('.course-info-section .form-textarea');
+      if (outlineTextarea) {
+        outlineTextarea.value = result;
+      }
+
+      closeOutlineModal();
+
+      if (typeof showMessage === 'function') {
+        showMessage('課程大綱已儲存', 'success');
+      }
+    }
+
+    // 儲存評語
+    function saveComment() {
+      const result = document.getElementById('commentResult').value;
+      if (!result) {
+        if (typeof showMessage === 'function') {
+          showMessage('請先生成評語', 'warning');
+        }
+        return;
+      }
+
+      // 將評語填入對應學生的欄位
+      if (currentStudent) {
+        const studentCards = document.querySelectorAll('.student-card');
+        studentCards.forEach(card => {
+          const nameElement = card.querySelector('.student-card__name');
+          if (nameElement && nameElement.textContent === currentStudent) {
+            const commentField = card.querySelector('.detail-input[rows="3"]');
+            if (commentField) {
+              commentField.value = result;
+            }
+          }
+        });
+      }
+
+      closeCommentModal();
+      updateProgressStats();
+
+      if (typeof showMessage === 'function') {
+        showMessage('評語已儲存至學生資料', 'success');
+      }
+    }
+
+    // 更新雷達圖
+    function updateRadar() {
+      // 簡化版雷達圖更新 - 實際應用可使用 Chart.js 等圖表庫
+      if (typeof showMessage === 'function') {
+        showMessage('分數已更新', 'success');
+      }
+    }
+
+    // 切換學生詳情展開/收合
+    function toggleStudentDetails(expandBtn) {
+      const card = expandBtn.closest('.student-card');
+      card.classList.toggle('student-card--expanded');
+    }
+
+    // 設定出缺席狀態
+    function setAttendance(btn, status) {
+      const buttons = btn.closest('.attendance-buttons').querySelectorAll('.attendance-btn');
+      buttons.forEach(b => b.classList.remove('attendance-btn--active'));
+      btn.classList.add('attendance-btn--active');
+      updateAttendanceStats();
+    }
+
+    // 更新出缺席統計
+    function updateAttendanceStats() {
+      let present = 0, absent = 0, makeup = 0;
+
+      document.querySelectorAll('.student-card').forEach(card => {
+        const activeBtn = card.querySelector('.attendance-btn--active');
+        if (activeBtn) {
+          if (activeBtn.classList.contains('attendance-btn--present')) present++;
+          else if (activeBtn.classList.contains('attendance-btn--absent')) absent++;
+          else if (activeBtn.classList.contains('attendance-btn--makeup')) makeup++;
+        }
+      });
+
+      document.getElementById('presentCount').textContent = present;
+      document.getElementById('absentCount').textContent = absent;
+      document.getElementById('makeupCount').textContent = makeup;
+    }
+
+    // 調整點數
+    function adjustPoints(arrow, delta) {
+      const input = arrow.closest('.points-input').querySelector('input');
+      let value = parseInt(input.value) || 0;
+      value = Math.max(0, Math.min(10, value + delta));
+      input.value = value;
+    }
+
+    // 上傳照片
+    function uploadPhoto(uploadArea) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function(e) {
+        if (e.target.files[0]) {
+          uploadArea.innerHTML = `
+            <img src="${URL.createObjectURL(e.target.files[0])}" style="max-width: 100%; max-height: 80px; border-radius: 4px;">
+            <span class="photo-upload__text">點擊更換照片</span>
+          `;
+        }
+      };
+      input.click();
+    }
+
+    // 開啟課程大綱 AI 生成模態框
+    function openOutlineModal() {
+      if (typeof showMessage === 'function') {
+        showMessage('AI 課程大綱生成工具開發中...', 'warning');
+      }
+    }
+
+    // 開啟評語 AI 生成模態框
+    function openCommentModal(studentName) {
+      if (typeof showMessage === 'function') {
+        showMessage(`AI 智能個人化評語生成工具 - ${studentName}`, 'warning');
+      }
+    }
+
+    // 清除表單
+    function clearForm() {
+      if (confirm('確定要清除所有填寫的內容嗎？')) {
+        document.querySelectorAll('.attendance-btn--active').forEach(btn => {
+          btn.classList.remove('attendance-btn--active');
+        });
+        document.querySelectorAll('.detail-input').forEach(input => {
+          input.value = '';
+        });
+        document.querySelectorAll('.points-input input').forEach(input => {
+          input.value = '1';
+        });
+        updateAttendanceStats();
+        if (typeof showMessage === 'function') {
+          showMessage('表單已清除', 'success');
+        }
+      }
+    }
+
+    // 提交日誌
+    async function submitJournal() {
+      try {
+        // 取得認證 Token
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          showMessage('請先登入', 'error');
+          window.location.href = '../login.html';
+          return;
+        }
+
+        // 驗證必填欄位
+        const topic = document.getElementById('journalTopic').value.trim();
+        const outline = document.getElementById('journalOutline').value.trim();
+
+        if (!topic) {
+          showMessage('請輸入課程主題', 'warning');
+          return;
+        }
+
+        // 收集課程備註
+        const noteCheckboxes = document.querySelectorAll('input[name="courseNote"]:checked');
+        const notes = Array.from(noteCheckboxes).map(cb => cb.value).join(', ');
+
+        // 取得課程資訊
+        const courseId = document.getElementById('journalCourseId').value || 3;
+        const scheduleId = document.getElementById('journalScheduleId').value || null;
+        const classroomId = document.getElementById('journalClassroomId').value || 1;
+        const startTime = document.getElementById('journalStartTime').value || null;
+        const endTime = document.getElementById('journalEndTime').value || null;
+
+        // 取得教師 ID (從 localStorage 或 token)
+        let teacherId = document.getElementById('journalTeacherId').value;
+        if (!teacherId) {
+          // 嘗試從 localStorage 取得用戶資訊
+          const userInfo = localStorage.getItem('userInfo');
+          if (userInfo) {
+            const user = JSON.parse(userInfo);
+            teacherId = user.teacher_id || user.id || 1;
+          } else {
+            teacherId = 1; // 預設值
+          }
+        }
+
+        // 取得日期
+        let logDate = document.getElementById('journalLogDate').value;
+        if (!logDate) {
+          logDate = new Date().toISOString().split('T')[0]; // 使用今天日期
+        }
+
+        // 顯示載入中
+        showMessage('正在提交日誌...', 'info');
+
+        // 1. 建立日誌主記錄
+        const logResponse = await fetch('/api/logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            course_id: parseInt(courseId),
+            schedule_id: scheduleId ? parseInt(scheduleId) : null,
+            log_date: logDate,
+            start_time: startTime,
+            end_time: endTime,
+            classroom_id: classroomId ? parseInt(classroomId) : null,
+            teacher_id: parseInt(teacherId),
+            topic: topic,
+            content: notes,
+            outline: outline
+          })
+        });
+
+        const logResult = await logResponse.json();
+
+        if (!logResult.success) {
+          showMessage(logResult.message || '日誌建立失敗', 'error');
+          return;
+        }
+
+        const logId = logResult.data.id;
+
+        // 2. 儲存每位學生的出席記錄
+        const studentCards = document.querySelectorAll('.student-card');
+        const studentPromises = [];
+
+        studentCards.forEach(card => {
+          const studentId = card.dataset.studentId;
+          if (!studentId) return;
+
+          // 取得出席狀態
+          const activeBtn = card.querySelector('.attendance-btn--active');
+          let attendance = 'present';
+          if (activeBtn) {
+            if (activeBtn.classList.contains('attendance-btn--absent')) attendance = 'absent';
+            else if (activeBtn.classList.contains('attendance-btn--makeup')) attendance = 'makeup';
+            else if (activeBtn.textContent.includes('未約課')) attendance = 'no_class';
+          }
+
+          // 取得詳細資料
+          const details = card.querySelector('.student-card__details');
+          let performance = '';
+          let studentNotes = '';
+          let pointsEarned = 1;
+
+          if (details) {
+            const commentField = details.querySelector('textarea[placeholder*="評語"]');
+            if (commentField) performance = commentField.value.trim();
+
+            const notesField = details.querySelector('textarea[placeholder*="其他需要記錄"]');
+            if (notesField) studentNotes = notesField.value.trim();
+
+            const pointsInput = details.querySelector('.points-input input');
+            if (pointsInput) pointsEarned = parseInt(pointsInput.value) || 0;
+          }
+
+          // 呼叫 API 儲存學生記錄
+          const promise = fetch(`/api/logs/${logId}/students/${studentId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              attendance: attendance,
+              performance: performance,
+              notes: studentNotes,
+              points_earned: pointsEarned
+            })
+          });
+
+          studentPromises.push(promise);
+        });
+
+        // 等待所有學生記錄儲存完成
+        await Promise.all(studentPromises);
+
+        showMessage('日誌已成功提交！', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'records.html';
+        }, 1500);
+
+      } catch (error) {
+        console.error('提交日誌錯誤:', error);
+        showMessage('提交失敗，請稍後再試', 'error');
+      }
+    }
+
+    // 更新進度統計
+    function updateProgressStats() {
+      const studentCards = document.querySelectorAll('.student-card');
+      const totalStudents = studentCards.length;
+
+      let commentsCompleted = 0;
+      let photosCompleted = 0;
+      let pointsCompleted = 0;
+
+      studentCards.forEach(card => {
+        const details = card.querySelector('.student-card__details');
+        if (details) {
+          // 檢查評語
+          const commentField = details.querySelector('textarea[placeholder*="評語"]');
+          if (commentField && commentField.value.trim()) {
+            commentsCompleted++;
+          }
+
+          // 檢查照片
+          const photoUpload = details.querySelector('.photo-upload img');
+          if (photoUpload) {
+            photosCompleted++;
+          }
+
+          // 檢查點數 (預設都算完成)
+          pointsCompleted++;
+        }
+      });
+
+      // 更新顯示
+      document.getElementById('commentCount').textContent = `${commentsCompleted}/${totalStudents}`;
+      document.getElementById('photoCount').textContent = `${photosCompleted}/${totalStudents}`;
+      document.getElementById('pointsCount').textContent = `${pointsCompleted}/${totalStudents}`;
+
+      // 計算整體完成度
+      const totalItems = totalStudents * 3;
+      const completedItems = commentsCompleted + photosCompleted + pointsCompleted;
+      const percentage = Math.round((completedItems / totalItems) * 100);
+
+      document.getElementById('overallPercentage').textContent = `${percentage}%`;
+      document.getElementById('overallCount').textContent = `${completedItems}/${totalItems} 項目`;
+      document.getElementById('overallProgressBar').style.width = `${percentage}%`;
+
+      // 更新學生卡片的個人進度
+      updateStudentProgress();
+    }
+
+    // 更新學生個人進度
+    function updateStudentProgress() {
+      document.querySelectorAll('.student-card').forEach(card => {
+        const details = card.querySelector('.student-card__details');
+        const progressBar = card.querySelector('.student-progress__fill');
+        const progressText = card.querySelector('.student-progress__text');
+        const indicators = card.querySelectorAll('.student-indicator__icon');
+
+        if (!details) return;
+
+        let completed = 0;
+        const total = 3;
+
+        // 檢查評語
+        const commentField = details.querySelector('textarea[placeholder*="評語"]');
+        if (commentField && commentField.value.trim()) {
+          completed++;
+          if (indicators[1]) indicators[1].classList.add('student-indicator__icon--completed');
+        }
+
+        // 檢查照片
+        const photoUpload = details.querySelector('.photo-upload img');
+        if (photoUpload) {
+          completed++;
+          if (indicators[3]) indicators[3].classList.add('student-indicator__icon--completed');
+        }
+
+        // 點數預設完成
+        completed++;
+        if (indicators[5]) indicators[5].classList.add('student-indicator__icon--completed');
+
+        // 更新進度條
+        const percentage = (completed / total) * 100;
+        if (progressBar) progressBar.style.width = `${percentage}%`;
+        if (progressText) progressText.textContent = `${completed}/${total}`;
+      });
+    }
+
+    // 監聽輸入變化
+    document.querySelectorAll('.detail-input').forEach(input => {
+      input.addEventListener('input', updateProgressStats);
+    });
+
+    // 初始化
+    updateAttendanceStats();
+    updateProgressStats();
+  </script>
+</body>
+</html>

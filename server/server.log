@@ -1,0 +1,71 @@
+
+> learning-system-api@1.0.0 start
+> node server.js
+
+✅ 資料庫連接成功
+
+🚀 智慧學習歷程系統 API 伺服器已啟動
+📍 伺服器位址: http://localhost:3000
+📍 API 端點: http://localhost:3000/api
+🔧 環境: development
+
+可用的 API 端點:
+  POST   /api/auth/login          - 登入
+  POST   /api/auth/register       - 註冊
+  GET    /api/students            - 取得學生列表
+  GET    /api/teachers            - 取得教師列表
+  GET    /api/courses             - 取得課程列表
+  GET    /api/logs                - 取得日誌列表
+  GET    /api/settings            - 取得系統設定
+
+[2026-07-30T16:03:24.013Z] POST /api/auth/login
+[2026-07-30T16:03:24.103Z] GET /api/schedules/deleted
+[2026-07-30T16:03:38.977Z] POST /api/auth/login
+[2026-07-30T16:03:39.058Z] GET /api/schedules
+[2026-07-30T16:03:39.087Z] DELETE /api/schedules/1
+[2026-07-30T16:03:39.102Z] GET /api/schedules/deleted
+[2026-07-30T16:03:54.375Z] POST /api/auth/login
+[2026-07-30T16:03:54.465Z] POST /api/schedules/1/restore
+[2026-07-30T16:03:54.479Z] GET /api/schedules
+[2026-07-30T16:03:54.506Z] GET /api/schedules/deleted
+[2026-07-30T16:05:32.277Z] GET /api/courses
+[2026-07-30T16:05:32.284Z] GET /api/courses
+[2026-07-30T16:05:32.293Z] GET /api/teachers
+[2026-07-30T16:05:32.296Z] GET /api/schedules/classrooms
+[2026-07-30T16:05:36.162Z] GET /api/schedules
+[2026-07-30T16:05:57.586Z] POST /api/schedules
+[2026-07-30T16:05:57.593Z] PUT /api/courses/1
+[2026-07-30T16:05:57.603Z] GET /api/schedules
+[2026-07-30T16:05:57.605Z] GET /api/schedules/classrooms
+[2026-07-30T16:05:57.611Z] GET /api/courses
+[2026-07-30T16:05:57.612Z] GET /api/teachers
+[2026-07-30T16:06:10.220Z] DELETE /api/schedules/7
+[2026-07-30T16:06:10.230Z] GET /api/schedules
+[2026-07-30T16:06:12.204Z] GET /api/schedules/deleted
+[2026-07-30T16:06:20.634Z] POST /api/schedules/7/restore
+[2026-07-30T16:06:20.643Z] GET /api/schedules/deleted
+[2026-07-30T16:06:20.645Z] GET /api/schedules
+[2026-07-30T16:08:47.924Z] GET /api/courses
+[2026-07-30T16:08:47.927Z] GET /api/courses
+[2026-07-30T16:08:47.931Z] GET /api/teachers
+[2026-07-30T16:08:47.933Z] GET /api/schedules/classrooms
+[2026-07-30T16:08:50.609Z] GET /api/schedules
+[2026-07-30T16:08:58.520Z] DELETE /api/schedules/7
+[2026-07-30T16:08:58.532Z] GET /api/schedules
+[2026-07-30T16:08:59.453Z] GET /api/schedules/deleted
+[2026-07-30T16:09:21.832Z] POST /api/schedules
+[2026-07-30T16:09:21.838Z] PUT /api/courses/1
+[2026-07-30T16:09:21.849Z] GET /api/schedules
+[2026-07-30T16:09:21.854Z] GET /api/schedules/classrooms
+[2026-07-30T16:09:21.856Z] GET /api/teachers
+[2026-07-30T16:09:21.861Z] GET /api/courses
+[2026-07-30T16:09:31.428Z] PUT /api/schedules/8
+[2026-07-30T16:09:31.437Z] PUT /api/courses/1
+[2026-07-30T16:09:31.446Z] GET /api/schedules
+[2026-07-30T16:09:31.448Z] GET /api/schedules/classrooms
+[2026-07-30T16:09:31.449Z] GET /api/courses
+[2026-07-30T16:09:31.454Z] GET /api/teachers
+[2026-07-30T16:09:38.490Z] GET /api/schedules
+[2026-07-31T15:19:17.117Z] GET /api/schedules
+[2026-07-31T15:19:29.710Z] GET /api/schedules
+Killed

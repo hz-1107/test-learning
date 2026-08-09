@@ -1,0 +1,427 @@
+const db = require('../config/db');
+const bcrypt = require('bcryptjs');
+
+// 取得所有學生
+exports.getAll = async (req, res) => {
+  try {
+    const { status, search, classroom_id, course_type_id, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    let sql = `
+      SELECT
+        s.*,
+        u.username, u.name, u.email, u.phone, u.avatar, u.is_active,
+        t.id as teacher_id,
+        tu.name as teacher_name,
+        cr.id as classroom_id,
+        cr.name as classroom_name,
+        ct.id as course_type_id,
+        ct.name as course_type_name,
+        (SELECT cs.start_time FROM course_schedules cs
+         JOIN course_enrollments ce ON cs.id = ce.schedule_id
+         WHERE ce.student_id = s.id AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
+         LIMIT 1) as class_start_time,
+        (SELECT cs.end_time FROM course_schedules cs
+         JOIN course_enrollments ce ON cs.id = ce.schedule_id
+         WHERE ce.student_id = s.id AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
+         LIMIT 1) as class_end_time,
+        (SELECT cs.day_of_week FROM course_schedules cs
+         JOIN course_enrollments ce ON cs.id = ce.schedule_id
+         WHERE ce.student_id = s.id AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
+         LIMIT 1) as class_day
+      FROM students s
+      JOIN users u ON s.user_id = u.id
+      LEFT JOIN teachers t ON s.teacher_id = t.id
+      LEFT JOIN users tu ON t.user_id = tu.id
+      LEFT JOIN classrooms cr ON s.classroom_id = cr.id
+      LEFT JOIN course_types ct ON s.course_type_id = ct.id
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (status) {
+      sql += ' AND s.status = ?';
+      params.push(status);
+    }
+
+    if (search) {
+      sql += ' AND (u.name LIKE ? OR s.student_code LIKE ? OR u.phone LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (classroom_id) {
+      sql += ' AND s.classroom_id = ?';
+      params.push(classroom_id);
+    }
+
+    if (course_type_id) {
+      sql += ' AND s.course_type_id = ?';
+      params.push(course_type_id);
+    }
+
+    // 計算總數
+    const countSql = sql.replace(/SELECT[\s\S]*?FROM students/, 'SELECT COUNT(*) as total FROM students');
+    const countResult = await db.query(countSql, params);
+    const total = countResult[0]?.total || 0;
+
+    // 加入分頁
+    sql += ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), offset);
+
+    const students = await db.query(sql, params);
+
+    res.json({
+      success: true,
+      data: {
+        students,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('取得學生列表錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
+// 取得單一學生
+exports.getOne = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await db.queryOne(`
+      SELECT
+        s.*,
+        u.username, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active,
+        t.id as assigned_teacher_id,
+        tu.name as teacher_name,
+        tt.id as assigned_trial_teacher_id,
+        ttu.name as trial_teacher_name,
+        cr.name as classroom_name,
+        ct.name as course_type_name
+      FROM students s
+      JOIN users u ON s.user_id = u.id
+      LEFT JOIN teachers t ON s.teacher_id = t.id
+      LEFT JOIN users tu ON t.user_id = tu.id
+      LEFT JOIN teachers tt ON s.trial_teacher_id = tt.id
+      LEFT JOIN users ttu ON tt.user_id = ttu.id
+      LEFT JOIN classrooms cr ON s.classroom_id = cr.id
+      LEFT JOIN course_types ct ON s.course_type_id = ct.id
+      WHERE s.id = ?
+    `, [id]);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到學生'
+      });
+    }
+
+    // 取得學生的點數餘額
+    const pointsResult = await db.queryOne(`
+      SELECT COALESCE(SUM(points), 0) as total_points
+      FROM point_transactions
+      WHERE student_id = ?
+    `, [id]);
+
+    student.total_points = pointsResult.total_points;
+
+    // 取得學生的班級
+    const enrollments = await db.query(`
+      SELECT ce.*, c.name as course_name, ct.name as course_type,
+        cs.day_of_week, cs.start_time, cs.end_time, cr.name as classroom_name
+      FROM course_enrollments ce
+      JOIN course_schedules cs ON ce.schedule_id = cs.id
+      JOIN courses c ON cs.course_id = c.id
+      LEFT JOIN course_types ct ON c.course_type_id = ct.id
+      LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
+      WHERE ce.student_id = ? AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
+    `, [id]);
+
+    student.enrollments = enrollments;
+
+    res.json({
+      success: true,
+      data: student
+    });
+  } catch (error) {
+    console.error('取得學生詳情錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
+// 新增學生
+exports.create = async (req, res) => {
+  try {
+    const {
+      name, birthday, school, grade, enrollment_date,
+      teacher_id, parent_name_father, parent_phone_father,
+      parent_name_mother, parent_phone_mother,
+      trial_teacher_id, trial_topic,
+      classroom_id, course_type_id, schedule_id
+    } = req.body;
+
+    // 驗證必要欄位
+    if (!name || !birthday || !school || !enrollment_date || !classroom_id || !course_type_id) {
+      return res.status(400).json({
+        success: false,
+        message: '請提供必要欄位（姓名、生日、學校、到班日期、教室、上課類別）'
+      });
+    }
+
+    // 使用父親電話作為帳號
+    const username = parent_phone_father ? parent_phone_father.replace(/-/g, '') : null;
+    if (!username) {
+      return res.status(400).json({
+        success: false,
+        message: '請提供家長電話(父)作為登入帳號'
+      });
+    }
+
+    // 檢查帳號是否已存在
+    const existingUser = await db.queryOne(
+      'SELECT id FROM users WHERE username = ?',
+      [username]
+    );
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: '此電話號碼已被使用作為帳號'
+      });
+    }
+
+    // 使用生日作為密碼 (格式: YYYYMMDD)
+    const password = birthday.replace(/-/g, '');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 建立使用者
+    const userId = await db.insert(
+      'INSERT INTO users (username, password, name, phone, birthday, role) VALUES (?, ?, ?, ?, ?, ?)',
+      [username, hashedPassword, name, parent_phone_father || null, birthday, 'student']
+    );
+
+    // 建立學生資料
+    const studentId = await db.insert(`
+      INSERT INTO students (
+        user_id, birth_date, school, grade, enrollment_date,
+        teacher_id, parent_name_father, parent_phone_father,
+        parent_name_mother, parent_phone_mother,
+        trial_teacher_id, trial_topic,
+        classroom_id, course_type_id, lesson_count
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      userId, birthday, school, grade || null, enrollment_date,
+      teacher_id || null, parent_name_father || null, parent_phone_father || null,
+      parent_name_mother || null, parent_phone_mother || null,
+      trial_teacher_id || null, trial_topic || null,
+      classroom_id, course_type_id, 0
+    ]);
+
+    // 如果有選擇班級，自動加入班級
+    if (schedule_id) {
+      const schedule = await db.queryOne('SELECT id FROM course_schedules WHERE id = ?', [schedule_id]);
+      if (schedule) {
+        await db.insert(
+          'INSERT INTO course_enrollments (schedule_id, student_id, status) VALUES (?, ?, ?)',
+          [schedule_id, studentId, 'enrolled']
+        );
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: '學生建立成功',
+      data: { id: studentId, userId }
+    });
+  } catch (error) {
+    console.error('新增學生錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
+// 更新學生
+exports.update = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name, birthday, school, grade, enrollment_date,
+      teacher_id, parent_name_father, parent_phone_father,
+      parent_name_mother, parent_phone_mother,
+      trial_teacher_id, trial_topic,
+      classroom_id, course_type_id, schedule_id, status
+    } = req.body;
+
+    // 取得學生資料
+    const student = await db.queryOne('SELECT user_id FROM students WHERE id = ?', [id]);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到學生'
+      });
+    }
+
+    // 更新使用者資料
+    await db.update(
+      'UPDATE users SET name = ?, birthday = ?, phone = ? WHERE id = ?',
+      [name, birthday || null, parent_phone_father || null, student.user_id]
+    );
+
+    // 更新學生資料
+    await db.update(`
+      UPDATE students SET
+        birth_date = ?, school = ?, grade = ?, enrollment_date = ?,
+        teacher_id = ?, parent_name_father = ?, parent_phone_father = ?,
+        parent_name_mother = ?, parent_phone_mother = ?,
+        trial_teacher_id = ?, trial_topic = ?,
+        classroom_id = ?, course_type_id = ?, status = ?
+      WHERE id = ?
+    `, [
+      birthday || null, school || null, grade || null, enrollment_date || null,
+      teacher_id || null, parent_name_father || null, parent_phone_father || null,
+      parent_name_mother || null, parent_phone_mother || null,
+      trial_teacher_id || null, trial_topic || null,
+      classroom_id || null, course_type_id || null, status || 'active', id
+    ]);
+
+    // 如果有更新班級
+    if (schedule_id) {
+      const schedule = await db.queryOne('SELECT id FROM course_schedules WHERE id = ?', [schedule_id]);
+      if (schedule) {
+        // 先取消之前的所有班級
+        await db.update(
+          'UPDATE course_enrollments SET status = "dropped" WHERE student_id = ?',
+          [id]
+        );
+        // 新增新的班級
+        const existing = await db.queryOne(
+          'SELECT id FROM course_enrollments WHERE schedule_id = ? AND student_id = ?',
+          [schedule_id, id]
+        );
+        if (existing) {
+          await db.update(
+            'UPDATE course_enrollments SET status = "enrolled" WHERE id = ?',
+            [existing.id]
+          );
+        } else {
+          await db.insert(
+            'INSERT INTO course_enrollments (schedule_id, student_id, status) VALUES (?, ?, ?)',
+            [schedule_id, id, 'enrolled']
+          );
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: '學生資料更新成功'
+    });
+  } catch (error) {
+    console.error('更新學生錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
+// 刪除學生
+exports.delete = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await db.queryOne('SELECT user_id FROM students WHERE id = ?', [id]);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到學生'
+      });
+    }
+
+    // 刪除使用者 (會連帶刪除學生資料，因為有 CASCADE)
+    await db.update('DELETE FROM users WHERE id = ?', [student.user_id]);
+
+    res.json({
+      success: true,
+      message: '學生刪除成功'
+    });
+  } catch (error) {
+    console.error('刪除學生錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
+// 取得學生點數記錄
+exports.getPoints = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const transactions = await db.query(`
+      SELECT pt.*, u.name as created_by_name
+      FROM point_transactions pt
+      LEFT JOIN users u ON pt.created_by = u.id
+      WHERE pt.student_id = ?
+      ORDER BY pt.created_at DESC
+      LIMIT ? OFFSET ?
+    `, [id, parseInt(limit), offset]);
+
+    const balance = await db.queryOne(`
+      SELECT COALESCE(SUM(points), 0) as balance
+      FROM point_transactions
+      WHERE student_id = ?
+    `, [id]);
+
+    res.json({
+      success: true,
+      data: {
+        transactions,
+        balance: balance.balance
+      }
+    });
+  } catch (error) {
+    console.error('取得學生點數記錄錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
+// 取得課程類型列表
+exports.getCourseTypes = async (req, res) => {
+  try {
+    const types = await db.query(
+      'SELECT * FROM course_types WHERE is_active = TRUE ORDER BY name'
+    );
+    res.json({
+      success: true,
+      data: types
+    });
+  } catch (error) {
+    console.error('取得課程類型錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};

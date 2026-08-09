@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>查看完整檔案 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="student-page">
+    <!-- 模態框 -->
+    <div class="modal" id="profileModal">
+      <div class="modal__content" style="max-width: 1200px;">
+        <!-- 模態框頭部 -->
+        <header class="modal__header">
+          <h1 class="modal__title">查看完整檔案</h1>
+          <button class="modal__close" onclick="closeModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </header>
+
+        <!-- 模態框內容 -->
+        <div class="modal__body">
+          <div class="profile-layout">
+            <!-- 左側學生資訊 -->
+            <aside class="profile-sidebar">
+              <div class="profile-avatar" id="profileAvatar">—</div>
+              <h2 class="profile-name" id="profileName">載入中...</h2>
+              <p class="profile-id" id="profileStudentCode">—</p>
+
+              <!-- 個人資訊 -->
+              <div class="profile-info-section">
+                <div class="profile-info-header">
+                  <span class="profile-info-title">個人資訊</span>
+                  <svg class="profile-info-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">電子郵件</span>
+                  <span class="profile-info-value" id="infoEmail">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">電話</span>
+                  <span class="profile-info-value" id="infoPhone">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">就讀學校</span>
+                  <span class="profile-info-value" id="infoSchool">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">年級</span>
+                  <span class="profile-info-value" id="infoGrade">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">性別</span>
+                  <span class="profile-info-value" id="infoGender">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">生日</span>
+                  <span class="profile-info-value" id="infoBirthDate">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">累積點數</span>
+                  <span class="profile-info-value" style="color: var(--color-primary-dark); font-weight: 600;"><span id="infoPoints">0</span> 點</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">課程階段</span>
+                  <span class="profile-course-tag" id="infoCourseStage">—</span>
+                </div>
+              </div>
+
+              <!-- 家長資訊 -->
+              <div class="profile-info-section">
+                <div class="profile-info-header">
+                  <span class="profile-info-title">家長資訊</span>
+                  <svg class="profile-info-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">父親姓名</span>
+                  <span class="profile-info-value" id="infoParentNameFather">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">父親電話</span>
+                  <span class="profile-info-value" id="infoParentPhoneFather">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">母親姓名</span>
+                  <span class="profile-info-value" id="infoParentNameMother">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">母親電話</span>
+                  <span class="profile-info-value" id="infoParentPhoneMother">—</span>
+                </div>
+              </div>
+
+              <!-- 歷史課程 -->
+              <div class="profile-info-section">
+                <div class="profile-info-header">
+                  <span class="profile-info-title">歷史課程</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;" id="courseHistoryList">
+                  <span style="font-size: 13px; color: var(--color-text-muted);">載入中...</span>
+                </div>
+              </div>
+            </aside>
+
+            <!-- 右側主要內容 -->
+            <main class="profile-main">
+              <!-- 能力雷達圖 -->
+              <section class="chart-section">
+                <div class="chart-header">
+                  <div>
+                    <h3 class="chart-title">能力雷達圖</h3>
+                    <p class="chart-subtitle" id="radarUpdateTime">＊更新時間：—</p>
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <div class="radar-chart">
+                    <canvas id="radarChart"></canvas>
+                  </div>
+                  <div class="chart-legend">
+                    <div class="legend-item">
+                      <span class="legend-label">程式 <span class="legend-score" id="legendScore-programming">0 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--yellow" id="legendFill-programming" style="width: 0%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">除錯 <span class="legend-score" id="legendScore-debugging">0 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--green" id="legendFill-debugging" style="width: 0%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">創意 <span class="legend-score" id="legendScore-creativity">0 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--orange" id="legendFill-creativity" style="width: 0%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">結構 <span class="legend-score" id="legendScore-structure">0 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--blue" id="legendFill-structure" style="width: 0%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">團隊合作 <span class="legend-score" id="legendScore-teamwork">0 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--red" id="legendFill-teamwork" style="width: 0%;"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 能力趨勢圖 -->
+              <section class="chart-section">
+                <h3 class="chart-title">能力趨勢圖</h3>
+                <div class="trend-filters">
+                  <div class="trend-filter-group">
+                    <span class="trend-filter-label">日期區間</span>
+                    <button class="trend-btn" onclick="setTrendRange(this, 6)">近 6 週</button>
+                    <button class="trend-btn trend-btn--active" onclick="setTrendRange(this, 12)">近 12 週</button>
+                    <input type="date" class="trend-date-input" id="profileTrendStart" style="padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-surface-alt); font-size: 12px;">
+                    <input type="date" class="trend-date-input" id="profileTrendEnd" style="padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-surface-alt); font-size: 12px;">
+                    <button class="trend-btn" onclick="applyProfileCustomRange()">套用</button>
+                  </div>
+                  <div class="trend-filter-group">
+                    <span class="trend-filter-label">指標項目</span>
+                    <button class="trend-btn trend-btn--active" onclick="toggleProfileIndicator(this, 'all')">★ 全部</button>
+                    <button class="trend-btn" onclick="toggleProfileIndicator(this, '程式')">★ 程式</button>
+                    <button class="trend-btn" onclick="toggleProfileIndicator(this, '除錯')">★ 除錯</button>
+                    <button class="trend-btn" onclick="toggleProfileIndicator(this, '創意')">★ 創意</button>
+                    <button class="trend-btn" onclick="toggleProfileIndicator(this, '結構')">★ 結構</button>
+                    <button class="trend-btn" onclick="toggleProfileIndicator(this, '團隊合作')">★ 團隊合作</button>
+                  </div>
+                </div>
+                <div class="trend-chart">
+                  <canvas id="trendChart"></canvas>
+                </div>
+              </section>
+
+              <!-- 學習成就 -->
+              <section class="achievement-section">
+                <h3 class="chart-title" style="margin-bottom: var(--spacing-lg);">學習成就</h3>
+                <div class="achievement-tabs">
+                  <button class="achievement-tab achievement-tab--active" data-tab="records">課程紀錄</button>
+                  <button class="achievement-tab" data-tab="competitions">競賽經歷</button>
+                </div>
+
+                <!-- 課程紀錄列表 (由後端 /api/students/me/records 動態載入) -->
+                <div class="achievement-list" id="recordsTab">
+                  <p style="font-size: 13px; color: var(--color-text-muted);">載入中...</p>
+                </div>
+
+                <!-- 競賽經歷列表 -->
+                <div class="achievement-list" id="competitionsTab" style="display: none;">
+                  <div class="achievement-item">
+                    <div class="achievement-dot" style="background: var(--color-success);"></div>
+                    <div class="achievement-content">
+                      <div class="achievement-header">
+                        <span class="achievement-date">2026-03-15</span>
+                        <span class="achievement-course">全國機器人大賽</span>
+                        <span class="achievement-status achievement-status--present">第一名</span>
+                      </div>
+                      <p class="achievement-description">
+                        參加 2026 全國青少年機器人創意大賽，榮獲國小組第一名。團隊表現出色，設計的機器人兼具創意與實用性。
+                      </p>
+                      <div class="achievement-meta">
+                        <span class="achievement-points">🏆 獲得點數: 20</span>
+                        <span>｜</span>
+                        <span>主辦：台灣青少年機器人協會</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="achievement-item">
+                    <div class="achievement-dot" style="background: var(--color-primary);"></div>
+                    <div class="achievement-content">
+                      <div class="achievement-header">
+                        <span class="achievement-date">2025-11-20</span>
+                        <span class="achievement-course">縣市科學競賽</span>
+                        <span class="achievement-status" style="background: #e0f2fe; color: #0284c7;">優等</span>
+                      </div>
+                      <p class="achievement-description">
+                        參加新竹縣科學創意競賽，獲得優等獎。展現良好的科學探究精神和實驗設計能力。
+                      </p>
+                      <div class="achievement-meta">
+                        <span class="achievement-points">🏆 獲得點數: 10</span>
+                        <span>｜</span>
+                        <span>主辦：新竹縣教育局</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="view-more-btn" id="viewMoreRecordsBtn" onclick="loadMoreRecords()">查看更多</button>
+              </section>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // 登入檢查
+    if (!isLoggedIn() || getUserRole() !== 'student') {
+      window.location.href = '../login.html';
+    }
+
+    // 關閉模態框
+    function closeModal() {
+      window.history.back();
+    }
+
+    // 點擊模態框外部關閉
+    document.getElementById('profileModal').addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        closeModal();
+      }
+    });
+
+    // ESC鍵關閉
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // 標籤頁切換
+    document.querySelectorAll('.achievement-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // 更新標籤狀態
+        document.querySelectorAll('.achievement-tab').forEach(t => t.classList.remove('achievement-tab--active'));
+        tab.classList.add('achievement-tab--active');
+
+        // 顯示對應內容
+        const tabName = tab.dataset.tab;
+        document.getElementById('recordsTab').style.display = tabName === 'records' ? 'flex' : 'none';
+        document.getElementById('competitionsTab').style.display = tabName === 'competitions' ? 'flex' : 'none';
+      });
+    });
+
+    // ========================================
+    // 真實資料串接
+    // ========================================
+    const SKILL_KEYS = ['程式', '除錯', '創意', '結構', '團隊合作'];
+    const SKILL_FIELD_MAP = { 程式: 'programming', 除錯: 'debugging', 創意: 'creativity', 結構: 'structure', 團隊合作: 'teamwork' };
+    const trendColors = {
+      程式: '#ffdb58', 除錯: '#41e654', 創意: '#ff9f43', 結構: '#54a0ff', 團隊合作: '#ff6b6b'
+    };
+    const ATTENDANCE_LABELS = { present: '出席', absent: '缺席', late: '遲到', excused: '請假' };
+    const ATTENDANCE_CLASS = { present: 'achievement-status--present', absent: 'achievement-status--absent', late: 'achievement-status--late', excused: 'achievement-status--absent' };
+
+    let radarChart = null;
+    let trendChart = null;
+    let recordsPage = 1;
+    let recordsHasMore = true;
+
+    function formatMD(dateStr) {
+      const parts = dateStr.split('-');
+      return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+    }
+
+    // 渲染個人 / 家長資訊
+    function renderProfileInfo(me) {
+      const s = me.student;
+      document.getElementById('profileAvatar').textContent = (s.name || '?').charAt(0);
+      document.getElementById('profileName').textContent = s.name || '—';
+      document.getElementById('profileStudentCode').textContent = s.student_code || '—';
+      document.getElementById('infoEmail').textContent = s.email || '—';
+      document.getElementById('infoPhone').textContent = s.phone || '—';
+      document.getElementById('infoSchool').textContent = s.school || '—';
+      document.getElementById('infoGrade').textContent = s.grade || '—';
+      document.getElementById('infoGender').textContent = s.gender === 'male' ? '男' : s.gender === 'female' ? '女' : '—';
+      document.getElementById('infoBirthDate').textContent = s.birth_date ? s.birth_date.replace(/-/g, ' / ') : '—';
+      document.getElementById('infoPoints').textContent = me.points.balance;
+      document.getElementById('infoCourseStage').textContent = me.enrollment ? me.enrollment.course_type_name : '尚未分班';
+
+      // 註: 資料庫 students 表是父母分開存 (parent_name_father/mother 等)，
+      // 沒有通用的 parent_name/parent_phone/parent_email 欄位，
+      // 之前用錯欄位名稱導致行政端修改家長資訊後，學生端一直顯示「—」
+      document.getElementById('infoParentNameFather').textContent = s.parent_name_father || '—';
+      document.getElementById('infoParentPhoneFather').textContent = s.parent_phone_father || '—';
+      document.getElementById('infoParentNameMother').textContent = s.parent_name_mother || '—';
+      document.getElementById('infoParentPhoneMother').textContent = s.parent_phone_mother || '—';
+    }
+
+    // 渲染歷史課程
+    function renderCourseHistory(me) {
+      const listEl = document.getElementById('courseHistoryList');
+      if (!me.courseHistory || !me.courseHistory.length) {
+        listEl.innerHTML = '<span style="font-size: 13px; color: var(--color-text-muted);">尚無修課紀錄</span>';
+        return;
+      }
+      listEl.innerHTML = me.courseHistory.map(c => {
+        const isCurrent = me.enrollment && c.course_id === me.enrollment.course_id;
+        return `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px;">${c.course_name}</span>
+            <span class="btn ${isCurrent ? 'btn--primary' : 'btn--outline'}" style="padding: 4px 12px; font-size: 12px;">
+              ${isCurrent ? '目前課程' : c.status === 'completed' ? '已結業' : '已退選'}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染雷達圖 + 圖例
+    function renderRadar(me) {
+      const skills = me.skills;
+      SKILL_KEYS.forEach(label => {
+        const value = skills[SKILL_FIELD_MAP[label]] || 0;
+        document.getElementById(`legendScore-${SKILL_FIELD_MAP[label]}`).textContent = `${value} / 5`;
+        document.getElementById(`legendFill-${SKILL_FIELD_MAP[label]}`).style.width = `${(value / 5) * 100}%`;
+      });
+
+      if (me.recentRecord) {
+        document.getElementById('radarUpdateTime').textContent = `＊更新時間：${me.recentRecord.log_date.replace(/-/g, ' / ')}`;
+      }
+
+      const data = SKILL_KEYS.map(label => skills[SKILL_FIELD_MAP[label]] || 0);
+      const radarCtx = document.getElementById('radarChart').getContext('2d');
+      radarChart = new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+          labels: SKILL_KEYS,
+          datasets: [{
+            label: '能力值',
+            data,
+            backgroundColor: 'rgba(255, 219, 88, 0.3)',
+            borderColor: '#ffdb58',
+            borderWidth: 2,
+            pointBackgroundColor: '#ffdb58',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#ffdb58'
+          }]
+        },
+        options: {
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 5,
+              ticks: { stepSize: 1 },
+              grid: { color: '#e5e7eb' },
+              angleLines: { color: '#e5e7eb' },
+              pointLabels: { font: { size: 12 } }
+            }
+          },
+          plugins: { legend: { display: false } },
+          maintainAspectRatio: true
+        }
+      });
+    }
+
+    // 趨勢圖
+    function buildTrendDatasets(trendData) {
+      return SKILL_KEYS.map(label => ({
+        label,
+        data: trendData[label] || [],
+        borderColor: trendColors[label],
+        backgroundColor: trendColors[label],
+        tension: 0.3,
+        pointRadius: 4
+      }));
+    }
+
+    async function fetchAndRenderTrend(params) {
+      try {
+        const result = await api.students.getMyTrend(params);
+        const trendData = result.data;
+        const labels = trendData.labels.map(formatMD);
+
+        if (!trendChart) {
+          const trendCtx = document.getElementById('trendChart').getContext('2d');
+          trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: { labels, datasets: buildTrendDatasets(trendData) },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 }, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+              },
+              plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } }
+            }
+          });
+        } else {
+          trendChart.data.labels = labels;
+          trendChart.data.datasets = buildTrendDatasets(trendData);
+          trendChart.update();
+        }
+      } catch (error) {
+        console.error('取得能力趨勢失敗', error);
+      }
+    }
+
+    function setTrendRange(btn, weeks) {
+      const group = btn.closest('.trend-filter-group');
+      group.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('trend-btn--active'));
+      btn.classList.add('trend-btn--active');
+      fetchAndRenderTrend({ weeks });
+    }
+
+    function applyProfileCustomRange() {
+      const startDate = document.getElementById('profileTrendStart').value;
+      const endDate = document.getElementById('profileTrendEnd').value;
+      if (!startDate || !endDate) {
+        alert('請選擇開始與結束日期');
+        return;
+      }
+      fetchAndRenderTrend({ start_date: startDate, end_date: endDate });
+    }
+
+    function toggleProfileIndicator(btn, label) {
+      const group = btn.closest('.trend-filter-group');
+      if (label === 'all') {
+        group.querySelectorAll('.trend-btn').forEach(b => b.classList.add('trend-btn--active'));
+        if (trendChart) {
+          trendChart.data.datasets.forEach((_, i) => { trendChart.getDatasetMeta(i).hidden = false; });
+          trendChart.update();
+        }
+        return;
+      }
+      btn.classList.toggle('trend-btn--active');
+      const datasetIndex = SKILL_KEYS.indexOf(label);
+      if (trendChart && datasetIndex >= 0) {
+        const meta = trendChart.getDatasetMeta(datasetIndex);
+        meta.hidden = !btn.classList.contains('trend-btn--active');
+        trendChart.update();
+      }
+    }
+
+    // 課程紀錄 (學習成就) 列表
+    function renderRecordItem(record) {
+      const statusLabel = ATTENDANCE_LABELS[record.attendance] || record.attendance;
+      const statusClass = ATTENDANCE_CLASS[record.attendance] || '';
+      const photo = record.photos && record.photos[0];
+      return `
+        <div class="achievement-item">
+          <div class="achievement-dot" style="${record.attendance === 'late' ? 'background: var(--color-warning);' : ''}"></div>
+          <div class="achievement-content">
+            <div class="achievement-header">
+              <span class="achievement-date">${record.log_date}</span>
+              <span class="achievement-course">${record.course_name}</span>
+              <span class="achievement-status ${statusClass}">${statusLabel}</span>
+            </div>
+            <p class="achievement-description">${record.performance || '尚無課堂表現紀錄'}</p>
+            <div class="achievement-meta">
+              <span class="achievement-points">🏆 獲得點數: ${record.points_earned || 0}</span>
+              ${record.notes ? `<span>｜</span><span>備註：${record.notes}</span>` : ''}
+            </div>
+          </div>
+          ${photo ? `<img src="${photo.photo_url}" alt="課程照片" class="achievement-image">` : ''}
+        </div>
+      `;
+    }
+
+    async function loadRecords(page = 1, append = false) {
+      try {
+        const result = await api.students.getMyRecords({ page, limit: 5 });
+        const { records, pagination } = result.data;
+        const listEl = document.getElementById('recordsTab');
+
+        if (!records.length && page === 1) {
+          listEl.innerHTML = '<p style="font-size: 13px; color: var(--color-text-muted);">尚無課程紀錄</p>';
+        } else {
+          const html = records.map(renderRecordItem).join('');
+          listEl.innerHTML = append ? listEl.innerHTML + html : html;
+        }
+
+        recordsPage = pagination.page;
+        recordsHasMore = pagination.page < pagination.totalPages;
+        document.getElementById('viewMoreRecordsBtn').style.display = recordsHasMore ? 'block' : 'none';
+      } catch (error) {
+        console.error('載入課程紀錄失敗', error);
+      }
+    }
+
+    function loadMoreRecords() {
+      const activeTab = document.querySelector('.achievement-tab--active').dataset.tab;
+      if (activeTab !== 'records' || !recordsHasMore) return;
+      loadRecords(recordsPage + 1, true);
+    }
+
+    // ========================================
+    // 頁面初始化
+    // ========================================
+    async function initProfile() {
+      try {
+        const result = await api.students.getMe();
+        const me = result.data;
+
+        renderProfileInfo(me);
+        renderCourseHistory(me);
+        renderRadar(me);
+        await fetchAndRenderTrend({ weeks: 12 });
+        await loadRecords(1, false);
+      } catch (error) {
+        console.error('載入學生檔案失敗', error);
+        if (error.response && error.response.status === 404) {
+          showMessage('尚未建立學生檔案，請聯絡管理人員', 'error');
+        }
+      }
+    }
+
+    initProfile();
+  </script>
+</body>
+</html>

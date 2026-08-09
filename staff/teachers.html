@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>老師管理 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .staff-layout {
+      display: grid;
+      grid-template-columns: 224px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    .staff-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .staff-sidebar__header {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .staff-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .staff-sidebar__avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .staff-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .staff-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .staff-sidebar__role {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .staff-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .staff-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 10px 12px;
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s;
+    }
+
+    .staff-sidebar__nav-item:hover {
+      background: rgba(117, 95, 0, 0.08);
+      color: var(--color-text-primary);
+    }
+
+    .staff-sidebar__nav-item--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .staff-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .staff-sidebar__footer {
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-surface);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .staff-main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .staff-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-xl);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .staff-header__title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-primary-dark);
+    }
+
+    .staff-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .staff-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 16px;
+      background: var(--color-background);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      width: 240px;
+    }
+
+    .staff-header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .staff-header__icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .staff-header__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      overflow: hidden;
+    }
+
+    .staff-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .staff-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .page-subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 20px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+    }
+
+    .filter-bar {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .filter-input {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      max-width: 280px;
+    }
+
+    .filter-input input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    /* 教師卡片網格 */
+    .teacher-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-lg);
+    }
+
+    .teacher-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .teacher-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .teacher-card__info {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .teacher-card__avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .teacher-card__details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .teacher-card__name {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .teacher-card__school {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .teacher-card__edit {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+    }
+
+    .teacher-card__contacts {
+      display: flex;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .teacher-card__contact {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .teacher-card__birthday {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .teacher-card__bio {
+      padding: var(--spacing-md);
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    @media (max-width: 1200px) {
+      .teacher-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .staff-layout {
+        grid-template-columns: 1fr;
+      }
+      .staff-sidebar {
+        display: none;
+      }
+    }
+
+    /* Modal 彈窗樣式 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+    .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
+    .modal__close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      border-radius: var(--radius-sm);
+    }
+    .modal__close:hover { background: var(--color-surface-alt); }
+    .modal__body { padding: var(--spacing-lg); }
+    .modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--color-surface-alt);
+    }
+    .form-group { margin-bottom: var(--spacing-md); }
+    .form-group label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-xs);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      background: var(--color-background);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-primary-dark);
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+    .btn-secondary {
+      padding: 10px 20px;
+      background: var(--color-surface-alt);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--color-surface); }
+  </style>
+  <link rel="stylesheet" href="../css/admin-notifications.css">
+</head>
+<body>
+  <div class="staff-layout">
+    <!-- 側邊欄 -->
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          老師管理
+        </a>
+        <a href="logs.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          日誌管理
+        </a>
+        <a href="courses.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          課程資訊
+        </a>
+        <a href="schedule.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          課表排程
+        </a>
+        <a href="points.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          點數管理
+        </a>
+        <a href="settings.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          系統設定
+        </a>
+      </nav>
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="currentDate">2026年6月15日</span>
+      </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="staff-main">
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <div class="staff-header__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="搜尋歷程或資源...">
+          </div>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          </button>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </button>
+          <div class="staff-header__avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <div class="staff-content">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">老師管理</h2>
+            <p class="page-subtitle">共 4 位老師</p>
+          </div>
+          <button class="btn-primary" onclick="openAddTeacherModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增老師
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-input">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="搜尋老師姓名">
+          </div>
+        </div>
+
+        <div class="teacher-grid">
+          <!-- 王老師 -->
+          <div class="teacher-card">
+            <div class="teacher-card__header">
+              <div class="teacher-card__info">
+                <div class="teacher-card__avatar">王</div>
+                <div class="teacher-card__details">
+                  <span class="teacher-card__name">王老師</span>
+                  <span class="teacher-card__school">台中教育大學</span>
+                </div>
+              </div>
+              <button class="teacher-card__edit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+            <div class="teacher-card__contacts">
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                LINE: wang_teacher
+              </span>
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                0912-345-678
+              </span>
+            </div>
+            <div class="teacher-card__birthday">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              生日：1985-03-15
+            </div>
+            <div class="teacher-card__bio">
+              主教程式設計，有豐富教學經驗
+            </div>
+          </div>
+
+          <!-- 李老師 -->
+          <div class="teacher-card">
+            <div class="teacher-card__header">
+              <div class="teacher-card__info">
+                <div class="teacher-card__avatar">李</div>
+                <div class="teacher-card__details">
+                  <span class="teacher-card__name">李老師</span>
+                  <span class="teacher-card__school">逢甲大學</span>
+                </div>
+              </div>
+              <button class="teacher-card__edit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+            <div class="teacher-card__contacts">
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                LINE: li_edu_99
+              </span>
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                0923-456-789
+              </span>
+            </div>
+            <div class="teacher-card__birthday">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              生日：1990-01-31
+            </div>
+            <div class="teacher-card__bio">
+              科創課程負責人，專長機械設計
+            </div>
+          </div>
+
+          <!-- 張老師 -->
+          <div class="teacher-card">
+            <div class="teacher-card__header">
+              <div class="teacher-card__info">
+                <div class="teacher-card__avatar">張</div>
+                <div class="teacher-card__details">
+                  <span class="teacher-card__name">張老師</span>
+                  <span class="teacher-card__school">靜宜大學</span>
+                </div>
+              </div>
+              <button class="teacher-card__edit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+            <div class="teacher-card__contacts">
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                LINE: zhang_teach
+              </span>
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                0934-567-890
+              </span>
+            </div>
+            <div class="teacher-card__birthday">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              生日：1988-10-23
+            </div>
+            <div class="teacher-card__bio">
+              幼兒教育專家，親切有耐心
+            </div>
+          </div>
+
+          <!-- 陳老師 -->
+          <div class="teacher-card">
+            <div class="teacher-card__header">
+              <div class="teacher-card__info">
+                <div class="teacher-card__avatar">陳</div>
+                <div class="teacher-card__details">
+                  <span class="teacher-card__name">陳老師</span>
+                  <span class="teacher-card__school">中興大學</span>
+                </div>
+              </div>
+              <button class="teacher-card__edit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+            <div class="teacher-card__contacts">
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                LINE: chen_edu
+              </span>
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                0945-678-901
+              </span>
+            </div>
+            <div class="teacher-card__birthday">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              生日：1992-01-06
+            </div>
+            <div class="teacher-card__bio">
+              動力班班導，擅長機器人教學
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新增老師 Modal -->
+  <div class="modal-overlay" id="addTeacherModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">新增老師</h3>
+        <button class="modal__close" onclick="closeModal('addTeacherModal')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form id="addTeacherForm">
+        <div class="modal__body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherName">姓名＊</label>
+              <input type="text" id="teacherName" name="name" required placeholder="老師姓名">
+            </div>
+            <div class="form-group">
+              <label for="teacherSchool">畢業學校＊</label>
+              <input type="text" id="teacherSchool" name="school" placeholder="畢業學校">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherLineId">LINE ID＊</label>
+              <input type="text" id="teacherLineId" name="line_id" required placeholder="LINE ID">
+            </div>
+            <div class="form-group">
+              <label for="teacherPhone">電話＊</label>
+              <input type="tel" id="teacherPhone" name="phone" placeholder="聯絡電話">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="teacherBirthday">生日＊</label>
+              <input type="date" id="teacherBirthday" name="birthday" required>
+            </div>
+            <div class="form-group">
+              <label for="teacherHireDate">到職日＊</label>
+              <input type="date" id="teacherHireDate" name="hire_date">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="teacherNotes">備註</label>
+            <textarea id="teacherNotes" name="notes" placeholder="備註說明"></textarea>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('addTeacherModal')">取消</button>
+          <button type="submit" class="btn-primary">新增</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 編輯老師 Modal -->
+  <div class="modal-overlay" id="editTeacherModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">編輯老師資訊</h3>
+        <button class="modal__close" onclick="closeModal('editTeacherModal')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form id="editTeacherForm">
+        <input type="hidden" id="editTeacherId">
+        <div class="modal__body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editTeacherName">姓名＊</label>
+              <input type="text" id="editTeacherName" name="name" required placeholder="老師姓名">
+            </div>
+            <div class="form-group">
+              <label for="editTeacherSchool">畢業學校＊</label>
+              <input type="text" id="editTeacherSchool" name="school" placeholder="畢業學校">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editTeacherLineId">LINE ID＊</label>
+              <input type="text" id="editTeacherLineId" name="line_id" readonly style="background: #e5e5e5; cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+              <label for="editTeacherPhone">電話＊</label>
+              <input type="tel" id="editTeacherPhone" name="phone" placeholder="聯絡電話">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editTeacherBirthday">生日＊</label>
+              <input type="date" id="editTeacherBirthday" name="birthday" required>
+            </div>
+            <div class="form-group">
+              <label for="editTeacherHireDate">到職日＊</label>
+              <input type="date" id="editTeacherHireDate" name="hire_date">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editTeacherNotes">備註</label>
+            <textarea id="editTeacherNotes" name="notes" placeholder="備註說明"></textarea>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('editTeacherModal')">取消</button>
+          <button type="submit" class="btn-primary">儲存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    const dateEl = document.getElementById('currentDate');
+    const now = new Date();
+    dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+    // ==================
+    // Modal 功能
+    // ==================
+    function openAddTeacherModal() {
+      document.getElementById('addTeacherModal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      if (modalId === 'addTeacherModal') {
+        document.getElementById('addTeacherForm').reset();
+      } else if (modalId === 'editTeacherModal') {
+        document.getElementById('editTeacherForm').reset();
+      }
+    }
+
+    // 點擊背景關閉 Modal
+    document.getElementById('addTeacherModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('addTeacherModal');
+    });
+    document.getElementById('editTeacherModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('editTeacherModal');
+    });
+
+    // ==================
+    // 新增老師
+    // ==================
+    document.getElementById('addTeacherForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = {
+        name: document.getElementById('teacherName').value,
+        school: document.getElementById('teacherSchool').value || null,
+        line_id: document.getElementById('teacherLineId').value,
+        phone: document.getElementById('teacherPhone').value || null,
+        birthday: document.getElementById('teacherBirthday').value,
+        hire_date: document.getElementById('teacherHireDate').value || null,
+        notes: document.getElementById('teacherNotes').value || null
+      };
+
+      try {
+        const result = await api.teachers.create(formData);
+        if (result.success) {
+          showMessage('老師新增成功！帳號為 LINE ID，密碼為生日（格式：YYYYMMDD）', 'success');
+          closeModal('addTeacherModal');
+          loadTeachers();
+        }
+      } catch (error) {
+        showMessage('新增老師失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    // ==================
+    // 編輯老師
+    // ==================
+    function openEditTeacherModal(teacher) {
+      document.getElementById('editTeacherId').value = teacher.id;
+      document.getElementById('editTeacherName').value = teacher.name || '';
+      document.getElementById('editTeacherSchool').value = teacher.school || '';
+      document.getElementById('editTeacherLineId').value = teacher.username || '';
+      document.getElementById('editTeacherPhone').value = teacher.phone || '';
+      document.getElementById('editTeacherBirthday').value = teacher.birthday ? teacher.birthday.split('T')[0] : '';
+      document.getElementById('editTeacherHireDate').value = teacher.hire_date ? teacher.hire_date.split('T')[0] : '';
+      document.getElementById('editTeacherNotes').value = teacher.notes || '';
+      document.getElementById('editTeacherModal').classList.add('active');
+    }
+
+    document.getElementById('editTeacherForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const teacherId = document.getElementById('editTeacherId').value;
+      const formData = {
+        name: document.getElementById('editTeacherName').value,
+        school: document.getElementById('editTeacherSchool').value || null,
+        phone: document.getElementById('editTeacherPhone').value || null,
+        birthday: document.getElementById('editTeacherBirthday').value,
+        hire_date: document.getElementById('editTeacherHireDate').value || null,
+        notes: document.getElementById('editTeacherNotes').value || null
+      };
+
+      try {
+        const result = await api.teachers.update(teacherId, formData);
+        if (result.success) {
+          showMessage('老師資料更新成功！', 'success');
+          closeModal('editTeacherModal');
+          loadTeachers();
+        }
+      } catch (error) {
+        showMessage('更新老師失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    // ==================
+    // 載入老師列表
+    // ==================
+    async function loadTeachers() {
+      try {
+        const result = await api.teachers.getAll();
+        const teacherGrid = document.querySelector('.teacher-grid');
+        const subtitle = document.querySelector('.page-subtitle');
+
+        subtitle.textContent = `共 ${result.data.length} 位老師`;
+
+        if (result.data.length === 0) {
+          teacherGrid.innerHTML = '<p style="color: var(--color-text-muted); grid-column: 1/-1; text-align: center; padding: 40px;">目前沒有老師，請點擊「新增老師」按鈕建立老師資料。</p>';
+          return;
+        }
+
+        // 儲存老師資料供編輯使用
+        window.teachersData = {};
+        result.data.forEach(t => { window.teachersData[t.id] = t; });
+
+        teacherGrid.innerHTML = result.data.map(teacher => {
+          const firstChar = teacher.name ? teacher.name.charAt(0) : '?';
+          const birthday = teacher.birthday ? teacher.birthday.split('T')[0] : '未設定';
+          const hireDate = teacher.hire_date ? teacher.hire_date.split('T')[0] : '未設定';
+          return `
+          <div class="teacher-card">
+            <div class="teacher-card__header">
+              <div class="teacher-card__info">
+                <div class="teacher-card__avatar">${firstChar}</div>
+                <div class="teacher-card__details">
+                  <span class="teacher-card__name">${teacher.name}</span>
+                  <span class="teacher-card__school">${teacher.school || '未設定學校'}</span>
+                </div>
+              </div>
+              <button class="teacher-card__edit" onclick="openEditTeacherModal(window.teachersData[${teacher.id}])">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="teacher-card__contacts">
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                LINE: ${teacher.username || '未設定'}
+              </span>
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                ${teacher.phone || '未設定'}
+              </span>
+            </div>
+            <div class="teacher-card__birthday">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              生日：${birthday} ｜ 到職日：${hireDate}
+            </div>
+            <div class="teacher-card__bio">
+              ${teacher.notes || '無備註'}
+            </div>
+          </div>
+        `}).join('');
+      } catch (error) {
+        console.error('載入老師列表失敗:', error);
+      }
+    }
+
+    // 頁面載入時載入老師列表
+    document.addEventListener('DOMContentLoaded', loadTeachers);
+  </script>
+  <script src="../js/admin-notifications.js"></script>
+</body>
+</html>

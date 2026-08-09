@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>點數管理 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .staff-layout { display: grid; grid-template-columns: 224px 1fr; min-height: 100vh; background: var(--color-background); }
+    .staff-sidebar { background: var(--color-surface-alt); padding: var(--spacing-lg) var(--spacing-md); display: flex; flex-direction: column; }
+    .staff-sidebar__header { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__profile { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__avatar { width: 36px; height: 36px; background: var(--color-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-md); font-weight: 600; color: var(--color-primary-dark); }
+    .staff-sidebar__info { display: flex; flex-direction: column; }
+    .staff-sidebar__name { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
+    .staff-sidebar__role { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .staff-sidebar__nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .staff-sidebar__nav-item { display: flex; align-items: center; gap: var(--spacing-md); padding: 10px 12px; font-size: var(--font-size-md); color: var(--color-text-secondary); text-decoration: none; border-radius: var(--radius-md); transition: all 0.2s; }
+    .staff-sidebar__nav-item:hover { background: rgba(117, 95, 0, 0.08); color: var(--color-text-primary); }
+    .staff-sidebar__nav-item--active { background: var(--color-primary); color: var(--color-primary-dark); }
+    .staff-sidebar__nav-item svg { width: 18px; height: 18px; }
+    .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
+    .staff-main { display: flex; flex-direction: column; overflow: hidden; }
+    .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
+    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
+    .staff-header__search { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); width: 240px; }
+    .staff-header__search input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
+    .staff-header__icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-secondary); cursor: pointer; }
+    .staff-header__avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); overflow: hidden; }
+    .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .page-subtitle { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: 4px; }
+
+    .filter-bar { display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .filter-input { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); min-width: 180px; }
+    .filter-input input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
+    .filter-select { padding: 10px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); cursor: pointer; min-width: 120px; }
+
+    .data-table { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 14px 16px; text-align: left; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-muted); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
+    .data-table td { padding: 16px; font-size: var(--font-size-md); color: var(--color-text-primary); border-bottom: 1px solid var(--color-surface-alt); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(255, 219, 88, 0.05); }
+
+    .course-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary-light); border-radius: 20px; font-size: var(--font-size-sm); color: var(--color-primary-dark); }
+    .points-value { color: var(--color-primary-dark); font-weight: 600; }
+
+    .btn-outline { display: inline-flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: transparent; border: 1px solid var(--color-primary); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-primary-dark); cursor: pointer; transition: all 0.2s; }
+    .btn-outline:hover { background: var(--color-primary-light); }
+    .btn-text { display: inline-flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: transparent; border: none; font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+
+    .pagination { display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); padding: var(--spacing-lg); }
+    .pagination__btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+    .pagination__btn--active { background: var(--color-primary); color: var(--color-primary-dark); }
+
+    .footer { padding: var(--spacing-lg) var(--spacing-xl); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+
+    /* 點數管理 / 點數紀錄彈窗 */
+    .points-modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--spacing-lg); }
+    .points-modal--hidden { display: none; }
+    .points-modal__card { width: 480px; max-width: 100%; max-height: 90vh; overflow-y: auto; background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .points-modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) 22px; border-bottom: 1px solid var(--color-surface-alt); }
+    .points-modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
+    .points-modal__close { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); background: none; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+    .points-modal__close:hover { background: var(--color-surface-alt); color: var(--color-text-primary); }
+    .points-modal__body { display: flex; flex-direction: column; gap: var(--spacing-md); padding: 22px; }
+    .points-current-box { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--color-warning-bg); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+    .points-current-box__value { font-size: 20px; font-weight: 700; color: var(--color-primary-dark); }
+    .points-field { display: flex; flex-direction: column; gap: 6px; }
+    .points-field__label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
+    .points-field select, .points-field input { width: 100%; padding: 8px 12px; background: #f5f5f5; border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-family: inherit; color: var(--color-text-primary); }
+    .points-field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237e7763' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 36px; }
+    .points-field input:focus, .points-field select:focus { outline: 2px solid var(--color-primary); outline-offset: -1px; }
+    .points-preview { border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); overflow: hidden; }
+    .points-preview__title { padding: 10px 16px; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); background: var(--color-background); border-bottom: 1px solid var(--color-surface-alt); }
+    .points-preview__row { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .points-preview__col { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px; }
+    .points-preview__col + .points-preview__col { border-left: 1px solid var(--color-surface-alt); }
+    .points-preview__label { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .points-preview__value { font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); }
+    .points-modal__footer { display: flex; align-items: center; justify-content: flex-end; gap: var(--spacing-sm); padding: var(--spacing-md) 22px 22px; }
+    .btn-cancel { padding: 10px 20px; background: none; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: var(--color-text-primary); cursor: pointer; transition: all 0.2s; }
+    .btn-cancel:hover { background: var(--color-surface-alt); }
+    .points-confirm-btn { padding: 10px 20px; border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: #fff; cursor: pointer; transition: opacity 0.2s; }
+    .points-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .points-history-list { display: flex; flex-direction: column; gap: var(--spacing-sm); padding: var(--spacing-md) 22px 22px; max-height: 60vh; overflow-y: auto; }
+    .points-history-row { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-md); padding: 12px 16px; background: #fafafa; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 10px; }
+    .points-history-row__reason { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
+    .points-history-row__meta { font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: 2px; }
+    .points-history-row__delta { font-size: var(--font-size-lg); font-weight: 700; white-space: nowrap; }
+    .points-history__empty { padding: var(--spacing-lg) 22px var(--spacing-xl); text-align: center; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+    @media (max-width: 992px) { .staff-layout { grid-template-columns: 1fr; } .staff-sidebar { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="staff-layout">
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>學生管理</a>
+        <a href="teachers.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>老師管理</a>
+        <a href="logs.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>日誌管理</a>
+        <a href="courses.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>課程資訊</a>
+        <a href="schedule.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>課表排程</a>
+        <a href="points.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>點數管理</a>
+        <a href="settings.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系統設定</a>
+      </nav>
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="currentDate">2026年6月15日</span>
+      </div>
+    </aside>
+
+    <main class="staff-main">
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <div class="staff-header__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="搜尋歷程或資源...">
+          </div>
+          <button class="staff-header__icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></button>
+          <button class="staff-header__icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+          <div class="staff-header__avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像"></div>
+        </div>
+      </header>
+
+      <div class="staff-content">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">點數管理</h2>
+            <p class="page-subtitle">最近更新：2026-06-18 14:30</p>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-input">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="搜尋學生姓名" id="pointsSearchInput">
+          </div>
+          <select class="filter-select" id="pointsClassroomFilter">
+            <option>全部教室</option>
+            <option>西屯教室</option>
+            <option>沙鹿教室</option>
+          </select>
+          <select class="filter-select" id="pointsCourseFilter">
+            <option>全部課程</option>
+            <option>動力機械</option>
+            <option>程式機械</option>
+            <option>幼兒簡易機械</option>
+            <option>科創機器人</option>
+          </select>
+          <button class="btn-outline" id="pointsApplyFilterBtn">套用</button>
+        </div>
+
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>課程名稱</th>
+                <th>教室</th>
+                <th>點數</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="pointsTableBody"></tbody>
+          </table>
+
+          <div class="pagination" id="pointsPagination"></div>
+        </div>
+      </div>
+
+      <div class="footer">© 2026 教育中心管理系統</div>
+    </main>
+  </div>
+
+  <!-- 點數管理彈窗 -->
+  <div class="points-modal points-modal--hidden" id="pointsManageModal">
+    <div class="points-modal__card">
+      <div class="points-modal__header">
+        <h3 class="points-modal__title" id="pointsManageTitle">點數管理</h3>
+        <button class="points-modal__close" onclick="closePointsManageModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="points-modal__body">
+        <div class="points-current-box">
+          <span>目前持有點數</span>
+          <span class="points-current-box__value" id="pointsCurrentValue">0 點</span>
+        </div>
+        <div class="points-field">
+          <label class="points-field__label">點數變動原因</label>
+          <select id="pointsReasonSelect">
+            <option value="" disabled selected>選擇點數變動原因</option>
+          </select>
+        </div>
+        <div class="points-field">
+          <label class="points-field__label">點數更動說明</label>
+          <input type="text" id="pointsDescriptionInput" placeholder="例：出席獎勵、競賽加分、兌換文具...">
+        </div>
+        <div class="points-field">
+          <label class="points-field__label">給予點數量</label>
+          <input type="number" min="1" step="1" id="pointsAmountInput" placeholder="請輸入點數（正整數）">
+        </div>
+        <div class="points-preview">
+          <div class="points-preview__title">結算預覽</div>
+          <div class="points-preview__row">
+            <div class="points-preview__col">
+              <span class="points-preview__label">目前點數</span>
+              <span class="points-preview__value" id="previewCurrentPoints">0</span>
+            </div>
+            <div class="points-preview__col">
+              <span class="points-preview__label">給予點數</span>
+              <span class="points-preview__value" id="previewDeltaPoints">—</span>
+            </div>
+            <div class="points-preview__col">
+              <span class="points-preview__label">更動後點數</span>
+              <span class="points-preview__value" id="previewFinalPoints">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="points-modal__footer">
+        <button class="btn-cancel" onclick="closePointsManageModal()">取消</button>
+        <button class="points-confirm-btn" id="pointsConfirmBtn" disabled>確認增加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 點數紀錄彈窗 -->
+  <div class="points-modal points-modal--hidden" id="pointsHistoryModal">
+    <div class="points-modal__card">
+      <div class="points-modal__header">
+        <h3 class="points-modal__title" id="pointsHistoryTitle">點數紀錄</h3>
+        <button class="points-modal__close" onclick="closePointsHistoryModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="points-history-list" id="pointsHistoryList"></div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script src="../js/students-data.js"></script>
+  <script src="../js/points-data.js"></script>
+  <script>
+    const dateEl = document.getElementById('currentDate');
+    const now = new Date();
+    dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+    // 點數資料（單一資料來源，持久化）
+    let pointsMap = loadPoints();
+
+    function persistPoints() {
+      savePoints(pointsMap);
+    }
+
+    function formatNow() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // 篩選與分頁
+    const POINTS_PAGE_SIZE = 8;
+    let currentPointsPage = 1;
+
+    const pointsSearchInput = document.getElementById('pointsSearchInput');
+    const pointsClassroomFilter = document.getElementById('pointsClassroomFilter');
+    const pointsCourseFilter = document.getElementById('pointsCourseFilter');
+    const pointsTableBody = document.getElementById('pointsTableBody');
+    const pointsPagination = document.getElementById('pointsPagination');
+
+    function getFilteredStudents() {
+      const keyword = pointsSearchInput.value.trim();
+      const classroom = pointsClassroomFilter.value;
+      const course = pointsCourseFilter.value;
+
+      return STUDENT_ROSTER.filter(s => {
+        const matchesKeyword = !keyword || s.name.includes(keyword);
+        const matchesClassroom = classroom === '全部教室' || `${s.room}教室` === classroom;
+        const matchesCourse = course === '全部課程' || s.course === course;
+        return matchesKeyword && matchesClassroom && matchesCourse;
+      });
+    }
+
+    function renderPointsPagination(totalPages, page) {
+      let html = `<button class="pagination__btn" id="pointsPrev">&lt;</button>`;
+      for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="pagination__btn${p === page ? ' pagination__btn--active' : ''}" data-page="${p}">${p}</button>`;
+      }
+      html += `<button class="pagination__btn" id="pointsNext">&gt;</button>`;
+      pointsPagination.innerHTML = html;
+    }
+
+    function renderPointsPage(page) {
+      const filtered = getFilteredStudents();
+      const totalPages = Math.max(1, Math.ceil(filtered.length / POINTS_PAGE_SIZE));
+      currentPointsPage = Math.min(Math.max(1, page), totalPages);
+      const start = (currentPointsPage - 1) * POINTS_PAGE_SIZE;
+      const pageStudents = filtered.slice(start, start + POINTS_PAGE_SIZE);
+
+      pointsTableBody.innerHTML = pageStudents.length ? pageStudents.map(s => {
+        const record = getStudentPointsRecord(pointsMap, s.name);
+        return `
+          <tr data-name="${s.name}">
+            <td>${s.name}</td>
+            <td><span class="course-tag">${s.course}</span></td>
+            <td>${s.room}教室</td>
+            <td><span class="points-value">${record.points}</span></td>
+            <td>
+              <button class="btn-outline" data-action="manage">點數管理</button>
+              <button class="btn-text" data-action="history">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                紀錄
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('') : '<tr><td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: 32px;">查無符合條件的學生</td></tr>';
+
+      renderPointsPagination(totalPages, currentPointsPage);
+    }
+
+    function applyPointsFilters() {
+      renderPointsPage(1);
+    }
+
+    document.getElementById('pointsApplyFilterBtn').addEventListener('click', applyPointsFilters);
+    pointsSearchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') applyPointsFilters();
+    });
+
+    pointsPagination.addEventListener('click', function (e) {
+      const pageBtn = e.target.closest('[data-page]');
+      if (pageBtn) {
+        renderPointsPage(Number(pageBtn.dataset.page));
+        return;
+      }
+      const totalPages = Math.max(1, Math.ceil(getFilteredStudents().length / POINTS_PAGE_SIZE));
+      if (e.target.id === 'pointsPrev' && currentPointsPage > 1) renderPointsPage(currentPointsPage - 1);
+      if (e.target.id === 'pointsNext' && currentPointsPage < totalPages) renderPointsPage(currentPointsPage + 1);
+    });
+
+    pointsTableBody.addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const name = btn.closest('tr').dataset.name;
+      if (btn.dataset.action === 'manage') {
+        openPointsManageModal(name);
+      } else if (btn.dataset.action === 'history') {
+        openPointsHistoryModal(name);
+      }
+    });
+
+    renderPointsPage(1);
+
+    // ============ 點數管理彈窗 ============
+    const pointsReasonSelect = document.getElementById('pointsReasonSelect');
+    pointsReasonSelect.innerHTML = '<option value="" disabled selected>選擇點數變動原因</option>' +
+      POINT_REASON_LIST.map(r => `<option value="${r}">${r}</option>`).join('');
+
+    let pointsManageTarget = null;
+
+    function openPointsManageModal(name) {
+      pointsManageTarget = name;
+      const record = getStudentPointsRecord(pointsMap, name);
+
+      document.getElementById('pointsManageTitle').textContent = `點數管理 — ${name}`;
+      document.getElementById('pointsCurrentValue').textContent = `${record.points} 點`;
+      document.getElementById('previewCurrentPoints').textContent = record.points;
+      document.getElementById('previewDeltaPoints').textContent = '—';
+      document.getElementById('previewDeltaPoints').style.color = '';
+      document.getElementById('previewFinalPoints').textContent = '—';
+      pointsReasonSelect.value = '';
+      document.getElementById('pointsDescriptionInput').value = '';
+      document.getElementById('pointsAmountInput').value = '';
+
+      updatePointsPreview();
+      document.getElementById('pointsManageModal').classList.remove('points-modal--hidden');
+    }
+
+    function closePointsManageModal() {
+      document.getElementById('pointsManageModal').classList.add('points-modal--hidden');
+      pointsManageTarget = null;
+    }
+
+    function updatePointsPreview() {
+      if (!pointsManageTarget) return;
+      const record = getStudentPointsRecord(pointsMap, pointsManageTarget);
+      const reason = pointsReasonSelect.value;
+      const amount = parseInt(document.getElementById('pointsAmountInput').value, 10);
+      const confirmBtn = document.getElementById('pointsConfirmBtn');
+      const deltaEl = document.getElementById('previewDeltaPoints');
+      const finalEl = document.getElementById('previewFinalPoints');
+
+      if (!reason || !amount || amount <= 0) {
+        deltaEl.textContent = '—';
+        deltaEl.style.color = '';
+        finalEl.textContent = '—';
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = reason ? POINT_REASON_META[reason].confirmLabel : '確認';
+        confirmBtn.style.background = reason ? POINT_REASON_META[reason].color : '#c4c4c4';
+        return;
+      }
+
+      const meta = POINT_REASON_META[reason];
+      const delta = meta.sign * amount;
+      const finalPoints = Math.max(0, record.points + delta);
+
+      deltaEl.textContent = `${delta > 0 ? '+' : ''}${delta}`;
+      deltaEl.style.color = meta.color;
+      finalEl.textContent = finalPoints;
+      confirmBtn.textContent = meta.confirmLabel;
+      confirmBtn.style.background = meta.color;
+      confirmBtn.disabled = false;
+    }
+
+    pointsReasonSelect.addEventListener('change', updatePointsPreview);
+    document.getElementById('pointsAmountInput').addEventListener('input', updatePointsPreview);
+
+    document.getElementById('pointsConfirmBtn').addEventListener('click', function () {
+      if (!pointsManageTarget) return;
+      const reason = pointsReasonSelect.value;
+      const amount = parseInt(document.getElementById('pointsAmountInput').value, 10);
+      if (!reason || !amount || amount <= 0) return;
+
+      const meta = POINT_REASON_META[reason];
+      const record = getStudentPointsRecord(pointsMap, pointsManageTarget);
+      const finalPoints = Math.max(0, record.points + meta.sign * amount);
+      const appliedDelta = finalPoints - record.points;
+      const description = document.getElementById('pointsDescriptionInput').value.trim() || reason;
+
+      record.history.unshift({
+        id: Date.now(),
+        reason,
+        description,
+        delta: appliedDelta,
+        date: formatNow(),
+        operator: '系統管理員',
+      });
+      record.points = finalPoints;
+
+      persistPoints();
+      renderPointsPage(currentPointsPage);
+      closePointsManageModal();
+    });
+
+    document.getElementById('pointsManageModal').addEventListener('click', function (e) {
+      if (e.target === this) closePointsManageModal();
+    });
+
+    // ============ 點數紀錄彈窗 ============
+    function openPointsHistoryModal(name) {
+      const record = getStudentPointsRecord(pointsMap, name);
+      document.getElementById('pointsHistoryTitle').textContent = `${name} — 點數紀錄`;
+
+      const listEl = document.getElementById('pointsHistoryList');
+      listEl.innerHTML = record.history.length ? record.history.map(h => {
+        const color = h.delta >= 0 ? '#007A55' : '#fe7560';
+        return `
+          <div class="points-history-row">
+            <div>
+              <div class="points-history-row__reason">${h.description}</div>
+              <div class="points-history-row__meta">${h.date}．${h.operator}</div>
+            </div>
+            <div class="points-history-row__delta" style="color:${color};">${h.delta > 0 ? '+' : ''}${h.delta}</div>
+          </div>
+        `;
+      }).join('') : '<p class="points-history__empty">尚無點數紀錄</p>';
+
+      document.getElementById('pointsHistoryModal').classList.remove('points-modal--hidden');
+    }
+
+    function closePointsHistoryModal() {
+      document.getElementById('pointsHistoryModal').classList.add('points-modal--hidden');
+    }
+
+    document.getElementById('pointsHistoryModal').addEventListener('click', function (e) {
+      if (e.target === this) closePointsHistoryModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closePointsManageModal();
+        closePointsHistoryModal();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學生管理 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .staff-layout { display: grid; grid-template-columns: 224px 1fr; min-height: 100vh; background: var(--color-background); }
+    .staff-sidebar { background: var(--color-surface-alt); padding: var(--spacing-lg) var(--spacing-md); display: flex; flex-direction: column; }
+    .staff-sidebar__header { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__profile { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__avatar { width: 36px; height: 36px; background: var(--color-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-md); font-weight: 600; color: var(--color-primary-dark); }
+    .staff-sidebar__info { display: flex; flex-direction: column; }
+    .staff-sidebar__name { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
+    .staff-sidebar__role { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .staff-sidebar__nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .staff-sidebar__nav-item { display: flex; align-items: center; gap: var(--spacing-md); padding: 10px 12px; font-size: var(--font-size-md); color: var(--color-text-secondary); text-decoration: none; border-radius: var(--radius-md); transition: all 0.2s; }
+    .staff-sidebar__nav-item:hover { background: rgba(117, 95, 0, 0.08); color: var(--color-text-primary); }
+    .staff-sidebar__nav-item--active { background: var(--color-primary); color: var(--color-primary-dark); }
+    .staff-sidebar__nav-item svg { width: 18px; height: 18px; }
+    .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
+    .staff-main { display: flex; flex-direction: column; overflow: hidden; }
+    .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
+    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
+    .staff-header__search { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); width: 240px; }
+    .staff-header__search input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
+    .staff-header__icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-secondary); cursor: pointer; border: none; background: transparent; }
+    .staff-header__avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); overflow: hidden; }
+    .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .page-subtitle { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: 4px; }
+    .btn-primary { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 20px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: var(--color-primary-dark); cursor: pointer; }
+    .btn-primary:hover { background: #f5d038; }
+
+    /* 篩選區 */
+    .filter-bar { display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .filter-input { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); min-width: 180px; }
+    .filter-input input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
+    .filter-select { padding: 10px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); cursor: pointer; min-width: 120px; }
+
+    /* 資料表格 */
+    .data-table { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 14px 16px; text-align: left; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-muted); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
+    .data-table td { padding: 16px; font-size: var(--font-size-md); color: var(--color-text-primary); border-bottom: 1px solid var(--color-surface-alt); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(255, 219, 88, 0.05); }
+    .course-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary-light); border-radius: 20px; font-size: var(--font-size-sm); color: var(--color-primary-dark); }
+    .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer; transition: all 0.2s; background: none; border: none; }
+    .action-btn:hover { background: var(--color-surface-alt); color: var(--color-text-primary); }
+
+    /* 分頁 */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); padding: var(--spacing-lg); }
+    .pagination__btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; transition: all 0.2s; background: none; border: none; }
+    .pagination__btn:hover { background: var(--color-surface-alt); }
+    .pagination__btn--active { background: var(--color-primary); color: var(--color-primary-dark); }
+    .pagination__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Modal 彈窗樣式 */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--color-surface); border-radius: var(--radius-lg); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+    .modal__header { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-surface-alt); }
+    .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
+    .modal__close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: var(--color-text-muted); border-radius: var(--radius-sm); }
+    .modal__close:hover { background: var(--color-surface-alt); }
+    .modal__body { padding: var(--spacing-lg); }
+    .modal__footer { display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); }
+    .form-group { margin-bottom: var(--spacing-md); }
+    .form-group label { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-xs); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-primary); background: var(--color-background); }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--color-primary-dark); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+    .btn-secondary { padding: 10px 20px; background: var(--color-surface-alt); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-secondary); cursor: pointer; }
+    .btn-secondary:hover { background: var(--color-surface); }
+
+    /* 班級選擇器 */
+    .class-selector { border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); max-height: 250px; overflow-y: auto; background: var(--color-background); }
+    .class-selector__search { padding: 10px 12px; border-bottom: 1px solid var(--color-surface-alt); display: flex; align-items: center; gap: 8px; }
+    .class-selector__search input { border: none; background: transparent; width: 100%; font-size: var(--font-size-sm); }
+    .class-selector__tabs { display: flex; border-bottom: 1px solid var(--color-surface-alt); padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
+    .class-selector__tab { padding: 4px 12px; border-radius: 20px; font-size: var(--font-size-xs); color: var(--color-text-muted); cursor: pointer; background: transparent; border: 1px solid var(--color-surface-alt); }
+    .class-selector__tab.active { background: var(--color-primary); color: var(--color-primary-dark); border-color: var(--color-primary); }
+    .class-selector__group { padding: 8px 12px; }
+    .class-selector__group-title { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); margin-bottom: 8px; }
+    .class-selector__item { padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; font-size: var(--font-size-sm); color: var(--color-text-primary); display: flex; align-items: center; gap: 8px; }
+    .class-selector__item:hover { background: var(--color-surface-alt); }
+    .class-selector__item.selected { background: var(--color-primary-light); }
+    .class-selector__item span { color: var(--color-text-muted); }
+
+    @media (max-width: 992px) { .staff-layout { grid-template-columns: 1fr; } .staff-sidebar { display: none; } }
+    @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+  <link rel="stylesheet" href="../css/admin-notifications.css">
+</head>
+<body>
+  <div class="staff-layout">
+    <!-- 側邊欄 -->
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          老師管理
+        </a>
+        <a href="logs.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          日誌管理
+        </a>
+        <a href="courses.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          課程資訊
+        </a>
+        <a href="schedule.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          課表排程
+        </a>
+        <a href="points.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          點數管理
+        </a>
+        <a href="settings.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          系統設定
+        </a>
+      </nav>
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="currentDate">2026年6月15日</span>
+      </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="staff-main">
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <div class="staff-header__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="搜尋歷程或資源...">
+          </div>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          </button>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          </button>
+          <div class="staff-header__avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <div class="staff-content">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">學生管理</h2>
+            <p class="page-subtitle" id="studentCount">共 0 名學生</p>
+          </div>
+          <button class="btn-primary" onclick="openAddStudentModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增學生
+          </button>
+        </div>
+
+        <!-- 篩選區 -->
+        <div class="filter-bar">
+          <div class="filter-input">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="searchInput" placeholder="搜尋學生姓名" onkeyup="handleSearch(event)">
+          </div>
+          <select class="filter-select" id="filterClassroom" onchange="loadStudents()">
+            <option value="">全部教室</option>
+          </select>
+          <select class="filter-select" id="filterCourseType" onchange="loadStudents()">
+            <option value="">全部課程</option>
+          </select>
+        </div>
+
+        <!-- 學生列表 -->
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>課程名稱</th>
+                <th>上課堂數</th>
+                <th>上課時間</th>
+                <th>教室</th>
+                <th>授課老師</th>
+                <th>學校</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <!-- 學生資料將由 JavaScript 動態載入 -->
+            </tbody>
+          </table>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新增學生 Modal -->
+  <div class="modal-overlay" id="addStudentModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">新增學生</h3>
+        <button class="modal__close" onclick="closeModal('addStudentModal')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="addStudentForm">
+        <div class="modal__body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>姓名＊</label>
+              <input type="text" name="name" placeholder="學生姓名" required>
+            </div>
+            <div class="form-group">
+              <label>生日＊</label>
+              <input type="date" name="birthday" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>學校＊</label>
+              <input type="text" name="school" placeholder="就讀學校" required>
+            </div>
+            <div class="form-group">
+              <label>年級</label>
+              <input type="text" name="grade" placeholder="例：3年級">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>到班日期＊</label>
+              <input type="date" name="enrollment_date" required>
+            </div>
+            <div class="form-group">
+              <label>授課老師＊</label>
+              <select name="teacher_id" id="addTeacherSelect" required>
+                <option value="">老師姓名</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>家長姓名(父)</label>
+              <input type="text" name="parent_name_father" placeholder="電話 / LINE">
+            </div>
+            <div class="form-group">
+              <label>家長電話(父)＊</label>
+              <input type="tel" name="parent_phone_father" placeholder="電話號碼" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>家長姓名(母)</label>
+              <input type="text" name="parent_name_mother" placeholder="電話 / LINE">
+            </div>
+            <div class="form-group">
+              <label>家長電話(母)</label>
+              <input type="tel" name="parent_phone_mother" placeholder="電話號碼">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>體驗課老師</label>
+              <select name="trial_teacher_id" id="addTrialTeacherSelect">
+                <option value="">體驗課老師姓名</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>體驗課主題</label>
+              <input type="text" name="trial_topic" placeholder="體驗課主題">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>教室＊</label>
+              <select name="classroom_id" id="addClassroomSelect" required>
+                <option value="">教室</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>上課類別＊</label>
+              <select name="course_type_id" id="addCourseTypeSelect" required>
+                <option value="">上課類別</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>班級</label>
+            <select name="schedule_id" id="addScheduleSelect">
+              <option value="">搜尋班級，例：動力機器人・陳老師・週一・14:00-16:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('addStudentModal')">取消</button>
+          <button type="submit" class="btn-primary">新增</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 編輯學生 Modal -->
+  <div class="modal-overlay" id="editStudentModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">編輯學生資訊</h3>
+        <button class="modal__close" onclick="closeModal('editStudentModal')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="editStudentForm">
+        <input type="hidden" name="id" id="editStudentId">
+        <div class="modal__body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>姓名＊</label>
+              <input type="text" name="name" id="editName" placeholder="學生姓名" required>
+            </div>
+            <div class="form-group">
+              <label>生日＊</label>
+              <input type="date" name="birthday" id="editBirthday" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>學校＊</label>
+              <input type="text" name="school" id="editSchool" placeholder="就讀學校" required>
+            </div>
+            <div class="form-group">
+              <label>年級</label>
+              <input type="text" name="grade" id="editGrade" placeholder="例：3年級">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>到班日期＊</label>
+              <input type="date" name="enrollment_date" id="editEnrollmentDate" required>
+            </div>
+            <div class="form-group">
+              <label>授課老師＊</label>
+              <select name="teacher_id" id="editTeacherSelect" required>
+                <option value="">老師姓名</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>家長姓名(父)</label>
+              <input type="text" name="parent_name_father" id="editParentNameFather" placeholder="電話 / LINE">
+            </div>
+            <div class="form-group">
+              <label>家長電話(父)</label>
+              <input type="tel" name="parent_phone_father" id="editParentPhoneFather" placeholder="電話號碼">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>家長姓名(母)</label>
+              <input type="text" name="parent_name_mother" id="editParentNameMother" placeholder="電話 / LINE">
+            </div>
+            <div class="form-group">
+              <label>家長電話(母)</label>
+              <input type="tel" name="parent_phone_mother" id="editParentPhoneMother" placeholder="電話號碼">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>體驗課老師</label>
+              <select name="trial_teacher_id" id="editTrialTeacherSelect">
+                <option value="">體驗課老師姓名</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>體驗課主題</label>
+              <input type="text" name="trial_topic" id="editTrialTopic" placeholder="體驗課主題">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>教室＊</label>
+              <select name="classroom_id" id="editClassroomSelect" required>
+                <option value="">教室</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>上課類別＊</label>
+              <select name="course_type_id" id="editCourseTypeSelect" required>
+                <option value="">上課類別</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>班級</label>
+            <select name="schedule_id" id="editScheduleSelect">
+              <option value="">搜尋班級，例：動力機器人・陳老師・週一・14:00-16:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('editStudentModal')">取消</button>
+          <button type="submit" class="btn-primary">儲存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // 全域資料
+    let teachersData = [];
+    let classroomsData = [];
+    let courseTypesData = [];
+    let schedulesData = [];
+    let currentPage = 1;
+    const limit = 20;
+
+    // 更新日期
+    const dateEl = document.getElementById('currentDate');
+    const now = new Date();
+    dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadDropdownData();
+      await loadStudents();
+    });
+
+    // 載入下拉選單資料
+    async function loadDropdownData() {
+      try {
+        const [teachersResult, classroomsResult, courseTypesResult, schedulesResult] = await Promise.all([
+          api.teachers.getAll(),
+          api.schedules.getClassrooms(),
+          api.students.getCourseTypes(),
+          api.schedules.getAll()
+        ]);
+
+        teachersData = teachersResult.data || [];
+        classroomsData = classroomsResult.data || [];
+        courseTypesData = courseTypesResult.data || [];
+        schedulesData = schedulesResult.data || [];
+
+        // 填充篩選器
+        populateFilterDropdowns();
+        // 填充表單下拉選單
+        populateFormDropdowns();
+      } catch (error) {
+        console.error('載入下拉選單資料失敗:', error);
+      }
+    }
+
+    function populateFilterDropdowns() {
+      // 教室篩選
+      const classroomFilter = document.getElementById('filterClassroom');
+      classroomsData.forEach(cr => {
+        const option = document.createElement('option');
+        option.value = cr.id;
+        option.textContent = cr.name;
+        classroomFilter.appendChild(option);
+      });
+
+      // 課程類型篩選
+      const courseTypeFilter = document.getElementById('filterCourseType');
+      courseTypesData.forEach(ct => {
+        const option = document.createElement('option');
+        option.value = ct.id;
+        option.textContent = ct.name;
+        courseTypeFilter.appendChild(option);
+      });
+    }
+
+    function populateFormDropdowns() {
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+
+      // 老師下拉選單
+      const teacherSelects = ['addTeacherSelect', 'addTrialTeacherSelect', 'editTeacherSelect', 'editTrialTeacherSelect'];
+      teacherSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const firstOption = select.querySelector('option');
+        select.innerHTML = '';
+        select.appendChild(firstOption);
+        teachersData.forEach(teacher => {
+          const option = document.createElement('option');
+          option.value = teacher.id;
+          option.textContent = teacher.name;
+          select.appendChild(option);
+        });
+      });
+
+      // 教室下拉選單
+      const classroomSelects = ['addClassroomSelect', 'editClassroomSelect'];
+      classroomSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const firstOption = select.querySelector('option');
+        select.innerHTML = '';
+        select.appendChild(firstOption);
+        classroomsData.forEach(cr => {
+          const option = document.createElement('option');
+          option.value = cr.id;
+          option.textContent = cr.name;
+          select.appendChild(option);
+        });
+      });
+
+      // 課程類型下拉選單
+      const courseTypeSelects = ['addCourseTypeSelect', 'editCourseTypeSelect'];
+      courseTypeSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const firstOption = select.querySelector('option');
+        select.innerHTML = '';
+        select.appendChild(firstOption);
+        courseTypesData.forEach(ct => {
+          const option = document.createElement('option');
+          option.value = ct.id;
+          option.textContent = ct.name;
+          select.appendChild(option);
+        });
+      });
+
+      // 班級下拉選單
+      const scheduleSelects = ['addScheduleSelect', 'editScheduleSelect'];
+      scheduleSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const firstOption = select.querySelector('option');
+        select.innerHTML = '';
+        select.appendChild(firstOption);
+        schedulesData.forEach(schedule => {
+          const option = document.createElement('option');
+          option.value = schedule.id;
+          const dayName = weekdays[schedule.day_of_week];
+          const startTime = schedule.start_time ? schedule.start_time.substring(0, 5) : '';
+          const endTime = schedule.end_time ? schedule.end_time.substring(0, 5) : '';
+          option.textContent = `${schedule.course_name}・${schedule.teacher_name || '未指派'}・週${dayName}・${startTime}-${endTime}`;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    // 載入學生列表
+    async function loadStudents() {
+      try {
+        const params = { page: currentPage, limit };
+        const search = document.getElementById('searchInput').value.trim();
+        const classroomId = document.getElementById('filterClassroom').value;
+        const courseTypeId = document.getElementById('filterCourseType').value;
+
+        if (search) params.search = search;
+        if (classroomId) params.classroom_id = classroomId;
+        if (courseTypeId) params.course_type_id = courseTypeId;
+
+        const result = await api.students.getAll(params);
+        const { students, pagination } = result.data;
+
+        document.getElementById('studentCount').textContent = `共 ${pagination.total} 名學生`;
+        renderStudentsTable(students);
+        renderPagination(pagination);
+      } catch (error) {
+        console.error('載入學生列表失敗:', error);
+      }
+    }
+
+    function renderStudentsTable(students) {
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      const tbody = document.getElementById('studentsTableBody');
+
+      if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--color-text-muted);">目前沒有學生資料</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = students.map(student => {
+        const dayName = student.class_day !== null ? weekdays[student.class_day] : '-';
+        const startTime = student.class_start_time ? student.class_start_time.substring(0, 5) : '';
+        const endTime = student.class_end_time ? student.class_end_time.substring(0, 5) : '';
+        const timeSlot = startTime && endTime ? `週${dayName}<br>${startTime}~${endTime}` : '-';
+
+        return `
+          <tr>
+            <td>${student.name || '-'}</td>
+            <td><span class="course-tag">${student.course_type_name || '-'}</span></td>
+            <td>${student.lesson_count || 0}</td>
+            <td>${timeSlot}</td>
+            <td>${student.classroom_name || '-'}</td>
+            <td>${student.teacher_name || '-'}</td>
+            <td>${student.school || '-'}</td>
+            <td>
+              <button class="action-btn" title="查看日誌">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </button>
+              <button class="action-btn" onclick="openEditStudentModal(${student.id})" title="編輯">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderPagination(pagination) {
+      const container = document.getElementById('pagination');
+      const { page, totalPages } = pagination;
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = `<button class="pagination__btn" onclick="goToPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>&lt;</button>`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+          html += `<button class="pagination__btn ${i === page ? 'pagination__btn--active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        } else if (i === page - 2 || i === page + 2) {
+          html += '<span style="padding:0 8px;">...</span>';
+        }
+      }
+
+      html += `<button class="pagination__btn" onclick="goToPage(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>&gt;</button>`;
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      loadStudents();
+    }
+
+    function handleSearch(event) {
+      if (event.key === 'Enter') {
+        currentPage = 1;
+        loadStudents();
+      }
+    }
+
+    // Modal 功能
+    function openAddStudentModal() {
+      document.getElementById('addStudentForm').reset();
+      // 設定預設日期為今天
+      document.querySelector('#addStudentForm [name="enrollment_date"]').value = new Date().toISOString().split('T')[0];
+      document.getElementById('addStudentModal').classList.add('active');
+    }
+
+    async function openEditStudentModal(studentId) {
+      try {
+        const result = await api.students.getOne(studentId);
+        const student = result.data;
+
+        document.getElementById('editStudentId').value = student.id;
+        document.getElementById('editName').value = student.name || '';
+        document.getElementById('editBirthday').value = student.birthday ? student.birthday.substring(0, 10) : '';
+        document.getElementById('editSchool').value = student.school || '';
+        document.getElementById('editGrade').value = student.grade || '';
+        document.getElementById('editEnrollmentDate').value = student.enrollment_date ? student.enrollment_date.substring(0, 10) : '';
+        document.getElementById('editTeacherSelect').value = student.teacher_id || '';
+        document.getElementById('editParentNameFather').value = student.parent_name_father || '';
+        document.getElementById('editParentPhoneFather').value = student.parent_phone_father || '';
+        document.getElementById('editParentNameMother').value = student.parent_name_mother || '';
+        document.getElementById('editParentPhoneMother').value = student.parent_phone_mother || '';
+        document.getElementById('editTrialTeacherSelect').value = student.trial_teacher_id || '';
+        document.getElementById('editTrialTopic').value = student.trial_topic || '';
+        document.getElementById('editClassroomSelect').value = student.classroom_id || '';
+        document.getElementById('editCourseTypeSelect').value = student.course_type_id || '';
+
+        document.getElementById('editStudentModal').classList.add('active');
+      } catch (error) {
+        showMessage('載入學生資料失敗', 'error');
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 新增學生
+    document.getElementById('addStudentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const result = await api.students.create(data);
+        if (result.success) {
+          showMessage('學生新增成功！', 'success');
+          closeModal('addStudentModal');
+          loadStudents();
+        }
+      } catch (error) {
+        showMessage('新增學生失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    // 編輯學生
+    document.getElementById('editStudentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      const studentId = data.id;
+      delete data.id;
+
+      try {
+        const result = await api.students.update(studentId, data);
+        if (result.success) {
+          showMessage('學生資料更新成功！', 'success');
+          closeModal('editStudentModal');
+          loadStudents();
+        }
+      } catch (error) {
+        showMessage('更新學生資料失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    // 點擊背景關閉 Modal
+    document.getElementById('addStudentModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('addStudentModal');
+    });
+    document.getElementById('editStudentModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('editStudentModal');
+    });
+  </script>
+  <script src="../js/admin-notifications.js"></script>
+</body>
+</html>

@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學生管理 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .admin-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .admin-sidebar__avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-sidebar__avatar svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .admin-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .admin-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 14px var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .admin-sidebar__nav-item:hover {
+      background: rgba(117, 95, 0, 0.1);
+      color: var(--color-text-primary);
+    }
+
+    .admin-sidebar__nav-item--active {
+      background: var(--color-primary);
+      border-left-color: var(--color-primary-dark);
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 主內容區 */
+    .admin-main {
+      background: var(--color-background);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導覽 */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-xl);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .admin-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .admin-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 16px;
+      background: var(--color-background);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      width: 240px;
+    }
+
+    .admin-header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .admin-header__icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .admin-header__badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: #fe7560;
+      border-radius: 50%;
+    }
+
+    .admin-header__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      overflow: hidden;
+    }
+
+    .admin-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 頁面內容 */
+    .admin-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-muted);
+    }
+
+    /* 主要內容網格 */
+    .management-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: var(--spacing-xl);
+    }
+
+    /* 學生表格 */
+    .data-table-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .data-table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .data-table-toolbar__left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .toolbar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toolbar-btn:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .toolbar-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .data-table td {
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .data-table tr:hover {
+      background: var(--color-background);
+    }
+
+    .data-table tr.selected {
+      background: rgba(255, 219, 88, 0.1);
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .student-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-surface-alt);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+    }
+
+    .student-avatar svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .student-name {
+      font-weight: 600;
+    }
+
+    .student-id {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .course-tag {
+      display: inline-block;
+      padding: 4px 8px;
+      background: var(--color-primary-light);
+      border-radius: 4px;
+      font-size: var(--font-size-xs);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .action-btn-small {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+    }
+
+    .action-btn-small:hover {
+      background: var(--color-surface-alt);
+    }
+
+    /* 分頁 */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-top: 1px solid var(--color-surface-alt);
+    }
+
+    .pagination__info {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .pagination__controls {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .pagination__btn {
+      padding: 6px 12px;
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+      cursor: pointer;
+    }
+
+    .pagination__btn:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .pagination__btn--active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    /* 學生詳細資料面板 */
+    .detail-panel {
+      background: var(--color-primary-light);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+    }
+
+    .detail-panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .detail-panel__user {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .detail-panel__avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+    }
+
+    .detail-panel__avatar svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .detail-panel__name {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .detail-panel__id {
+      font-size: var(--font-size-sm);
+      color: var(--color-primary-dark);
+    }
+
+    .detail-panel__actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .detail-panel__btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .detail-panel__btn:hover {
+      background: var(--color-surface-alt);
+    }
+
+    /* 詳細資料區 */
+    .detail-section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-md) var(--spacing-xl);
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+    }
+
+    .detail-item__icon {
+      width: 20px;
+      height: 20px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .detail-item__content {
+      flex: 1;
+    }
+
+    .detail-item__label {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+    }
+
+    .detail-item__value {
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+    }
+
+    /* 備註區 */
+    .notes-section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .notes-section__title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .notes-section__content {
+      background: var(--color-primary);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+    }
+
+    /* 歷史紀錄 */
+    .history-section__title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .history-item {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .history-item__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .history-item__content {
+      flex: 1;
+    }
+
+    .history-item__date {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 2px;
+    }
+
+    .history-item__text {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    /* 匯出按鈕 */
+    .export-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--color-surface);
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      margin-top: var(--spacing-lg);
+    }
+
+    .export-btn:hover {
+      background: var(--color-primary-light);
+    }
+
+    /* 頁腳 */
+    .admin-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-surface-alt);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .admin-footer__links {
+      display: flex;
+      gap: var(--spacing-lg);
+    }
+
+    .admin-footer__link {
+      color: var(--color-text-muted);
+      text-decoration: none;
+    }
+
+    /* 響應式 */
+    @media (max-width: 1200px) {
+      .management-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- 側邊欄 -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__profile">
+        <div class="admin-sidebar__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+        <div class="admin-sidebar__info">
+          <span class="admin-sidebar__name">嚴大明 老師</span>
+          <span class="admin-sidebar__subtitle">管理者系統</span>
+        </div>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <a href="dashboard.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          首頁
+        </a>
+        <a href="students.html" class="admin-sidebar__nav-item admin-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          教師管理
+        </a>
+        <a href="schedule.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          課表排程
+        </a>
+        <a href="settings.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="admin-main">
+      <!-- 頂部導覽 -->
+      <header class="admin-header">
+        <h1 class="admin-header__title">智慧學習歷程系統</h1>
+        <div class="admin-header__actions">
+          <div class="admin-header__search">
+            <input type="text" placeholder="搜尋系統功能...">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+          <button class="admin-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+            </svg>
+          </button>
+          <button class="admin-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span class="admin-header__badge"></span>
+          </button>
+          <div class="admin-header__avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="admin-content">
+        <div class="page-header">
+          <h2 class="page-title">學生管理</h2>
+          <p class="page-subtitle">管理和查看所有學生資訊</p>
+        </div>
+
+        <div class="management-grid">
+          <!-- 學生表格 -->
+          <div class="data-table-card">
+            <div class="data-table-toolbar">
+              <div class="data-table-toolbar__left">
+                <button class="toolbar-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                  </svg>
+                </button>
+                <button class="toolbar-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
+              </div>
+              <button class="toolbar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="16"/>
+                  <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+              </button>
+            </div>
+
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>學生資訊</th>
+                  <th>修課課程</th>
+                  <th>出席率</th>
+                  <th>點數</th>
+                  <th>編輯</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="student-name">張小明</div>
+                        <div class="student-id">S001</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">程式機械</span></td>
+                  <td>95%</td>
+                  <td>88</td>
+                  <td>
+                    <button class="action-btn-small">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                        <circle cx="5" cy="12" r="1"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="selected">
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="student-name">李美華</div>
+                        <div class="student-id">S002</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">程式機械</span></td>
+                  <td>92%</td>
+                  <td>91</td>
+                  <td>
+                    <button class="action-btn-small">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                        <circle cx="5" cy="12" r="1"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="student-name">王大明</div>
+                        <div class="student-id">S003</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">科創機器人</span></td>
+                  <td>78%</td>
+                  <td>75</td>
+                  <td>
+                    <button class="action-btn-small">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                        <circle cx="5" cy="12" r="1"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="student-name">陳小芳</div>
+                        <div class="student-id">S004</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td></td>
+                  <td>98%</td>
+                  <td>94</td>
+                  <td>
+                    <button class="action-btn-small">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                        <circle cx="5" cy="12" r="1"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="student-name">林志豪</div>
+                        <div class="student-id">S005</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="course-tag">科創機器人</span>
+                    <span class="course-tag" style="margin-left: 4px;">幼兒簡易機械</span>
+                  </td>
+                  <td>89%</td>
+                  <td>82</td>
+                  <td>
+                    <button class="action-btn-small">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                        <circle cx="5" cy="12" r="1"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="pagination">
+              <span class="pagination__info">顯示 5 位學生</span>
+              <div class="pagination__controls">
+                <button class="pagination__btn">上一頁</button>
+                <button class="pagination__btn pagination__btn--active">1</button>
+                <button class="pagination__btn">2</button>
+                <button class="pagination__btn">下一頁</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 學生詳細資料面板 -->
+          <div class="detail-panel">
+            <div class="detail-panel__header">
+              <div class="detail-panel__user">
+                <div class="detail-panel__avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="detail-panel__name">李美華</div>
+                  <div class="detail-panel__id">S002</div>
+                </div>
+              </div>
+              <div class="detail-panel__actions">
+                <button class="detail-panel__btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                  </svg>
+                </button>
+                <button class="detail-panel__btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <svg class="detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                  <div class="detail-item__content">
+                    <div class="detail-item__label">電子郵件</div>
+                    <div class="detail-item__value">meihua@example.com</div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <svg class="detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <div class="detail-item__content">
+                    <div class="detail-item__label">性別</div>
+                    <div class="detail-item__value">女</div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <svg class="detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                  </svg>
+                  <div class="detail-item__content">
+                    <div class="detail-item__label">聯絡電話</div>
+                    <div class="detail-item__value">0923-456-789</div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <svg class="detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <div class="detail-item__content">
+                    <div class="detail-item__label">生日</div>
+                    <div class="detail-item__value">2020 / 01 / 30</div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <svg class="detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  <div class="detail-item__content">
+                    <div class="detail-item__label">就讀學校</div>
+                    <div class="detail-item__value">新光國小</div>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <svg class="detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <div class="detail-item__content">
+                    <div class="detail-item__label">入學日期</div>
+                    <div class="detail-item__value">2024/09/01</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="notes-section">
+              <div class="notes-section__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                帳號/行政備註
+              </div>
+              <div class="notes-section__content">
+                該生因家庭因素，繳費發票需開立統編...
+              </div>
+            </div>
+
+            <div class="history-section">
+              <div class="history-section__title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                歷史異動紀錄
+              </div>
+              <div class="history-list">
+                <div class="history-item">
+                  <div class="history-item__dot"></div>
+                  <div class="history-item__content">
+                    <div class="history-item__date">2026/04/15</div>
+                    <div class="history-item__text">帳號建立（由 嚴大明 建立）</div>
+                  </div>
+                </div>
+                <div class="history-item">
+                  <div class="history-item__dot"></div>
+                  <div class="history-item__content">
+                    <div class="history-item__date">2026/05/01</div>
+                    <div class="history-item__text">權限變更：新增 [科創機器人] 課程</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="export-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              匯出學習歷程檔案
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 頁腳 -->
+      <footer class="admin-footer">
+        <span>© 2023 智慧學習歷程系統 | 版權所有</span>
+        <div class="admin-footer__links">
+          <a href="#" class="admin-footer__link">服務條款</a>
+          <a href="#" class="admin-footer__link">隱私政策</a>
+          <a href="#" class="admin-footer__link">系統日誌</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+</body>
+</html>

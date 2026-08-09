@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課表排程 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/admin-notifications.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .admin-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .admin-sidebar__avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-sidebar__avatar svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .admin-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .admin-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 14px var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .admin-sidebar__nav-item:hover {
+      background: rgba(117, 95, 0, 0.1);
+      color: var(--color-text-primary);
+    }
+
+    .admin-sidebar__nav-item--active {
+      background: var(--color-primary);
+      border-left-color: var(--color-primary-dark);
+      color: var(--color-primary-dark);
+    }
+
+    .admin-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 主內容區 */
+    .admin-main {
+      background: var(--color-background);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導覽 */
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-xl);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .admin-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .admin-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .admin-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 16px;
+      background: var(--color-background);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      width: 240px;
+    }
+
+    .admin-header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .admin-header__icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      position: relative;
+      background: transparent;
+      border: none;
+    }
+
+    .admin-header__badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: #fe7560;
+      border-radius: 50%;
+    }
+
+    .admin-header__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      overflow: hidden;
+    }
+
+    .admin-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 頁面內容 */
+    .admin-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-muted);
+    }
+
+    /* 控制區域 - 兩欄式 */
+    .control-areas {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .control-area {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+    }
+
+    .control-area__header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .control-area__header svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-text-muted);
+    }
+
+    .control-area__row {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .control-area__row:last-child {
+      margin-bottom: 0;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      flex: 1;
+    }
+
+    .filter-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .filter-select {
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 40px;
+    }
+
+    .filter-input {
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+    }
+
+    .filter-input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .time-input-group {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      flex: 1;
+    }
+
+    .time-input {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-align: center;
+    }
+
+    .time-icon {
+      color: var(--color-text-muted);
+    }
+
+    /* 新增按鈕 */
+    .add-schedule-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      margin-top: var(--spacing-md);
+      transition: all 0.2s;
+    }
+
+    .add-schedule-btn:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    .add-schedule-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 教師顏色圖例 */
+    .teacher-legend {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .teacher-legend__label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .teacher-legend__items {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .teacher-legend__item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .teacher-legend__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .teacher-legend__dot--blue {
+      background: #3b82f6;
+    }
+
+    .teacher-legend__dot--orange {
+      background: #f97316;
+    }
+
+    .teacher-legend__dot--cream {
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+    }
+
+    .teacher-legend__conflict {
+      margin-left: auto;
+      font-size: var(--font-size-xs);
+      color: #fe7560;
+    }
+
+    /* 課表 */
+    .schedule-table {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-surface-alt);
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(5, 1fr);
+    }
+
+    .schedule-header {
+      display: contents;
+    }
+
+    .schedule-header-cell {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+      text-align: center;
+    }
+
+    .schedule-header-cell:first-child {
+      background: transparent;
+    }
+
+    .schedule-day {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .schedule-date {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .schedule-body {
+      display: contents;
+    }
+
+    .schedule-time-row {
+      display: contents;
+    }
+
+    .schedule-time-cell {
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-align: right;
+      border-right: 1px solid var(--color-surface-alt);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .schedule-time-main {
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .schedule-time-sub {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .schedule-cell {
+      min-height: 50px;
+      border-bottom: 1px solid var(--color-surface-alt);
+      border-right: 1px solid var(--color-surface-alt);
+      position: relative;
+      padding: 2px;
+    }
+
+    .schedule-cell:last-child {
+      border-right: none;
+    }
+
+    /* 休息時段 */
+    .schedule-break {
+      grid-column: 1 / -1;
+      background: var(--color-background);
+      padding: var(--spacing-sm) var(--spacing-md);
+      text-align: center;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    /* 課程區塊 */
+    .course-block {
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .course-block:hover {
+      transform: scale(1.02);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+
+    .course-block--yellow {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .course-block--blue {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .course-block--orange {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+
+    .course-block--gray {
+      background: #e5e7eb;
+      color: #6b7280;
+    }
+
+    .course-block__title {
+      font-weight: 600;
+      font-size: var(--font-size-xs);
+      margin-bottom: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .course-block__teacher {
+      font-size: 10px;
+      opacity: 0.8;
+    }
+
+    /* 編輯排課 Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal__header {
+      background: var(--color-primary);
+      padding: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .modal__close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-primary-dark);
+      padding: var(--spacing-xs);
+    }
+
+    .modal__close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .modal__body {
+      padding: var(--spacing-xl);
+    }
+
+    .modal__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .modal__field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .modal__field--full {
+      grid-column: 1 / -1;
+    }
+
+    .modal__label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .modal__time-row {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+
+    .modal__time-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    /* 狀態切換 */
+    .status-toggle {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .status-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .status-btn.active {
+      border-color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+
+    .status-btn__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-btn__dot--green {
+      background: #41e654;
+    }
+
+    .status-btn__dot--red {
+      background: #fe7560;
+    }
+
+    .modal__footer {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-lg);
+      border-top: 1px solid var(--color-surface-alt);
+    }
+
+    .modal__delete-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: none;
+      border: none;
+      color: #fe7560;
+      font-size: var(--font-size-md);
+      cursor: pointer;
+    }
+
+    .modal__delete-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .modal__actions {
+      margin-left: auto;
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .modal__cancel-btn {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: none;
+      border: none;
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .modal__save-btn {
+      padding: var(--spacing-sm) var(--spacing-xl);
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal__save-btn:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    /* 頁腳 */
+    .admin-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-lg) var(--spacing-xl);
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-surface-alt);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .admin-footer__links {
+      display: flex;
+      gap: var(--spacing-lg);
+    }
+
+    .admin-footer__link {
+      color: var(--color-text-muted);
+      text-decoration: none;
+    }
+
+    /* 響應式 */
+    @media (max-width: 1200px) {
+      .control-areas {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar {
+        display: none;
+      }
+
+      .schedule-grid {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- 側邊欄 -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__profile">
+        <div class="admin-sidebar__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+        <div class="admin-sidebar__info">
+          <span class="admin-sidebar__name">嚴大明 老師</span>
+          <span class="admin-sidebar__subtitle">管理者系統</span>
+        </div>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <a href="dashboard.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          首頁
+        </a>
+        <a href="students.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          教師管理
+        </a>
+        <a href="schedule.html" class="admin-sidebar__nav-item admin-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          課表排程
+        </a>
+        <a href="announcements.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 17H2a3 3 0 003 3h14a3 3 0 003-3zm0-3H2v-2l2-5h16l2 5v2zM12 5V3"/>
+            <circle cx="12" cy="6" r="1"/>
+          </svg>
+          公告管理
+        </a>
+        <a href="settings.html" class="admin-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="admin-main">
+      <!-- 頂部導覽 -->
+      <header class="admin-header">
+        <h1 class="admin-header__title">智慧學習歷程系統</h1>
+        <div class="admin-header__actions">
+          <div class="admin-header__search">
+            <input type="text" placeholder="搜尋功能...">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+          <button class="admin-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+            </svg>
+          </button>
+          <button class="admin-header__icon-btn" data-notification-btn>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span class="admin-header__badge"></span>
+          </button>
+          <div class="admin-header__avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="admin-content">
+        <div class="page-header">
+          <h2 class="page-title">課表排程</h2>
+          <p class="page-subtitle">查看並排定現有的課程表與教室使用狀況</p>
+        </div>
+
+        <!-- 控制區域 -->
+        <div class="control-areas">
+          <!-- Area A: 查看課表 -->
+          <div class="control-area">
+            <div class="control-area__header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              Area A: 查看課表
+            </div>
+            <div class="control-area__row">
+              <div class="filter-group">
+                <label class="filter-label">篩選教師</label>
+                <select class="filter-select" id="filterTeacher">
+                  <option>請選擇教師</option>
+                  <option>嚴老師</option>
+                  <option>陳老師</option>
+                  <option>黃老師</option>
+                  <option>科老師</option>
+                  <option>李老師</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">篩選課程</label>
+                <select class="filter-select" id="filterCourse">
+                  <option>請選擇課程</option>
+                  <option>程式機械</option>
+                  <option>科創機器人</option>
+                  <option>動力機械</option>
+                  <option>幼兒簡易機械</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-area__row">
+              <div class="filter-group">
+                <label class="filter-label">篩選教室</label>
+                <select class="filter-select" id="filterClassroom">
+                  <option>請選擇教室</option>
+                  <option>A101 教室</option>
+                  <option>A102 教室</option>
+                  <option>B201 教室</option>
+                  <option>B202 教室</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Area B: 新增排課 -->
+          <div class="control-area">
+            <div class="control-area__header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+              Area B: 新增排課
+            </div>
+            <div class="control-area__row">
+              <div class="filter-group">
+                <label class="filter-label">教師</label>
+                <select class="filter-select" id="addTeacher">
+                  <option>選擇教師</option>
+                  <option>嚴老師</option>
+                  <option>陳老師</option>
+                  <option>黃老師</option>
+                  <option>王老師</option>
+                  <option>李老師</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">課程</label>
+                <select class="filter-select" id="addCourse">
+                  <option>選擇課程</option>
+                  <option>程式機械</option>
+                  <option>科創機器人</option>
+                  <option>動力機械</option>
+                  <option>幼兒簡易機械</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">星期</label>
+                <select class="filter-select" id="addDay">
+                  <option>週二</option>
+                  <option>週三</option>
+                  <option>週四</option>
+                  <option>週五</option>
+                  <option>週六</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">教室</label>
+                <select class="filter-select" id="addClassroom">
+                  <option>選擇教室</option>
+                  <option>A101 教室</option>
+                  <option>A102 教室</option>
+                  <option>B201 教室</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-area__row">
+              <div class="filter-group">
+                <label class="filter-label">開始時間</label>
+                <div class="time-input-group">
+                  <input type="time" class="time-input" id="startTime" value="09:00">
+                </div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">結束時間</label>
+                <div class="time-input-group">
+                  <input type="time" class="time-input" id="endTime" value="10:00">
+                </div>
+              </div>
+            </div>
+            <button class="add-schedule-btn" id="addScheduleBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              確認排課並新增至課表
+            </button>
+          </div>
+        </div>
+
+        <!-- 教師顏色圖例 -->
+        <div class="teacher-legend">
+          <span class="teacher-legend__label">教師顏色圖例：</span>
+          <div class="teacher-legend__items">
+            <div class="teacher-legend__item">
+              <span class="teacher-legend__dot teacher-legend__dot--blue"></span>
+              顏老師 (藍色)
+            </div>
+            <div class="teacher-legend__item">
+              <span class="teacher-legend__dot teacher-legend__dot--orange"></span>
+              陳老師 (橘色)
+            </div>
+            <div class="teacher-legend__item">
+              <span class="teacher-legend__dot teacher-legend__dot--cream"></span>
+              王老師 (米色)
+            </div>
+          </div>
+          <span class="teacher-legend__conflict">* 系統會自動檢查教室衝突</span>
+        </div>
+
+        <!-- 課表 -->
+        <div class="schedule-table">
+          <div class="schedule-grid" id="scheduleGrid">
+            <!-- Header -->
+            <div class="schedule-header">
+              <div class="schedule-header-cell"></div>
+              <div class="schedule-header-cell">
+                <div class="schedule-day">週二</div>
+                <div class="schedule-date">2026/05/26</div>
+              </div>
+              <div class="schedule-header-cell">
+                <div class="schedule-day">週三</div>
+                <div class="schedule-date">2026/05/27</div>
+              </div>
+              <div class="schedule-header-cell">
+                <div class="schedule-day">週四</div>
+                <div class="schedule-date">2026/05/28</div>
+              </div>
+              <div class="schedule-header-cell">
+                <div class="schedule-day">週五</div>
+                <div class="schedule-date">2026/05/29</div>
+              </div>
+              <div class="schedule-header-cell">
+                <div class="schedule-day">週六</div>
+                <div class="schedule-date">2026/05/30</div>
+              </div>
+            </div>
+            <!-- Time slots will be generated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 頁腳 -->
+      <footer class="admin-footer">
+        <span>© 2023 智慧學習歷程系統 | 版權所有</span>
+        <div class="admin-footer__links">
+          <a href="#" class="admin-footer__link">服務條款</a>
+          <a href="#" class="admin-footer__link">隱私政策</a>
+          <a href="#" class="admin-footer__link">系統日誌</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- 編輯課堂排程 Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">編輯課堂排程</h3>
+        <button class="modal__close" id="closeModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="modal__row">
+          <div class="modal__field">
+            <label class="modal__label">課程名稱</label>
+            <select class="filter-select" id="editCourse">
+              <option>程式機械</option>
+              <option>科創機器人</option>
+              <option>動力機械</option>
+              <option>幼兒簡易機械</option>
+            </select>
+          </div>
+          <div class="modal__field">
+            <label class="modal__label">指派教師</label>
+            <select class="filter-select" id="editTeacher">
+              <option>陳老師</option>
+              <option>嚴老師</option>
+              <option>黃老師</option>
+              <option>王老師</option>
+              <option>李老師</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal__row">
+          <div class="modal__field modal__field--full">
+            <label class="modal__label">上課時間</label>
+            <div class="modal__time-row">
+              <select class="filter-select" id="editDay" style="width: 120px;">
+                <option>週二</option>
+                <option>週三</option>
+                <option>週四</option>
+                <option>週五</option>
+                <option>週六</option>
+              </select>
+              <div class="modal__time-input">
+                <input type="time" class="time-input" id="editStartTime" value="09:00">
+              </div>
+              <div class="modal__time-input">
+                <input type="time" class="time-input" id="editEndTime" value="10:00">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__row">
+          <div class="modal__field modal__field--full">
+            <label class="modal__label">課堂狀態</label>
+            <div class="status-toggle">
+              <button class="status-btn active" id="statusNormal">
+                <span class="status-btn__dot status-btn__dot--green"></span>
+                正常
+              </button>
+              <button class="status-btn" id="statusSuspended">
+                <span class="status-btn__dot status-btn__dot--red"></span>
+                停課
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="modal__delete-btn" id="deleteSchedule">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          刪除此堂排課
+        </button>
+        <div class="modal__actions">
+          <button class="modal__cancel-btn" id="cancelEdit">取消</button>
+          <button class="modal__save-btn" id="saveEdit">儲存變更</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/admin-notifications.js"></script>
+  <script>
+    // 產生課表時間格
+    const scheduleGrid = document.getElementById('scheduleGrid');
+    const editModal = document.getElementById('editModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const cancelEditBtn = document.getElementById('cancelEdit');
+    const statusNormalBtn = document.getElementById('statusNormal');
+    const statusSuspendedBtn = document.getElementById('statusSuspended');
+
+    // 課程資料
+    const courses = [
+      // 週二
+      { day: 1, start: 14, duration: 3, title: '動力機械', teacher: '顏老師', color: 'blue' },
+      { day: 1, start: 18, duration: 2, title: '動力機械', teacher: '陳老師', color: 'orange' },
+      { day: 1, start: 18, duration: 2, title: '動力機械', teacher: '顏老師', color: 'blue', offset: 1 },
+      { day: 1, start: 18, duration: 2, title: '程式機械', teacher: '王老師', color: 'yellow', offset: 2 },
+      // 週三
+      { day: 2, start: 15, duration: 2, title: '動力機械', teacher: '陳老師', color: 'orange' },
+      { day: 2, start: 15, duration: 2, title: '程式機械', teacher: '王老師', color: 'yellow', offset: 1 },
+      { day: 2, start: 18, duration: 3, title: '程式機械', teacher: '王老師', color: 'yellow' },
+      // 週四
+      { day: 3, start: 15, duration: 2, title: '程式機械', teacher: '陳老師', color: 'orange' },
+      { day: 3, start: 18, duration: 2, title: '動力機械', teacher: '顏老師', color: 'blue' },
+      { day: 3, start: 18, duration: 2, title: '程式機械', teacher: '陳老師', color: 'orange', offset: 1 },
+      // 週五
+      { day: 4, start: 12, duration: 4, title: '動力機械', teacher: '陳老師', color: 'gray' },
+      { day: 4, start: 14, duration: 3, title: '科創機器人', teacher: '王老師', color: 'yellow', offset: 1 },
+      { day: 4, start: 18, duration: 2, title: '科創機器人', teacher: '王老師', color: 'yellow' },
+      // 週六
+      { day: 5, start: 9, duration: 2, title: '程式機械', teacher: '陳老師', color: 'orange' },
+      { day: 5, start: 9, duration: 2, title: '動力機械', teacher: '顏老師', color: 'blue', offset: 1 },
+      { day: 5, start: 10, duration: 3, title: '程式機械', teacher: '王老師', color: 'yellow', offset: 2 },
+      { day: 5, start: 13, duration: 2, title: '動力機械', teacher: '顏老師', color: 'blue' },
+      { day: 5, start: 13, duration: 2, title: '程式機械', teacher: '陳老師', color: 'orange', offset: 1 },
+      { day: 5, start: 16, duration: 2, title: '程式機械', teacher: '王老師', color: 'yellow' },
+      { day: 5, start: 18, duration: 2, title: '動力機械', teacher: '顏老師', color: 'blue' },
+    ];
+
+    // 定義時間段 (9:00-19:00)
+    const timeSlots = [];
+    for (let hour = 9; hour <= 19; hour++) {
+      timeSlots.push({ hour, minute: 0 });
+      if (hour < 19) {
+        timeSlots.push({ hour, minute: 30 });
+      }
+    }
+
+    // 產生時間格
+    timeSlots.forEach((slot, index) => {
+      // 插入休息時段行 (12:00)
+      if (slot.hour === 12 && slot.minute === 0) {
+        const breakRow = document.createElement('div');
+        breakRow.className = 'schedule-break';
+        breakRow.textContent = '休息時段';
+        scheduleGrid.appendChild(breakRow);
+      }
+
+      // 時間欄
+      const timeCell = document.createElement('div');
+      timeCell.className = 'schedule-time-cell';
+      if (slot.minute === 0) {
+        timeCell.innerHTML = `
+          <div class="schedule-time-main">${String(slot.hour).padStart(2, '0')}:00</div>
+        `;
+      } else {
+        timeCell.innerHTML = `
+          <div class="schedule-time-sub">${String(slot.hour).padStart(2, '0')}:30</div>
+        `;
+      }
+      scheduleGrid.appendChild(timeCell);
+
+      // 5天的格子
+      for (let day = 1; day <= 5; day++) {
+        const cell = document.createElement('div');
+        cell.className = 'schedule-cell';
+        cell.dataset.day = day;
+        cell.dataset.slot = index;
+        cell.dataset.hour = slot.hour;
+        cell.dataset.minute = slot.minute;
+        scheduleGrid.appendChild(cell);
+      }
+    });
+
+    // 放置課程區塊
+    courses.forEach((course, courseIndex) => {
+      const startSlot = (course.start - 9) * 2;
+      const cells = document.querySelectorAll(`.schedule-cell[data-day="${course.day}"][data-slot="${startSlot}"]`);
+
+      if (cells.length > 0) {
+        const cell = cells[0];
+        const block = document.createElement('div');
+        block.className = `course-block course-block--${course.color}`;
+        block.style.top = '2px';
+        block.style.height = `calc(${course.duration * 50}px - 4px)`;
+        block.dataset.courseIndex = courseIndex;
+
+        if (course.offset) {
+          const width = 100 / 3;
+          block.style.left = `calc(${course.offset * width}% + 2px)`;
+          block.style.width = `calc(${width}% - 4px)`;
+          block.style.right = 'auto';
+        }
+
+        block.innerHTML = `
+          <div class="course-block__title">${course.title}</div>
+          <div class="course-block__teacher">${course.teacher}</div>
+        `;
+
+        // 點擊開啟編輯 Modal
+        block.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openEditModal(course);
+        });
+
+        cell.appendChild(block);
+      }
+    });
+
+    // 開啟編輯 Modal
+    function openEditModal(course) {
+      document.getElementById('editCourse').value = course.title;
+      document.getElementById('editTeacher').value = course.teacher;
+
+      const days = ['', '週二', '週三', '週四', '週五', '週六'];
+      document.getElementById('editDay').value = days[course.day];
+
+      document.getElementById('editStartTime').value = `${String(course.start).padStart(2, '0')}:00`;
+      document.getElementById('editEndTime').value = `${String(course.start + course.duration).padStart(2, '0')}:00`;
+
+      editModal.classList.add('active');
+    }
+
+    // 關閉 Modal
+    function closeModal() {
+      editModal.classList.remove('active');
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelEditBtn.addEventListener('click', closeModal);
+    editModal.addEventListener('click', function(e) {
+      if (e.target === editModal) {
+        closeModal();
+      }
+    });
+
+    // 狀態切換
+    statusNormalBtn.addEventListener('click', function() {
+      this.classList.add('active');
+      statusSuspendedBtn.classList.remove('active');
+    });
+
+    statusSuspendedBtn.addEventListener('click', function() {
+      this.classList.add('active');
+      statusNormalBtn.classList.remove('active');
+    });
+
+    // 儲存變更
+    document.getElementById('saveEdit').addEventListener('click', function() {
+      showMessage('排課已更新', 'success');
+      closeModal();
+    });
+
+    // 刪除排課
+    document.getElementById('deleteSchedule').addEventListener('click', function() {
+      if (confirm('確定要刪除此堂排課嗎？')) {
+        showMessage('排課已刪除', 'success');
+        closeModal();
+      }
+    });
+
+    // 新增排課
+    document.getElementById('addScheduleBtn').addEventListener('click', function() {
+      const teacher = document.getElementById('addTeacher').value;
+      const course = document.getElementById('addCourse').value;
+      const day = document.getElementById('addDay').value;
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+
+      if (teacher === '選擇教師' || course === '選擇課程') {
+        showMessage('請選擇教師和課程', 'error');
+        return;
+      }
+
+      showMessage(`已新增排課：${day} ${startTime}-${endTime} ${course}`, 'success');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教師日誌 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .page-header {
+      padding: 32px;
+      padding-bottom: 24px;
+    }
+
+    .page-header__title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 8px;
+    }
+
+    .page-header__subtitle {
+      font-size: 16px;
+      color: #6a7282;
+    }
+
+    /* 篩選列 */
+    .filter-bar {
+      background: white;
+      border: 0.8px solid rgba(0, 0, 0, 0.08);
+      border-radius: 13px;
+      padding: 18px 20px;
+      margin: 0 32px 24px;
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group__label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #888;
+    }
+
+    .filter-group__input {
+      background: #f5f5f5;
+      border: none;
+      border-radius: 9px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #364153;
+      min-width: 130px;
+    }
+
+    .filter-group__input:focus {
+      outline: 2px solid var(--color-primary);
+    }
+
+    .filter-group__select {
+      background: white;
+      border: 0.8px solid rgba(0, 0, 0, 0.08);
+      border-radius: 9px;
+      padding: 8px 32px 8px 12px;
+      font-size: 14px;
+      color: #364153;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23364153' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .filter-group__select:focus {
+      outline: 2px solid var(--color-primary);
+    }
+
+    .filter-group--range {
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .filter-group--range .filter-group__label {
+      align-self: center;
+      color: #888;
+    }
+
+    .btn-apply {
+      background: var(--color-primary);
+      border: 1px solid rgba(113, 92, 0, 0.2);
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-apply:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    /* 日誌列表 */
+    .diary-list {
+      padding: 0 32px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .diary-card {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+
+    .diary-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .diary-card__icon {
+      width: 48px;
+      height: 48px;
+      background: var(--color-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .diary-card__icon svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary-dark);
+    }
+
+    .diary-card__content {
+      flex: 1;
+    }
+
+    .diary-card__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 6px;
+    }
+
+    .diary-card__meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .diary-card__meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #6a7282;
+    }
+
+    .diary-card__meta-item svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .diary-card__action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--color-primary);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .diary-card__action:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    .diary-card__action svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 狀態標籤 */
+    .diary-card__status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .diary-card__status--completed {
+      background: rgba(0, 201, 80, 0.15);
+      color: #00c950;
+    }
+
+    .diary-card__status--in-progress {
+      background: rgba(43, 127, 255, 0.15);
+      color: #2b7fff;
+    }
+
+    .diary-card__status--pending {
+      background: rgba(251, 44, 54, 0.15);
+      color: #fb2c36;
+    }
+
+    /* 分頁 */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding: 24px 32px;
+    }
+
+    .pagination__btn {
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+      color: #364153;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pagination__btn:hover {
+      border-color: var(--color-primary);
+      background: rgba(255, 219, 88, 0.1);
+    }
+
+    .pagination__btn--active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .pagination__btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* 響應式 */
+    @media (max-width: 992px) {
+      .filter-bar {
+        padding: 16px;
+        margin: 0 16px 16px;
+      }
+
+      .diary-list {
+        padding: 0 16px 16px;
+      }
+
+      .diary-card {
+        flex-wrap: wrap;
+      }
+
+      .diary-card__action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        padding: 24px 16px;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group--range {
+        flex-wrap: wrap;
+      }
+
+      .diary-card__meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- 頂部導覽列 -->
+    <header class="header">
+      <h1 class="header__logo">智慧學習歷程系統</h1>
+
+      <div class="header__search">
+        <svg class="header__search-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="currentColor"/>
+        </svg>
+        <input type="text" class="header__search-input" placeholder="搜尋...">
+      </div>
+
+      <div class="header__actions">
+        <button class="header__icon-btn" aria-label="語言設定">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM9 17.93C5.05 17.44 2 14.08 2 10C2 9.38 2.08 8.79 2.21 8.21L7 13V14C7 15.1 7.9 16 9 16V17.93ZM15.9 15.39C15.64 14.58 14.9 14 14 14H13V11C13 10.45 12.55 10 12 10H6V8H8C8.55 8 9 7.55 9 7V5H11C12.1 5 13 4.1 13 3V2.59C15.93 3.78 18 6.65 18 10C18 12.08 17.2 13.97 15.9 15.39Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <button class="header__icon-btn" aria-label="通知">
+          <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 20C9.1 20 10 19.1 10 18H6C6 19.1 6.9 20 8 20ZM14 14V9C14 5.93 12.37 3.36 9.5 2.68V2C9.5 1.17 8.83 0.5 8 0.5C7.17 0.5 6.5 1.17 6.5 2V2.68C3.64 3.36 2 5.92 2 9V14L0 16V17H16V16L14 14ZM12 15H4V9C4 6.52 5.51 4.5 8 4.5C10.49 4.5 12 6.52 12 9V15Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="header__avatar">
+          <img src="https://via.placeholder.com/36" alt="使用者頭像">
+        </div>
+      </div>
+    </header>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar">
+      <div class="sidebar__profile">
+        <div class="sidebar__profile-inner">
+          <div class="sidebar__profile-avatar">
+            <svg class="sidebar__profile-avatar-icon" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H20C21.1 18 22 17.1 22 16V2C22 0.9 21.1 0 20 0ZM20 16H2V2H20V16Z" fill="#755f00"/>
+            </svg>
+          </div>
+          <div class="sidebar__profile-info">
+            <span class="sidebar__profile-name">王小明 老師</span>
+            <span class="sidebar__profile-role">教師系統</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 18V12H11V18H16V10H19L10 2L1 10H4V18H7Z" fill="currentColor"/>
+          </svg>
+          <span>首頁</span>
+        </a>
+        <a href="schedule.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2H15V0H13V2H5V0H3V2H2C0.89 2 0 2.9 0 4V18C0 19.1 0.89 20 2 20H16C17.1 20 18 19.1 18 18V4C18 2.9 17.1 2 16 2ZM16 18H2V7H16V18ZM4 9H9V14H4V9Z" fill="currentColor"/>
+          </svg>
+          <span>課表</span>
+        </a>
+        <a href="records.html" class="sidebar__nav-item sidebar__nav-item--active">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2H14V0H6V2H2C0.9 2 0 2.9 0 4V18C0 19.1 0.9 20 2 20H18C19.1 20 20 19.1 20 18V4C20 2.9 19.1 2 18 2ZM8 2H12V4H8V2ZM18 18H2V4H6V6H14V4H18V18ZM4 10H16V12H4V10ZM4 14H12V16H4V14Z" fill="currentColor"/>
+          </svg>
+          <span>教師日誌</span>
+        </a>
+        <a href="students.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5 0C4.7 0 0 4.7 0 10.5C0 16.3 4.7 21 10.5 21C16.3 21 21 16.3 21 10.5C21 4.7 16.3 0 10.5 0ZM10.5 3.15C12.24 3.15 13.65 4.56 13.65 6.3C13.65 8.04 12.24 9.45 10.5 9.45C8.76 9.45 7.35 8.04 7.35 6.3C7.35 4.56 8.76 3.15 10.5 3.15ZM10.5 18.06C7.875 18.06 5.544 16.716 4.2 14.7C4.2 12.6 8.4 11.445 10.5 11.445C12.6 11.445 16.8 12.6 16.8 14.7C15.456 16.716 13.125 18.06 10.5 18.06Z" fill="currentColor"/>
+          </svg>
+          <span>學生管理</span>
+        </a>
+        <a href="settings.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.14 10.94C17.18 10.64 17.2 10.33 17.2 10C17.2 9.68 17.18 9.36 17.13 9.06L19.16 7.48C19.34 7.34 19.39 7.07 19.28 6.87L17.36 3.55C17.24 3.33 16.99 3.26 16.77 3.33L14.38 4.29C13.88 3.91 13.35 3.59 12.76 3.35L12.4 0.81C12.36 0.57 12.16 0.4 11.92 0.4H8.08C7.84 0.4 7.65 0.57 7.61 0.81L7.25 3.35C6.66 3.59 6.12 3.92 5.63 4.29L3.24 3.33C3.02 3.25 2.77 3.33 2.65 3.55L0.74 6.87C0.62 7.08 0.66 7.34 0.86 7.48L2.89 9.06C2.84 9.36 2.8 9.69 2.8 10C2.8 10.31 2.82 10.64 2.87 10.94L0.84 12.52C0.66 12.66 0.61 12.93 0.72 13.13L2.64 16.45C2.76 16.67 3.01 16.74 3.23 16.67L5.62 15.71C6.12 16.09 6.65 16.41 7.24 16.65L7.6 19.19C7.65 19.43 7.84 19.6 8.08 19.6H11.92C12.16 19.6 12.36 19.43 12.39 19.19L12.75 16.65C13.34 16.41 13.88 16.09 14.37 15.71L16.76 16.67C16.98 16.75 17.23 16.67 17.35 16.45L19.27 13.13C19.39 12.91 19.34 12.66 19.15 12.52L17.14 10.94ZM10 13.6C8.02 13.6 6.4 11.98 6.4 10C6.4 8.02 8.02 6.4 10 6.4C11.98 6.4 13.6 8.02 13.6 10C13.6 11.98 11.98 13.6 10 13.6Z" fill="currentColor"/>
+          </svg>
+          <span>系統設定</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="main-content" style="padding: 0;">
+      <div class="page-header">
+        <h2 class="page-header__title">教師日誌</h2>
+        <p class="page-header__subtitle">檢視和管理所有教師的歷史紀錄</p>
+      </div>
+
+      <!-- 篩選列 -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span class="filter-group__label">時間區間</span>
+          <div class="filter-group--range">
+            <input type="date" class="filter-group__input" id="startDate" value="2026-05-01">
+            <span class="filter-group__label">至</span>
+            <input type="date" class="filter-group__input" id="endDate" value="2026-05-30">
+          </div>
+        </div>
+        <button class="btn-apply" onclick="applyFilters()">套用</button>
+        <div class="filter-group">
+          <span class="filter-group__label">填答狀態</span>
+          <select class="filter-group__select" id="statusFilter">
+            <option value="all">全部</option>
+            <option value="completed">已完成</option>
+            <option value="in-progress">進行中</option>
+            <option value="pending">未填答</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-group__label">課程</span>
+          <select class="filter-group__select" id="courseFilter">
+            <option value="all">全部課程</option>
+            <option value="科創機器人">科創機器人</option>
+            <option value="動力機械">動力機械</option>
+            <option value="程式機械">程式機械</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-group__label">教室</span>
+          <select class="filter-group__select" id="roomFilter">
+            <option value="all">全部教室</option>
+            <option value="西屯">西屯</option>
+            <option value="沙鹿">沙鹿</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 日誌列表 -->
+      <div class="diary-list" id="diaryList">
+        <!-- 日誌項目 1 - 未填答 -->
+        <div class="diary-card" data-status="pending" data-course="科創機器人">
+          <div class="diary-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="diary-card__content">
+            <h3 class="diary-card__title">
+              科創機器人
+              <span class="diary-card__status diary-card__status--pending">未填答</span>
+            </h3>
+            <div class="diary-card__meta">
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                2026/05/30
+              </span>
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                16:30 - 18:00
+              </span>
+            </div>
+          </div>
+          <a href="journal.html" class="diary-card__action">
+            填寫 / 查看日誌
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- 日誌項目 2 - 進行中 -->
+        <div class="diary-card" data-status="in-progress" data-course="科創機器人">
+          <div class="diary-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="diary-card__content">
+            <h3 class="diary-card__title">
+              科創機器人
+              <span class="diary-card__status diary-card__status--in-progress">進行中</span>
+            </h3>
+            <div class="diary-card__meta">
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                2026/05/30
+              </span>
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                14:45 - 16:15
+              </span>
+            </div>
+          </div>
+          <a href="journal.html" class="diary-card__action">
+            填寫 / 查看日誌
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- 日誌項目 3 - 已完成 -->
+        <div class="diary-card" data-status="completed" data-course="科創機器人">
+          <div class="diary-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="diary-card__content">
+            <h3 class="diary-card__title">
+              科創機器人
+              <span class="diary-card__status diary-card__status--completed">已完成</span>
+            </h3>
+            <div class="diary-card__meta">
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                2026/05/30
+              </span>
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                13:00 - 14:30
+              </span>
+            </div>
+          </div>
+          <a href="journal.html" class="diary-card__action">
+            填寫 / 查看日誌
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- 日誌項目 4 -->
+        <div class="diary-card" data-status="completed" data-course="科創機器人">
+          <div class="diary-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="diary-card__content">
+            <h3 class="diary-card__title">
+              科創機器人
+              <span class="diary-card__status diary-card__status--completed">已完成</span>
+            </h3>
+            <div class="diary-card__meta">
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                2026/05/30
+              </span>
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                11:00 - 12:30
+              </span>
+            </div>
+          </div>
+          <a href="journal.html" class="diary-card__action">
+            填寫 / 查看日誌
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- 日誌項目 5 -->
+        <div class="diary-card" data-status="completed" data-course="科創機器人">
+          <div class="diary-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="diary-card__content">
+            <h3 class="diary-card__title">
+              科創機器人
+              <span class="diary-card__status diary-card__status--completed">已完成</span>
+            </h3>
+            <div class="diary-card__meta">
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                2026/05/30
+              </span>
+              <span class="diary-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                9:00 - 10:30
+              </span>
+            </div>
+          </div>
+          <a href="journal.html" class="diary-card__action">
+            填寫 / 查看日誌
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- 分頁 -->
+      <div class="pagination">
+        <button class="pagination__btn" disabled>&lt;</button>
+        <button class="pagination__btn pagination__btn--active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">&gt;</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // 篩選功能
+    function applyFilters() {
+      const status = document.getElementById('statusFilter').value;
+      const course = document.getElementById('courseFilter').value;
+      const room = document.getElementById('roomFilter').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      const cards = document.querySelectorAll('.diary-card');
+
+      cards.forEach(card => {
+        let show = true;
+
+        // 狀態篩選
+        if (status !== 'all') {
+          const cardStatus = card.dataset.status;
+          if (cardStatus !== status) {
+            show = false;
+          }
+        }
+
+        // 課程篩選
+        if (course !== 'all') {
+          const cardCourse = card.dataset.course;
+          if (cardCourse !== course) {
+            show = false;
+          }
+        }
+
+        card.style.display = show ? 'flex' : 'none';
+      });
+
+      if (typeof showMessage === 'function') {
+        showMessage('篩選條件已套用', 'success');
+      }
+    }
+
+    // 監聽篩選變更
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('courseFilter').addEventListener('change', applyFilters);
+    document.getElementById('roomFilter').addEventListener('change', applyFilters);
+  </script>
+</body>
+</html>

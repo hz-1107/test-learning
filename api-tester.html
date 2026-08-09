@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API 測試工具 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+    }
+
+    .api-tester {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* 側邊欄 */
+    .sidebar {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .sidebar__title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #ffd700;
+    }
+
+    .sidebar__subtitle {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    .api-group {
+      margin-bottom: 24px;
+    }
+
+    .api-group__title {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 8px;
+      padding-left: 8px;
+    }
+
+    .api-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .api-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .api-item.active {
+      background: rgba(255, 215, 0, 0.2);
+    }
+
+    .api-item__method {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      min-width: 45px;
+      text-align: center;
+    }
+
+    .method-get { background: #22c55e; color: #fff; }
+    .method-post { background: #f59e0b; color: #fff; }
+    .method-put { background: #3b82f6; color: #fff; }
+    .method-delete { background: #ef4444; color: #fff; }
+
+    /* 主內容區 */
+    .main {
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      gap: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header__title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .auth-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .auth-status__badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .auth-status__badge.logged-in {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .auth-status__badge.logged-out {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    /* 請求區塊 */
+    .request-panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .request-panel__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .method-select {
+      padding: 10px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: monospace;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: #ffd700;
+    }
+
+    .send-btn {
+      padding: 10px 24px;
+      background: #ffd700;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+      background: #f5c800;
+    }
+
+    .send-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* 標籤頁 */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .tab:hover {
+      color: #333;
+    }
+
+    .tab.active {
+      color: #333;
+      font-weight: 600;
+      border-bottom-color: #ffd700;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 請求體編輯器 */
+    .body-editor {
+      width: 100%;
+      min-height: 200px;
+      padding: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    .body-editor:focus {
+      outline: none;
+      border-color: #ffd700;
+    }
+
+    /* 回應區塊 */
+    .response-panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .response-panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .response-panel__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .response-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+    }
+
+    .response-meta__item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .response-meta__label {
+      color: #888;
+    }
+
+    .response-meta__value {
+      font-weight: 600;
+    }
+
+    .status-200 { color: #22c55e; }
+    .status-201 { color: #22c55e; }
+    .status-400 { color: #f59e0b; }
+    .status-401 { color: #ef4444; }
+    .status-403 { color: #ef4444; }
+    .status-404 { color: #f59e0b; }
+    .status-500 { color: #ef4444; }
+
+    .response-body {
+      flex: 1;
+      background: #1a1a2e;
+      border-radius: 8px;
+      padding: 16px;
+      overflow: auto;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+
+    .response-body pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* JSON 語法高亮 */
+    .json-key { color: #9cdcfe; }
+    .json-string { color: #ce9178; }
+    .json-number { color: #b5cea8; }
+    .json-boolean { color: #569cd6; }
+    .json-null { color: #569cd6; }
+
+    /* 快速登入 */
+    .quick-login {
+      background: #fff7e6;
+      border: 1px solid #ffd700;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .quick-login__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .quick-login__buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quick-login__btn {
+      padding: 8px 16px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-login__btn:hover {
+      background: #ffd700;
+      border-color: #ffd700;
+    }
+
+    /* 載入動畫 */
+    .loading {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .loading.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #ffd700;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 響應式 */
+    @media (max-width: 768px) {
+      .api-tester {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="api-tester">
+    <!-- 側邊欄 - API 列表 -->
+    <aside class="sidebar">
+      <div class="sidebar__title">API 測試工具</div>
+      <div class="sidebar__subtitle">智慧學習歷程系統</div>
+
+      <!-- 認證 -->
+      <div class="api-group">
+        <div class="api-group__title">認證 Auth</div>
+        <div class="api-item" data-method="POST" data-url="/api/auth/login" data-body='{"username":"admin","password":"admin123"}'>
+          <span class="api-item__method method-post">POST</span>
+          <span>登入</span>
+        </div>
+        <div class="api-item" data-method="POST" data-url="/api/auth/register" data-body='{"username":"test","password":"test123","name":"測試用戶","role":"student"}'>
+          <span class="api-item__method method-post">POST</span>
+          <span>註冊</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/auth/profile">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得使用者資訊</span>
+        </div>
+      </div>
+
+      <!-- 學生 -->
+      <div class="api-group">
+        <div class="api-group__title">學生 Students</div>
+        <div class="api-item" data-method="GET" data-url="/api/students">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得學生列表</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/students/1">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得學生詳情</span>
+        </div>
+        <div class="api-item" data-method="POST" data-url="/api/students" data-body='{"username":"student1","password":"123456","name":"王小明","phone":"0912345678"}'>
+          <span class="api-item__method method-post">POST</span>
+          <span>新增學生</span>
+        </div>
+        <div class="api-item" data-method="PUT" data-url="/api/students/1" data-body='{"name":"王小明(已更新)"}'>
+          <span class="api-item__method method-put">PUT</span>
+          <span>更新學生</span>
+        </div>
+        <div class="api-item" data-method="DELETE" data-url="/api/students/1">
+          <span class="api-item__method method-delete">DELETE</span>
+          <span>刪除學生</span>
+        </div>
+      </div>
+
+      <!-- 教師 -->
+      <div class="api-group">
+        <div class="api-group__title">教師 Teachers</div>
+        <div class="api-item" data-method="GET" data-url="/api/teachers">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得教師列表</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/teachers/1">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得教師詳情</span>
+        </div>
+        <div class="api-item" data-method="POST" data-url="/api/teachers" data-body='{"username":"teacher1","password":"123456","name":"陳老師","school":"台中教育大學"}'>
+          <span class="api-item__method method-post">POST</span>
+          <span>新增教師</span>
+        </div>
+      </div>
+
+      <!-- 課程 -->
+      <div class="api-group">
+        <div class="api-group__title">課程 Courses</div>
+        <div class="api-item" data-method="GET" data-url="/api/courses/types">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得課程類型</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/courses">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得課程列表</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/courses/1">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得課程詳情</span>
+        </div>
+        <div class="api-item" data-method="POST" data-url="/api/courses" data-body='{"name":"動力機械初階班","course_type_id":2,"max_students":8}'>
+          <span class="api-item__method method-post">POST</span>
+          <span>新增課程</span>
+        </div>
+      </div>
+
+      <!-- 日誌 -->
+      <div class="api-group">
+        <div class="api-group__title">日誌 Logs</div>
+        <div class="api-item" data-method="GET" data-url="/api/logs">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得日誌列表</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/logs/1">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得日誌詳情</span>
+        </div>
+        <div class="api-item" data-method="PUT" data-url="/api/logs/1/permissions" data-body='{"teacher_ids":[1,2]}'>
+          <span class="api-item__method method-put">PUT</span>
+          <span>更新日誌權限</span>
+        </div>
+      </div>
+
+      <!-- 設定 -->
+      <div class="api-group">
+        <div class="api-group__title">設定 Settings</div>
+        <div class="api-item" data-method="GET" data-url="/api/settings">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得系統設定</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/settings/holidays">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得假日列表</span>
+        </div>
+        <div class="api-item" data-method="POST" data-url="/api/settings/holidays" data-body='{"holiday_date":"2026-12-31","name":"跨年假","type":"custom"}'>
+          <span class="api-item__method method-post">POST</span>
+          <span>新增假日</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/settings/classrooms">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得教室列表</span>
+        </div>
+        <div class="api-item" data-method="GET" data-url="/api/settings/notifications">
+          <span class="api-item__method method-get">GET</span>
+          <span>取得通知設定</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="main">
+      <div class="header">
+        <h1 class="header__title">API 測試工具</h1>
+        <div class="auth-status">
+          <span class="auth-status__badge logged-out" id="authBadge">未登入</span>
+          <button class="send-btn" id="logoutBtn" style="display:none" onclick="logout()">登出</button>
+        </div>
+      </div>
+
+      <!-- 快速登入 -->
+      <div class="quick-login">
+        <div class="quick-login__title">快速登入 (使用預設帳號)</div>
+        <div class="quick-login__buttons">
+          <button class="quick-login__btn" onclick="quickLogin('admin', 'admin123', 'admin')">管理員</button>
+          <button class="quick-login__btn" onclick="quickLogin('staff', 'staff123', 'staff')">行政人員</button>
+          <button class="quick-login__btn" onclick="quickLogin('teacher', 'teacher123', 'teacher')">教師</button>
+          <button class="quick-login__btn" onclick="quickLogin('student', 'student123', 'student')">學生</button>
+        </div>
+      </div>
+
+      <!-- 請求區塊 -->
+      <div class="request-panel">
+        <div class="request-panel__header">
+          <select class="method-select" id="methodSelect">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+          <input type="text" class="url-input" id="urlInput" value="http://localhost:3000/api" placeholder="輸入 API URL">
+          <button class="send-btn" id="sendBtn" onclick="sendRequest()">發送請求</button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="body">請求體 Body</button>
+          <button class="tab" data-tab="headers">標頭 Headers</button>
+        </div>
+
+        <div class="tab-content active" id="bodyTab">
+          <textarea class="body-editor" id="bodyEditor" placeholder='輸入 JSON 格式的請求體，例如：
+{
+  "username": "admin",
+  "password": "admin123"
+}'></textarea>
+        </div>
+
+        <div class="tab-content" id="headersTab">
+          <textarea class="body-editor" id="headersEditor" placeholder='自訂標頭（JSON 格式）：
+{
+  "X-Custom-Header": "value"
+}'></textarea>
+        </div>
+      </div>
+
+      <!-- 回應區塊 -->
+      <div class="response-panel">
+        <div class="response-panel__header">
+          <span class="response-panel__title">回應 Response</span>
+          <div class="response-meta">
+            <div class="response-meta__item">
+              <span class="response-meta__label">狀態:</span>
+              <span class="response-meta__value" id="responseStatus">-</span>
+            </div>
+            <div class="response-meta__item">
+              <span class="response-meta__label">時間:</span>
+              <span class="response-meta__value" id="responseTime">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+        </div>
+
+        <div class="response-body" id="responseBody">
+          <pre>點擊「發送請求」查看回應</pre>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://localhost:3000';
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAuthStatus();
+
+      // 綁定 API 項目點擊事件
+      document.querySelectorAll('.api-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.api-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+
+          document.getElementById('methodSelect').value = item.dataset.method;
+          document.getElementById('urlInput').value = BASE_URL + item.dataset.url;
+
+          if (item.dataset.body) {
+            document.getElementById('bodyEditor').value = JSON.stringify(JSON.parse(item.dataset.body), null, 2);
+          } else {
+            document.getElementById('bodyEditor').value = '';
+          }
+        });
+      });
+
+      // 綁定標籤頁切換
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+          tab.classList.add('active');
+          document.getElementById(tab.dataset.tab + 'Tab').classList.add('active');
+        });
+      });
+    });
+
+    // 更新認證狀態
+    function updateAuthStatus() {
+      const token = localStorage.getItem('authToken');
+      const badge = document.getElementById('authBadge');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      if (token) {
+        const userName = localStorage.getItem('userName') || '使用者';
+        badge.textContent = `已登入: ${userName}`;
+        badge.classList.remove('logged-out');
+        badge.classList.add('logged-in');
+        logoutBtn.style.display = 'block';
+      } else {
+        badge.textContent = '未登入';
+        badge.classList.remove('logged-in');
+        badge.classList.add('logged-out');
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    // 快速登入
+    async function quickLogin(username, password, role) {
+      document.getElementById('methodSelect').value = 'POST';
+      document.getElementById('urlInput').value = BASE_URL + '/api/auth/login';
+      document.getElementById('bodyEditor').value = JSON.stringify({ username, password, role }, null, 2);
+
+      await sendRequest();
+    }
+
+    // 登出
+    function logout() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userRole');
+      updateAuthStatus();
+
+      document.getElementById('responseBody').innerHTML = '<pre>已登出</pre>';
+      document.getElementById('responseStatus').textContent = '-';
+      document.getElementById('responseStatus').className = 'response-meta__value';
+    }
+
+    // 發送請求
+    async function sendRequest() {
+      const method = document.getElementById('methodSelect').value;
+      const url = document.getElementById('urlInput').value;
+      const bodyText = document.getElementById('bodyEditor').value;
+      const headersText = document.getElementById('headersEditor').value;
+
+      const loading = document.getElementById('loading');
+      const responseBody = document.getElementById('responseBody');
+      const responseStatus = document.getElementById('responseStatus');
+      const responseTime = document.getElementById('responseTime');
+      const sendBtn = document.getElementById('sendBtn');
+
+      // 顯示載入中
+      loading.classList.add('active');
+      responseBody.style.display = 'none';
+      sendBtn.disabled = true;
+
+      const startTime = Date.now();
+
+      try {
+        // 準備請求設定
+        const config = {
+          method,
+          url,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        // 加入 Token
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        // 加入自訂標頭
+        if (headersText) {
+          try {
+            const customHeaders = JSON.parse(headersText);
+            Object.assign(config.headers, customHeaders);
+          } catch (e) {
+            // 忽略無效的 JSON
+          }
+        }
+
+        // 加入請求體
+        if (bodyText && ['POST', 'PUT', 'PATCH'].includes(method)) {
+          try {
+            config.data = JSON.parse(bodyText);
+          } catch (e) {
+            throw new Error('請求體 JSON 格式錯誤');
+          }
+        }
+
+        // 發送請求
+        const response = await axios(config);
+        const endTime = Date.now();
+
+        // 顯示結果
+        responseStatus.textContent = response.status;
+        responseStatus.className = `response-meta__value status-${response.status}`;
+        responseTime.textContent = `${endTime - startTime}ms`;
+        responseBody.innerHTML = `<pre>${syntaxHighlight(JSON.stringify(response.data, null, 2))}</pre>`;
+
+        // 如果是登入成功，儲存 Token
+        if (url.includes('/auth/login') && response.data.success && response.data.data) {
+          localStorage.setItem('authToken', response.data.data.token);
+          localStorage.setItem('userName', response.data.data.user.name);
+          localStorage.setItem('userRole', response.data.data.user.role);
+          updateAuthStatus();
+        }
+
+      } catch (error) {
+        const endTime = Date.now();
+
+        if (error.response) {
+          responseStatus.textContent = error.response.status;
+          responseStatus.className = `response-meta__value status-${error.response.status}`;
+          responseBody.innerHTML = `<pre>${syntaxHighlight(JSON.stringify(error.response.data, null, 2))}</pre>`;
+        } else {
+          responseStatus.textContent = 'Error';
+          responseStatus.className = 'response-meta__value status-500';
+          responseBody.innerHTML = `<pre style="color:#ef4444">${error.message}</pre>`;
+        }
+
+        responseTime.textContent = `${endTime - startTime}ms`;
+      }
+
+      // 隱藏載入中
+      loading.classList.remove('active');
+      responseBody.style.display = 'block';
+      sendBtn.disabled = false;
+    }
+
+    // JSON 語法高亮
+    function syntaxHighlight(json) {
+      json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        let cls = 'json-number';
+        if (/^"/.test(match)) {
+          if (/:$/.test(match)) {
+            cls = 'json-key';
+          } else {
+            cls = 'json-string';
+          }
+        } else if (/true|false/.test(match)) {
+          cls = 'json-boolean';
+        } else if (/null/.test(match)) {
+          cls = 'json-null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+      });
+    }
+  </script>
+</body>
+</html>

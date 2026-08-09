@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系統設定 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .page-header {
+      padding: 32px;
+      padding-bottom: 24px;
+    }
+
+    .page-header__title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 8px;
+    }
+
+    .page-header__subtitle {
+      font-size: 16px;
+      color: #6a7282;
+    }
+
+    .settings-container {
+      padding: 0 32px 32px;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+    }
+
+    .settings-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .settings-nav__item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .settings-nav__item:hover {
+      background: #f3f4f6;
+    }
+
+    .settings-nav__item--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .settings-nav__item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .settings-content {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 14px;
+      padding: 32px;
+    }
+
+    .settings-section {
+      margin-bottom: 32px;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .settings-section__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 8px;
+    }
+
+    .settings-section__desc {
+      font-size: 14px;
+      color: #6a7282;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-group__label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #364153;
+      margin-bottom: 8px;
+    }
+
+    .form-group__input {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px 14px;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #101828;
+    }
+
+    .form-group__input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(255, 219, 88, 0.2);
+    }
+
+    .form-group__help {
+      font-size: 12px;
+      color: #6a7282;
+      margin-top: 6px;
+    }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .toggle-group:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-group__content h4 {
+      font-size: 14px;
+      font-weight: 500;
+      color: #101828;
+      margin-bottom: 4px;
+    }
+
+    .toggle-group__content p {
+      font-size: 13px;
+      color: #6a7282;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      background: #e5e7eb;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch.active {
+      background: var(--color-primary);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(22px);
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(0, 0, 0, 0.08);
+      margin: 32px 0;
+    }
+
+    .btn-save {
+      background: var(--color-primary);
+      border: 1px solid rgba(113, 92, 0, 0.2);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+    }
+
+    .btn-save:hover {
+      filter: brightness(0.95);
+    }
+
+    .btn-secondary {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #364153;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    .btn-secondary:hover {
+      background: #f3f4f6;
+    }
+
+    .btn-danger {
+      background: white;
+      border: 1px solid #fe7560;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fe7560;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover {
+      background: rgba(254, 117, 96, 0.05);
+    }
+
+    .profile-avatar-edit {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .profile-avatar-edit__image {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      background: var(--color-primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .profile-avatar-edit__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-upload {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #364153;
+      cursor: pointer;
+    }
+
+    .btn-upload:hover {
+      background: #f3f4f6;
+    }
+
+    .profile-avatar-edit__hint {
+      font-size: 12px;
+      color: #6a7282;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- 頂部導覽列 -->
+    <header class="header">
+      <h1 class="header__logo">智慧學習歷程系統</h1>
+
+      <div class="header__search">
+        <svg class="header__search-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="currentColor"/>
+        </svg>
+        <input type="text" class="header__search-input" placeholder="搜尋...">
+      </div>
+
+      <div class="header__actions">
+        <button class="header__icon-btn" aria-label="語言設定">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM9 17.93C5.05 17.44 2 14.08 2 10C2 9.38 2.08 8.79 2.21 8.21L7 13V14C7 15.1 7.9 16 9 16V17.93ZM15.9 15.39C15.64 14.58 14.9 14 14 14H13V11C13 10.45 12.55 10 12 10H6V8H8C8.55 8 9 7.55 9 7V5H11C12.1 5 13 4.1 13 3V2.59C15.93 3.78 18 6.65 18 10C18 12.08 17.2 13.97 15.9 15.39Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <button class="header__icon-btn" aria-label="通知">
+          <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 20C9.1 20 10 19.1 10 18H6C6 19.1 6.9 20 8 20ZM14 14V9C14 5.93 12.37 3.36 9.5 2.68V2C9.5 1.17 8.83 0.5 8 0.5C7.17 0.5 6.5 1.17 6.5 2V2.68C3.64 3.36 2 5.92 2 9V14L0 16V17H16V16L14 14ZM12 15H4V9C4 6.52 5.51 4.5 8 4.5C10.49 4.5 12 6.52 12 9V15Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="header__avatar">
+          <img src="https://via.placeholder.com/36" alt="使用者頭像">
+        </div>
+      </div>
+    </header>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar">
+      <div class="sidebar__profile">
+        <div class="sidebar__profile-inner">
+          <div class="sidebar__profile-avatar">
+            <svg class="sidebar__profile-avatar-icon" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H20C21.1 18 22 17.1 22 16V2C22 0.9 21.1 0 20 0ZM20 16H2V2H20V16Z" fill="#755f00"/>
+            </svg>
+          </div>
+          <div class="sidebar__profile-info">
+            <span class="sidebar__profile-name">王小明 老師</span>
+            <span class="sidebar__profile-role">教師系統</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 18V12H11V18H16V10H19L10 2L1 10H4V18H7Z" fill="currentColor"/>
+          </svg>
+          <span>首頁</span>
+        </a>
+        <a href="schedule.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2H15V0H13V2H5V0H3V2H2C0.89 2 0 2.9 0 4V18C0 19.1 0.89 20 2 20H16C17.1 20 18 19.1 18 18V4C18 2.9 17.1 2 16 2ZM16 18H2V7H16V18ZM4 9H9V14H4V9Z" fill="currentColor"/>
+          </svg>
+          <span>課表</span>
+        </a>
+        <a href="records.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2H14V0H6V2H2C0.9 2 0 2.9 0 4V18C0 19.1 0.9 20 2 20H18C19.1 20 20 19.1 20 18V4C20 2.9 19.1 2 18 2ZM8 2H12V4H8V2ZM18 18H2V4H6V6H14V4H18V18ZM4 10H16V12H4V10ZM4 14H12V16H4V14Z" fill="currentColor"/>
+          </svg>
+          <span>教師日誌</span>
+        </a>
+        <a href="students.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5 0C4.7 0 0 4.7 0 10.5C0 16.3 4.7 21 10.5 21C16.3 21 21 16.3 21 10.5C21 4.7 16.3 0 10.5 0ZM10.5 3.15C12.24 3.15 13.65 4.56 13.65 6.3C13.65 8.04 12.24 9.45 10.5 9.45C8.76 9.45 7.35 8.04 7.35 6.3C7.35 4.56 8.76 3.15 10.5 3.15ZM10.5 18.06C7.875 18.06 5.544 16.716 4.2 14.7C4.2 12.6 8.4 11.445 10.5 11.445C12.6 11.445 16.8 12.6 16.8 14.7C15.456 16.716 13.125 18.06 10.5 18.06Z" fill="currentColor"/>
+          </svg>
+          <span>學生管理</span>
+        </a>
+        <a href="settings.html" class="sidebar__nav-item sidebar__nav-item--active">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.14 10.94C17.18 10.64 17.2 10.33 17.2 10C17.2 9.68 17.18 9.36 17.13 9.06L19.16 7.48C19.34 7.34 19.39 7.07 19.28 6.87L17.36 3.55C17.24 3.33 16.99 3.26 16.77 3.33L14.38 4.29C13.88 3.91 13.35 3.59 12.76 3.35L12.4 0.81C12.36 0.57 12.16 0.4 11.92 0.4H8.08C7.84 0.4 7.65 0.57 7.61 0.81L7.25 3.35C6.66 3.59 6.12 3.92 5.63 4.29L3.24 3.33C3.02 3.25 2.77 3.33 2.65 3.55L0.74 6.87C0.62 7.08 0.66 7.34 0.86 7.48L2.89 9.06C2.84 9.36 2.8 9.69 2.8 10C2.8 10.31 2.82 10.64 2.87 10.94L0.84 12.52C0.66 12.66 0.61 12.93 0.72 13.13L2.64 16.45C2.76 16.67 3.01 16.74 3.23 16.67L5.62 15.71C6.12 16.09 6.65 16.41 7.24 16.65L7.6 19.19C7.65 19.43 7.84 19.6 8.08 19.6H11.92C12.16 19.6 12.36 19.43 12.39 19.19L12.75 16.65C13.34 16.41 13.88 16.09 14.37 15.71L16.76 16.67C16.98 16.75 17.23 16.67 17.35 16.45L19.27 13.13C19.39 12.91 19.34 12.66 19.15 12.52L17.14 10.94ZM10 13.6C8.02 13.6 6.4 11.98 6.4 10C6.4 8.02 8.02 6.4 10 6.4C11.98 6.4 13.6 8.02 13.6 10C13.6 11.98 11.98 13.6 10 13.6Z" fill="currentColor"/>
+          </svg>
+          <span>系統設定</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="main-content" style="padding: 0;">
+      <div class="page-header">
+        <h2 class="page-header__title">系統設定</h2>
+        <p class="page-header__subtitle">管理您的帳戶和系統偏好設定</p>
+      </div>
+
+      <div class="settings-container">
+        <!-- 設定導覽 -->
+        <nav class="settings-nav">
+          <a href="#" class="settings-nav__item settings-nav__item--active">
+            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 9C11.21 9 13 7.21 13 5C13 2.79 11.21 1 9 1C6.79 1 5 2.79 5 5C5 7.21 6.79 9 9 9ZM9 11C6.33 11 1 12.34 1 15V17H17V15C17 12.34 11.67 11 9 11Z" fill="currentColor"/>
+            </svg>
+            個人資料
+          </a>
+          <a href="#" class="settings-nav__item">
+            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 2H15V0H13V2H5V0H3V2H2C0.89 2 0 2.9 0 4V16C0 17.1 0.89 18 2 18H16C17.1 18 18 17.1 18 16V4C18 2.9 17.1 2 16 2ZM16 16H2V7H16V16ZM16 5H2V4H16V5Z" fill="currentColor"/>
+            </svg>
+            通知設定
+          </a>
+          <a href="#" class="settings-nav__item">
+            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 7H13V5C13 2.24 10.76 0 8 0C5.24 0 3 2.24 3 5V7H2C0.9 7 0 7.9 0 9V16C0 17.1 0.9 18 2 18H14C15.1 18 16 17.1 16 16V9C16 7.9 15.1 7 14 7ZM8 14C6.9 14 6 13.1 6 12C6 10.9 6.9 10 8 10C9.1 10 10 10.9 10 12C10 13.1 9.1 14 8 14ZM11 7H5V5C5 3.34 6.34 2 8 2C9.66 2 11 3.34 11 5V7Z" fill="currentColor"/>
+            </svg>
+            安全設定
+          </a>
+          <a href="#" class="settings-nav__item">
+            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 1C4.58 1 1 4.58 1 9C1 13.42 4.58 17 9 17C13.42 17 17 13.42 17 9C17 4.58 13.42 1 9 1ZM9 15C5.69 15 3 12.31 3 9C3 5.69 5.69 3 9 3C12.31 3 15 5.69 15 9C15 12.31 12.31 15 9 15ZM9.5 5H8V10L12.25 12.52L13 11.24L9.5 9.15V5Z" fill="currentColor"/>
+            </svg>
+            外觀設定
+          </a>
+        </nav>
+
+        <!-- 設定內容 -->
+        <div class="settings-content">
+          <section class="settings-section">
+            <h3 class="settings-section__title">個人資料</h3>
+            <p class="settings-section__desc">更新您的個人資訊和頭像</p>
+
+            <div class="profile-avatar-edit">
+              <div class="profile-avatar-edit__image">王</div>
+              <div class="profile-avatar-edit__actions">
+                <button class="btn-upload">上傳新頭像</button>
+                <span class="profile-avatar-edit__hint">建議尺寸：200x200 像素</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-group__label">姓名</label>
+              <input type="text" class="form-group__input" value="王小明">
+            </div>
+
+            <div class="form-group">
+              <label class="form-group__label">電子郵件</label>
+              <input type="email" class="form-group__input" value="teacher@funtech.edu.tw">
+            </div>
+
+            <div class="form-group">
+              <label class="form-group__label">電話號碼</label>
+              <input type="tel" class="form-group__input" value="0912-345-678">
+            </div>
+          </section>
+
+          <div class="divider"></div>
+
+          <section class="settings-section">
+            <h3 class="settings-section__title">通知偏好</h3>
+            <p class="settings-section__desc">設定您想接收的通知類型</p>
+
+            <div class="toggle-group">
+              <div class="toggle-group__content">
+                <h4>課程提醒</h4>
+                <p>在課程開始前收到提醒通知</p>
+              </div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+
+            <div class="toggle-group">
+              <div class="toggle-group__content">
+                <h4>日誌提醒</h4>
+                <p>提醒您填寫待完成的教學日誌</p>
+              </div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+
+            <div class="toggle-group">
+              <div class="toggle-group__content">
+                <h4>系統更新</h4>
+                <p>接收系統更新和新功能通知</p>
+              </div>
+              <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+            </div>
+
+            <div class="toggle-group">
+              <div class="toggle-group__content">
+                <h4>電子郵件通知</h4>
+                <p>透過電子郵件接收重要通知</p>
+              </div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+          </section>
+
+          <div class="divider"></div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <button class="btn-secondary">取消</button>
+              <button class="btn-save">儲存變更</button>
+            </div>
+            <button class="btn-danger">登出帳號</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

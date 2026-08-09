@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課表排程 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .staff-layout { display: grid; grid-template-columns: 224px 1fr; min-height: 100vh; background: var(--color-background); }
+    .staff-sidebar { background: var(--color-surface-alt); padding: var(--spacing-lg) var(--spacing-md); display: flex; flex-direction: column; }
+    .staff-sidebar__header { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__profile { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__avatar { width: 36px; height: 36px; background: var(--color-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-md); font-weight: 600; color: var(--color-primary-dark); }
+    .staff-sidebar__info { display: flex; flex-direction: column; }
+    .staff-sidebar__name { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
+    .staff-sidebar__role { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .staff-sidebar__nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .staff-sidebar__nav-item { display: flex; align-items: center; gap: var(--spacing-md); padding: 10px 12px; font-size: var(--font-size-md); color: var(--color-text-secondary); text-decoration: none; border-radius: var(--radius-md); transition: all 0.2s; }
+    .staff-sidebar__nav-item:hover { background: rgba(117, 95, 0, 0.08); color: var(--color-text-primary); }
+    .staff-sidebar__nav-item--active { background: var(--color-primary); color: var(--color-primary-dark); }
+    .staff-sidebar__nav-item svg { width: 18px; height: 18px; }
+    .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
+    .staff-main { display: flex; flex-direction: column; overflow: hidden; }
+    .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
+    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
+    .staff-header__icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-secondary); cursor: pointer; }
+    .staff-header__avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); overflow: hidden; }
+    .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .btn-primary { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 20px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: var(--color-primary-dark); cursor: pointer; }
+    .btn-secondary { padding: 10px 20px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-secondary); cursor: pointer; }
+
+    /* 篩選列 */
+    .schedule-filters { display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+    .filter-select { padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); cursor: pointer; }
+    .date-nav { display: flex; align-items: center; gap: var(--spacing-sm); }
+    .date-nav__btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-secondary); }
+    .date-nav__btn:hover { background: var(--color-surface-alt); }
+    .date-nav__current { padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); min-width: 180px; text-align: center; }
+    .date-nav__input { padding: 8px 12px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); }
+    .weekday-tabs { display: flex; gap: 4px; margin-left: auto; }
+    .weekday-tab { width: 40px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+    .weekday-tab--active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); }
+
+    /* 課表 */
+    .schedule-grid { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .schedule-header { display: grid; border-bottom: 1px solid var(--color-surface-alt); }
+    .schedule-header__cell { padding: var(--spacing-md); text-align: center; font-size: var(--font-size-md); font-weight: 500; color: var(--color-text-primary); border-right: 1px dashed var(--color-surface-alt); }
+    .schedule-header__cell:first-child { border-right: 1px solid var(--color-surface-alt); }
+    .schedule-header__cell:last-child { border-right: none; }
+    .schedule-body { display: grid; }
+    .schedule-time { padding: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-text-primary); border-right: 1px solid var(--color-surface-alt); border-bottom: 1px dashed var(--color-surface-alt); display: flex; flex-direction: column; }
+    .schedule-time__main { font-weight: 500; }
+    .schedule-time__sub { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .schedule-cell { position: relative; min-height: 50px; border-right: 1px dashed var(--color-surface-alt); border-bottom: 1px dashed var(--color-surface-alt); }
+    .schedule-cell:last-child { border-right: none; }
+
+    /* 課程方塊 */
+    .schedule-block { position: absolute; left: 2px; right: 2px; padding: 6px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .schedule-block:hover { transform: scale(1.02); box-shadow: var(--shadow-md); z-index: 10; }
+    .schedule-block--yellow { background: rgba(255, 219, 88, 0.3); border-left: 3px solid #ffdb58; }
+    .schedule-block--orange { background: rgba(255, 183, 120, 0.3); border-left: 3px solid #ffb778; }
+    .schedule-block--purple { background: rgba(200, 180, 255, 0.3); border-left: 3px solid #c8b4ff; }
+    .schedule-block--blue { background: rgba(135, 206, 250, 0.3); border-left: 3px solid #87CEEB; }
+    .schedule-block--green { background: rgba(144, 238, 144, 0.3); border-left: 3px solid #90EE90; }
+    .schedule-block--adjusted { border-style: dashed; }
+    .schedule-block__title { font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .schedule-block__location { color: var(--color-text-muted); }
+    .schedule-block__teacher { color: var(--color-text-secondary); margin-top: 2px; }
+    .schedule-block__badge { position: absolute; top: 2px; right: 2px; padding: 1px 4px; font-size: 9px; background: #ff6b6b; color: white; border-radius: 2px; }
+
+    /* 調課 Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal { background: var(--color-surface); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-surface-alt); }
+    .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
+    .modal__close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted); }
+    .modal__close:hover { background: var(--color-surface-alt); }
+    .modal__body { padding: var(--spacing-lg); }
+    .modal__footer { display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); }
+    .form-group { margin-bottom: var(--spacing-lg); }
+    .form-group label { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-sm); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+    .adjustment-type-btns { display: flex; gap: var(--spacing-sm); }
+    .adjustment-type-btn { flex: 1; padding: 10px; text-align: center; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); cursor: pointer; font-size: var(--font-size-sm); }
+    .adjustment-type-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); }
+    .schedule-info { background: var(--color-background); border-radius: var(--radius-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .schedule-info__title { font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--spacing-xs); }
+    .schedule-info__detail { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+    /* 載入中 */
+    .loading { display: flex; align-items: center; justify-content: center; padding: var(--spacing-xl); color: var(--color-text-muted); }
+
+    @media (max-width: 992px) { .staff-layout { grid-template-columns: 1fr; } .staff-sidebar { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="staff-layout">
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>學生管理</a>
+        <a href="teachers.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>老師管理</a>
+        <a href="logs.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>日誌管理</a>
+        <a href="courses.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>課程資訊</a>
+        <a href="schedule.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>課表排程</a>
+        <a href="points.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>點數管理</a>
+        <a href="settings.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系統設定</a>
+      </nav>
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="currentDate">2026年6月15日</span>
+      </div>
+    </aside>
+
+    <main class="staff-main">
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <button class="staff-header__icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+          <div class="staff-header__avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像"></div>
+        </div>
+      </header>
+
+      <div class="staff-content">
+        <div class="page-header">
+          <h2 class="page-title">課表排程</h2>
+          <button class="btn-primary" onclick="openAdjustmentModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            調課
+          </button>
+        </div>
+
+        <div class="schedule-filters">
+          <select class="filter-select" id="filterTeacher" onchange="loadSchedule()">
+            <option value="">全部老師</option>
+          </select>
+          <select class="filter-select" id="filterClassroom" onchange="loadSchedule()">
+            <option value="">全部教室</option>
+          </select>
+          <div class="date-nav">
+            <button class="date-nav__btn" onclick="changeWeek(-1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="date-nav__current" id="weekDisplay">2026/08/01 ~ 2026/08/07</span>
+            <button class="date-nav__btn" onclick="changeWeek(1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <input type="date" class="date-nav__input" id="datePicker" onchange="goToDate(this.value)">
+            <button class="btn-secondary" onclick="goToToday()">今天</button>
+          </div>
+          <div class="weekday-tabs" id="weekdayTabs">
+            <button class="weekday-tab" data-day="1">週一</button>
+            <button class="weekday-tab" data-day="2">週二</button>
+            <button class="weekday-tab" data-day="3">週三</button>
+            <button class="weekday-tab" data-day="4">週四</button>
+            <button class="weekday-tab" data-day="5">週五</button>
+            <button class="weekday-tab" data-day="6">週六</button>
+            <button class="weekday-tab" data-day="0">週日</button>
+          </div>
+        </div>
+
+        <div class="schedule-grid">
+          <div class="schedule-header" id="scheduleHeader">
+            <!-- 由 JS 動態生成 -->
+          </div>
+          <div class="schedule-body" id="scheduleBody">
+            <div class="loading">載入中...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 調課 Modal -->
+  <div class="modal-overlay" id="adjustmentModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title" id="adjustmentModalTitle">新增調課</h3>
+        <button class="modal__close" onclick="closeModal('adjustmentModal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="schedule-info" id="scheduleInfo" style="display: none;">
+          <div class="schedule-info__title" id="scheduleInfoTitle"></div>
+          <div class="schedule-info__detail" id="scheduleInfoDetail"></div>
+        </div>
+
+        <div class="form-group">
+          <label>選擇班級</label>
+          <select id="adjustScheduleId">
+            <option value="">請選擇班級</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>原上課日期</label>
+          <input type="date" id="adjustOriginalDate">
+        </div>
+
+        <div class="form-group">
+          <label>調課類型</label>
+          <div class="adjustment-type-btns">
+            <div class="adjustment-type-btn active" data-type="reschedule" onclick="setAdjustmentType('reschedule')">改期</div>
+            <div class="adjustment-type-btn" data-type="cancel" onclick="setAdjustmentType('cancel')">取消</div>
+            <div class="adjustment-type-btn" data-type="makeup" onclick="setAdjustmentType('makeup')">補課</div>
+          </div>
+        </div>
+
+        <div id="adjustedFields">
+          <div class="form-group">
+            <label>調整後日期</label>
+            <input type="date" id="adjustAdjustedDate">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>調整後開始時間</label>
+              <input type="time" id="adjustStartTime">
+            </div>
+            <div class="form-group">
+              <label>調整後結束時間</label>
+              <input type="time" id="adjustEndTime">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>調整後教室</label>
+            <select id="adjustClassroom">
+              <option value="">維持原教室</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>調課原因</label>
+          <textarea id="adjustReason" rows="2" placeholder="請輸入調課原因（選填）"></textarea>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn-secondary" onclick="closeModal('adjustmentModal')">取消</button>
+        <button class="btn-primary" onclick="saveAdjustment()">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // 狀態
+    let currentDate = new Date();
+    let currentDayOfWeek = currentDate.getDay(); // 0=週日
+    let teachers = [];
+    let classrooms = [];
+    let schedules = [];
+    let currentAdjustmentType = 'reschedule';
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', async () => {
+      updateCurrentDateDisplay();
+      await loadFilters();
+      await loadSchedule();
+      setupWeekdayTabs();
+    });
+
+    // 更新日期顯示
+    function updateCurrentDateDisplay() {
+      const dateEl = document.getElementById('currentDate');
+      const now = new Date();
+      dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+      // 更新週顯示
+      const weekStart = getWeekStart(currentDate);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      document.getElementById('weekDisplay').textContent =
+        `${formatDate(weekStart)} ~ ${formatDate(weekEnd)}`;
+      document.getElementById('datePicker').value = formatDateISO(currentDate);
+    }
+
+    // 取得週一日期
+    function getWeekStart(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff));
+    }
+
+    // 格式化日期 (接受字串日期或 Date 物件，避免傳入字串時 .getFullYear is not a function)
+    function formatDate(date) {
+      if (!(date instanceof Date)) date = new Date(date);
+      return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatDateISO(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    // 載入篩選器選項
+    async function loadFilters() {
+      try {
+        // 載入老師
+        const teachersResult = await api.teachers.getAll();
+        teachers = teachersResult.data || [];
+        const teacherSelect = document.getElementById('filterTeacher');
+        teachers.forEach(t => {
+          teacherSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+        });
+
+        // 載入教室
+        const classroomsResult = await api.schedules.getClassrooms();
+        classrooms = classroomsResult.data || [];
+        const classroomSelect = document.getElementById('filterClassroom');
+        const adjustClassroomSelect = document.getElementById('adjustClassroom');
+        classrooms.forEach(c => {
+          classroomSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+          adjustClassroomSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+
+        // 載入班級到調課選單
+        const schedulesResult = await api.schedules.getAll();
+        schedules = schedulesResult.data || [];
+        const scheduleSelect = document.getElementById('adjustScheduleId');
+        schedules.forEach(s => {
+          const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+          const dayName = dayNames[s.day_of_week];
+          const time = s.start_time ? s.start_time.substring(0, 5) : '';
+          scheduleSelect.innerHTML += `<option value="${s.id}">${s.course_name} - ${dayName} ${time} (${s.teacher_name || '未指派'})</option>`;
+        });
+      } catch (error) {
+        console.error('載入篩選器失敗:', error);
+      }
+    }
+
+    // 載入課表
+    async function loadSchedule() {
+      const scheduleBody = document.getElementById('scheduleBody');
+      const scheduleHeader = document.getElementById('scheduleHeader');
+      scheduleBody.innerHTML = '<div class="loading">載入中...</div>';
+
+      try {
+        const teacherId = document.getElementById('filterTeacher').value;
+        const classroomId = document.getElementById('filterClassroom').value;
+
+        const result = await api.scheduleCalendar.getDaily({
+          date: formatDateISO(currentDate),
+          teacher_id: teacherId || undefined,
+          classroom_id: classroomId || undefined
+        });
+
+        const data = result.data;
+        const teacherList = data.teachers.filter(t => t.schedules.length > 0 || !teacherId);
+
+        // 如果沒有選擇特定老師，顯示所有有排課的老師
+        const displayTeachers = teacherId ? teacherList : teacherList.slice(0, 7);
+
+        // 生成表頭
+        const cols = displayTeachers.length + 1;
+        scheduleHeader.style.gridTemplateColumns = `60px repeat(${displayTeachers.length}, 1fr)`;
+        scheduleHeader.innerHTML = '<div class="schedule-header__cell"></div>' +
+          displayTeachers.map(t => `<div class="schedule-header__cell">${t.teacher_name}</div>`).join('');
+
+        // 生成課表內容
+        scheduleBody.style.gridTemplateColumns = `60px repeat(${displayTeachers.length}, 1fr)`;
+        scheduleBody.innerHTML = '';
+
+        const times = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+
+        times.forEach((time, index) => {
+          const hour = parseInt(time);
+
+          // 時間欄
+          const timeCell = document.createElement('div');
+          timeCell.className = 'schedule-time';
+          timeCell.innerHTML = `<span class="schedule-time__main">${time}</span><span class="schedule-time__sub">${hour}:30</span>`;
+          scheduleBody.appendChild(timeCell);
+
+          // 老師欄位
+          displayTeachers.forEach((teacher, tIndex) => {
+            const cell = document.createElement('div');
+            cell.className = 'schedule-cell';
+
+            // 找這個老師在這個時間的課程
+            teacher.schedules.forEach(schedule => {
+              const startHour = parseInt(schedule.start_time.split(':')[0]);
+              const endHour = parseInt(schedule.end_time.split(':')[0]);
+
+              if (startHour === hour) {
+                const duration = endHour - startHour;
+                const block = document.createElement('div');
+                const colorClass = getColorClass(schedule.course_type_name || schedule.course_name);
+                block.className = `schedule-block schedule-block--${colorClass}${schedule.is_adjusted ? ' schedule-block--adjusted' : ''}`;
+                block.style.top = '2px';
+                block.style.height = `${duration * 50 - 4}px`;
+
+                const locationName = schedule.classroom_name ? `[${schedule.classroom_name.replace('教室', '')}]` : '';
+                block.innerHTML = `
+                  <div class="schedule-block__title">${schedule.course_name} ${locationName}</div>
+                  <div class="schedule-block__teacher">${schedule.teacher_name || ''}</div>
+                  ${schedule.is_adjusted ? '<span class="schedule-block__badge">調</span>' : ''}
+                `;
+
+                block.onclick = () => openScheduleDetail(schedule);
+                cell.appendChild(block);
+              }
+            });
+
+            scheduleBody.appendChild(cell);
+          });
+        });
+
+        if (displayTeachers.length === 0) {
+          scheduleBody.innerHTML = '<div class="loading">今日無排課</div>';
+        }
+
+      } catch (error) {
+        console.error('載入課表失敗:', error);
+        scheduleBody.innerHTML = '<div class="loading">載入失敗</div>';
+      }
+    }
+
+    // 取得課程顏色
+    function getColorClass(name) {
+      if (!name) return 'yellow';
+      if (name.includes('動力')) return 'yellow';
+      if (name.includes('程式')) return 'orange';
+      if (name.includes('科創')) return 'purple';
+      if (name.includes('幼兒')) return 'blue';
+      return 'green';
+    }
+
+    // 切換週
+    function changeWeek(delta) {
+      currentDate.setDate(currentDate.getDate() + (delta * 7));
+      updateCurrentDateDisplay();
+      loadSchedule();
+    }
+
+    // 跳到今天
+    function goToToday() {
+      currentDate = new Date();
+      currentDayOfWeek = currentDate.getDay();
+      updateCurrentDateDisplay();
+      loadSchedule();
+      updateWeekdayTabs();
+    }
+
+    // 跳到指定日期
+    function goToDate(dateStr) {
+      currentDate = new Date(dateStr);
+      currentDayOfWeek = currentDate.getDay();
+      updateCurrentDateDisplay();
+      loadSchedule();
+      updateWeekdayTabs();
+    }
+
+    // 設置星期標籤
+    function setupWeekdayTabs() {
+      const tabs = document.querySelectorAll('.weekday-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const day = parseInt(tab.dataset.day);
+          // 計算目標日期
+          const weekStart = getWeekStart(currentDate);
+          const targetDate = new Date(weekStart);
+          targetDate.setDate(weekStart.getDate() + (day === 0 ? 6 : day - 1));
+          currentDate = targetDate;
+          currentDayOfWeek = day;
+          updateCurrentDateDisplay();
+          loadSchedule();
+          updateWeekdayTabs();
+        });
+      });
+      updateWeekdayTabs();
+    }
+
+    // 更新星期標籤狀態
+    function updateWeekdayTabs() {
+      const tabs = document.querySelectorAll('.weekday-tab');
+      tabs.forEach(tab => {
+        const day = parseInt(tab.dataset.day);
+        if (day === currentDayOfWeek) {
+          tab.classList.add('weekday-tab--active');
+        } else {
+          tab.classList.remove('weekday-tab--active');
+        }
+      });
+    }
+
+    // 開啟課程詳情
+    function openScheduleDetail(schedule) {
+      // 可以顯示課程詳情或開啟調課 Modal
+      openAdjustmentModal(schedule);
+    }
+
+    // 開啟調課 Modal
+    function openAdjustmentModal(schedule = null) {
+      if (schedule) {
+        document.getElementById('adjustScheduleId').value = schedule.schedule_id;
+        document.getElementById('adjustOriginalDate').value = formatDateISO(currentDate);
+        document.getElementById('scheduleInfo').style.display = 'block';
+        document.getElementById('scheduleInfoTitle').textContent = schedule.course_name;
+        document.getElementById('scheduleInfoDetail').textContent =
+          `${schedule.teacher_name || '未指派'} | ${schedule.classroom_name || '未指定'} | ${schedule.start_time?.substring(0, 5)} - ${schedule.end_time?.substring(0, 5)}`;
+      } else {
+        document.getElementById('scheduleInfo').style.display = 'none';
+        document.getElementById('adjustOriginalDate').value = formatDateISO(currentDate);
+      }
+      document.getElementById('adjustmentModal').classList.add('active');
+    }
+
+    // 關閉 Modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 設置調課類型
+    function setAdjustmentType(type) {
+      currentAdjustmentType = type;
+      document.querySelectorAll('.adjustment-type-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+      });
+
+      // 取消類型不需要調整後欄位
+      document.getElementById('adjustedFields').style.display = type === 'cancel' ? 'none' : 'block';
+    }
+
+    // 儲存調課
+    async function saveAdjustment() {
+      const scheduleId = document.getElementById('adjustScheduleId').value;
+      const originalDate = document.getElementById('adjustOriginalDate').value;
+
+      if (!scheduleId || !originalDate) {
+        alert('請選擇班級和原上課日期');
+        return;
+      }
+
+      const data = {
+        schedule_id: parseInt(scheduleId),
+        original_date: originalDate,
+        adjustment_type: currentAdjustmentType,
+        reason: document.getElementById('adjustReason').value || null
+      };
+
+      if (currentAdjustmentType !== 'cancel') {
+        data.adjusted_date = document.getElementById('adjustAdjustedDate').value || null;
+        data.adjusted_start_time = document.getElementById('adjustStartTime').value || null;
+        data.adjusted_end_time = document.getElementById('adjustEndTime').value || null;
+        data.adjusted_classroom_id = document.getElementById('adjustClassroom').value || null;
+      }
+
+      try {
+        await api.scheduleCalendar.adjustments.create(data);
+        alert('調課建立成功');
+        closeModal('adjustmentModal');
+        loadSchedule();
+      } catch (error) {
+        alert('調課建立失敗: ' + (error.response?.data?.message || '未知錯誤'));
+      }
+    }
+
+    // 點擊背景關閉 Modal
+    document.getElementById('adjustmentModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('adjustmentModal');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+/* ============================================
+   行政端通知公告系統樣式
+   基於 Figma 設計實作
+   ============================================ */
+
+/* ============================================
+   通知面板（鈴鐺點擊後的下拉面板）
+   ============================================ */
+.notification-panel {
+  position: fixed;
+  top: 60px;
+  right: 80px;
+  width: 445px;
+  height: 699px;
+  max-height: calc(100vh - 80px);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 25px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.notification-panel.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.notification-panel__container {
+  padding: 32px 32px 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.notification-panel__title {
+  font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #000;
+  line-height: normal;
+}
+
+.notification-panel__add-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  transition: opacity 0.2s;
+  padding: 0;
+}
+
+.notification-panel__add-btn:hover {
+  opacity: 0.7;
+}
+
+.notification-panel__add-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.notification-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 32px;
+  margin-top: 10px;
+}
+
+.notification-panel__item {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 10px;
+}
+
+.notification-panel__item:first-child {
+  border-top: 1px solid #e5e5e5;
+}
+
+.notification-panel__item-date {
+  font-family: '42dot Sans', 'Noto Sans TC', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: #656e79;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  line-height: 15px;
+  margin-bottom: 0;
+}
+
+.notification-panel__item-title {
+  font-family: 'Inter', 'Noto Sans TC', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #353535;
+  line-height: 26px;
+  word-break: break-word;
+}
+
+.notification-panel__empty {
+  padding: 40px 0;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* ============================================
+   新增公告彈窗
+   ============================================ */
+.announcement-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(209, 213, 220, 0.7);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 15px;
+  z-index: 1001;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+}
+
+.announcement-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.announcement-modal {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 25px 25px rgba(0, 0, 0, 0.25);
+  width: 480px;
+  max-width: 100%;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  transform: translateY(-20px);
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.announcement-modal-overlay.active .announcement-modal {
+  transform: translateY(0);
+}
+
+/* 彈窗標題 */
+.announcement-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 22.5px 15.8px;
+  border-bottom: 0.8px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.announcement-modal__title {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13.125px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 18.75px;
+}
+
+.announcement-modal__close {
+  width: 26.25px;
+  height: 26.25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 9.375px;
+  cursor: pointer;
+  color: #666;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.announcement-modal__close:hover {
+  background: #f5f5f5;
+}
+
+.announcement-modal__close svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* 彈窗內容 */
+.announcement-modal__body {
+  padding: 22.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 18.75px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 表單組 */
+.announcement-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5.625px;
+}
+
+.announcement-form-label {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 11.25px;
+  font-weight: 500;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.2813px;
+  line-height: 15px;
+}
+
+/* Radio 按鈕組 */
+.announcement-radio-group {
+  display: flex;
+  gap: 18.75px;
+  flex-wrap: wrap;
+}
+
+.announcement-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.announcement-radio input[type="radio"] {
+  display: none;
+}
+
+.announcement-radio__mark {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid #888;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.announcement-radio input[type="radio"]:checked + .announcement-radio__mark {
+  border-color: #1a1a1a;
+  background: #1a1a1a;
+}
+
+.announcement-radio input[type="radio"]:checked + .announcement-radio__mark::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+}
+
+.announcement-radio__text {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13.125px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 18.75px;
+}
+
+/* 定時發布日期時間 */
+.announcement-scheduled-fields {
+  display: flex;
+  gap: 7.5px;
+}
+
+.announcement-datetime-row {
+  display: flex;
+  gap: 7.5px;
+}
+
+.announcement-date-picker,
+.announcement-time-picker {
+  position: relative;
+}
+
+.announcement-date-input,
+.announcement-time-input {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 9.375px;
+  padding: 8px 12px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13.125px;
+  font-weight: 500;
+  color: #000;
+  outline: none;
+  height: 33.75px;
+  box-sizing: border-box;
+}
+
+.announcement-date-input {
+  width: 129px;
+}
+
+.announcement-time-input {
+  width: 118px;
+}
+
+/* 下拉選擇 */
+.announcement-select-wrapper {
+  position: relative;
+}
+
+.announcement-select {
+  width: 100%;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 9.375px;
+  padding: 7.5px 35px 7.5px 11.25px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13.125px;
+  font-weight: 500;
+  color: #888;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 33.75px;
+  box-sizing: border-box;
+  line-height: 18.75px;
+}
+
+.announcement-select:focus,
+.announcement-select:valid {
+  color: #1a1a1a;
+}
+
+.announcement-select-icon {
+  position: absolute;
+  right: 11.25px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #666;
+}
+
+/* 文字輸入框 */
+.announcement-input {
+  width: 100%;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 9.375px;
+  padding: 7.5px 11.25px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13.125px;
+  font-weight: 400;
+  color: #1a1a1a;
+  outline: none;
+  height: 33.75px;
+  box-sizing: border-box;
+  line-height: normal;
+}
+
+.announcement-input::placeholder {
+  color: rgba(26, 26, 26, 0.5);
+}
+
+/* 文字區域 */
+.announcement-textarea {
+  width: 100%;
+  height: 100.3px;
+  min-height: 100.3px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 9.375px;
+  padding: 7.5px 11.25px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13.125px;
+  font-weight: 400;
+  color: #1a1a1a;
+  outline: none;
+  resize: vertical;
+  line-height: 21.328px;
+  box-sizing: border-box;
+}
+
+.announcement-textarea::placeholder {
+  color: rgba(26, 26, 26, 0.5);
+}
+
+/* 彈窗底部 */
+.announcement-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 11.25px;
+  padding: 15.8px 22.5px 15px;
+  border-top: 0.8px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.announcement-btn {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13.125px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 18.75px;
+  text-align: center;
+  border-radius: 9.375px;
+}
+
+.announcement-btn--cancel {
+  background: transparent;
+  border: 0.8px solid rgba(0, 0, 0, 0.08);
+  color: #1a1a1a;
+  padding: 8.3px 15.8px;
+}
+
+.announcement-btn--cancel:hover {
+  background: #f5f5f5;
+}
+
+.announcement-btn--confirm {
+  background: #ffdb58;
+  border: none;
+  color: #1a1a1a;
+  padding: 7.5px 15px;
+}
+
+.announcement-btn--confirm:hover {
+  filter: brightness(0.95);
+}
+
+.announcement-btn--confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   響應式調整
+   ============================================ */
+@media (max-width: 768px) {
+  .notification-panel {
+    right: 10px;
+    width: calc(100vw - 20px);
+    max-width: 445px;
+    height: auto;
+    max-height: calc(100vh - 80px);
+  }
+
+  .announcement-modal {
+    max-width: calc(100vw - 30px);
+  }
+}

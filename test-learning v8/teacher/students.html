@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學生管理 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: #6a7282;
+    }
+
+    /* 主要內容區分割佈局 */
+    .students-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      height: calc(100vh - 180px);
+    }
+
+    @media (max-width: 1024px) {
+      .students-layout {
+        grid-template-columns: 1fr;
+      }
+      .student-profile-panel {
+        display: none;
+      }
+    }
+
+    /* 左側學生列表區 */
+    .students-list-section {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    /* 搜尋篩選列 */
+    .search-filter-bar {
+      padding: 16px 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 180px;
+      max-width: 240px;
+      position: relative;
+    }
+
+    .search-input input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      background: #f3f4f6;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .search-input svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: rgba(10, 10, 10, 0.4);
+    }
+
+    .filter-select {
+      padding: 10px 36px 10px 16px;
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #364153;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23364153' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      cursor: pointer;
+    }
+
+    /* 學生表格 */
+    .students-table-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .students-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .students-table th {
+      background: white;
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6a7282;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+    }
+
+    .students-table td {
+      padding: 14px 20px;
+      font-size: 14px;
+      color: #101828;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .students-table tr {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .students-table tr:hover td {
+      background: #fafafa;
+    }
+
+    .students-table tr.active td {
+      background: rgba(255, 219, 88, 0.1);
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .student-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+    }
+
+    .student-name {
+      font-weight: 500;
+    }
+
+    .course-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 219, 88, 0.3);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .view-btn {
+      padding: 6px 14px;
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #364153;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .view-btn:hover {
+      background: #f9fafb;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    /* 分頁 */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .pagination-btn {
+      padding: 8px 14px;
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #364153;
+      cursor: pointer;
+    }
+
+    .pagination-btn:hover {
+      background: #f9fafb;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-num {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #364153;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .pagination-num:hover {
+      background: #f9fafb;
+    }
+
+    .pagination-num--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    /* 右側學生檔案面板 */
+    .student-profile-panel {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--color-primary);
+    }
+
+    .profile-header__info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-header__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary-dark);
+    }
+
+    .profile-header__name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .profile-header__edit {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-primary-dark);
+      padding: 4px;
+    }
+
+    .profile-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* 基本資訊格線 */
+    .profile-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 24px;
+      margin-bottom: 24px;
+    }
+
+    .profile-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .profile-info-item__icon {
+      width: 16px;
+      height: 16px;
+      color: #6a7282;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .profile-info-item__content {
+      flex: 1;
+    }
+
+    .profile-info-item__label {
+      font-size: 12px;
+      color: #6a7282;
+      margin-bottom: 2px;
+    }
+
+    .profile-info-item__value {
+      font-size: 14px;
+      color: #101828;
+      font-weight: 500;
+    }
+
+    /* 圖表區塊 */
+    .chart-section {
+      margin-bottom: 20px;
+    }
+
+    .chart-section__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 12px;
+    }
+
+    .radar-chart-container {
+      max-width: 200px;
+      margin: 0 auto;
+    }
+
+    .trend-chart-container {
+      height: 140px;
+    }
+
+    .trend-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      justify-content: center;
+    }
+
+    .trend-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: #6a7282;
+    }
+
+    .trend-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* 底部操作按鈕 */
+    .profile-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .profile-action-btn {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .profile-action-btn--secondary {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: #364153;
+    }
+
+    .profile-action-btn--secondary:hover {
+      background: #f9fafb;
+    }
+
+    .profile-action-btn--primary {
+      background: var(--color-primary);
+      border: 1px solid rgba(113, 92, 0, 0.15);
+      color: var(--color-primary-dark);
+    }
+
+    .profile-action-btn--primary:hover {
+      filter: brightness(0.97);
+    }
+
+    /* Modal 樣式 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal__content {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      background: var(--color-primary);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .modal__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .modal__close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--color-primary-dark);
+    }
+
+    .modal__body {
+      padding: 24px;
+    }
+
+    /* 點數管理 */
+    .points-current {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .points-current__label {
+      font-size: 14px;
+      color: #364153;
+    }
+
+    .points-current__value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-primary-dark);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group__label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #101828;
+      margin-bottom: 8px;
+    }
+
+    .form-group__input,
+    .form-group__select,
+    .form-group__textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #101828;
+    }
+
+    .form-group__textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .points-preview {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 20px 0;
+    }
+
+    .points-preview__title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #6a7282;
+      margin-bottom: 12px;
+    }
+
+    .points-preview__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      text-align: center;
+    }
+
+    .points-preview__item-label {
+      font-size: 12px;
+      color: #6a7282;
+      margin-bottom: 4px;
+    }
+
+    .points-preview__item-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: #101828;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .modal-btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .modal-btn--cancel {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: #364153;
+    }
+
+    .modal-btn--confirm {
+      background: var(--color-primary);
+      border: 1px solid rgba(113, 92, 0, 0.2);
+      color: var(--color-primary-dark);
+    }
+
+    /* 新增競賽 Modal */
+    .competition-modal .modal__content {
+      max-width: 560px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .level-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .level-btn {
+      padding: 12px 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+      color: #364153;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .level-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .level-btn--active {
+      background: var(--color-primary);
+      border-color: rgba(113, 92, 0, 0.2);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .upload-area {
+      border: 2px dashed rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .upload-area:hover {
+      border-color: var(--color-primary);
+      background: rgba(255, 219, 88, 0.05);
+    }
+
+    .upload-area__icon {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 8px;
+      color: #6a7282;
+    }
+
+    .upload-area__text {
+      font-size: 14px;
+      color: #364153;
+      margin-bottom: 4px;
+    }
+
+    .upload-area__hint {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .required-mark {
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- 頂部導覽列 -->
+    <header class="header">
+      <h1 class="header__logo">智慧學習歷程系統</h1>
+
+      <div class="header__search">
+        <svg class="header__search-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="currentColor"/>
+        </svg>
+        <input type="text" class="header__search-input" placeholder="搜尋...">
+      </div>
+
+      <div class="header__actions">
+        <button class="header__icon-btn" aria-label="語言設定">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM9 17.93C5.05 17.44 2 14.08 2 10C2 9.38 2.08 8.79 2.21 8.21L7 13V14C7 15.1 7.9 16 9 16V17.93ZM15.9 15.39C15.64 14.58 14.9 14 14 14H13V11C13 10.45 12.55 10 12 10H6V8H8C8.55 8 9 7.55 9 7V5H11C12.1 5 13 4.1 13 3V2.59C15.93 3.78 18 6.65 18 10C18 12.08 17.2 13.97 15.9 15.39Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <button class="header__icon-btn" aria-label="通知">
+          <svg viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 20C9.1 20 10 19.1 10 18H6C6 19.1 6.9 20 8 20ZM14 14V9C14 5.93 12.37 3.36 9.5 2.68V2C9.5 1.17 8.83 0.5 8 0.5C7.17 0.5 6.5 1.17 6.5 2V2.68C3.64 3.36 2 5.92 2 9V14L0 16V17H16V16L14 14ZM12 15H4V9C4 6.52 5.51 4.5 8 4.5C10.49 4.5 12 6.52 12 9V15Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="header__avatar">
+          <img src="https://via.placeholder.com/36" alt="使用者頭像">
+        </div>
+      </div>
+    </header>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar">
+      <div class="sidebar__profile">
+        <div class="sidebar__profile-inner">
+          <div class="sidebar__profile-avatar">
+            <svg class="sidebar__profile-avatar-icon" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H20C21.1 18 22 17.1 22 16V2C22 0.9 21.1 0 20 0ZM20 16H2V2H20V16Z" fill="#755f00"/>
+            </svg>
+          </div>
+          <div class="sidebar__profile-info">
+            <span class="sidebar__profile-name">王小明 老師</span>
+            <span class="sidebar__profile-role">教師系統</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 18V12H11V18H16V10H19L10 2L1 10H4V18H7Z" fill="currentColor"/>
+          </svg>
+          <span>首頁</span>
+        </a>
+        <a href="schedule.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2H15V0H13V2H5V0H3V2H2C0.89 2 0 2.9 0 4V18C0 19.1 0.89 20 2 20H16C17.1 20 18 19.1 18 18V4C18 2.9 17.1 2 16 2ZM16 18H2V7H16V18ZM4 9H9V14H4V9Z" fill="currentColor"/>
+          </svg>
+          <span>課表</span>
+        </a>
+        <a href="records.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2H14V0H6V2H2C0.9 2 0 2.9 0 4V18C0 19.1 0.9 20 2 20H18C19.1 20 20 19.1 20 18V4C20 2.9 19.1 2 18 2ZM8 2H12V4H8V2ZM18 18H2V4H6V6H14V4H18V18ZM4 10H16V12H4V10ZM4 14H12V16H4V14Z" fill="currentColor"/>
+          </svg>
+          <span>教師日誌</span>
+        </a>
+        <a href="students.html" class="sidebar__nav-item sidebar__nav-item--active">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5 0C4.7 0 0 4.7 0 10.5C0 16.3 4.7 21 10.5 21C16.3 21 21 16.3 21 10.5C21 4.7 16.3 0 10.5 0ZM10.5 3.15C12.24 3.15 13.65 4.56 13.65 6.3C13.65 8.04 12.24 9.45 10.5 9.45C8.76 9.45 7.35 8.04 7.35 6.3C7.35 4.56 8.76 3.15 10.5 3.15ZM10.5 18.06C7.875 18.06 5.544 16.716 4.2 14.7C4.2 12.6 8.4 11.445 10.5 11.445C12.6 11.445 16.8 12.6 16.8 14.7C15.456 16.716 13.125 18.06 10.5 18.06Z" fill="currentColor"/>
+          </svg>
+          <span>學生管理</span>
+        </a>
+        <a href="settings.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.14 10.94C17.18 10.64 17.2 10.33 17.2 10C17.2 9.68 17.18 9.36 17.13 9.06L19.16 7.48C19.34 7.34 19.39 7.07 19.28 6.87L17.36 3.55C17.24 3.33 16.99 3.26 16.77 3.33L14.38 4.29C13.88 3.91 13.35 3.59 12.76 3.35L12.4 0.81C12.36 0.57 12.16 0.4 11.92 0.4H8.08C7.84 0.4 7.65 0.57 7.61 0.81L7.25 3.35C6.66 3.59 6.12 3.92 5.63 4.29L3.24 3.33C3.02 3.25 2.77 3.33 2.65 3.55L0.74 6.87C0.62 7.08 0.66 7.34 0.86 7.48L2.89 9.06C2.84 9.36 2.8 9.69 2.8 10C2.8 10.31 2.82 10.64 2.87 10.94L0.84 12.52C0.66 12.66 0.61 12.93 0.72 13.13L2.64 16.45C2.76 16.67 3.01 16.74 3.23 16.67L5.62 15.71C6.12 16.09 6.65 16.41 7.24 16.65L7.6 19.19C7.65 19.43 7.84 19.6 8.08 19.6H11.92C12.16 19.6 12.36 19.43 12.39 19.19L12.75 16.65C13.34 16.41 13.88 16.09 14.37 15.71L16.76 16.67C16.98 16.75 17.23 16.67 17.35 16.45L19.27 13.13C19.39 12.91 19.34 12.66 19.15 12.52L17.14 10.94ZM10 13.6C8.02 13.6 6.4 11.98 6.4 10C6.4 8.02 8.02 6.4 10 6.4C11.98 6.4 13.6 8.02 13.6 10C13.6 11.98 11.98 13.6 10 13.6Z" fill="currentColor"/>
+          </svg>
+          <span>系統設定</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="main-content">
+      <div class="page-header">
+        <h2>學生管理</h2>
+        <p>管理和查看所有學生資訊</p>
+      </div>
+
+      <div class="students-layout">
+        <!-- 左側：學生列表 -->
+        <div class="students-list-section">
+          <div class="search-filter-bar">
+            <div class="search-input">
+              <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="currentColor"/>
+              </svg>
+              <input type="text" placeholder="搜尋學生姓名" id="searchInput">
+            </div>
+            <select class="filter-select" id="classroomFilter">
+              <option value="">全部教室</option>
+              <option value="西屯">西屯</option>
+              <option value="沙鹿">沙鹿</option>
+            </select>
+            <select class="filter-select" id="courseFilter">
+              <option value="">全部課程</option>
+              <option value="科創機器人">科創機器人</option>
+              <option value="程式機械">程式機械</option>
+              <option value="幼兒簡易機械">幼兒簡易機械</option>
+            </select>
+          </div>
+
+          <div class="students-table-wrapper">
+            <table class="students-table">
+              <thead>
+                <tr>
+                  <th>學生資訊</th>
+                  <th>課程名稱</th>
+                  <th>教室</th>
+                  <th>點數</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody">
+                <tr onclick="selectStudent(this, '張小明', 88)" data-student="張小明" data-course="程式機械" data-classroom="沙鹿" data-points="88">
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <span class="student-name">張小明</span>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">程式機械</span></td>
+                  <td>沙鹿</td>
+                  <td>88</td>
+                  <td>
+                    <button class="view-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      查看檔案
+                    </button>
+                  </td>
+                </tr>
+                <tr class="active" onclick="selectStudent(this, '李美華', 90)" data-student="李美華" data-course="程式機械" data-classroom="西屯" data-points="90">
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <span class="student-name">李美華</span>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">程式機械</span></td>
+                  <td>西屯</td>
+                  <td>90</td>
+                  <td>
+                    <button class="view-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      查看檔案
+                    </button>
+                  </td>
+                </tr>
+                <tr onclick="selectStudent(this, '王大明', 75)" data-student="王大明" data-course="科創機器人" data-classroom="沙鹿" data-points="75">
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <span class="student-name">王大明</span>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">科創機器人</span></td>
+                  <td>沙鹿</td>
+                  <td>75</td>
+                  <td>
+                    <button class="view-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      查看檔案
+                    </button>
+                  </td>
+                </tr>
+                <tr onclick="selectStudent(this, '陳小芳', 94)" data-student="陳小芳" data-course="程式機械" data-classroom="西屯" data-points="94">
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <span class="student-name">陳小芳</span>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">程式機械</span></td>
+                  <td>西屯</td>
+                  <td>94</td>
+                  <td>
+                    <button class="view-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      查看檔案
+                    </button>
+                  </td>
+                </tr>
+                <tr onclick="selectStudent(this, '林志豪', 94)" data-student="林志豪" data-course="幼兒簡易機械" data-classroom="沙鹿" data-points="94">
+                  <td>
+                    <div class="student-info">
+                      <div class="student-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </div>
+                      <span class="student-name">林志豪</span>
+                    </div>
+                  </td>
+                  <td><span class="course-tag">幼兒簡易機械</span></td>
+                  <td>沙鹿</td>
+                  <td>94</td>
+                  <td>
+                    <button class="view-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      查看檔案
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <button class="pagination-btn" disabled>上一頁</button>
+            <span class="pagination-num pagination-num--active">1</span>
+            <span class="pagination-num">2</span>
+            <button class="pagination-btn">下一頁</button>
+          </div>
+        </div>
+
+        <!-- 右側：學生檔案面板 -->
+        <div class="student-profile-panel">
+          <div class="profile-header">
+            <div class="profile-header__info">
+              <div class="profile-header__avatar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <span class="profile-header__name" id="profileName">李美華</span>
+            </div>
+            <button class="profile-header__edit">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="profile-content">
+            <!-- 基本資訊 -->
+            <div class="profile-info-grid">
+              <div class="profile-info-item">
+                <svg class="profile-info-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                <div class="profile-info-item__content">
+                  <div class="profile-info-item__label">累積點數</div>
+                  <div class="profile-info-item__value" id="profilePoints">90 點</div>
+                </div>
+              </div>
+              <div class="profile-info-item">
+                <svg class="profile-info-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <div class="profile-info-item__content">
+                  <div class="profile-info-item__label">性別</div>
+                  <div class="profile-info-item__value">女</div>
+                </div>
+              </div>
+              <div class="profile-info-item">
+                <svg class="profile-info-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                </svg>
+                <div class="profile-info-item__content">
+                  <div class="profile-info-item__label">年級</div>
+                  <div class="profile-info-item__value">三年級</div>
+                </div>
+              </div>
+              <div class="profile-info-item">
+                <svg class="profile-info-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <div class="profile-info-item__content">
+                  <div class="profile-info-item__label">生日</div>
+                  <div class="profile-info-item__value">2017 / 01 / 30</div>
+                </div>
+              </div>
+              <div class="profile-info-item">
+                <svg class="profile-info-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                  <polyline points="2 17 12 22 22 17"/>
+                  <polyline points="2 12 12 17 22 12"/>
+                </svg>
+                <div class="profile-info-item__content">
+                  <div class="profile-info-item__label">課程名稱</div>
+                  <div class="profile-info-item__value">程式機械</div>
+                </div>
+              </div>
+              <div class="profile-info-item">
+                <svg class="profile-info-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <div class="profile-info-item__content">
+                  <div class="profile-info-item__label">到班日期</div>
+                  <div class="profile-info-item__value">2024/09/01</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 學習雷達圖 -->
+            <div class="chart-section">
+              <div class="chart-section__title">學習雷達圖</div>
+              <div class="radar-chart-container">
+                <canvas id="radarChart"></canvas>
+              </div>
+            </div>
+
+            <!-- 能力趨勢圖 -->
+            <div class="chart-section">
+              <div class="chart-section__title">能力趨勢圖</div>
+              <div class="trend-chart-container">
+                <canvas id="trendChart"></canvas>
+              </div>
+              <div class="trend-legend">
+                <div class="trend-legend-item">
+                  <span class="trend-legend-dot" style="background: #3b82f6;"></span>
+                  程式
+                </div>
+                <div class="trend-legend-item">
+                  <span class="trend-legend-dot" style="background: #22c55e;"></span>
+                  除錯
+                </div>
+                <div class="trend-legend-item">
+                  <span class="trend-legend-dot" style="background: #eab308;"></span>
+                  創意
+                </div>
+                <div class="trend-legend-item">
+                  <span class="trend-legend-dot" style="background: #f97316;"></span>
+                  結構
+                </div>
+                <div class="trend-legend-item">
+                  <span class="trend-legend-dot" style="background: #ec4899;"></span>
+                  團隊合作
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-actions">
+            <button class="profile-action-btn profile-action-btn--secondary" onclick="openPointsModal()">點數管理</button>
+            <button class="profile-action-btn profile-action-btn--primary" onclick="openCompetitionModal()">新增競賽</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 點數管理 Modal -->
+  <div class="modal" id="pointsModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 class="modal__title">點數管理 — <span id="pointsStudentName">李美華</span></h3>
+        <button class="modal__close" onclick="closeModal('pointsModal')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="points-current">
+          <span class="points-current__label">目前持有點數</span>
+          <span class="points-current__value" id="currentPointsDisplay">90 點</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">點數變動原因</label>
+          <select class="form-group__select" id="pointsReason">
+            <option value="">選擇點數變動原因</option>
+            <option value="attendance">出席獎勵</option>
+            <option value="competition">競賽加分</option>
+            <option value="behavior">表現獎勵</option>
+            <option value="redemption">兌換扣除</option>
+            <option value="other">其他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">點數更動說明</label>
+          <input type="text" class="form-group__input" placeholder="例：出席獎勵、競賽加分、兌換文具⋯">
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">給予點數量</label>
+          <input type="number" class="form-group__input" placeholder="請輸入點數（正整數）" id="pointsAmount">
+        </div>
+
+        <div class="points-preview">
+          <div class="points-preview__title">結算預覽</div>
+          <div class="points-preview__grid">
+            <div>
+              <div class="points-preview__item-label">目前點數</div>
+              <div class="points-preview__item-value" id="previewCurrent">90</div>
+            </div>
+            <div>
+              <div class="points-preview__item-label">給予點數</div>
+              <div class="points-preview__item-value" id="previewChange">—</div>
+            </div>
+            <div>
+              <div class="points-preview__item-label">更動後點數</div>
+              <div class="points-preview__item-value" id="previewTotal">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn--cancel" onclick="closeModal('pointsModal')">取消</button>
+          <button class="modal-btn modal-btn--confirm" onclick="confirmPoints()">確認增加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增競賽 Modal -->
+  <div class="modal competition-modal" id="competitionModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 class="modal__title">競賽歷程 — <span id="competitionStudentName">李美華</span></h3>
+        <button class="modal__close" onclick="closeModal('competitionModal')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label class="form-group__label">主辦單位<span class="required-mark">*</span></label>
+          <input type="text" class="form-group__input" placeholder="例如：台灣青少年機器人協會">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">競賽名稱</label>
+            <input type="text" class="form-group__input" placeholder="例如：機器人大賽台灣公開賽">
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">競賽日期<span class="required-mark">*</span></label>
+            <input type="date" class="form-group__input" value="2026-06-01">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">競賽等級<span class="required-mark">*</span></label>
+          <div class="level-buttons">
+            <button class="level-btn level-btn--active" onclick="selectLevel(this)">國際賽</button>
+            <button class="level-btn" onclick="selectLevel(this)">全國賽</button>
+            <button class="level-btn" onclick="selectLevel(this)">區域賽</button>
+            <button class="level-btn" onclick="selectLevel(this)">縣市賽</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">隊伍/組別名稱</label>
+          <input type="text" class="form-group__input" placeholder="例如：FUN學聯隊（3人）">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">名次</label>
+            <input type="text" class="form-group__input" placeholder="例如：第一名">
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">成績/分數</label>
+            <input type="text" class="form-group__input" placeholder="例如：96分">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">參賽證明<span class="required-mark">*</span></label>
+          <div class="upload-area">
+            <div class="upload-area__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <div class="upload-area__text">點擊上傳學生照片或文件</div>
+            <div class="upload-area__hint">支援 JPG、PNG、PDF、Word 文件</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-group__label">競賽說明</label>
+          <textarea class="form-group__textarea" placeholder="詳述競賽內容、學生表現及其他補充資訊..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn--confirm" onclick="submitCompetition()" style="width: 100%;">新增競賽歷程</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    let currentStudent = '李美華';
+    let currentPoints = 90;
+    let radarChart = null;
+    let trendChart = null;
+
+    // 選擇學生
+    function selectStudent(row, name, points) {
+      // 移除其他選中狀態
+      document.querySelectorAll('.students-table tr').forEach(r => r.classList.remove('active'));
+      row.classList.add('active');
+
+      currentStudent = name;
+      currentPoints = points;
+
+      // 更新右側面板
+      document.getElementById('profileName').textContent = name;
+      document.getElementById('profilePoints').textContent = points + ' 點';
+
+      // 更新圖表
+      updateCharts();
+    }
+
+    // 開啟點數管理 Modal
+    function openPointsModal() {
+      document.getElementById('pointsStudentName').textContent = currentStudent;
+      document.getElementById('currentPointsDisplay').textContent = currentPoints + ' 點';
+      document.getElementById('previewCurrent').textContent = currentPoints;
+      document.getElementById('pointsModal').classList.add('active');
+    }
+
+    // 開啟新增競賽 Modal
+    function openCompetitionModal() {
+      document.getElementById('competitionStudentName').textContent = currentStudent;
+      document.getElementById('competitionModal').classList.add('active');
+    }
+
+    // 關閉 Modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 選擇競賽等級
+    function selectLevel(btn) {
+      document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('level-btn--active'));
+      btn.classList.add('level-btn--active');
+    }
+
+    // 點數預覽計算
+    document.getElementById('pointsAmount')?.addEventListener('input', function() {
+      const change = parseInt(this.value) || 0;
+      document.getElementById('previewChange').textContent = change > 0 ? `+${change}` : change;
+      document.getElementById('previewTotal').textContent = currentPoints + change;
+    });
+
+    // 確認點數變更
+    function confirmPoints() {
+      alert('點數已更新！');
+      closeModal('pointsModal');
+    }
+
+    // 提交競賽
+    function submitCompetition() {
+      alert('競賽紀錄已新增！');
+      closeModal('competitionModal');
+    }
+
+    // 搜尋與篩選
+    function filterStudents() {
+      const searchValue = document.getElementById('searchInput').value.toLowerCase();
+      const classroomValue = document.getElementById('classroomFilter').value;
+      const courseValue = document.getElementById('courseFilter').value;
+
+      const rows = document.querySelectorAll('#studentsTableBody tr');
+      rows.forEach(row => {
+        const student = row.dataset.student?.toLowerCase() || '';
+        const classroom = row.dataset.classroom || '';
+        const course = row.dataset.course || '';
+
+        const matchSearch = student.includes(searchValue);
+        const matchClassroom = !classroomValue || classroom === classroomValue;
+        const matchCourse = !courseValue || course === courseValue;
+
+        row.style.display = matchSearch && matchClassroom && matchCourse ? '' : 'none';
+      });
+    }
+
+    document.getElementById('searchInput')?.addEventListener('input', filterStudents);
+    document.getElementById('classroomFilter')?.addEventListener('change', filterStudents);
+    document.getElementById('courseFilter')?.addEventListener('change', filterStudents);
+
+    // 初始化圖表
+    function initCharts() {
+      // 雷達圖
+      const radarCtx = document.getElementById('radarChart');
+      if (radarCtx) {
+        radarChart = new Chart(radarCtx, {
+          type: 'radar',
+          data: {
+            labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
+            datasets: [{
+              data: [4, 4, 3, 3, 2],
+              backgroundColor: 'rgba(255, 219, 88, 0.3)',
+              borderColor: 'rgba(255, 219, 88, 1)',
+              borderWidth: 2,
+              pointBackgroundColor: 'rgba(255, 219, 88, 1)',
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 5,
+                ticks: { stepSize: 1, display: false },
+                grid: { color: 'rgba(0, 0, 0, 0.08)' },
+                angleLines: { color: 'rgba(0, 0, 0, 0.08)' },
+                pointLabels: { font: { size: 11 } }
+              }
+            }
+          }
+        });
+      }
+
+      // 趨勢圖
+      const trendCtx = document.getElementById('trendChart');
+      if (trendCtx) {
+        trendChart = new Chart(trendCtx, {
+          type: 'line',
+          data: {
+            labels: ['3/27', '4/3', '4/10', '4/17', '4/24'],
+            datasets: [
+              { label: '程式', data: [3.5, 4, 4.5, 4, 5], borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '除錯', data: [3, 3.5, 4, 4, 4], borderColor: '#22c55e', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '創意', data: [3, 3.5, 3, 4, 3.5], borderColor: '#eab308', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '結構', data: [2.5, 3, 2.5, 3, 3], borderColor: '#f97316', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '團隊合作', data: [2, 2.5, 3, 3, 4], borderColor: '#ec4899', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+    }
+
+    function updateCharts() {
+      // 可根據學生更新圖表數據
+    }
+
+    // 點擊 Modal 外部關閉
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+
+    // 頁面載入時初始化圖表
+    document.addEventListener('DOMContentLoaded', initCharts);
+  </script>
+</body>
+</html>

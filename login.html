@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登入 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="login-page">
+    <!-- 背景裝飾 -->
+    <div class="login-page__decoration">
+      <div class="login-page__decoration-blur-yellow"></div>
+      <div class="login-page__decoration-blur-blue"></div>
+    </div>
+
+    <!-- 主要登入容器 -->
+    <div class="login-container">
+      <!-- 左側品牌區塊 -->
+      <div class="login-branding">
+        <div class="login-branding__decoration"></div>
+
+        <!-- Logo -->
+        <div class="login-branding__logo">
+          <svg class="login-branding__logo-icon" viewBox="0 0 33 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.5 0L33 29H0L16.5 0Z" fill="#755f00"/>
+          </svg>
+          <span class="login-branding__logo-text">FUN學科技教育中心</span>
+        </div>
+
+        <!-- 標語 -->
+        <div class="login-branding__content">
+          <h1 class="login-branding__title">
+            夢想啟程<br>
+            積木、程式、機器人設計引領未來
+          </h1>
+        </div>
+
+        <!-- 底部裝飾區域 -->
+        <div></div>
+      </div>
+
+      <!-- 右側登入表單 -->
+      <div class="login-form-section">
+        <div class="login-form__header">
+          <h2 class="login-form__title">會員資料</h2>
+        </div>
+
+        <form class="login-form" id="loginForm">
+          <!-- 身份選擇 -->
+          <div class="form-group">
+            <label class="form-group__label">登入身份</label>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-primary); border-radius: 8px; cursor: pointer; border: 2px solid var(--color-primary);">
+                <input type="radio" name="userRole" value="teacher" checked style="accent-color: var(--color-primary-dark);">
+                <span style="font-size: 14px; color: var(--color-primary-dark); font-weight: 500;">教師</span>
+              </label>
+              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-surface-alt); border-radius: 8px; cursor: pointer; border: 2px solid transparent;" id="studentLabel">
+                <input type="radio" name="userRole" value="student" style="accent-color: var(--color-primary-dark);">
+                <span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 500;">學生</span>
+              </label>
+              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-surface-alt); border-radius: 8px; cursor: pointer; border: 2px solid transparent;" id="staffLabel">
+                <input type="radio" name="userRole" value="staff" style="accent-color: var(--color-primary-dark);">
+                <span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 500;">行政人員</span>
+              </label>
+              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-surface-alt); border-radius: 8px; cursor: pointer; border: 2px solid transparent;" id="adminLabel">
+                <input type="radio" name="userRole" value="admin" style="accent-color: var(--color-primary-dark);">
+                <span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 500;">管理者</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 帳號輸入 -->
+          <div class="form-group">
+            <label class="form-group__label">帳號 / 使用者代碼</label>
+            <div class="form-input">
+              <svg class="form-input__icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 8C10.21 8 12 6.21 12 4C12 1.79 10.21 0 8 0C5.79 0 4 1.79 4 4C4 6.21 5.79 8 8 8ZM8 10C5.33 10 0 11.34 0 14V16H16V14C16 11.34 10.67 10 8 10Z" fill="currentColor"/>
+              </svg>
+              <input
+                type="text"
+                class="form-input__field"
+                id="username"
+                placeholder="請輸入您的帳號"
+                required
+              >
+            </div>
+          </div>
+
+          <!-- 密碼輸入 -->
+          <div class="form-group">
+            <div class="form-group__header">
+              <label class="form-group__label">密碼</label>
+              <a href="#" class="form-group__link">忘記密碼？</a>
+            </div>
+            <div class="form-input">
+              <svg class="form-input__icon" viewBox="0 0 16 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 7H13V5C13 2.24 10.76 0 8 0C5.24 0 3 2.24 3 5V7H2C0.9 7 0 7.9 0 9V19C0 20.1 0.9 21 2 21H14C15.1 21 16 20.1 16 19V9C16 7.9 15.1 7 14 7ZM8 16C6.9 16 6 15.1 6 14C6 12.9 6.9 12 8 12C9.1 12 10 12.9 10 14C10 15.1 9.1 16 8 16ZM11 7H5V5C5 3.34 6.34 2 8 2C9.66 2 11 3.34 11 5V7Z" fill="currentColor"/>
+              </svg>
+              <input
+                type="password"
+                class="form-input__field"
+                id="password"
+                placeholder="預設密碼：西元年月日"
+                required
+              >
+              <button type="button" class="form-input__toggle" id="togglePassword" aria-label="顯示密碼">
+                <svg viewBox="0 0 22 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 0C6 0 1.73 3.11 0 7.5C1.73 11.89 6 15 11 15C16 15 20.27 11.89 22 7.5C20.27 3.11 16 0 11 0ZM11 12.5C8.24 12.5 6 10.26 6 7.5C6 4.74 8.24 2.5 11 2.5C13.76 2.5 16 4.74 16 7.5C16 10.26 13.76 12.5 11 12.5ZM11 4.5C9.34 4.5 8 5.84 8 7.5C8 9.16 9.34 10.5 11 10.5C12.66 10.5 14 9.16 14 7.5C14 5.84 12.66 4.5 11 4.5Z" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 記住我 -->
+          <div class="form-checkbox">
+            <input type="checkbox" class="form-checkbox__input" id="rememberMe">
+            <label class="form-checkbox__label" for="rememberMe">在此裝置上記住我</label>
+          </div>
+
+          <!-- 登入按鈕 -->
+          <button type="submit" class="login-form__submit">
+            <span>登入系統</span>
+            <svg class="login-form__submit-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 0L7.59 1.41L13.17 7H0V9H13.17L7.59 14.59L9 16L17 8L9 0Z" fill="currentColor"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 頁腳連結 -->
+    <div class="login-footer">
+      <a href="#" class="login-footer__link">隱私權政策</a>
+      <a href="#" class="login-footer__link">服務條款</a>
+      <a href="#" class="login-footer__link">系統說明紀錄</a>
+      <span class="login-footer__link">© 2024 數位策展人</span>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // 進入登入頁時清除舊的認證資料
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
+
+    // 角色選擇視覺反饋
+    document.querySelectorAll('input[name="userRole"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.querySelectorAll('input[name="userRole"]').forEach(r => {
+          const label = r.closest('label');
+          if (r.checked) {
+            label.style.background = 'var(--color-primary)';
+            label.style.borderColor = 'var(--color-primary)';
+            label.querySelector('span').style.color = 'var(--color-primary-dark)';
+          } else {
+            label.style.background = 'var(--color-surface-alt)';
+            label.style.borderColor = 'transparent';
+            label.querySelector('span').style.color = 'var(--color-text-secondary)';
+          }
+        });
+      });
+    });
+
+    // 登入表單提交
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const submitBtn = document.querySelector('.login-form__submit');
+
+      // 檢查輸入
+      if (!username || !password) {
+        showMessage('請輸入帳號和密碼', 'error');
+        return;
+      }
+
+      // 禁用按鈕
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = '登入中...';
+
+      try {
+        const result = await api.auth.login({ username, password });
+
+        if (result.success) {
+          // 儲存認證資訊
+          localStorage.setItem('authToken', result.data.token);
+          localStorage.setItem('userName', result.data.user.name);
+          localStorage.setItem('userRole', result.data.user.role);
+
+          // 顯示成功訊息
+          showMessage('登入成功，正在跳轉...', 'success');
+
+          // 跳轉到對應頁面
+          setTimeout(() => {
+            window.location.href = result.data.redirectUrl;
+          }, 1000);
+        }
+      } catch (error) {
+        // 顯示錯誤訊息
+        const message = error.response?.data?.message || '帳號或密碼錯誤';
+        showMessage(message, 'error');
+
+        // 恢復按鈕
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').textContent = '登入系統';
+      }
+    });
+
+    // 檢查是否已登入
+    if (localStorage.getItem('authToken')) {
+      const role = localStorage.getItem('userRole');
+      let redirectUrl = '/student/dashboard.html';
+      switch (role) {
+        case 'admin': redirectUrl = '/admin/dashboard.html'; break;
+        case 'staff': redirectUrl = '/staff/schedule.html'; break;
+        case 'teacher': redirectUrl = '/teacher/dashboard.html'; break;
+      }
+      // 如果已登入，可選擇自動跳轉
+      // window.location.href = redirectUrl;
+    }
+  </script>
+</body>
+</html>
