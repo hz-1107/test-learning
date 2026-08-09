@@ -355,7 +355,7 @@
             </svg>
           </div>
           <div class="sidebar__profile-info">
-            <span class="sidebar__profile-name">王小明 老師</span>
+            <span class="sidebar__profile-name" id="teacherName">老師</span>
             <span class="sidebar__profile-role">教師系統</span>
           </div>
         </div>
@@ -399,7 +399,7 @@
     <main class="main-content" style="padding: 0;">
       <div class="page-header">
         <h2 class="page-header__title">教師日誌</h2>
-        <p class="page-header__subtitle">檢視和管理所有教師的歷史紀錄</p>
+        <p class="page-header__subtitle">選擇班級以填寫或查看教學日誌</p>
       </div>
 
       <!-- 篩選列 -->
@@ -407,9 +407,9 @@
         <div class="filter-group">
           <span class="filter-group__label">時間區間</span>
           <div class="filter-group--range">
-            <input type="date" class="filter-group__input" id="startDate" value="2026-05-01">
+            <input type="date" class="filter-group__input" id="startDate">
             <span class="filter-group__label">至</span>
-            <input type="date" class="filter-group__input" id="endDate" value="2026-05-30">
+            <input type="date" class="filter-group__input" id="endDate">
           </div>
         </div>
         <button class="btn-apply" onclick="applyFilters()">套用</button>
@@ -443,214 +443,9 @@
 
       <!-- 日誌列表 -->
       <div class="diary-list" id="diaryList">
-        <!-- 日誌項目 1 - 未填答 -->
-        <div class="diary-card" data-status="pending" data-course="科創機器人">
-          <div class="diary-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div class="diary-card__content">
-            <h3 class="diary-card__title">
-              科創機器人
-              <span class="diary-card__status diary-card__status--pending">未填答</span>
-            </h3>
-            <div class="diary-card__meta">
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                2026/05/30
-              </span>
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                16:30 - 18:00
-              </span>
-            </div>
-          </div>
-          <a href="journal.html" class="diary-card__action">
-            填寫 / 查看日誌
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </a>
-        </div>
-
-        <!-- 日誌項目 2 - 進行中 -->
-        <div class="diary-card" data-status="in-progress" data-course="科創機器人">
-          <div class="diary-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div class="diary-card__content">
-            <h3 class="diary-card__title">
-              科創機器人
-              <span class="diary-card__status diary-card__status--in-progress">進行中</span>
-            </h3>
-            <div class="diary-card__meta">
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                2026/05/30
-              </span>
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                14:45 - 16:15
-              </span>
-            </div>
-          </div>
-          <a href="journal.html" class="diary-card__action">
-            填寫 / 查看日誌
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </a>
-        </div>
-
-        <!-- 日誌項目 3 - 已完成 -->
-        <div class="diary-card" data-status="completed" data-course="科創機器人">
-          <div class="diary-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div class="diary-card__content">
-            <h3 class="diary-card__title">
-              科創機器人
-              <span class="diary-card__status diary-card__status--completed">已完成</span>
-            </h3>
-            <div class="diary-card__meta">
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                2026/05/30
-              </span>
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                13:00 - 14:30
-              </span>
-            </div>
-          </div>
-          <a href="journal.html" class="diary-card__action">
-            填寫 / 查看日誌
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </a>
-        </div>
-
-        <!-- 日誌項目 4 -->
-        <div class="diary-card" data-status="completed" data-course="科創機器人">
-          <div class="diary-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div class="diary-card__content">
-            <h3 class="diary-card__title">
-              科創機器人
-              <span class="diary-card__status diary-card__status--completed">已完成</span>
-            </h3>
-            <div class="diary-card__meta">
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                2026/05/30
-              </span>
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                11:00 - 12:30
-              </span>
-            </div>
-          </div>
-          <a href="journal.html" class="diary-card__action">
-            填寫 / 查看日誌
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </a>
-        </div>
-
-        <!-- 日誌項目 5 -->
-        <div class="diary-card" data-status="completed" data-course="科創機器人">
-          <div class="diary-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div class="diary-card__content">
-            <h3 class="diary-card__title">
-              科創機器人
-              <span class="diary-card__status diary-card__status--completed">已完成</span>
-            </h3>
-            <div class="diary-card__meta">
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                2026/05/30
-              </span>
-              <span class="diary-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                9:00 - 10:30
-              </span>
-            </div>
-          </div>
-          <a href="journal.html" class="diary-card__action">
-            填寫 / 查看日誌
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </a>
+        <!-- 班級卡片將由 JavaScript 動態載入 -->
+        <div class="loading-message" style="text-align: center; padding: 40px; color: #6a7282;">
+          載入中...
         </div>
       </div>
 
@@ -666,6 +461,102 @@
 
   <script src="../js/main.js"></script>
   <script>
+    // 全域變數
+    let allClasses = [];
+    let filteredClasses = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // 頁面載入時執行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 顯示教師名稱
+      const userName = localStorage.getItem('userName');
+      if (userName) {
+        document.getElementById('teacherName').textContent = userName + ' 老師';
+      }
+
+      // 設定日期篩選器為當月
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+      document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+
+      loadMyClasses();
+    });
+
+    // API 基礎網址
+    const API_BASE = 'http://localhost:3000';
+
+    // 從 API 載入教師的班級
+    async function loadMyClasses() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/api/schedules/my-classes`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('API 錯誤:', response.status, errorData);
+          if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            window.location.href = '../login.html';
+            return;
+          }
+          throw new Error(errorData.message || `載入班級失敗 (HTTP ${response.status})`);
+        }
+
+        const result = await response.json();
+        console.log('API 回應:', result);
+        allClasses = result.data?.schedules || [];
+
+        // 更新篩選下拉選單
+        updateFilterOptions();
+
+        // 套用篩選並渲染
+        applyFilters();
+
+      } catch (error) {
+        console.error('載入班級錯誤:', error);
+        document.getElementById('diaryList').innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #fb2c36;">
+            載入失敗：${error.message}<br>
+            <small style="color: #6a7282;">請確認伺服器已啟動且您已登入教師帳號</small>
+          </div>
+        `;
+      }
+    }
+
+    // 更新篩選下拉選單的選項
+    function updateFilterOptions() {
+      const courseFilter = document.getElementById('courseFilter');
+      const roomFilter = document.getElementById('roomFilter');
+
+      // 收集唯一的課程和教室
+      const courses = [...new Set(allClasses.map(c => c.course_name))];
+      const rooms = [...new Set(allClasses.map(c => c.classroom_name))];
+
+      // 更新課程選項
+      courseFilter.innerHTML = '<option value="all">全部課程</option>';
+      courses.forEach(course => {
+        courseFilter.innerHTML += `<option value="${course}">${course}</option>`;
+      });
+
+      // 更新教室選項
+      roomFilter.innerHTML = '<option value="all">全部教室</option>';
+      rooms.forEach(room => {
+        roomFilter.innerHTML += `<option value="${room}">${room}</option>`;
+      });
+    }
+
     // 篩選功能
     function applyFilters() {
       const status = document.getElementById('statusFilter').value;
@@ -674,33 +565,142 @@
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
 
-      const cards = document.querySelectorAll('.diary-card');
-
-      cards.forEach(card => {
-        let show = true;
-
-        // 狀態篩選
-        if (status !== 'all') {
-          const cardStatus = card.dataset.status;
-          if (cardStatus !== status) {
-            show = false;
-          }
-        }
-
+      filteredClasses = allClasses.filter(cls => {
         // 課程篩選
-        if (course !== 'all') {
-          const cardCourse = card.dataset.course;
-          if (cardCourse !== course) {
-            show = false;
-          }
+        if (course !== 'all' && cls.course_name !== course) {
+          return false;
         }
 
-        card.style.display = show ? 'flex' : 'none';
+        // 教室篩選
+        if (room !== 'all' && cls.classroom_name !== room) {
+          return false;
+        }
+
+        // TODO: 狀態篩選需要從日誌資料表判斷
+        // 目前暫時顯示全部
+
+        return true;
       });
 
-      if (typeof showMessage === 'function') {
-        showMessage('篩選條件已套用', 'success');
+      currentPage = 1;
+      renderClassList();
+      renderPagination();
+    }
+
+    // 渲染班級列表
+    function renderClassList() {
+      const container = document.getElementById('diaryList');
+
+      if (filteredClasses.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #6a7282;">
+            目前沒有任何班級
+          </div>
+        `;
+        return;
       }
+
+      // 計算分頁
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageClasses = filteredClasses.slice(startIndex, endIndex);
+
+      container.innerHTML = pageClasses.map(cls => {
+        // 格式化時間
+        const startTime = cls.start_time ? cls.start_time.substring(0, 5) : '';
+        const endTime = cls.end_time ? cls.end_time.substring(0, 5) : '';
+        const timeDisplay = startTime && endTime ? `${startTime} - ${endTime}` : '未設定';
+
+        // 格式化星期
+        const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+        const dayDisplay = cls.day_of_week !== undefined ? `週${weekDays[cls.day_of_week]}` : '';
+
+        return `
+          <div class="diary-card" data-schedule-id="${cls.schedule_id}" data-course="${cls.course_name}" data-room="${cls.classroom_name}">
+            <div class="diary-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </div>
+            <div class="diary-card__content">
+              <h3 class="diary-card__title">
+                ${cls.course_name}
+                <span class="diary-card__status diary-card__status--pending">待填寫</span>
+              </h3>
+              <div class="diary-card__meta">
+                <span class="diary-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  ${dayDisplay}
+                </span>
+                <span class="diary-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  ${timeDisplay}
+                </span>
+                <span class="diary-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  ${cls.classroom_name}
+                </span>
+              </div>
+            </div>
+            <a href="journal.html?schedule_id=${cls.schedule_id}" class="diary-card__action">
+              填寫 / 查看日誌
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染分頁
+    function renderPagination() {
+      const container = document.querySelector('.pagination');
+      const totalPages = Math.ceil(filteredClasses.length / itemsPerPage);
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = `
+        <button class="pagination__btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&lt;</button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        html += `
+          <button class="pagination__btn ${i === currentPage ? 'pagination__btn--active' : ''}" onclick="goToPage(${i})">${i}</button>
+        `;
+      }
+
+      html += `
+        <button class="pagination__btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&gt;</button>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // 跳轉到指定頁面
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredClasses.length / itemsPerPage);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderClassList();
+      renderPagination();
     }
 
     // 監聽篩選變更

@@ -634,6 +634,267 @@
       color: var(--color-primary-dark);
     }
 
+    /* ==================== */
+    /* 班級列表視圖樣式 */
+    /* ==================== */
+    .class-list-view {
+      display: block;
+    }
+
+    .class-list-view.hidden {
+      display: none;
+    }
+
+    .journal-form-view {
+      display: none;
+    }
+
+    .journal-form-view.active {
+      display: block;
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header__title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #101828;
+      margin: 0 0 8px 0;
+    }
+
+    .page-header__subtitle {
+      font-size: 16px;
+      font-weight: 700;
+      color: #6a7282;
+      margin: 0;
+    }
+
+    /* 篩選器 */
+    .filter-bar {
+      background: white;
+      border: 0.8px solid rgba(0, 0, 0, 0.08);
+      border-radius: 13px;
+      padding: 18px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter-group__label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #888;
+    }
+
+    .filter-group__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-input {
+      background: #f5f5f5;
+      border: none;
+      border-radius: 9px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #364153;
+      min-width: 140px;
+      height: 34px;
+    }
+
+    .filter-select {
+      background: white;
+      border: 0.8px solid rgba(0, 0, 0, 0.08);
+      border-radius: 9px;
+      padding: 8px 32px 8px 12px;
+      font-size: 14px;
+      color: #364153;
+      min-width: 120px;
+      height: 34px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+    }
+
+    .filter-btn {
+      background: var(--color-primary);
+      border: 1px solid rgba(113, 92, 0, 0.2);
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #715c00;
+      cursor: pointer;
+      height: 34px;
+    }
+
+    .filter-btn:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    /* 班級卡片列表 */
+    .class-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .class-card {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 14px;
+      padding: 21px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .class-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .class-card__left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .class-card__icon {
+      width: 48px;
+      height: 48px;
+      background: var(--color-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .class-card__icon svg {
+      width: 24px;
+      height: 24px;
+      color: #715c00;
+    }
+
+    .class-card__info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .class-card__name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #101828;
+    }
+
+    .class-card__meta {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .class-card__meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #6a7282;
+    }
+
+    .class-card__meta-item svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .class-card__right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #6a7282;
+      font-size: 14px;
+    }
+
+    .class-card__right svg {
+      width: 20px;
+      height: 20px;
+      transform: rotate(-90deg);
+    }
+
+    /* 分頁 */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      margin-top: 24px;
+    }
+
+    .pagination__btn {
+      width: 30px;
+      height: 30px;
+      border: 0.8px solid rgba(0, 0, 0, 0.08);
+      border-radius: 9px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: #888;
+    }
+
+    .pagination__btn:hover {
+      border-color: var(--color-primary);
+    }
+
+    .pagination__btn--active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #1a1a1a;
+    }
+
+    .pagination__btn--disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .pagination__btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* 空狀態 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6a7282;
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
     /* 響應式 */
     @media (max-width: 1200px) {
       .journal-page {
@@ -668,14 +929,85 @@
 </head>
 <body>
   <div class="journal-page">
-    <a href="records.html" class="back-link">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-      返回教師日誌
-    </a>
+    <!-- 班級列表視圖 -->
+    <div class="class-list-view" id="classListView">
+      <div class="page-header">
+        <h1 class="page-header__title">教師日誌</h1>
+        <p class="page-header__subtitle">檢視和管理所有課程的歷史紀錄</p>
+      </div>
 
-    <div class="journal-container">
+      <!-- 篩選器 -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span class="filter-group__label">時間區間</span>
+          <div class="filter-group__row">
+            <input type="date" class="filter-input" id="filterStartDate">
+            <span style="color: #888; font-size: 11px;">至</span>
+            <input type="date" class="filter-input" id="filterEndDate">
+          </div>
+        </div>
+        <button class="filter-btn" onclick="applyFilters()">套用</button>
+        <div class="filter-group">
+          <span class="filter-group__label">填答狀態</span>
+          <select class="filter-select" id="filterStatus">
+            <option value="">全部</option>
+            <option value="completed">已填寫</option>
+            <option value="pending">未填寫</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-group__label">課程</span>
+          <select class="filter-select" id="filterCourse">
+            <option value="">全部課程</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-group__label">教室</span>
+          <select class="filter-select" id="filterClassroom">
+            <option value="">全部教室</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 班級列表 -->
+      <div class="class-list" id="classList">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <p>正在載入班級列表...</p>
+        </div>
+      </div>
+
+      <!-- 分頁 -->
+      <div class="pagination" id="pagination" style="display: none;">
+        <button class="pagination__btn pagination__btn--disabled" id="prevPageBtn" onclick="changePage(-1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <div id="pageButtons"></div>
+        <button class="pagination__btn" id="nextPageBtn" onclick="changePage(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 日誌填寫視圖 -->
+    <div class="journal-form-view" id="journalFormView">
+      <a href="#" class="back-link" onclick="goBack(); return false;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        返回班級列表
+      </a>
+
+      <div class="journal-container">
       <!-- 頁面標題 -->
       <div class="journal-header">
         <h1 class="journal-header__title">教師日誌</h1>
@@ -1353,6 +1685,8 @@
         </section>
       </div>
     </div>
+    <!-- 結束 journal-form-view -->
+    </div>
   </div>
 
   <!-- AI 課程大綱生成 Modal -->
@@ -1823,6 +2157,11 @@
     let schedulesData = [];
     // 當前選擇的班級學生
     let currentStudents = [];
+    // 分頁設定
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    // 篩選後的資料
+    let filteredSchedules = [];
 
     // 頁面載入時初始化
     document.addEventListener('DOMContentLoaded', function() {
@@ -1840,11 +2179,244 @@
 
       // 設定今天日期為預設
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('journalDateInput').value = today;
-      document.getElementById('journalLogDate').value = today;
+
+      // 設定篩選器預設日期範圍（過去30天到今天）
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      document.getElementById('filterStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+      document.getElementById('filterEndDate').value = today;
 
       // 載入教師的班級列表
       await loadMySchedules();
+
+      // 檢查 URL 參數，如果有 schedule_id 則直接進入日誌填寫頁面
+      const urlParams = new URLSearchParams(window.location.search);
+      const scheduleId = urlParams.get('schedule_id');
+
+      if (scheduleId) {
+        // 直接進入日誌填寫視圖
+        showJournalFormView(parseInt(scheduleId));
+      } else {
+        // 渲染班級列表
+        renderClassList();
+      }
+    }
+
+    // 返回上一頁
+    function goBack() {
+      // 檢查是否從 records.html 進入（URL 有 schedule_id 參數）
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('schedule_id')) {
+        // 從 records.html 進入，返回 records.html
+        window.location.href = 'records.html';
+      } else {
+        // 從班級列表進入，顯示班級列表
+        showClassListView();
+      }
+    }
+
+    // 顯示班級列表視圖
+    function showClassListView() {
+      document.getElementById('classListView').classList.remove('hidden');
+      document.getElementById('journalFormView').classList.remove('active');
+      renderClassList();
+    }
+
+    // 顯示日誌填寫視圖
+    function showJournalFormView(scheduleId) {
+      document.getElementById('classListView').classList.add('hidden');
+      document.getElementById('journalFormView').classList.add('active');
+
+      // 設定今天日期
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('journalDateInput').value = today;
+      document.getElementById('journalLogDate').value = today;
+
+      // 選擇對應的班級
+      document.getElementById('journalScheduleSelect').value = scheduleId;
+      onScheduleChange();
+    }
+
+    // 渲染班級列表
+    function renderClassList() {
+      const container = document.getElementById('classList');
+
+      // 使用篩選後的資料，如果沒有則使用全部資料
+      const dataToRender = filteredSchedules.length > 0 ? filteredSchedules : schedulesData;
+
+      if (dataToRender.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <p>目前沒有負責的班級</p>
+          </div>
+        `;
+        document.getElementById('pagination').style.display = 'none';
+        return;
+      }
+
+      // 計算分頁
+      const totalPages = Math.ceil(dataToRender.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageData = dataToRender.slice(startIndex, endIndex);
+
+      const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      const today = new Date().toISOString().split('T')[0];
+
+      container.innerHTML = pageData.map(schedule => {
+        const dayName = dayNames[schedule.day_of_week] || '';
+        const startTime = schedule.start_time ? schedule.start_time.slice(0, 5) : '';
+        const endTime = schedule.end_time ? schedule.end_time.slice(0, 5) : '';
+
+        return `
+          <div class="class-card" onclick="showJournalFormView(${schedule.schedule_id})">
+            <div class="class-card__left">
+              <div class="class-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                </svg>
+              </div>
+              <div class="class-card__info">
+                <span class="class-card__name">${schedule.course_name || '未命名課程'}</span>
+                <div class="class-card__meta">
+                  <span class="class-card__meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    ${dayName}
+                  </span>
+                  <span class="class-card__meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    ${startTime} - ${endTime}
+                  </span>
+                  ${schedule.classroom_name ? `
+                  <span class="class-card__meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                      <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    ${schedule.classroom_name}
+                  </span>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="class-card__right">
+              <span>填寫 / 查看日誌</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 渲染分頁
+      renderPagination(totalPages);
+    }
+
+    // 渲染分頁
+    function renderPagination(totalPages) {
+      const pagination = document.getElementById('pagination');
+      const pageButtons = document.getElementById('pageButtons');
+      const prevBtn = document.getElementById('prevPageBtn');
+      const nextBtn = document.getElementById('nextPageBtn');
+
+      if (totalPages <= 1) {
+        pagination.style.display = 'none';
+        return;
+      }
+
+      pagination.style.display = 'flex';
+
+      // 更新上一頁按鈕
+      if (currentPage === 1) {
+        prevBtn.classList.add('pagination__btn--disabled');
+      } else {
+        prevBtn.classList.remove('pagination__btn--disabled');
+      }
+
+      // 更新下一頁按鈕
+      if (currentPage === totalPages) {
+        nextBtn.classList.add('pagination__btn--disabled');
+      } else {
+        nextBtn.classList.remove('pagination__btn--disabled');
+      }
+
+      // 渲染頁碼按鈕
+      let buttonsHtml = '';
+      for (let i = 1; i <= totalPages; i++) {
+        const isActive = i === currentPage ? 'pagination__btn--active' : '';
+        buttonsHtml += `<button class="pagination__btn ${isActive}" onclick="goToPage(${i})">${i}</button>`;
+      }
+      pageButtons.innerHTML = buttonsHtml;
+    }
+
+    // 切換頁面
+    function changePage(delta) {
+      const dataToRender = filteredSchedules.length > 0 ? filteredSchedules : schedulesData;
+      const totalPages = Math.ceil(dataToRender.length / itemsPerPage);
+      const newPage = currentPage + delta;
+
+      if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        renderClassList();
+      }
+    }
+
+    // 跳轉到指定頁面
+    function goToPage(page) {
+      currentPage = page;
+      renderClassList();
+    }
+
+    // 套用篩選
+    function applyFilters() {
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
+      const status = document.getElementById('filterStatus').value;
+      const course = document.getElementById('filterCourse').value;
+      const classroom = document.getElementById('filterClassroom').value;
+
+      // 目前簡單篩選，只根據課程和教室篩選
+      filteredSchedules = schedulesData.filter(schedule => {
+        if (course && schedule.course_id != course) return false;
+        if (classroom && schedule.classroom_id != classroom) return false;
+        return true;
+      });
+
+      currentPage = 1;
+      renderClassList();
+      showMessage('已套用篩選條件', 'success');
+    }
+
+    // 填充篩選器下拉選單
+    function populateFilterDropdowns() {
+      const courseSelect = document.getElementById('filterCourse');
+      const classroomSelect = document.getElementById('filterClassroom');
+
+      // 取得唯一課程
+      const courses = [...new Map(schedulesData.map(s => [s.course_id, { id: s.course_id, name: s.course_name }])).values()];
+      courseSelect.innerHTML = '<option value="">全部課程</option>' +
+        courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+      // 取得唯一教室
+      const classrooms = [...new Map(schedulesData.filter(s => s.classroom_id).map(s => [s.classroom_id, { id: s.classroom_id, name: s.classroom_name }])).values()];
+      classroomSelect.innerHTML = '<option value="">全部教室</option>' +
+        classrooms.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     }
 
     // 載入教師的班級列表
@@ -1888,6 +2460,13 @@
         if (schedulesData.length === 0) {
           showMessage('您目前沒有負責的班級', 'warning');
         }
+
+        // 填充篩選器下拉選單
+        populateFilterDropdowns();
+
+        // 渲染班級列表
+        filteredSchedules = schedulesData;
+        renderClassList();
 
       } catch (error) {
         console.error('載入班級錯誤:', error);
