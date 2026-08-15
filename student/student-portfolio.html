@@ -311,6 +311,168 @@
       line-height: 1.6;
     }
 
+    /* 進階篩選 */
+    .filter-popover-wrap {
+      position: relative;
+    }
+
+    .filter-toggle-btn--active {
+      border-color: var(--color-primary);
+      background: var(--color-primary-light);
+      color: var(--color-primary-dark);
+    }
+
+    .filter-popover {
+      display: none;
+      position: absolute;
+      top: calc(100% + var(--spacing-sm));
+      right: 0;
+      width: 320px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      z-index: 30;
+    }
+
+    .filter-popover.active {
+      display: block;
+    }
+
+    .filter-popover__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .filter-popover__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .filter-popover__close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .filter-popover__body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+      padding: var(--spacing-lg);
+    }
+
+    .filter-popover__group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .filter-popover__group--row {
+      flex-direction: row;
+      gap: var(--spacing-sm);
+    }
+
+    .filter-popover__label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .filter-popover__input {
+      width: 100%;
+      padding: 10px var(--spacing-md);
+      border: 1.6px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-background);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+    }
+
+    .filter-popover__input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    .filter-popover__select {
+      width: 100%;
+      padding: 11px var(--spacing-md);
+      border: 1.6px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-background);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237e7763' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right var(--spacing-md) center;
+    }
+
+    .filter-popover__footer {
+      display: flex;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+      border-top: 1px solid var(--color-surface-alt);
+    }
+
+    .filter-popover__footer .btn--outline {
+      flex-shrink: 0;
+    }
+
+    .filter-popover__footer .btn--primary {
+      flex: 1;
+    }
+
+    /* 批量選取工具列 */
+    .list-toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .list-toolbar__select-all {
+      cursor: pointer;
+    }
+
+    .list-toolbar__count {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* 卡片勾選框 */
+    .history-card__top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+    }
+
+    .card-select {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding-top: 4px;
+      cursor: pointer;
+    }
+
+    .card-select input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--color-primary);
+    }
+
     /* 響應式 */
     @media (max-width: 992px) {
       .student-dashboard {
@@ -403,6 +565,13 @@
 <header class="student-header">
         <h1 class="student-header__title">智慧學習歷程系統</h1>
         <div class="student-header__actions">
+          <div class="student-header__search">
+            <input type="text" id="portfolioSearchInput" placeholder="搜尋課程名稱或說明...">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
           <button class="student-header__icon-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -421,13 +590,48 @@
         <div class="page-title-row">
           <h2 class="page-title">學習歷程</h2>
           <div class="page-actions">
-            <button class="action-btn action-btn--outline">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-              </svg>
-              篩選條件
-            </button>
-            <button class="action-btn action-btn--primary">
+            <div class="filter-popover-wrap">
+              <button class="action-btn action-btn--outline" id="filterToggleBtn" onclick="toggleFilterPopover()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                篩選條件
+              </button>
+              <div class="filter-popover" id="filterPopover">
+                <div class="filter-popover__header">
+                  <h3 class="filter-popover__title">篩選條件</h3>
+                  <button class="filter-popover__close" onclick="closeFilterPopover()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="filter-popover__body">
+                  <div class="filter-popover__group">
+                    <label class="filter-popover__label">課程分類</label>
+                    <select class="filter-popover__select" id="categoryFilterSelect">
+                      <option value="">全部</option>
+                      <option value="動力機械">動力機械</option>
+                      <option value="程式機械">程式機械</option>
+                      <option value="科創機器人">科創機器人</option>
+                    </select>
+                  </div>
+                  <div class="filter-popover__group">
+                    <label class="filter-popover__label">日期範圍</label>
+                    <div class="filter-popover__group filter-popover__group--row">
+                      <input type="date" class="filter-popover__input" id="startDateFilterInput">
+                      <input type="date" class="filter-popover__input" id="endDateFilterInput">
+                    </div>
+                  </div>
+                </div>
+                <div class="filter-popover__footer">
+                  <button type="button" class="btn btn--outline" onclick="resetPortfolioFilters()">重置</button>
+                  <button type="button" class="btn btn--primary" onclick="applyPortfolioFilters()">套用篩選</button>
+                </div>
+              </div>
+            </div>
+            <button class="action-btn action-btn--primary" onclick="exportSelectedHistory()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
@@ -438,11 +642,25 @@
           </div>
         </div>
 
+        <!-- 批量選取工具列 -->
+        <div class="list-toolbar">
+          <label class="form-checkbox list-toolbar__select-all">
+            <input type="checkbox" class="form-checkbox__input" id="selectAllCheckbox">
+            <span class="form-checkbox__label">全選</span>
+          </label>
+          <span class="list-toolbar__count" id="selectedCountLabel">已選擇 0 筆</span>
+        </div>
+
         <!-- 學習歷程列表 -->
         <div class="history-list">
           <!-- 歷程卡片 1 -->
-          <div class="history-card">
-            <h3 class="history-card__title">動力機械</h3>
+          <div class="history-card" data-category="動力機械" data-date="2026-05-20">
+            <div class="history-card__top">
+              <h3 class="history-card__title">動力機械</h3>
+              <label class="card-select" title="選取以匯出">
+                <input type="checkbox" data-export-select>
+              </label>
+            </div>
             <p class="history-card__subtitle">齒輪理論 — 戰鬥陀螺</p>
             <div class="history-card__meta">
               <span class="history-card__meta-item">
@@ -465,8 +683,13 @@
           </div>
 
           <!-- 歷程卡片 2 -->
-          <div class="history-card">
-            <h3 class="history-card__title">程式機械</h3>
+          <div class="history-card" data-category="程式機械" data-date="2026-05-15">
+            <div class="history-card__top">
+              <h3 class="history-card__title">程式機械</h3>
+              <label class="card-select" title="選取以匯出">
+                <input type="checkbox" data-export-select>
+              </label>
+            </div>
             <p class="history-card__subtitle">Scratch入門</p>
             <div class="history-card__meta">
               <span class="history-card__meta-item">
@@ -489,8 +712,13 @@
           </div>
 
           <!-- 歷程卡片 3 -->
-          <div class="history-card">
-            <h3 class="history-card__title">科創機器人</h3>
+          <div class="history-card" data-category="科創機器人" data-date="2026-05-10">
+            <div class="history-card__top">
+              <h3 class="history-card__title">科創機器人</h3>
+              <label class="card-select" title="選取以匯出">
+                <input type="checkbox" data-export-select>
+              </label>
+            </div>
             <p class="history-card__subtitle">感測器整合應用</p>
             <div class="history-card__meta">
               <span class="history-card__meta-item">
@@ -513,8 +741,13 @@
           </div>
 
           <!-- 歷程卡片 4 -->
-          <div class="history-card">
-            <h3 class="history-card__title">動力機械</h3>
+          <div class="history-card" data-category="動力機械" data-date="2026-05-05">
+            <div class="history-card__top">
+              <h3 class="history-card__title">動力機械</h3>
+              <label class="card-select" title="選取以匯出">
+                <input type="checkbox" data-export-select>
+              </label>
+            </div>
             <p class="history-card__subtitle">問題解決與團隊合作</p>
             <div class="history-card__meta">
               <span class="history-card__meta-item">
@@ -542,35 +775,191 @@
 
   <script src="../js/main.js"></script>
   <script src="../js/notifications.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="../js/pdf-export.js"></script>
   <script>
-    // 搜尋功能
-    const searchInput = document.querySelector('.search-box input');
-    searchInput.addEventListener('input', function() {
-      const query = this.value.toLowerCase();
-      const cards = document.querySelectorAll('.history-card');
+    const searchInput = document.getElementById('portfolioSearchInput');
+    const allHistoryCards = Array.from(document.querySelectorAll('.history-card'));
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const selectedCountLabel = document.getElementById('selectedCountLabel');
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
 
-      cards.forEach(card => {
+    const activeFilters = { category: '', startDate: '', endDate: '' };
+
+    // 套用搜尋關鍵字 + 篩選條件（AND 條件），即時套用
+    function applyAllFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+
+      allHistoryCards.forEach(card => {
         const title = card.querySelector('.history-card__title').textContent.toLowerCase();
         const subtitle = card.querySelector('.history-card__subtitle').textContent.toLowerCase();
         const description = card.querySelector('.history-card__description').textContent.toLowerCase();
 
-        if (title.includes(query) || subtitle.includes(query) || description.includes(query)) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
+        const matchesQuery = !query || title.includes(query) || subtitle.includes(query) || description.includes(query);
+        const matchesCategory = !activeFilters.category || card.dataset.category === activeFilters.category;
+        const cardDate = card.dataset.date || '';
+        const matchesStart = !activeFilters.startDate || cardDate >= activeFilters.startDate;
+        const matchesEnd = !activeFilters.endDate || cardDate <= activeFilters.endDate;
+
+        const visible = matchesQuery && matchesCategory && matchesStart && matchesEnd;
+        card.style.display = visible ? '' : 'none';
+
+        // 隱藏的卡片不列入匯出選取範圍
+        if (!visible) {
+          const checkbox = card.querySelector('[data-export-select]');
+          if (checkbox) checkbox.checked = false;
         }
       });
+
+      updateSelectedCount();
+    }
+
+    searchInput.addEventListener('input', applyAllFilters);
+
+    // 篩選面板開關
+    function toggleFilterPopover() {
+      document.getElementById('filterPopover').classList.toggle('active');
+    }
+
+    function closeFilterPopover() {
+      document.getElementById('filterPopover').classList.remove('active');
+    }
+
+    document.addEventListener('click', function(e) {
+      const wrap = document.querySelector('.filter-popover-wrap');
+      if (wrap && !wrap.contains(e.target)) {
+        closeFilterPopover();
+      }
     });
 
-    // 篩選按鈕
-    document.querySelector('.action-btn--outline').addEventListener('click', function() {
-      showMessage('篩選功能開發中...', 'warning');
+    // 套用篩選：課程分類、日期範圍，按下「套用篩選」才生效
+    function applyPortfolioFilters() {
+      activeFilters.category = document.getElementById('categoryFilterSelect').value;
+      activeFilters.startDate = document.getElementById('startDateFilterInput').value;
+      activeFilters.endDate = document.getElementById('endDateFilterInput').value;
+
+      filterToggleBtn.classList.toggle(
+        'filter-toggle-btn--active',
+        !!(activeFilters.category || activeFilters.startDate || activeFilters.endDate)
+      );
+
+      applyAllFilters();
+      closeFilterPopover();
+    }
+
+    function resetPortfolioFilters() {
+      document.getElementById('categoryFilterSelect').value = '';
+      document.getElementById('startDateFilterInput').value = '';
+      document.getElementById('endDateFilterInput').value = '';
+
+      activeFilters.category = '';
+      activeFilters.startDate = '';
+      activeFilters.endDate = '';
+
+      filterToggleBtn.classList.remove('filter-toggle-btn--active');
+      applyAllFilters();
+    }
+
+    // 批量選取
+    function visibleHistoryCards() {
+      return allHistoryCards.filter(card => card.style.display !== 'none');
+    }
+
+    function updateSelectedCount() {
+      const visible = visibleHistoryCards();
+      const checked = visible.filter(card => card.querySelector('[data-export-select]').checked);
+
+      selectedCountLabel.textContent = `已選擇 ${checked.length} 筆`;
+      selectAllCheckbox.checked = visible.length > 0 && checked.length === visible.length;
+      selectAllCheckbox.indeterminate = checked.length > 0 && checked.length < visible.length;
+    }
+
+    selectAllCheckbox.addEventListener('change', function() {
+      visibleHistoryCards().forEach(card => {
+        card.querySelector('[data-export-select]').checked = selectAllCheckbox.checked;
+      });
+      updateSelectedCount();
     });
 
-    // 匯出按鈕
-    document.querySelector('.action-btn--primary').addEventListener('click', function() {
-      showMessage('正在匯出學習歷程...', 'success');
+    allHistoryCards.forEach(card => {
+      card.querySelector('[data-export-select]').addEventListener('change', updateSelectedCount);
     });
+
+    updateSelectedCount();
+
+    const CATEGORY_STYLES = {
+      '動力機械': { color: '#8a5522', bg: 'rgba(176,107,42,0.18)' },
+      '程式機械': { color: '#376775', bg: 'rgba(74,144,164,0.18)' },
+      '科創機器人': { color: '#5b3ea6', bg: 'rgba(124,58,237,0.18)' }
+    };
+    const DEFAULT_CATEGORY_STYLE = { color: '#a3760e', bg: 'rgba(212,160,18,0.18)' };
+
+    // 批量匯出：有勾選就匯出勾選項目，否則匯出目前篩選結果全部
+    async function exportSelectedHistory() {
+      const visible = visibleHistoryCards();
+      const checked = visible.filter(card => card.querySelector('[data-export-select]').checked);
+      const target = checked.length > 0 ? checked : visible;
+
+      if (target.length === 0) {
+        showMessage('沒有符合條件的學習歷程可匯出', 'warning');
+        return;
+      }
+
+      showMessage('正在產生 PDF...', 'success');
+
+      const studentName = document.querySelector('.student-sidebar__name')?.textContent.trim() || '';
+
+      let totalHours = 0;
+      const categories = new Set();
+
+      const rows = target.map((card, i) => {
+        const category = card.dataset.category || card.querySelector('.history-card__title').textContent.trim();
+        const style = CATEGORY_STYLES[category] || DEFAULT_CATEGORY_STYLE;
+        const subtitle = card.querySelector('.history-card__subtitle').textContent.trim();
+        const metaItems = card.querySelectorAll('.history-card__meta-item');
+        const duration = metaItems.length > 1 ? metaItems[1].textContent.trim() : '';
+        const hoursMatch = duration.match(/(\d+(\.\d+)?)/);
+        if (hoursMatch) totalHours += parseFloat(hoursMatch[1]);
+        categories.add(category);
+
+        return {
+          index: i + 1,
+          title: card.querySelector('.history-card__title').textContent.trim(),
+          subtitle,
+          badge: category,
+          badgeColor: style.color,
+          badgeBg: style.bg,
+          metaFields: [
+            `日期：${card.dataset.date || ''}`,
+            duration ? `時數：${duration}` : null
+          ].filter(Boolean),
+          description: card.querySelector('.history-card__description').textContent.trim()
+        };
+      });
+
+      const ok = await exportReportToPDF({
+        docTitle: '學習歷程報告書',
+        studentName,
+        summaryStats: [
+          { label: '總筆數', value: `${target.length}` },
+          { label: '總學習時數', value: `${totalHours}小時` },
+          { label: '涵蓋課程分類', value: `${categories.size}` }
+        ],
+        rows,
+        filename: `學習歷程_${formatDateForFilename()}.pdf`
+      });
+
+      if (ok) {
+        showMessage(`已匯出 ${target.length} 筆學習歷程`, 'success');
+      }
+    }
+
+    function formatDateForFilename() {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+    }
   </script>
 </body>
 </html>
