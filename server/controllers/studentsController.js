@@ -127,7 +127,7 @@ exports.getOne = async (req, res) => {
 
     // 取得學生的點數餘額
     const pointsResult = await db.queryOne(`
-      SELECT COALESCE(SUM(points), 0) as total_points
+      SELECT COALESCE(SUM(amount), 0) as total_points
       FROM point_transactions
       WHERE student_id = ?
     `, [id]);
@@ -380,16 +380,16 @@ exports.getPoints = async (req, res) => {
     // 註: LIMIT/OFFSET 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
     // (mysql2 prepared statement 對 LIMIT/OFFSET 使用佔位符在部分版本會出錯)
     const transactions = await db.query(`
-      SELECT pt.*, u.name as created_by_name
+      SELECT pt.*, u.name as operator_name
       FROM point_transactions pt
-      LEFT JOIN users u ON pt.created_by = u.id
+      LEFT JOIN users u ON pt.operator_id = u.id
       WHERE pt.student_id = ?
       ORDER BY pt.created_at DESC
       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `, [id]);
 
     const balance = await db.queryOne(`
-      SELECT COALESCE(SUM(points), 0) as balance
+      SELECT COALESCE(SUM(amount), 0) as balance
       FROM point_transactions
       WHERE student_id = ?
     `, [id]);
@@ -442,11 +442,11 @@ exports.getMe = async (req, res) => {
 
     // 點數餘額與最近交易紀錄
     const balanceResult = await db.queryOne(
-      'SELECT COALESCE(SUM(points), 0) as balance FROM point_transactions WHERE student_id = ?',
+      'SELECT COALESCE(SUM(amount), 0) as balance FROM point_transactions WHERE student_id = ?',
       [student.id]
     );
     const recentTransactions = await db.query(
-      'SELECT id, points, type, reason, created_at FROM point_transactions WHERE student_id = ? ORDER BY created_at DESC LIMIT 20',
+      'SELECT id, amount, reason, description, created_at FROM point_transactions WHERE student_id = ? ORDER BY created_at DESC LIMIT 20',
       [student.id]
     );
 
@@ -496,8 +496,8 @@ exports.getMe = async (req, res) => {
     }
     attendanceSql += ' GROUP BY slr.attendance';
     const attendanceRows = await db.query(attendanceSql, attendanceParams);
-    const attendanceStats = { present: 0, absent: 0, late: 0, excused: 0 };
-    attendanceRows.forEach(row => { attendanceStats[row.attendance] = row.count; });
+    const attendanceStats = { present: 0, absent: 0, late: 0, leave: 0, makeup: 0 };
+    attendanceRows.forEach(row => { if (attendanceStats.hasOwnProperty(row.attendance)) attendanceStats[row.attendance] = row.count; });
     const totalLessons = Object.values(attendanceStats).reduce((sum, n) => sum + n, 0);
 
     // 最新一筆課堂紀錄 (能力雷達與首頁翻轉卡皆取自同一筆最新紀錄)

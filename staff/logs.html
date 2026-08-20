@@ -481,6 +481,7 @@
       overflow-y: auto;
       transform: translateY(20px);
       transition: transform 0.3s;
+      margin: auto;
     }
 
     .modal-overlay.active .modal {
@@ -690,14 +691,15 @@
             <polyline points="14 2 14 8 20 8"/>
             <line x1="16" y1="13" x2="8" y2="13"/>
             <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
           </svg>
           日誌管理
         </a>
         <a href="courses.html" class="staff-sidebar__nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
           </svg>
           課程資訊
         </a>
@@ -1034,50 +1036,389 @@
 
   <script src="../js/main.js"></script>
   <script>
-    // 更新當前日期
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
-    document.getElementById('currentDate').textContent = dateStr;
+    const API_BASE = window.API_BASE || 'http://localhost:3000';
 
-    // 狀態標籤切換
-    const statusTabs = document.querySelectorAll('.status-tab');
-    statusTabs.forEach(tab => {
-      tab.addEventListener('click', function() {
-        statusTabs.forEach(t => t.classList.remove('status-tab--active'));
-        this.classList.add('status-tab--active');
-        filterByStatus(this.dataset.status);
-      });
+    // 狀態
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentStatus = 'all';
+    let allTeachers = [];
+    let currentLogId = null;
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 更新當前日期
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+      document.getElementById('currentDate').textContent = dateStr;
+
+      // 設定預設日期範圍（過去30天）
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+
+      document.getElementById('startDate').value = formatDateForInput(startDate);
+      document.getElementById('endDate').value = formatDateForInput(endDate);
+
+      // 載入篩選選項和日誌
+      loadFilterOptions();
+      loadLogs();
+
+      // 綁定事件
+      bindEvents();
     });
 
-    function filterByStatus(status) {
-      // 篩選邏輯
-      console.log('Filter by status:', status);
+    function formatDateForInput(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function getAuthToken() {
+      return localStorage.getItem('authToken');
+    }
+
+    async function loadFilterOptions() {
+      const token = getAuthToken();
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      try {
+        // 並行載入教師、課程、教室
+        const [teachersRes, coursesRes, classroomsRes] = await Promise.all([
+          fetch(`${API_BASE}/api/teachers`, { headers }),
+          fetch(`${API_BASE}/api/courses`, { headers }),
+          fetch(`${API_BASE}/api/settings/classrooms`, { headers })
+        ]);
+
+        const teachersData = await teachersRes.json();
+        const coursesData = await coursesRes.json();
+        const classroomsData = await classroomsRes.json();
+
+        // 填充教師選項
+        const teacherSelect = document.getElementById('teacherFilter');
+        teacherSelect.innerHTML = '<option value="">全部老師</option>';
+        if (teachersData.success && teachersData.data) {
+          allTeachers = teachersData.data;
+          teachersData.data.forEach(teacher => {
+            teacherSelect.innerHTML += `<option value="${teacher.id}">${teacher.name}</option>`;
+          });
+        }
+
+        // 填充課程選項
+        const courseSelect = document.getElementById('courseFilter');
+        courseSelect.innerHTML = '<option value="">全部課程</option>';
+        if (coursesData.success && coursesData.data) {
+          coursesData.data.forEach(course => {
+            courseSelect.innerHTML += `<option value="${course.id}">${course.name}</option>`;
+          });
+        }
+
+        // 填充教室選項
+        const classroomSelect = document.getElementById('classroomFilter');
+        classroomSelect.innerHTML = '<option value="">全部教室</option>';
+        if (classroomsData.success && classroomsData.data) {
+          classroomsData.data.forEach(classroom => {
+            classroomSelect.innerHTML += `<option value="${classroom.id}">${classroom.name}</option>`;
+          });
+        }
+      } catch (error) {
+        console.error('載入篩選選項失敗:', error);
+      }
+    }
+
+    async function loadLogs() {
+      const token = getAuthToken();
+
+      // 取得篩選條件
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const teacherId = document.getElementById('teacherFilter').value;
+      const courseId = document.getElementById('courseFilter').value;
+      const classroomId = document.getElementById('classroomFilter').value;
+
+      // 建構查詢參數
+      const params = new URLSearchParams();
+      params.append('page', currentPage);
+      params.append('limit', 20);
+
+      if (startDate) params.append('start_date', startDate);
+      if (endDate) params.append('end_date', endDate);
+      if (teacherId) params.append('teacher_id', teacherId);
+      if (courseId) params.append('course_id', courseId);
+      if (classroomId) params.append('classroom_id', classroomId);
+      if (currentStatus !== 'all') params.append('status', currentStatus);
+
+      try {
+        const response = await fetch(`${API_BASE}/api/logs?${params.toString()}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          renderLogsTable(result.data.logs);
+          renderPagination(result.data.pagination);
+        } else {
+          showMessage(result.message || '載入日誌失敗', 'error');
+        }
+      } catch (error) {
+        console.error('載入日誌錯誤:', error);
+        showMessage('載入日誌失敗', 'error');
+      }
+    }
+
+    function renderLogsTable(logs) {
+      const tbody = document.getElementById('logsTableBody');
+
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+              暫無日誌資料
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(log => {
+        const statusMap = {
+          'pending': { class: 'status-badge--pending', text: '未填寫' },
+          'progress': { class: 'status-badge--progress', text: '進行中' },
+          'completed': { class: 'status-badge--completed', text: '已完成' }
+        };
+
+        const status = statusMap[log.status] || statusMap['pending'];
+        const logDateTime = formatLogDateTime(log.log_date, log.start_time);
+        const permissions = log.additional_teachers
+          ? `原教師 + 代課：${log.additional_teachers}`
+          : '原教師';
+
+        return `
+          <tr>
+            <td>${logDateTime}</td>
+            <td>${log.course_name || '-'}</td>
+            <td>${log.classroom_name || '-'}</td>
+            <td>${log.teacher_name || '-'}</td>
+            <td><span class="status-badge ${status.class}"><span class="status-badge__dot"></span>${status.text}</span></td>
+            <td>${permissions}</td>
+            <td>
+              <button class="action-btn action-btn--outline" onclick="openPermissionModal(${log.id}, '${log.log_date}', '${log.start_time || ''}', '${log.course_name || ''}', '${log.teacher_name || ''}', ${log.teacher_id})">權限</button>
+              <button class="action-btn action-btn--primary" onclick="viewLog(${log.id})">查看</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function formatLogDateTime(dateStr, timeStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      return timeStr ? `${formattedDate} ${timeStr.substring(0, 5)}` : formattedDate;
+    }
+
+    function renderPagination(pagination) {
+      if (!pagination) return;
+
+      totalPages = pagination.totalPages;
+      currentPage = pagination.page;
+
+      const paginationDiv = document.querySelector('.pagination');
+      if (!paginationDiv) return;
+
+      let html = `<button class="pagination__btn" onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>&lt;</button>`;
+
+      // 顯示頁碼
+      const maxButtons = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+      let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+      if (endPage - startPage + 1 < maxButtons) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="pagination__btn ${i === currentPage ? 'pagination__btn--active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+      }
+
+      html += `<button class="pagination__btn" onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>&gt;</button>`;
+
+      paginationDiv.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      loadLogs();
+    }
+
+    function bindEvents() {
+      // 狀態標籤切換
+      const statusTabs = document.querySelectorAll('.status-tab');
+      statusTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          statusTabs.forEach(t => t.classList.remove('status-tab--active'));
+          this.classList.add('status-tab--active');
+          currentStatus = this.dataset.status;
+          currentPage = 1;
+          loadLogs();
+        });
+      });
+
+      // 套用按鈕
+      document.querySelector('.filter-btn').addEventListener('click', function() {
+        currentPage = 1;
+        loadLogs();
+      });
+
+      // 篩選下拉選單變更時自動載入
+      ['teacherFilter', 'courseFilter', 'classroomFilter'].forEach(id => {
+        document.getElementById(id).addEventListener('change', function() {
+          currentPage = 1;
+          loadLogs();
+        });
+      });
+
+      // 點擊 Modal 外部關閉
+      document.getElementById('permissionModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closePermissionModal();
+        }
+      });
     }
 
     // 權限 Modal
-    function openPermissionModal() {
+    function openPermissionModal(logId, logDate, logTime, courseName, teacherName, mainTeacherId) {
+      currentLogId = logId;
+
+      // 更新 Modal 資訊欄
+      const infoBar = document.querySelector('.modal__info-bar');
+      const displayTime = logTime ? logTime.substring(0, 5) : '';
+      infoBar.textContent = `${logDate} ${displayTime} • ${courseName} • ${teacherName}`;
+
+      // 更新主開課教師
+      document.querySelector('.modal__option-subtitle').textContent = teacherName;
+      document.getElementById('defaultTeacher').checked = true;
+      document.getElementById('defaultTeacher').dataset.teacherId = mainTeacherId;
+
+      // 載入其他教師選項
+      loadTeacherOptions(mainTeacherId, logId);
+
       document.getElementById('permissionModal').classList.add('active');
+    }
+
+    async function loadTeacherOptions(excludeTeacherId, logId) {
+      const teacherListContainer = document.querySelector('.modal__body');
+
+      // 移除舊的教師列表
+      const oldItems = teacherListContainer.querySelectorAll('.modal__teacher-item');
+      oldItems.forEach(item => item.remove());
+
+      // 取得目前權限
+      let currentPermissions = [];
+      try {
+        const token = getAuthToken();
+        const response = await fetch(`${API_BASE}/api/logs/${logId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (result.success && result.data.permissions) {
+          currentPermissions = result.data.permissions.map(p => p.teacher_id);
+        }
+      } catch (error) {
+        console.error('載入權限失敗:', error);
+      }
+
+      // 建立教師列表 HTML
+      const listHeader = document.querySelector('.modal__list-header');
+
+      allTeachers.filter(t => t.id !== excludeTeacherId).forEach(teacher => {
+        const isChecked = currentPermissions.includes(teacher.id);
+        const item = document.createElement('div');
+        item.className = 'modal__teacher-item';
+        item.innerHTML = `
+          <input type="checkbox" class="modal__option-checkbox teacher-permission-checkbox"
+                 data-teacher-id="${teacher.id}" ${isChecked ? 'checked' : ''}>
+          <div class="modal__option-content">
+            <div class="modal__option-title">${teacher.name}</div>
+            <div class="modal__option-subtitle">${teacher.school || ''}</div>
+          </div>
+        `;
+        listHeader.parentNode.insertBefore(item, listHeader.nextSibling);
+      });
+
+      // 更新已選老師數量
+      updateSelectedCount();
+
+      // 綁定複選框變更事件
+      document.querySelectorAll('.teacher-permission-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+      });
+
+      // 全選功能
+      const selectAllLink = document.querySelector('.modal__list-header a');
+      selectAllLink.onclick = function(e) {
+        e.preventDefault();
+        const checkboxes = document.querySelectorAll('.teacher-permission-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        updateSelectedCount();
+      };
+    }
+
+    function updateSelectedCount() {
+      const checked = document.querySelectorAll('.teacher-permission-checkbox:checked').length;
+      document.querySelector('.modal__list-header span').textContent = `已選老師（${checked} 位）`;
     }
 
     function closePermissionModal() {
       document.getElementById('permissionModal').classList.remove('active');
+      currentLogId = null;
     }
 
-    function savePermission() {
-      showMessage('權限設定已儲存', 'success');
-      closePermissionModal();
+    async function savePermission() {
+      if (!currentLogId) return;
+
+      const token = getAuthToken();
+      const teacherIds = Array.from(document.querySelectorAll('.teacher-permission-checkbox:checked'))
+        .map(cb => parseInt(cb.dataset.teacherId));
+
+      try {
+        const response = await fetch(`${API_BASE}/api/logs/${currentLogId}/permissions`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ teacher_ids: teacherIds })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showMessage('權限設定已儲存', 'success');
+          closePermissionModal();
+          loadLogs(); // 重新載入列表以更新權限顯示
+        } else {
+          showMessage(result.message || '儲存失敗', 'error');
+        }
+      } catch (error) {
+        console.error('儲存權限錯誤:', error);
+        showMessage('儲存權限失敗', 'error');
+      }
     }
 
     // 查看日誌
-    function viewLog() {
-      window.location.href = 'log-detail.html';
+    function viewLog(logId) {
+      window.location.href = `log-detail.html?id=${logId}`;
     }
 
-    // 點擊 Modal 外部關閉
-    document.getElementById('permissionModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closePermissionModal();
-      }
+    // 搜尋教師
+    document.querySelector('.modal__search input').addEventListener('input', function(e) {
+      const keyword = e.target.value.toLowerCase();
+      document.querySelectorAll('.modal__teacher-item').forEach(item => {
+        const name = item.querySelector('.modal__option-title').textContent.toLowerCase();
+        item.style.display = name.includes(keyword) ? '' : 'none';
+      });
     });
   </script>
   <script src="../js/admin-notifications.js"></script>

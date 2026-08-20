@@ -412,7 +412,7 @@
             <input type="date" class="filter-group__input" id="endDate">
           </div>
         </div>
-        <button class="btn-apply" onclick="applyFilters()">套用</button>
+        <button class="btn-apply" onclick="loadMyClasses()">套用</button>
         <div class="filter-group">
           <span class="filter-group__label">填答狀態</span>
           <select class="filter-group__select" id="statusFilter">
@@ -488,7 +488,7 @@
     // API 基礎網址
     const API_BASE = 'http://localhost:3000';
 
-    // 從 API 載入教師的班級
+    // 從 API 載入教師的課程與日誌狀態
     async function loadMyClasses() {
       const token = localStorage.getItem('authToken');
       if (!token) {
@@ -497,7 +497,12 @@
       }
 
       try {
-        const response = await fetch(`${API_BASE}/api/schedules/my-classes`, {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        // 使用新的 API 端點取得課程日誌狀態
+        const url = `${API_BASE}/api/logs/my-status?start_date=${startDate}&end_date=${endDate}`;
+        const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -535,6 +540,23 @@
       }
     }
 
+    // 取得狀態顯示資訊
+    function getStatusDisplay(status, expected, completed) {
+      if (expected === 0) {
+        return { class: 'pending', text: '無課程' };
+      }
+
+      switch (status) {
+        case 'completed':
+          return { class: 'completed', text: '已完成' };
+        case 'in-progress':
+          return { class: 'in-progress', text: '進行中' };
+        case 'pending':
+        default:
+          return { class: 'pending', text: '待填寫' };
+      }
+    }
+
     // 更新篩選下拉選單的選項
     function updateFilterOptions() {
       const courseFilter = document.getElementById('courseFilter');
@@ -562,8 +584,6 @@
       const status = document.getElementById('statusFilter').value;
       const course = document.getElementById('courseFilter').value;
       const room = document.getElementById('roomFilter').value;
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
 
       filteredClasses = allClasses.filter(cls => {
         // 課程篩選
@@ -576,8 +596,10 @@
           return false;
         }
 
-        // TODO: 狀態篩選需要從日誌資料表判斷
-        // 目前暫時顯示全部
+        // 狀態篩選
+        if (status !== 'all' && cls.log_status !== status) {
+          return false;
+        }
 
         return true;
       });
@@ -615,6 +637,9 @@
         const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
         const dayDisplay = cls.day_of_week !== undefined ? `週${weekDays[cls.day_of_week]}` : '';
 
+        // 取得狀態顯示
+        const statusInfo = getStatusDisplay(cls.log_status, cls.expected_logs, cls.completed_logs);
+
         return `
           <div class="diary-card" data-schedule-id="${cls.schedule_id}" data-course="${cls.course_name}" data-room="${cls.classroom_name}">
             <div class="diary-card__icon">
@@ -628,7 +653,7 @@
             <div class="diary-card__content">
               <h3 class="diary-card__title">
                 ${cls.course_name}
-                <span class="diary-card__status diary-card__status--pending">待填寫</span>
+                <span class="diary-card__status diary-card__status--${statusInfo.class}">${statusInfo.text}</span>
               </h3>
               <div class="diary-card__meta">
                 <span class="diary-card__meta-item">
@@ -653,6 +678,13 @@
                     <circle cx="12" cy="10" r="3"/>
                   </svg>
                   ${cls.classroom_name}
+                </span>
+                <span class="diary-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                  </svg>
+                  填寫進度 ${cls.completed_logs || 0}/${cls.expected_logs || 0}
                 </span>
               </div>
             </div>

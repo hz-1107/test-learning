@@ -429,6 +429,8 @@
       position: fixed;
       top: 0;
       left: 0;
+      right: 0;
+      bottom: 0;
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.5);
@@ -449,6 +451,7 @@
       max-width: 480px;
       max-height: 90vh;
       overflow-y: auto;
+      margin: auto;
     }
 
     .modal__header {
@@ -705,7 +708,7 @@
             </svg>
           </div>
           <div class="sidebar__profile-info">
-            <span class="sidebar__profile-name">王小明 老師</span>
+            <span class="sidebar__profile-name" id="sidebarUserName">老師</span>
             <span class="sidebar__profile-role">教師系統</span>
           </div>
         </div>
@@ -787,129 +790,9 @@
                 </tr>
               </thead>
               <tbody id="studentsTableBody">
-                <tr onclick="selectStudent(this, '張小明', 88)" data-student="張小明" data-course="程式機械" data-classroom="沙鹿" data-points="88">
-                  <td>
-                    <div class="student-info">
-                      <div class="student-avatar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                          <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                      </div>
-                      <span class="student-name">張小明</span>
-                    </div>
-                  </td>
-                  <td><span class="course-tag">程式機械</span></td>
-                  <td>沙鹿</td>
-                  <td>88</td>
-                  <td>
-                    <button class="view-btn">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      查看檔案
-                    </button>
-                  </td>
-                </tr>
-                <tr class="active" onclick="selectStudent(this, '李美華', 90)" data-student="李美華" data-course="程式機械" data-classroom="西屯" data-points="90">
-                  <td>
-                    <div class="student-info">
-                      <div class="student-avatar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                          <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                      </div>
-                      <span class="student-name">李美華</span>
-                    </div>
-                  </td>
-                  <td><span class="course-tag">程式機械</span></td>
-                  <td>西屯</td>
-                  <td>90</td>
-                  <td>
-                    <button class="view-btn">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      查看檔案
-                    </button>
-                  </td>
-                </tr>
-                <tr onclick="selectStudent(this, '王大明', 75)" data-student="王大明" data-course="科創機器人" data-classroom="沙鹿" data-points="75">
-                  <td>
-                    <div class="student-info">
-                      <div class="student-avatar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                          <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                      </div>
-                      <span class="student-name">王大明</span>
-                    </div>
-                  </td>
-                  <td><span class="course-tag">科創機器人</span></td>
-                  <td>沙鹿</td>
-                  <td>75</td>
-                  <td>
-                    <button class="view-btn">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      查看檔案
-                    </button>
-                  </td>
-                </tr>
-                <tr onclick="selectStudent(this, '陳小芳', 94)" data-student="陳小芳" data-course="程式機械" data-classroom="西屯" data-points="94">
-                  <td>
-                    <div class="student-info">
-                      <div class="student-avatar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                          <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                      </div>
-                      <span class="student-name">陳小芳</span>
-                    </div>
-                  </td>
-                  <td><span class="course-tag">程式機械</span></td>
-                  <td>西屯</td>
-                  <td>94</td>
-                  <td>
-                    <button class="view-btn">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      查看檔案
-                    </button>
-                  </td>
-                </tr>
-                <tr onclick="selectStudent(this, '林志豪', 94)" data-student="林志豪" data-course="幼兒簡易機械" data-classroom="沙鹿" data-points="94">
-                  <td>
-                    <div class="student-info">
-                      <div class="student-avatar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                          <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                      </div>
-                      <span class="student-name">林志豪</span>
-                    </div>
-                  </td>
-                  <td><span class="course-tag">幼兒簡易機械</span></td>
-                  <td>沙鹿</td>
-                  <td>94</td>
-                  <td>
-                    <button class="view-btn">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      查看檔案
-                    </button>
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 40px; color: #6a7282;">
+                    載入中...
                   </td>
                 </tr>
               </tbody>
@@ -934,7 +817,7 @@
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
               </div>
-              <span class="profile-header__name" id="profileName">李美華</span>
+              <span class="profile-header__name" id="profileName">-</span>
             </div>
             <button class="profile-header__edit">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -954,7 +837,7 @@
                 </svg>
                 <div class="profile-info-item__content">
                   <div class="profile-info-item__label">累積點數</div>
-                  <div class="profile-info-item__value" id="profilePoints">90 點</div>
+                  <div class="profile-info-item__value" id="profilePoints">- 點</div>
                 </div>
               </div>
               <div class="profile-info-item">
@@ -964,7 +847,7 @@
                 </svg>
                 <div class="profile-info-item__content">
                   <div class="profile-info-item__label">性別</div>
-                  <div class="profile-info-item__value">女</div>
+                  <div class="profile-info-item__value">-</div>
                 </div>
               </div>
               <div class="profile-info-item">
@@ -974,7 +857,7 @@
                 </svg>
                 <div class="profile-info-item__content">
                   <div class="profile-info-item__label">年級</div>
-                  <div class="profile-info-item__value">三年級</div>
+                  <div class="profile-info-item__value">-</div>
                 </div>
               </div>
               <div class="profile-info-item">
@@ -986,7 +869,7 @@
                 </svg>
                 <div class="profile-info-item__content">
                   <div class="profile-info-item__label">生日</div>
-                  <div class="profile-info-item__value">2017 / 01 / 30</div>
+                  <div class="profile-info-item__value">-</div>
                 </div>
               </div>
               <div class="profile-info-item">
@@ -997,7 +880,7 @@
                 </svg>
                 <div class="profile-info-item__content">
                   <div class="profile-info-item__label">課程名稱</div>
-                  <div class="profile-info-item__value">程式機械</div>
+                  <div class="profile-info-item__value">-</div>
                 </div>
               </div>
               <div class="profile-info-item">
@@ -1009,7 +892,7 @@
                 </svg>
                 <div class="profile-info-item__content">
                   <div class="profile-info-item__label">到班日期</div>
-                  <div class="profile-info-item__value">2024/09/01</div>
+                  <div class="profile-info-item__value">-</div>
                 </div>
               </div>
             </div>
@@ -1094,7 +977,7 @@
 
         <div class="form-group">
           <label class="form-group__label">點數更動說明</label>
-          <input type="text" class="form-group__input" placeholder="例：出席獎勵、競賽加分、兌換文具⋯">
+          <input type="text" class="form-group__input" id="pointsDescription" placeholder="例：出席獎勵、競賽加分、兌換文具⋯">
         </div>
 
         <div class="form-group">
@@ -1212,38 +1095,351 @@
 
   <script src="../js/main.js"></script>
   <script>
-    let currentStudent = '李美華';
-    let currentPoints = 90;
+    const API_BASE = 'http://localhost:3000/api';
+
+    // 從 localStorage 取得 token
+    function getAuthToken() {
+      return localStorage.getItem('authToken');
+    }
+
+    // API 請求封裝
+    async function apiRequest(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        window.location.href = '../login.html';
+        throw new Error('未登入');
+      }
+
+      const defaultOptions = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      };
+
+      const response = await fetch(`${API_BASE}${url}`, { ...defaultOptions, ...options });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || '請求失敗');
+      }
+
+      return data;
+    }
+
+    // 狀態變數
+    let allStudents = [];
+    let filteredStudents = [];
+    let currentStudent = null;
+    let currentStudentId = null;
+    let currentPoints = 0;
+    let myClasses = [];
+    let classrooms = new Set();
+    let courses = new Set();
     let radarChart = null;
     let trendChart = null;
 
+    // 分頁
+    let currentPage = 1;
+    const pageSize = 10;
+
+    // 載入教師的班級和學生
+    async function loadMyStudents() {
+      try {
+        // 取得教師的班級
+        const classesRes = await apiRequest('/schedules/my-classes');
+        myClasses = classesRes.data.schedules || [];
+
+        if (myClasses.length === 0) {
+          document.getElementById('studentsTableBody').innerHTML = `
+            <tr><td colspan="5" style="text-align: center; padding: 40px; color: #6a7282;">
+              目前沒有指派的班級
+            </td></tr>
+          `;
+          return;
+        }
+
+        // 從每個班級取得學生
+        const studentMap = new Map(); // 用 Map 避免重複學生
+
+        for (const schedule of myClasses) {
+          const studentsRes = await apiRequest(`/schedules/${schedule.schedule_id}/students`);
+          const scheduleInfo = studentsRes.data.schedule;
+          const students = studentsRes.data.students || [];
+
+          // 收集教室和課程用於篩選
+          if (scheduleInfo.classroom_name) {
+            classrooms.add(scheduleInfo.classroom_name);
+          }
+          if (scheduleInfo.course_name) {
+            courses.add(scheduleInfo.course_name);
+          }
+
+          // 合併學生資料
+          for (const student of students) {
+            if (!studentMap.has(student.id)) {
+              studentMap.set(student.id, {
+                ...student,
+                course_name: scheduleInfo.course_name,
+                classroom_name: scheduleInfo.classroom_name,
+                schedule_id: schedule.schedule_id,
+                points: 0 // 預設點數，稍後批量取得
+              });
+            }
+          }
+        }
+
+        allStudents = Array.from(studentMap.values());
+
+        // 批量取得學生點數
+        if (allStudents.length > 0) {
+          const studentIds = allStudents.map(s => s.id);
+          try {
+            const pointsRes = await apiRequest('/points/batch', {
+              method: 'POST',
+              body: JSON.stringify({ studentIds })
+            });
+            const balanceMap = pointsRes.data || {};
+            allStudents.forEach(s => {
+              s.points = balanceMap[s.id] || 0;
+            });
+          } catch (e) {
+            console.warn('批量取得點數失敗，嘗試個別取得:', e);
+            // 個別取得
+            for (const student of allStudents) {
+              try {
+                const balanceRes = await apiRequest(`/points/${student.id}/balance`);
+                student.points = balanceRes.data.balance || 0;
+              } catch (e2) {
+                student.points = 0;
+              }
+            }
+          }
+        }
+
+        // 更新篩選選項
+        updateFilterOptions();
+
+        // 渲染學生列表
+        filteredStudents = [...allStudents];
+        renderStudents();
+
+        // 預設選擇第一個學生
+        if (allStudents.length > 0) {
+          selectStudentById(allStudents[0].id);
+        }
+
+      } catch (error) {
+        console.error('載入學生錯誤:', error);
+        document.getElementById('studentsTableBody').innerHTML = `
+          <tr><td colspan="5" style="text-align: center; padding: 40px; color: #dc2626;">
+            載入失敗: ${error.message}
+          </td></tr>
+        `;
+      }
+    }
+
+    // 更新篩選選項
+    function updateFilterOptions() {
+      const classroomFilter = document.getElementById('classroomFilter');
+      const courseFilter = document.getElementById('courseFilter');
+
+      // 清空並重建教室選項
+      classroomFilter.innerHTML = '<option value="">全部教室</option>';
+      classrooms.forEach(name => {
+        classroomFilter.innerHTML += `<option value="${name}">${name}</option>`;
+      });
+
+      // 清空並重建課程選項
+      courseFilter.innerHTML = '<option value="">全部課程</option>';
+      courses.forEach(name => {
+        courseFilter.innerHTML += `<option value="${name}">${name}</option>`;
+      });
+    }
+
+    // 渲染學生列表
+    function renderStudents() {
+      const tbody = document.getElementById('studentsTableBody');
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageStudents = filteredStudents.slice(start, end);
+
+      if (pageStudents.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="5" style="text-align: center; padding: 40px; color: #6a7282;">
+            沒有符合條件的學生
+          </td></tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = pageStudents.map(student => `
+        <tr onclick="selectStudentById(${student.id})"
+            data-student-id="${student.id}"
+            data-student="${student.name}"
+            data-course="${student.course_name || ''}"
+            data-classroom="${student.classroom_name || ''}"
+            data-points="${student.points}"
+            class="${currentStudentId === student.id ? 'active' : ''}">
+          <td>
+            <div class="student-info">
+              <div class="student-avatar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <span class="student-name">${student.name}</span>
+            </div>
+          </td>
+          <td><span class="course-tag">${student.course_name || '-'}</span></td>
+          <td>${student.classroom_name || '-'}</td>
+          <td>${student.points}</td>
+          <td>
+            <button class="view-btn" onclick="event.stopPropagation(); selectStudentById(${student.id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              查看檔案
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      // 更新分頁
+      renderPagination();
+    }
+
+    // 渲染分頁
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredStudents.length / pageSize);
+      const pagination = document.querySelector('.pagination');
+
+      let html = `<button class="pagination-btn" onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>上一頁</button>`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<span class="pagination-num ${i === currentPage ? 'pagination-num--active' : ''}" onclick="goToPage(${i})">${i}</span>`;
+      }
+
+      html += `<button class="pagination-btn" onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一頁</button>`;
+
+      pagination.innerHTML = html;
+    }
+
+    // 分頁跳轉
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredStudents.length / pageSize);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderStudents();
+    }
+
     // 選擇學生
-    function selectStudent(row, name, points) {
+    async function selectStudentById(studentId) {
+      const student = allStudents.find(s => s.id === studentId);
+      if (!student) return;
+
       // 移除其他選中狀態
       document.querySelectorAll('.students-table tr').forEach(r => r.classList.remove('active'));
-      row.classList.add('active');
+      const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+      if (row) row.classList.add('active');
 
-      currentStudent = name;
-      currentPoints = points;
+      currentStudent = student.name;
+      currentStudentId = studentId;
+      currentPoints = student.points;
 
-      // 更新右側面板
-      document.getElementById('profileName').textContent = name;
-      document.getElementById('profilePoints').textContent = points + ' 點';
+      // 更新右側面板基本資訊
+      document.getElementById('profileName').textContent = student.name;
+      document.getElementById('profilePoints').textContent = student.points + ' 點';
 
-      // 更新圖表
-      updateCharts();
+      // 載入學生詳細資訊
+      try {
+        const detailRes = await apiRequest(`/students/${studentId}`);
+        const detail = detailRes.data;
+
+        // 更新詳細資訊
+        updateProfileInfo(detail);
+
+        // 載入能力數據
+        await loadStudentAbilities(studentId);
+      } catch (error) {
+        console.error('載入學生詳情錯誤:', error);
+      }
+    }
+
+    // 更新個人資料面板
+    function updateProfileInfo(student) {
+      // 性別
+      const genderEl = document.querySelector('.profile-info-item:nth-child(2) .profile-info-item__value');
+      if (genderEl) genderEl.textContent = student.gender === 'male' ? '男' : student.gender === 'female' ? '女' : '-';
+
+      // 年級
+      const gradeEl = document.querySelector('.profile-info-item:nth-child(3) .profile-info-item__value');
+      if (gradeEl) gradeEl.textContent = student.grade || '-';
+
+      // 生日
+      const birthdayEl = document.querySelector('.profile-info-item:nth-child(4) .profile-info-item__value');
+      if (birthdayEl && student.birthday) {
+        const date = new Date(student.birthday);
+        birthdayEl.textContent = `${date.getFullYear()} / ${String(date.getMonth() + 1).padStart(2, '0')} / ${String(date.getDate()).padStart(2, '0')}`;
+      }
+
+      // 課程名稱
+      const courseEl = document.querySelector('.profile-info-item:nth-child(5) .profile-info-item__value');
+      if (courseEl && student.enrollments && student.enrollments.length > 0) {
+        courseEl.textContent = student.enrollments[0].course_name || '-';
+      }
+
+      // 到班日期
+      const enrollDateEl = document.querySelector('.profile-info-item:nth-child(6) .profile-info-item__value');
+      if (enrollDateEl && student.enrollment_date) {
+        const date = new Date(student.enrollment_date);
+        enrollDateEl.textContent = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+      }
+    }
+
+    // 載入學生能力數據（從日誌記錄）
+    async function loadStudentAbilities(studentId) {
+      try {
+        // 這裡可以從日誌記錄中取得學生的能力評分
+        // 目前先用預設值，實際應從 student_log_records 取得
+        const abilities = {
+          programming: 3,
+          debugging: 3,
+          creativity: 3,
+          structure: 3,
+          teamwork: 3
+        };
+
+        updateCharts(abilities);
+      } catch (error) {
+        console.error('載入能力數據錯誤:', error);
+      }
     }
 
     // 開啟點數管理 Modal
     function openPointsModal() {
+      if (!currentStudentId) {
+        alert('請先選擇學生');
+        return;
+      }
       document.getElementById('pointsStudentName').textContent = currentStudent;
       document.getElementById('currentPointsDisplay').textContent = currentPoints + ' 點';
       document.getElementById('previewCurrent').textContent = currentPoints;
+      document.getElementById('previewChange').textContent = '—';
+      document.getElementById('previewTotal').textContent = '—';
+      document.getElementById('pointsAmount').value = '';
+      document.getElementById('pointsReason').value = '';
       document.getElementById('pointsModal').classList.add('active');
     }
 
     // 開啟新增競賽 Modal
     function openCompetitionModal() {
+      if (!currentStudentId) {
+        alert('請先選擇學生');
+        return;
+      }
       document.getElementById('competitionStudentName').textContent = currentStudent;
       document.getElementById('competitionModal').classList.add('active');
     }
@@ -1267,13 +1463,55 @@
     });
 
     // 確認點數變更
-    function confirmPoints() {
-      alert('點數已更新！');
-      closeModal('pointsModal');
+    async function confirmPoints() {
+      if (!currentStudentId) {
+        alert('請先選擇學生');
+        return;
+      }
+
+      const amount = parseInt(document.getElementById('pointsAmount').value);
+      const reason = document.getElementById('pointsReason').value;
+      const description = document.getElementById('pointsDescription')?.value || '';
+
+      if (!amount || amount === 0) {
+        alert('請輸入點數');
+        return;
+      }
+
+      if (!reason) {
+        alert('請選擇變動原因');
+        return;
+      }
+
+      try {
+        const response = await apiRequest(`/points/${currentStudentId}/transactions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            amount,
+            reason,
+            description: description || reason
+          })
+        });
+
+        // 更新本地學生點數
+        const student = allStudents.find(s => s.id === currentStudentId);
+        if (student) {
+          student.points = response.data.new_balance;
+          currentPoints = response.data.new_balance;
+          document.getElementById('profilePoints').textContent = currentPoints + ' 點';
+          renderStudents();
+        }
+
+        alert('點數已更新！');
+        closeModal('pointsModal');
+      } catch (error) {
+        alert('更新點數失敗: ' + error.message);
+      }
     }
 
     // 提交競賽
     function submitCompetition() {
+      // TODO: 實作競賽記錄 API
       alert('競賽紀錄已新增！');
       closeModal('competitionModal');
     }
@@ -1284,18 +1522,15 @@
       const classroomValue = document.getElementById('classroomFilter').value;
       const courseValue = document.getElementById('courseFilter').value;
 
-      const rows = document.querySelectorAll('#studentsTableBody tr');
-      rows.forEach(row => {
-        const student = row.dataset.student?.toLowerCase() || '';
-        const classroom = row.dataset.classroom || '';
-        const course = row.dataset.course || '';
-
-        const matchSearch = student.includes(searchValue);
-        const matchClassroom = !classroomValue || classroom === classroomValue;
-        const matchCourse = !courseValue || course === courseValue;
-
-        row.style.display = matchSearch && matchClassroom && matchCourse ? '' : 'none';
+      filteredStudents = allStudents.filter(student => {
+        const matchSearch = !searchValue || student.name.toLowerCase().includes(searchValue);
+        const matchClassroom = !classroomValue || student.classroom_name === classroomValue;
+        const matchCourse = !courseValue || student.course_name === courseValue;
+        return matchSearch && matchClassroom && matchCourse;
       });
+
+      currentPage = 1;
+      renderStudents();
     }
 
     document.getElementById('searchInput')?.addEventListener('input', filterStudents);
@@ -1312,7 +1547,7 @@
           data: {
             labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
             datasets: [{
-              data: [4, 4, 3, 3, 2],
+              data: [0, 0, 0, 0, 0],
               backgroundColor: 'rgba(255, 219, 88, 0.3)',
               borderColor: 'rgba(255, 219, 88, 1)',
               borderWidth: 2,
@@ -1346,13 +1581,13 @@
         trendChart = new Chart(trendCtx, {
           type: 'line',
           data: {
-            labels: ['3/27', '4/3', '4/10', '4/17', '4/24'],
+            labels: [],
             datasets: [
-              { label: '程式', data: [3.5, 4, 4.5, 4, 5], borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
-              { label: '除錯', data: [3, 3.5, 4, 4, 4], borderColor: '#22c55e', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
-              { label: '創意', data: [3, 3.5, 3, 4, 3.5], borderColor: '#eab308', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
-              { label: '結構', data: [2.5, 3, 2.5, 3, 3], borderColor: '#f97316', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
-              { label: '團隊合作', data: [2, 2.5, 3, 3, 4], borderColor: '#ec4899', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 }
+              { label: '程式', data: [], borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '除錯', data: [], borderColor: '#22c55e', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '創意', data: [], borderColor: '#eab308', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '結構', data: [], borderColor: '#f97316', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+              { label: '團隊合作', data: [], borderColor: '#ec4899', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2 }
             ]
           },
           options: {
@@ -1368,8 +1603,17 @@
       }
     }
 
-    function updateCharts() {
-      // 可根據學生更新圖表數據
+    function updateCharts(abilities) {
+      if (radarChart && abilities) {
+        radarChart.data.datasets[0].data = [
+          abilities.programming || 0,
+          abilities.debugging || 0,
+          abilities.creativity || 0,
+          abilities.structure || 0,
+          abilities.teamwork || 0
+        ];
+        radarChart.update();
+      }
     }
 
     // 點擊 Modal 外部關閉
@@ -1381,8 +1625,32 @@
       });
     });
 
-    // 頁面載入時初始化圖表
-    document.addEventListener('DOMContentLoaded', initCharts);
+    // 載入使用者資訊
+    async function loadUserInfo() {
+      try {
+        const response = await apiRequest('/auth/profile');
+        if (response.success && response.data) {
+          const userName = response.data.name || response.data.username || '老師';
+          document.getElementById('sidebarUserName').textContent = userName + ' 老師';
+        }
+      } catch (error) {
+        console.warn('載入使用者資訊失敗:', error);
+      }
+    }
+
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 檢查登入狀態
+      const token = getAuthToken();
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      loadUserInfo();
+      initCharts();
+      loadMyStudents();
+    });
   </script>
 </body>
 </html>

@@ -52,7 +52,9 @@
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsIm5hbWUiOiLns7vntbHnrqHnkIblk6EiLCJpYXQiOjE3ODYyMDU4MjMsImV4cCI6MTc4NjgxMDYyM30._ZdGDVv6mgktm3iLY_4P3dCrBmmHOE1FM9vkyj_N4r0\")",
       "Bash(__NEW_LINE_19d0706ac4910500__ curl -X POST http://localhost:3000/api/logs -H \"Content-Type: application/json\" -H \"Authorization: Bearer $TOKEN\" -d '{\n    \"\"course_id\"\": 3,\n    \"\"log_date\"\": \"\"2026-08-08\"\",\n    \"\"start_time\"\": \"\"16:30\"\",\n    \"\"end_time\"\": \"\"18:00\"\",\n    \"\"classroom_id\"\": 1,\n    \"\"teacher_id\"\": 1,\n    \"\"topic\"\": \"\"測試課程主題\"\",\n    \"\"content\"\": \"\"正常上課\"\",\n    \"\"outline\"\": \"\"這是測試的課程大綱\"\"\n  }')",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsIm5hbWUiOiLns7vntbHnrqHnkIblk6EiLCJpYXQiOjE3ODYyMTIxNjMsImV4cCI6MTc4NjgxNjk2M30.7UD5naguH6BVhdPW6AUFktiXbPmlxswnUOeLbcxX6E0\")",
-      "Bash(__NEW_LINE_c841d0b7964ee150__ echo \"=== API 回傳的日期格式測試 ===\")"
+      "Bash(__NEW_LINE_c841d0b7964ee150__ echo \"=== API 回傳的日期格式測試 ===\")",
+      "Bash(lsof:*)",
+      "Bash(netstat:*)"
     ]
   }
 }

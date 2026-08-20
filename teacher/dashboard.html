@@ -154,7 +154,7 @@
             </svg>
           </div>
           <div class="sidebar__profile-info">
-            <span class="sidebar__profile-name">王小明 老師</span>
+            <span class="sidebar__profile-name" id="sidebarUserName">老師</span>
             <span class="sidebar__profile-role">教師系統</span>
           </div>
         </div>
@@ -198,8 +198,8 @@
     <main class="main-content">
       <!-- 歡迎區塊 -->
       <section class="welcome-section">
-        <h2 class="welcome-section__title">午安，王小明 老師</h2>
-        <p class="welcome-section__date" id="currentDate">2026 / 04 / 22 (三)</p>
+        <h2 class="welcome-section__title" id="welcomeTitle">您好，老師</h2>
+        <p class="welcome-section__date" id="currentDate">載入中...</p>
       </section>
 
       <!-- 課程與日誌區塊 -->
@@ -216,104 +216,8 @@
           </div>
 
           <div class="courses-grid" id="coursesGrid">
-            <!-- 課程卡片 1 - 已完成 -->
-            <div class="course-card course-card--completed" data-status="completed">
-              <div class="course-card__header">
-                <span class="course-card__status course-card__status--completed">
-                  <svg class="course-card__status-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 0C3.14 0 0 3.14 0 7C0 10.86 3.14 14 7 14C10.86 14 14 10.86 14 7C14 3.14 10.86 0 7 0ZM5.6 10.5L2.1 7L3.087 6.013L5.6 8.519L10.913 3.206L11.9 4.2L5.6 10.5Z" fill="currentColor"/>
-                  </svg>
-                  已完成
-                </span>
-                <span class="course-card__students">35 位學生</span>
-              </div>
-              <h4 class="course-card__title">科創機器人</h4>
-              <div class="course-card__footer">
-                <span class="course-card__time">17：00 ~ 19：30</span>
-                <a href="journal.html" class="course-card__action">
-                  <svg class="course-card__action-icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 11.875V15H3.125L12.3417 5.78333L9.21667 2.65833L0 11.875ZM14.7583 3.36667C15.0833 3.04167 15.0833 2.51667 14.7583 2.19167L12.8083 0.241667C12.4833 -0.0833333 11.9583 -0.0833333 11.6333 0.241667L10.1083 1.76667L13.2333 4.89167L14.7583 3.36667Z" fill="currentColor"/>
-                  </svg>
-                  填寫日誌
-                </a>
-              </div>
-            </div>
-
-            <!-- 課程卡片 2 - 未完成 -->
-            <div class="course-card course-card--completed" data-status="pending">
-              <div class="course-card__header">
-                <span class="course-card__status course-card__status--pending">
-                  <svg class="course-card__status-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C12.42 16 16 12.42 16 8C16 3.58 12.42 0 8 0ZM9 12H7V10H9V12ZM9 8H7V4H9V8Z" fill="currentColor"/>
-                  </svg>
-                  未完成
-                </span>
-                <span class="course-card__students">5 位學生</span>
-              </div>
-              <h4 class="course-card__title">科創機器人</h4>
-              <div class="course-card__footer">
-                <span class="course-card__time">17：00 ~ 19：30</span>
-                <a href="journal.html" class="course-card__action">
-                  <svg class="course-card__action-icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 11.875V15H3.125L12.3417 5.78333L9.21667 2.65833L0 11.875ZM14.7583 3.36667C15.0833 3.04167 15.0833 2.51667 14.7583 2.19167L12.8083 0.241667C12.4833 -0.0833333 11.9583 -0.0833333 11.6333 0.241667L10.1083 1.76667L13.2333 4.89167L14.7583 3.36667Z" fill="currentColor"/>
-                  </svg>
-                  填寫日誌
-                </a>
-              </div>
-            </div>
-
-            <!-- 課程卡片 3 - 進行中 -->
-            <div class="course-card course-card--in-progress" data-status="in-progress">
-              <div class="course-card__header">
-                <span class="course-card__status course-card__status--in-progress">
-                  <svg class="course-card__status-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 0C3.14 0 0 3.14 0 7C0 10.86 3.14 14 7 14C10.86 14 14 10.86 14 7C14 3.14 10.86 0 7 0ZM7 12.6C3.92 12.6 1.4 10.08 1.4 7C1.4 3.92 3.92 1.4 7 1.4C10.08 1.4 12.6 3.92 12.6 7C12.6 10.08 10.08 12.6 7 12.6ZM4.9 4.9H6.3V7.7L8.68 9.1L7.98 10.22L4.9 8.4V4.9Z" fill="currentColor"/>
-                  </svg>
-                  進行中
-                </span>
-                <span class="course-card__students">3 位學生</span>
-              </div>
-              <h4 class="course-card__title">科創機器人</h4>
-              <div class="course-card__footer">
-                <span class="course-card__time">17：00 ~ 19：30</span>
-                <a href="journal.html" class="course-card__action">
-                  <svg class="course-card__action-icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 11.875V15H3.125L12.3417 5.78333L9.21667 2.65833L0 11.875ZM14.7583 3.36667C15.0833 3.04167 15.0833 2.51667 14.7583 2.19167L12.8083 0.241667C12.4833 -0.0833333 11.9583 -0.0833333 11.6333 0.241667L10.1083 1.76667L13.2333 4.89167L14.7583 3.36667Z" fill="currentColor"/>
-                  </svg>
-                  填寫日誌
-                </a>
-              </div>
-            </div>
-
-            <!-- 課程卡片 4 - 進行中 -->
-            <div class="course-card course-card--pending" data-status="in-progress">
-              <div class="course-card__header">
-                <span class="course-card__status course-card__status--in-progress">
-                  <svg class="course-card__status-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 0C3.14 0 0 3.14 0 7C0 10.86 3.14 14 7 14C10.86 14 14 10.86 14 7C14 3.14 10.86 0 7 0ZM7 12.6C3.92 12.6 1.4 10.08 1.4 7C1.4 3.92 3.92 1.4 7 1.4C10.08 1.4 12.6 3.92 12.6 7C12.6 10.08 10.08 12.6 7 12.6ZM4.9 4.9H6.3V7.7L8.68 9.1L7.98 10.22L4.9 8.4V4.9Z" fill="currentColor"/>
-                  </svg>
-                  進行中
-                </span>
-                <span class="course-card__students">3 位學生</span>
-              </div>
-              <h4 class="course-card__title">科創機器人</h4>
-              <div class="course-card__footer">
-                <span class="course-card__time">17：00 ~ 19：30</span>
-                <a href="journal.html" class="course-card__action">
-                  <svg class="course-card__action-icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 11.875V15H3.125L12.3417 5.78333L9.21667 2.65833L0 11.875ZM14.7583 3.36667C15.0833 3.04167 15.0833 2.51667 14.7583 2.19167L12.8083 0.241667C12.4833 -0.0833333 11.9583 -0.0833333 11.6333 0.241667L10.1083 1.76667L13.2333 4.89167L14.7583 3.36667Z" fill="currentColor"/>
-                  </svg>
-                  填寫日誌
-                </a>
-              </div>
-            </div>
-
-            <!-- 新增班級卡片 -->
-            <div class="add-class-card" id="addClassBtn">
-              <svg class="add-class-card__icon" viewBox="0 0 25 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 19.4 5.6 25 12.5 25C19.4 25 25 19.4 25 12.5C25 5.6 19.4 0 12.5 0ZM18.75 13.75H13.75V18.75H11.25V13.75H6.25V11.25H11.25V6.25H13.75V11.25H18.75V13.75Z" fill="currentColor"/>
-              </svg>
-              <span class="add-class-card__text">新增管理班級</span>
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6a7282;">
+              載入中...
             </div>
           </div>
         </div>
@@ -322,48 +226,22 @@
         <div class="journal-section">
           <h3 class="journal-section__title">本週教師日誌</h3>
 
-          <div class="journal-section__content">
+          <div class="journal-section__content" id="journalContent">
             <!-- 進度卡 -->
             <div class="journal-progress">
               <div class="journal-progress__info">
-                <p class="journal-progress__title">本週共 10 堂課</p>
+                <p class="journal-progress__title" id="journalTotal">本週共 - 堂課</p>
                 <div class="journal-progress__stats">
-                  <span>完成度 40％</span>
-                  <span>4 / 10</span>
+                  <span id="journalPercent">完成度 -％</span>
+                  <span id="journalCount">- / -</span>
                 </div>
                 <div class="journal-progress__bar">
-                  <div class="journal-progress__bar-fill" style="width: 40%"></div>
+                  <div class="journal-progress__bar-fill" id="journalProgressBar" style="width: 0%"></div>
                 </div>
               </div>
               <a href="records.html" class="journal-progress__btn">查看所有日誌</a>
             </div>
-
-            <!-- 日誌項目 1 -->
-            <div class="journal-item">
-              <div class="journal-item__header">
-                <h4 class="journal-item__title">科創機器人</h4>
-                <p class="journal-item__date">2026/04/22 • 今日</p>
-              </div>
-              <a href="journal.html" class="journal-item__btn">填寫日誌</a>
-            </div>
-
-            <!-- 日誌項目 2 -->
-            <div class="journal-item">
-              <div class="journal-item__header">
-                <h4 class="journal-item__title">科創機器人</h4>
-                <p class="journal-item__date">2026/04/21 • 昨日</p>
-              </div>
-              <a href="journal.html" class="journal-item__btn">填寫日誌</a>
-            </div>
-
-            <!-- 日誌項目 3 -->
-            <div class="journal-item">
-              <div class="journal-item__header">
-                <h4 class="journal-item__title">科創機器人</h4>
-                <p class="journal-item__date">2026/04/21 • 前天</p>
-              </div>
-              <a href="journal.html" class="journal-item__btn">填寫日誌</a>
-            </div>
+            <div style="text-align: center; padding: 20px; color: #6a7282;">載入中...</div>
           </div>
         </div>
       </section>
@@ -446,6 +324,294 @@
   <script src="../js/main.js"></script>
   <script src="../js/notifications.js"></script>
   <script>
+    const API_BASE = 'http://localhost:3000/api';
+
+    // 從 localStorage 取得 token
+    function getAuthToken() {
+      return localStorage.getItem('authToken');
+    }
+
+    // API 請求封裝
+    async function apiRequest(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        window.location.href = '../login.html';
+        throw new Error('未登入');
+      }
+
+      const defaultOptions = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      };
+
+      const response = await fetch(`${API_BASE}${url}`, { ...defaultOptions, ...options });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || '請求失敗');
+      }
+
+      return data;
+    }
+
+    // 狀態變數
+    let mySchedules = [];
+    let userName = '老師';
+    const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+
+    // 更新日期顯示和歡迎訊息
+    function updateWelcome() {
+      const now = new Date();
+      const hour = now.getHours();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const dayOfWeek = dayNames[now.getDay()];
+
+      // 問候語
+      let greeting = '您好';
+      if (hour >= 5 && hour < 12) greeting = '早安';
+      else if (hour >= 12 && hour < 18) greeting = '午安';
+      else greeting = '晚安';
+
+      document.getElementById('welcomeTitle').textContent = `${greeting}，${userName} 老師`;
+      document.getElementById('currentDate').textContent = `${year} / ${month} / ${day} (${dayOfWeek})`;
+    }
+
+    // 載入使用者資訊
+    async function loadUserInfo() {
+      try {
+        const response = await apiRequest('/auth/profile');
+        if (response.success && response.data) {
+          userName = response.data.name || response.data.username || '老師';
+          document.getElementById('sidebarUserName').textContent = userName + ' 老師';
+          updateWelcome();
+        }
+      } catch (error) {
+        console.warn('載入使用者資訊失敗:', error);
+      }
+    }
+
+    // 載入今日課程
+    async function loadTodayCourses() {
+      try {
+        const response = await apiRequest('/schedules/my-classes');
+        mySchedules = response.data.schedules || [];
+
+        const today = new Date().getDay();
+        const todaySchedules = mySchedules.filter(s => s.day_of_week === today);
+
+        // 按時間排序
+        todaySchedules.sort((a, b) => {
+          const timeA = a.start_time || '00:00:00';
+          const timeB = b.start_time || '00:00:00';
+          return timeA.localeCompare(timeB);
+        });
+
+        renderTodayCourses(todaySchedules);
+        renderJournalSection();
+      } catch (error) {
+        console.error('載入課程錯誤:', error);
+        document.getElementById('coursesGrid').innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #dc2626;">
+            載入失敗: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    // 渲染今日課程
+    function renderTodayCourses(schedules) {
+      const grid = document.getElementById('coursesGrid');
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+
+      if (schedules.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6a7282;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px; display: block; color: #d1d5db;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <p>今天沒有排定的課程</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+
+      schedules.forEach(schedule => {
+        const startTime = formatTime(schedule.start_time);
+        const endTime = formatTime(schedule.end_time);
+
+        // 判斷課程狀態
+        const startMinutes = parseTimeToMinutes(schedule.start_time);
+        const endMinutes = parseTimeToMinutes(schedule.end_time);
+
+        let status = 'pending';
+        let statusText = '待上課';
+        let statusClass = 'pending';
+
+        if (currentTime >= endMinutes) {
+          status = 'completed';
+          statusText = '已結束';
+          statusClass = 'completed';
+        } else if (currentTime >= startMinutes && currentTime < endMinutes) {
+          status = 'in-progress';
+          statusText = '進行中';
+          statusClass = 'in-progress';
+        }
+
+        html += `
+          <div class="course-card course-card--${statusClass}" data-status="${status}" data-schedule-id="${schedule.schedule_id}">
+            <div class="course-card__header">
+              <span class="course-card__status course-card__status--${statusClass}">
+                ${getStatusIcon(status)}
+                ${statusText}
+              </span>
+              <span class="course-card__students">${schedule.student_count || 0} 位學生</span>
+            </div>
+            <h4 class="course-card__title">${schedule.course_name || '未命名課程'}</h4>
+            <div class="course-card__footer">
+              <span class="course-card__time">${startTime} ~ ${endTime}</span>
+              <a href="records.html" class="course-card__action">
+                <svg class="course-card__action-icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 11.875V15H3.125L12.3417 5.78333L9.21667 2.65833L0 11.875ZM14.7583 3.36667C15.0833 3.04167 15.0833 2.51667 14.7583 2.19167L12.8083 0.241667C12.4833 -0.0833333 11.9583 -0.0833333 11.6333 0.241667L10.1083 1.76667L13.2333 4.89167L14.7583 3.36667Z" fill="currentColor"/>
+                </svg>
+                填寫日誌
+              </a>
+            </div>
+          </div>
+        `;
+      });
+
+      // 可選：新增班級卡片（如果需要）
+      // html += `...add class card...`;
+
+      grid.innerHTML = html;
+
+      // 篩選功能
+      setupFilterButtons();
+    }
+
+    // 取得狀態圖示
+    function getStatusIcon(status) {
+      if (status === 'completed') {
+        return `<svg class="course-card__status-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 0C3.14 0 0 3.14 0 7C0 10.86 3.14 14 7 14C10.86 14 14 10.86 14 7C14 3.14 10.86 0 7 0ZM5.6 10.5L2.1 7L3.087 6.013L5.6 8.519L10.913 3.206L11.9 4.2L5.6 10.5Z" fill="currentColor"/>
+        </svg>`;
+      } else if (status === 'in-progress') {
+        return `<svg class="course-card__status-icon" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 0C3.14 0 0 3.14 0 7C0 10.86 3.14 14 7 14C10.86 14 14 10.86 14 7C14 3.14 10.86 0 7 0ZM7 12.6C3.92 12.6 1.4 10.08 1.4 7C1.4 3.92 3.92 1.4 7 1.4C10.08 1.4 12.6 3.92 12.6 7C12.6 10.08 10.08 12.6 7 12.6ZM4.9 4.9H6.3V7.7L8.68 9.1L7.98 10.22L4.9 8.4V4.9Z" fill="currentColor"/>
+        </svg>`;
+      } else {
+        return `<svg class="course-card__status-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C12.42 16 16 12.42 16 8C16 3.58 12.42 0 8 0ZM9 12H7V10H9V12ZM9 8H7V4H9V8Z" fill="currentColor"/>
+        </svg>`;
+      }
+    }
+
+    // 渲染日誌區塊
+    function renderJournalSection() {
+      const totalClasses = mySchedules.length;
+      const completedClasses = 0; // TODO: 從 API 取得已完成日誌數量
+      const percent = totalClasses > 0 ? Math.round((completedClasses / totalClasses) * 100) : 0;
+
+      document.getElementById('journalTotal').textContent = `本週共 ${totalClasses} 堂課`;
+      document.getElementById('journalPercent').textContent = `完成度 ${percent}％`;
+      document.getElementById('journalCount').textContent = `${completedClasses} / ${totalClasses}`;
+      document.getElementById('journalProgressBar').style.width = `${percent}%`;
+
+      // 顯示需要填寫日誌的課程
+      const journalContent = document.getElementById('journalContent');
+      const progressCard = journalContent.querySelector('.journal-progress');
+
+      // 清除載入中的提示
+      const loadingDiv = journalContent.querySelector('div[style*="text-align: center"]');
+      if (loadingDiv) loadingDiv.remove();
+
+      // 取得今天和近幾天的課程
+      const now = new Date();
+      const today = now.getDay();
+
+      // 顯示待填寫的日誌
+      mySchedules.slice(0, 3).forEach(schedule => {
+        const dayDiff = getDayDiff(schedule.day_of_week, today);
+        let dateLabel = '';
+        if (dayDiff === 0) dateLabel = '今日';
+        else if (dayDiff === 1) dateLabel = '昨日';
+        else dateLabel = `${dayDiff}天前`;
+
+        const journalItem = document.createElement('div');
+        journalItem.className = 'journal-item';
+        journalItem.innerHTML = `
+          <div class="journal-item__header">
+            <h4 class="journal-item__title">${schedule.course_name || '未命名課程'}</h4>
+            <p class="journal-item__date">${formatDate(now)} • ${dateLabel}</p>
+          </div>
+          <a href="records.html" class="journal-item__btn">填寫日誌</a>
+        `;
+        journalContent.appendChild(journalItem);
+      });
+    }
+
+    // 設定篩選按鈕
+    function setupFilterButtons() {
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          filterBtns.forEach(b => b.classList.remove('filter-btn--active'));
+          this.classList.add('filter-btn--active');
+
+          const filter = this.dataset.filter;
+          const cards = document.querySelectorAll('.course-card');
+
+          cards.forEach(card => {
+            const status = card.dataset.status;
+            if (filter === 'all' || status === filter) {
+              card.style.display = '';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+
+    // 輔助函數：格式化時間
+    function formatTime(timeStr) {
+      if (!timeStr) return '--:--';
+      const parts = timeStr.split(':');
+      return `${parts[0]}：${parts[1]}`;
+    }
+
+    // 輔助函數：時間轉分鐘
+    function parseTimeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const parts = timeStr.split(':');
+      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+
+    // 輔助函數：計算天數差
+    function getDayDiff(scheduleDay, today) {
+      let diff = today - scheduleDay;
+      if (diff < 0) diff += 7;
+      return diff;
+    }
+
+    // 輔助函數：格式化日期
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}/${month}/${day}`;
+    }
+
     // AI 工具開啟功能
     function openAITool(toolType) {
       const toolNames = {
@@ -456,16 +622,25 @@
 
       const toolName = toolNames[toolType] || 'AI 工具';
 
-      // 顯示功能開發中提示
       if (typeof showMessage === 'function') {
         showMessage(`${toolName}功能開發中...`, 'warning');
       } else {
         alert(`${toolName}功能開發中...`);
       }
-
-      // 這裡可以添加跳轉到對應工具頁面的邏輯
-      // window.location.href = `ai-tools.html?tool=${toolType}`;
     }
+
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = getAuthToken();
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      updateWelcome();
+      loadUserInfo();
+      loadTodayCourses();
+    });
   </script>
 </body>
 </html>

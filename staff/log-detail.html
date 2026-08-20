@@ -608,14 +608,15 @@
             <polyline points="14 2 14 8 20 8"/>
             <line x1="16" y1="13" x2="8" y2="13"/>
             <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
           </svg>
           日誌管理
         </a>
         <a href="courses.html" class="staff-sidebar__nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
           </svg>
           課程資訊
         </a>
@@ -704,44 +705,14 @@
           <div class="course-info-card__header">課程資訊</div>
 
           <div class="course-info-grid">
-            <div class="course-info-item">
-              <span class="course-info-item__label">課程名稱</span>
-              <span class="course-info-item__value">動力機器人</span>
-            </div>
-            <div class="course-info-item">
-              <span class="course-info-item__label">授課教師</span>
-              <span class="course-info-item__value">陳老師</span>
-            </div>
-            <div class="course-info-item">
-              <span class="course-info-item__label">教室</span>
-              <span class="course-info-item__value">西屯</span>
-            </div>
-            <div class="course-info-item">
-              <span class="course-info-item__label">課程時間</span>
-              <span class="course-info-item__value">2026/06/26 18:00~19:30</span>
-            </div>
-            <div class="course-info-item">
-              <span class="course-info-item__label">課程主題</span>
-              <span class="course-info-item__value">感應器模組與條件控制基礎應用</span>
-            </div>
-            <div class="course-info-item">
-              <span class="course-info-item__label">課程備註</span>
-              <div class="course-notes">
-                <label><input type="checkbox" checked disabled> 正常上課</label>
-                <label><input type="checkbox" disabled> 時段異動：_____</label>
-                <label><input type="checkbox" disabled> 師資異動：_____</label>
-              </div>
+            <div style="text-align: center; padding: 20px; color: var(--color-text-muted);">
+              載入中...
             </div>
           </div>
 
-          <div class="course-outline">
+          <div class="course-outline" style="display: none;">
             <div class="course-outline__title">課程大綱</div>
-            <ol class="course-outline__list">
-              <li>1. 複習上週感度組裝重點</li>
-              <li>2. 介紹超音波感應器原理與接線方式</li>
-              <li>3. 實作：讓機器人偵測障礙物並自動停止</li>
-              <li>4. 成果展示與互評</li>
-            </ol>
+            <ol class="course-outline__list"></ol>
           </div>
         </div>
 
@@ -749,20 +720,192 @@
         <div class="students-section">
           <div class="students-section__header">
             <h3 class="students-section__title">學生出缺席與表現紀錄</h3>
-            <span class="students-section__count">4 名學生</span>
+            <span class="students-section__count">- 名學生</span>
           </div>
+          <div style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+            載入中...
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 
-          <!-- 學生項目 1 - 展開 -->
-          <div class="student-item expanded" id="student1">
-            <div class="student-item__header" onclick="toggleStudent('student1')">
+  <script src="../js/main.js"></script>
+  <script>
+    const API_BASE = window.API_BASE || 'http://localhost:3000';
+    let currentLogData = null;
+    let radarCharts = {};
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 更新當前日期
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+      document.getElementById('currentDate').textContent = dateStr;
+
+      // 取得 URL 參數中的日誌 ID
+      const urlParams = new URLSearchParams(window.location.search);
+      const logId = urlParams.get('id');
+
+      if (logId) {
+        loadLogDetail(logId);
+      } else {
+        showMessage('找不到日誌 ID', 'error');
+      }
+    });
+
+    function getAuthToken() {
+      return localStorage.getItem('authToken');
+    }
+
+    async function loadLogDetail(logId) {
+      const token = getAuthToken();
+
+      try {
+        const response = await fetch(`${API_BASE}/api/logs/${logId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          currentLogData = result.data;
+          renderLogDetail(result.data);
+        } else {
+          showMessage(result.message || '載入日誌詳情失敗', 'error');
+        }
+      } catch (error) {
+        console.error('載入日誌詳情錯誤:', error);
+        showMessage('載入日誌詳情失敗', 'error');
+      }
+    }
+
+    function renderLogDetail(log) {
+      // 更新頁面標題區的狀態
+      const statusBadge = document.querySelector('.page-header .status-badge');
+      const statusMap = {
+        'pending': { class: 'status-badge--pending', text: '未填寫' },
+        'progress': { class: 'status-badge--progress', text: '進行中' },
+        'completed': { class: 'status-badge--completed', text: '已完成' }
+      };
+      const status = statusMap[log.status] || statusMap['pending'];
+      statusBadge.className = `status-badge ${status.class}`;
+      statusBadge.textContent = status.text;
+
+      // 渲染課程資訊
+      renderCourseInfo(log);
+
+      // 渲染學生記錄
+      renderStudentRecords(log.student_records || []);
+    }
+
+    function renderCourseInfo(log) {
+      const infoGrid = document.querySelector('.course-info-grid');
+
+      // 格式化日期時間
+      const logDate = log.log_date ? new Date(log.log_date) : null;
+      const dateStr = logDate ? `${logDate.getFullYear()}/${String(logDate.getMonth() + 1).padStart(2, '0')}/${String(logDate.getDate()).padStart(2, '0')}` : '-';
+      const timeStr = log.start_time && log.end_time
+        ? `${log.start_time.substring(0, 5)}~${log.end_time.substring(0, 5)}`
+        : '';
+      const dateTimeStr = timeStr ? `${dateStr} ${timeStr}` : dateStr;
+
+      infoGrid.innerHTML = `
+        <div class="course-info-item">
+          <span class="course-info-item__label">課程名稱</span>
+          <span class="course-info-item__value">${log.course_name || '-'}</span>
+        </div>
+        <div class="course-info-item">
+          <span class="course-info-item__label">授課教師</span>
+          <span class="course-info-item__value">${log.teacher_name || '-'}</span>
+        </div>
+        <div class="course-info-item">
+          <span class="course-info-item__label">教室</span>
+          <span class="course-info-item__value">${log.classroom_name || '-'}</span>
+        </div>
+        <div class="course-info-item">
+          <span class="course-info-item__label">課程時間</span>
+          <span class="course-info-item__value">${dateTimeStr}</span>
+        </div>
+        <div class="course-info-item">
+          <span class="course-info-item__label">課程主題</span>
+          <span class="course-info-item__value">${log.topic || '-'}</span>
+        </div>
+        <div class="course-info-item">
+          <span class="course-info-item__label">課程備註</span>
+          <span class="course-info-item__value">${log.content || '無'}</span>
+        </div>
+      `;
+
+      // 渲染課程大綱
+      const outlineContainer = document.querySelector('.course-outline');
+      if (log.outline) {
+        let outlineItems = [];
+        try {
+          outlineItems = typeof log.outline === 'string' ? JSON.parse(log.outline) : log.outline;
+        } catch (e) {
+          outlineItems = [log.outline];
+        }
+
+        if (Array.isArray(outlineItems) && outlineItems.length > 0) {
+          outlineContainer.innerHTML = `
+            <div class="course-outline__title">課程大綱</div>
+            <ol class="course-outline__list">
+              ${outlineItems.map((item, index) => `<li>${index + 1}. ${item}</li>`).join('')}
+            </ol>
+          `;
+          outlineContainer.style.display = 'block';
+        } else {
+          outlineContainer.style.display = 'none';
+        }
+      } else {
+        outlineContainer.style.display = 'none';
+      }
+    }
+
+    function renderStudentRecords(records) {
+      const section = document.querySelector('.students-section');
+      const countSpan = section.querySelector('.students-section__count');
+      countSpan.textContent = `${records.length} 名學生`;
+
+      // 移除舊的學生項目
+      const oldItems = section.querySelectorAll('.student-item');
+      oldItems.forEach(item => item.remove());
+
+      if (records.length === 0) {
+        section.insertAdjacentHTML('beforeend', `
+          <div style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+            尚無學生記錄
+          </div>
+        `);
+        return;
+      }
+
+      records.forEach((record, index) => {
+        const studentId = `student${index + 1}`;
+        const initial = record.student_name ? record.student_name.charAt(0) : '?';
+
+        const attendanceMap = {
+          'present': { class: 'student-item__status--present', text: '出席' },
+          'absent': { class: 'student-item__status--absent', text: '缺席' },
+          'late': { class: 'student-item__status--makeup', text: '遲到' },
+          'leave': { class: 'student-item__status--makeup', text: '請假' },
+          'makeup': { class: 'student-item__status--makeup', text: '補課' }
+        };
+        const attendance = attendanceMap[record.attendance] || attendanceMap['present'];
+        const points = record.points_earned > 0 ? `+${record.points_earned}點` : '';
+
+        const html = `
+          <div class="student-item ${index === 0 ? 'expanded' : ''}" id="${studentId}">
+            <div class="student-item__header" onclick="toggleStudent('${studentId}')">
               <div class="student-item__info">
-                <div class="student-item__avatar">王</div>
-                <span class="student-item__id">S001</span>
-                <span class="student-item__name">王小明</span>
-                <span class="student-item__status student-item__status--present">出席</span>
+                <div class="student-item__avatar">${initial}</div>
+                <span class="student-item__id">${record.student_code || '-'}</span>
+                <span class="student-item__name">${record.student_name || '-'}</span>
+                <span class="student-item__status ${attendance.class}">${attendance.text}</span>
               </div>
               <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                <span class="student-item__points">+5點</span>
+                <span class="student-item__points">${points}</span>
                 <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 12 15 18 9"/>
                 </svg>
@@ -772,7 +915,7 @@
               <div class="student-detail__section">
                 <div class="student-detail__label">教師評語</div>
                 <div class="student-detail__content">
-                  今日積極參與感應器安裝，主動協助同學解決接線問題，思維清晰，表現優異。建議可嘗試更進階的程式邏輯挑戰。
+                  ${record.performance || record.notes || '無'}
                 </div>
               </div>
 
@@ -780,28 +923,28 @@
                 <div class="student-detail__label">能力評估</div>
                 <div class="ability-section">
                   <div class="radar-chart-container">
-                    <canvas id="radarChart1"></canvas>
+                    <canvas id="radarChart${index}"></canvas>
                   </div>
                   <div class="ability-list">
                     <div class="ability-item">
                       <span class="ability-item__name">程式</span>
-                      <span class="ability-item__score">4 / 5</span>
+                      <span class="ability-item__score">${record.skill_programming || 0} / 5</span>
                     </div>
                     <div class="ability-item">
                       <span class="ability-item__name">除錯</span>
-                      <span class="ability-item__score">4 / 5</span>
+                      <span class="ability-item__score">${record.skill_debugging || 0} / 5</span>
                     </div>
                     <div class="ability-item">
                       <span class="ability-item__name">創意</span>
-                      <span class="ability-item__score">4 / 5</span>
+                      <span class="ability-item__score">${record.skill_creativity || 0} / 5</span>
                     </div>
                     <div class="ability-item">
                       <span class="ability-item__name">結構</span>
-                      <span class="ability-item__score">3 / 5</span>
+                      <span class="ability-item__score">${record.skill_structure || 0} / 5</span>
                     </div>
                     <div class="ability-item">
                       <span class="ability-item__name">團隊合作</span>
-                      <span class="ability-item__score">4 / 5</span>
+                      <span class="ability-item__score">${record.skill_teamwork || 0} / 5</span>
                     </div>
                   </div>
                 </div>
@@ -811,129 +954,83 @@
                 <div class="student-detail__section">
                   <div class="student-detail__label">獲得點數</div>
                   <div class="points-box">
-                    <span class="points-box__value">+5</span>
+                    <span class="points-box__value">+${record.points_earned || 0}</span>
                     <span class="points-box__unit">點</span>
                   </div>
                 </div>
                 <div class="student-detail__section">
                   <div class="student-detail__label">備註事項</div>
-                  <div class="student-detail__content">無</div>
+                  <div class="student-detail__content">${record.notes || '無'}</div>
                 </div>
               </div>
 
-              <div class="student-detail__section">
-                <div class="student-detail__label">上課照片</div>
-                <div class="photos-grid">
-                  <div class="photo-placeholder">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="8.5" cy="8.5" r="1.5"/>
-                      <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                    照片 1
-                  </div>
-                  <div class="photo-placeholder">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="8.5" cy="8.5" r="1.5"/>
-                      <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                    照片 2
-                  </div>
-                </div>
-              </div>
+              ${renderPhotos(record.photos || [])}
             </div>
           </div>
+        `;
 
-          <!-- 學生項目 2 -->
-          <div class="student-item" id="student2">
-            <div class="student-item__header" onclick="toggleStudent('student2')">
-              <div class="student-item__info">
-                <div class="student-item__avatar">李</div>
-                <span class="student-item__id">S002</span>
-                <span class="student-item__name">李美華</span>
-                <span class="student-item__status student-item__status--present">出席</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                <span class="student-item__points">+4點</span>
-                <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
-            </div>
-            <div class="student-item__detail">
-              <!-- 詳細內容省略 -->
-            </div>
-          </div>
+        section.insertAdjacentHTML('beforeend', html);
 
-          <!-- 學生項目 3 -->
-          <div class="student-item" id="student3">
-            <div class="student-item__header" onclick="toggleStudent('student3')">
-              <div class="student-item__info">
-                <div class="student-item__avatar">張</div>
-                <span class="student-item__id">S003</span>
-                <span class="student-item__name">張大偉</span>
-                <span class="student-item__status student-item__status--makeup">補課</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                <span class="student-item__points">+2點</span>
-                <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
-            </div>
-            <div class="student-item__detail">
-              <!-- 詳細內容省略 -->
-            </div>
-          </div>
-
-          <!-- 學生項目 4 -->
-          <div class="student-item" id="student4">
-            <div class="student-item__header" onclick="toggleStudent('student4')">
-              <div class="student-item__info">
-                <div class="student-item__avatar">陳</div>
-                <span class="student-item__id">S004</span>
-                <span class="student-item__name">陳小芳</span>
-                <span class="student-item__status student-item__status--absent">缺席</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                <span class="student-item__points"></span>
-                <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
-            </div>
-            <div class="student-item__detail">
-              <!-- 詳細內容省略 -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <script src="../js/main.js"></script>
-  <script>
-    // 更新當前日期
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
-    document.getElementById('currentDate').textContent = dateStr;
-
-    // 學生項目展開/收合
-    function toggleStudent(id) {
-      const item = document.getElementById(id);
-      item.classList.toggle('expanded');
+        // 在下一個事件循環中創建雷達圖
+        setTimeout(() => {
+          createRadarChart(`radarChart${index}`, [
+            record.skill_programming || 0,
+            record.skill_debugging || 0,
+            record.skill_creativity || 0,
+            record.skill_structure || 0,
+            record.skill_teamwork || 0
+          ]);
+        }, 100);
+      });
     }
 
-    // 雷達圖
-    const ctx = document.getElementById('radarChart1');
-    if (ctx) {
-      new Chart(ctx, {
+    function renderPhotos(photos) {
+      if (!photos || photos.length === 0) {
+        return `
+          <div class="student-detail__section">
+            <div class="student-detail__label">上課照片</div>
+            <div class="photos-grid">
+              <div class="photo-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                無照片
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="student-detail__section">
+          <div class="student-detail__label">上課照片</div>
+          <div class="photos-grid">
+            ${photos.map((photo, i) => `
+              <img src="${photo.photo_url}" alt="照片 ${i + 1}"
+                   style="width: 120px; height: 90px; object-fit: cover; border-radius: var(--radius-md);">
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function createRadarChart(canvasId, data) {
+      const ctx = document.getElementById(canvasId);
+      if (!ctx) return;
+
+      // 銷毀舊圖表（如果存在）
+      if (radarCharts[canvasId]) {
+        radarCharts[canvasId].destroy();
+      }
+
+      radarCharts[canvasId] = new Chart(ctx, {
         type: 'radar',
         data: {
           labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
           datasets: [{
-            data: [4, 4, 4, 3, 4],
+            data: data,
             backgroundColor: 'rgba(255, 219, 88, 0.3)',
             borderColor: '#ffdb58',
             borderWidth: 2,
@@ -975,6 +1072,12 @@
           }
         }
       });
+    }
+
+    // 學生項目展開/收合
+    function toggleStudent(id) {
+      const item = document.getElementById(id);
+      item.classList.toggle('expanded');
     }
   </script>
   <script src="../js/admin-notifications.js"></script>

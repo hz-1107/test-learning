@@ -116,7 +116,7 @@
       <nav class="staff-sidebar__nav">
         <a href="students.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>學生管理</a>
         <a href="teachers.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>老師管理</a>
-        <a href="logs.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>日誌管理</a>
+        <a href="logs.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>日誌管理</a>
         <a href="courses.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>課程資訊</a>
         <a href="schedule.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>課表排程</a>
         <a href="points.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>點數管理</a>
@@ -146,7 +146,7 @@
         <div class="page-header">
           <div>
             <h2 class="page-title">點數管理</h2>
-            <p class="page-subtitle">最近更新：2026-06-18 14:30</p>
+            <p class="page-subtitle" id="lastUpdate">從資料庫載入學生資料</p>
           </div>
         </div>
 
@@ -156,16 +156,10 @@
             <input type="text" placeholder="搜尋學生姓名" id="pointsSearchInput">
           </div>
           <select class="filter-select" id="pointsClassroomFilter">
-            <option>全部教室</option>
-            <option>西屯教室</option>
-            <option>沙鹿教室</option>
+            <option value="">全部教室</option>
           </select>
           <select class="filter-select" id="pointsCourseFilter">
-            <option>全部課程</option>
-            <option>動力機械</option>
-            <option>程式機械</option>
-            <option>幼兒簡易機械</option>
-            <option>科創機器人</option>
+            <option value="">全部課程</option>
           </select>
           <button class="btn-outline" id="pointsApplyFilterBtn">套用</button>
         </div>
@@ -265,25 +259,27 @@
   </div>
 
   <script src="../js/main.js"></script>
-  <script src="../js/students-data.js"></script>
-  <script src="../js/points-data.js"></script>
   <script>
+    // API 基礎網址
+    const POINTS_API_BASE = window.API_BASE || 'http://localhost:3000';
+
     const dateEl = document.getElementById('currentDate');
     const now = new Date();
     dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
 
-    // 點數資料（單一資料來源，持久化）
-    let pointsMap = loadPoints();
+    // 點數變動原因
+    const POINT_REASON_LIST = ['增加', '扣除', '兌換獎品', '其他'];
+    const POINT_REASON_META = {
+      '增加': { sign: 1, confirmLabel: '確認增加', color: '#007A55' },
+      '扣除': { sign: -1, confirmLabel: '確認扣除', color: '#fe7560' },
+      '兌換獎品': { sign: -1, confirmLabel: '確認兌換', color: '#fe7560' },
+      '其他': { sign: 1, confirmLabel: '確認送出', color: '#007A55' },
+    };
 
-    function persistPoints() {
-      savePoints(pointsMap);
-    }
-
-    function formatNow() {
-      const d = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    }
+    // 學生資料
+    let allStudents = [];
+    let classrooms = [];
+    let courseTypes = [];
 
     // 篩選與分頁
     const POINTS_PAGE_SIZE = 8;
@@ -295,20 +291,116 @@
     const pointsTableBody = document.getElementById('pointsTableBody');
     const pointsPagination = document.getElementById('pointsPagination');
 
-    function getFilteredStudents() {
-      const keyword = pointsSearchInput.value.trim();
-      const classroom = pointsClassroomFilter.value;
-      const course = pointsCourseFilter.value;
+    // 頁面載入時執行
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadFilterOptions();
+      await loadStudents();
+    });
 
-      return STUDENT_ROSTER.filter(s => {
-        const matchesKeyword = !keyword || s.name.includes(keyword);
-        const matchesClassroom = classroom === '全部教室' || `${s.room}教室` === classroom;
-        const matchesCourse = course === '全部課程' || s.course === course;
+    // 載入篩選選項（教室和課程類型）
+    async function loadFilterOptions() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      try {
+        // 並行載入教室和課程類型
+        const [classroomsRes, courseTypesRes] = await Promise.all([
+          fetch(`${POINTS_API_BASE}/api/schedules/classrooms`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch(`${POINTS_API_BASE}/api/students/course-types`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+
+        if (classroomsRes.ok) {
+          const data = await classroomsRes.json();
+          classrooms = data.data || [];
+          updateClassroomFilter();
+        }
+
+        if (courseTypesRes.ok) {
+          const data = await courseTypesRes.json();
+          courseTypes = data.data || [];
+          updateCourseFilter();
+        }
+      } catch (error) {
+        console.error('載入篩選選項錯誤:', error);
+      }
+    }
+
+    // 更新教室下拉選單
+    function updateClassroomFilter() {
+      pointsClassroomFilter.innerHTML = '<option value="">全部教室</option>';
+      classrooms.forEach(c => {
+        pointsClassroomFilter.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      });
+    }
+
+    // 更新課程下拉選單
+    function updateCourseFilter() {
+      pointsCourseFilter.innerHTML = '<option value="">全部課程</option>';
+      courseTypes.forEach(c => {
+        pointsCourseFilter.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      });
+    }
+
+    // 從 API 載入學生資料
+    async function loadStudents() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      try {
+        pointsTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 32px;">載入中...</td></tr>';
+
+        const response = await fetch(`${POINTS_API_BASE}/api/students?limit=1000`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            window.location.href = '../login.html';
+            return;
+          }
+          throw new Error('載入學生資料失敗');
+        }
+
+        const result = await response.json();
+        console.log('學生 API 回應:', result);
+        allStudents = result.data?.students || [];
+        renderPointsPage(1);
+
+      } catch (error) {
+        console.error('載入學生錯誤:', error);
+        pointsTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #fb2c36; padding: 32px;">載入失敗：${error.message}</td></tr>`;
+      }
+    }
+
+    function getFilteredStudents() {
+      const keyword = pointsSearchInput.value.trim().toLowerCase();
+      const classroomId = pointsClassroomFilter.value;
+      const courseTypeId = pointsCourseFilter.value;
+
+      return allStudents.filter(s => {
+        const matchesKeyword = !keyword || (s.name && s.name.toLowerCase().includes(keyword));
+        const matchesClassroom = !classroomId || s.classroom_id == classroomId;
+        const matchesCourse = !courseTypeId || s.course_type_id == courseTypeId;
         return matchesKeyword && matchesClassroom && matchesCourse;
       });
     }
 
     function renderPointsPagination(totalPages, page) {
+      if (totalPages <= 1) {
+        pointsPagination.innerHTML = '';
+        return;
+      }
       let html = `<button class="pagination__btn" id="pointsPrev">&lt;</button>`;
       for (let p = 1; p <= totalPages; p++) {
         html += `<button class="pagination__btn${p === page ? ' pagination__btn--active' : ''}" data-page="${p}">${p}</button>`;
@@ -325,13 +417,15 @@
       const pageStudents = filtered.slice(start, start + POINTS_PAGE_SIZE);
 
       pointsTableBody.innerHTML = pageStudents.length ? pageStudents.map(s => {
-        const record = getStudentPointsRecord(pointsMap, s.name);
+        const points = s.points_balance ?? 0;
+        const courseName = s.course_type_name || '未指定';
+        const classroomName = s.classroom_name || '未指定';
         return `
-          <tr data-name="${s.name}">
+          <tr data-id="${s.id}" data-name="${s.name}" data-points="${points}">
             <td>${s.name}</td>
-            <td><span class="course-tag">${s.course}</span></td>
-            <td>${s.room}教室</td>
-            <td><span class="points-value">${record.points}</span></td>
+            <td><span class="course-tag">${courseName}</span></td>
+            <td>${classroomName}</td>
+            <td><span class="points-value">${points}</span></td>
             <td>
               <button class="btn-outline" data-action="manage">點數管理</button>
               <button class="btn-text" data-action="history">
@@ -369,15 +463,16 @@
     pointsTableBody.addEventListener('click', function (e) {
       const btn = e.target.closest('button[data-action]');
       if (!btn) return;
-      const name = btn.closest('tr').dataset.name;
+      const row = btn.closest('tr');
+      const name = row.dataset.name;
+      const id = row.dataset.id;
+      const points = parseInt(row.dataset.points) || 0;
       if (btn.dataset.action === 'manage') {
-        openPointsManageModal(name);
+        openPointsManageModal(name, id, points);
       } else if (btn.dataset.action === 'history') {
-        openPointsHistoryModal(name);
+        openPointsHistoryModal(name, id);
       }
     });
-
-    renderPointsPage(1);
 
     // ============ 點數管理彈窗 ============
     const pointsReasonSelect = document.getElementById('pointsReasonSelect');
@@ -385,14 +480,17 @@
       POINT_REASON_LIST.map(r => `<option value="${r}">${r}</option>`).join('');
 
     let pointsManageTarget = null;
+    let pointsManageTargetId = null;
+    let pointsManageCurrentBalance = 0;
 
-    function openPointsManageModal(name) {
+    function openPointsManageModal(name, id, points) {
       pointsManageTarget = name;
-      const record = getStudentPointsRecord(pointsMap, name);
+      pointsManageTargetId = id;
+      pointsManageCurrentBalance = points;
 
       document.getElementById('pointsManageTitle').textContent = `點數管理 — ${name}`;
-      document.getElementById('pointsCurrentValue').textContent = `${record.points} 點`;
-      document.getElementById('previewCurrentPoints').textContent = record.points;
+      document.getElementById('pointsCurrentValue').textContent = `${points} 點`;
+      document.getElementById('previewCurrentPoints').textContent = points;
       document.getElementById('previewDeltaPoints').textContent = '—';
       document.getElementById('previewDeltaPoints').style.color = '';
       document.getElementById('previewFinalPoints').textContent = '—';
@@ -407,11 +505,13 @@
     function closePointsManageModal() {
       document.getElementById('pointsManageModal').classList.add('points-modal--hidden');
       pointsManageTarget = null;
+      pointsManageTargetId = null;
+      pointsManageCurrentBalance = 0;
     }
 
     function updatePointsPreview() {
       if (!pointsManageTarget) return;
-      const record = getStudentPointsRecord(pointsMap, pointsManageTarget);
+      const currentPoints = pointsManageCurrentBalance;
       const reason = pointsReasonSelect.value;
       const amount = parseInt(document.getElementById('pointsAmountInput').value, 10);
       const confirmBtn = document.getElementById('pointsConfirmBtn');
@@ -430,7 +530,7 @@
 
       const meta = POINT_REASON_META[reason];
       const delta = meta.sign * amount;
-      const finalPoints = Math.max(0, record.points + delta);
+      const finalPoints = Math.max(0, currentPoints + delta);
 
       deltaEl.textContent = `${delta > 0 ? '+' : ''}${delta}`;
       deltaEl.style.color = meta.color;
@@ -443,31 +543,53 @@
     pointsReasonSelect.addEventListener('change', updatePointsPreview);
     document.getElementById('pointsAmountInput').addEventListener('input', updatePointsPreview);
 
-    document.getElementById('pointsConfirmBtn').addEventListener('click', function () {
-      if (!pointsManageTarget) return;
+    document.getElementById('pointsConfirmBtn').addEventListener('click', async function () {
+      if (!pointsManageTarget || !pointsManageTargetId) return;
       const reason = pointsReasonSelect.value;
       const amount = parseInt(document.getElementById('pointsAmountInput').value, 10);
       if (!reason || !amount || amount <= 0) return;
 
       const meta = POINT_REASON_META[reason];
-      const record = getStudentPointsRecord(pointsMap, pointsManageTarget);
-      const finalPoints = Math.max(0, record.points + meta.sign * amount);
-      const appliedDelta = finalPoints - record.points;
+      const delta = meta.sign * amount;
       const description = document.getElementById('pointsDescriptionInput').value.trim() || reason;
+      const token = localStorage.getItem('authToken');
 
-      record.history.unshift({
-        id: Date.now(),
-        reason,
-        description,
-        delta: appliedDelta,
-        date: formatNow(),
-        operator: '系統管理員',
-      });
-      record.points = finalPoints;
+      const confirmBtn = document.getElementById('pointsConfirmBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = '處理中...';
 
-      persistPoints();
-      renderPointsPage(currentPointsPage);
-      closePointsManageModal();
+      try {
+        const response = await fetch(`${POINTS_API_BASE}/api/points/${pointsManageTargetId}/transaction`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ amount: delta, reason, description })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || '操作失敗');
+        }
+
+        // 更新本地學生資料中的點數
+        const student = allStudents.find(s => s.id == pointsManageTargetId);
+        if (student) {
+          student.points_balance = result.data.new_balance;
+        }
+
+        renderPointsPage(currentPointsPage);
+        closePointsManageModal();
+        alert(`${delta > 0 ? '增加' : '扣除'}點數成功！新餘額：${result.data.new_balance} 點`);
+
+      } catch (error) {
+        console.error('點數操作錯誤:', error);
+        alert('操作失敗：' + error.message);
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = meta.confirmLabel;
+      }
     });
 
     document.getElementById('pointsManageModal').addEventListener('click', function (e) {
@@ -475,25 +597,45 @@
     });
 
     // ============ 點數紀錄彈窗 ============
-    function openPointsHistoryModal(name) {
-      const record = getStudentPointsRecord(pointsMap, name);
+    async function openPointsHistoryModal(name, studentId) {
       document.getElementById('pointsHistoryTitle').textContent = `${name} — 點數紀錄`;
-
       const listEl = document.getElementById('pointsHistoryList');
-      listEl.innerHTML = record.history.length ? record.history.map(h => {
-        const color = h.delta >= 0 ? '#007A55' : '#fe7560';
-        return `
-          <div class="points-history-row">
-            <div>
-              <div class="points-history-row__reason">${h.description}</div>
-              <div class="points-history-row__meta">${h.date}．${h.operator}</div>
-            </div>
-            <div class="points-history-row__delta" style="color:${color};">${h.delta > 0 ? '+' : ''}${h.delta}</div>
-          </div>
-        `;
-      }).join('') : '<p class="points-history__empty">尚無點數紀錄</p>';
-
+      listEl.innerHTML = '<p style="text-align: center; padding: 20px;">載入中...</p>';
       document.getElementById('pointsHistoryModal').classList.remove('points-modal--hidden');
+
+      const token = localStorage.getItem('authToken');
+
+      try {
+        const response = await fetch(`${POINTS_API_BASE}/api/points/${studentId}/history`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || '載入失敗');
+        }
+
+        const transactions = result.data?.transactions || [];
+
+        listEl.innerHTML = transactions.length ? transactions.map(h => {
+          const color = h.amount >= 0 ? '#007A55' : '#fe7560';
+          const dateStr = h.created_at ? h.created_at.replace('T', ' ').substring(0, 16) : '';
+          return `
+            <div class="points-history-row">
+              <div>
+                <div class="points-history-row__reason">${h.description || h.reason}</div>
+                <div class="points-history-row__meta">${dateStr}．${h.operator_name || '系統'}</div>
+              </div>
+              <div class="points-history-row__delta" style="color:${color};">${h.amount > 0 ? '+' : ''}${h.amount}</div>
+            </div>
+          `;
+        }).join('') : '<p class="points-history__empty">尚無點數紀錄</p>';
+
+      } catch (error) {
+        console.error('載入點數紀錄錯誤:', error);
+        listEl.innerHTML = `<p class="points-history__empty" style="color: #fb2c36;">載入失敗：${error.message}</p>`;
+      }
     }
 
     function closePointsHistoryModal() {

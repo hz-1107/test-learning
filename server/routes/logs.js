@@ -6,6 +6,12 @@ const { authenticate, authorize } = require('../middleware/auth');
 // 所有路由都需要認證
 router.use(authenticate);
 
+// 取得教師的課程日誌狀態
+router.get('/my-status', authorize('admin', 'staff', 'teacher'), logsController.getMyLogsStatus);
+
+// 根據排程和日期取得日誌
+router.get('/by-schedule', authorize('admin', 'staff', 'teacher'), logsController.getByScheduleAndDate);
+
 // 日誌管理路由
 router.get('/', logsController.getAll);
 router.get('/:id', logsController.getOne);
@@ -17,5 +23,12 @@ router.put('/:id/permissions', authorize('admin', 'staff'), logsController.updat
 
 // 學生記錄
 router.put('/:id/students/:student_id', authorize('admin', 'staff', 'teacher'), logsController.updateStudentRecord);
+
+// 課堂活動照片
+router.get('/:id/photos', logsController.getPhotos);
+router.post('/:id/photos', authorize('admin', 'staff', 'teacher'), logsController.addPhoto);
+router.post('/:id/photos/batch', authorize('admin', 'staff', 'teacher'), logsController.addPhotos);
+router.put('/:id/photos/:photoId', authorize('admin', 'staff', 'teacher'), logsController.updatePhoto);
+router.delete('/:id/photos/:photoId', authorize('admin', 'staff', 'teacher'), logsController.deletePhoto);
 
 module.exports = router;
