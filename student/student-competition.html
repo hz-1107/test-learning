@@ -1138,7 +1138,8 @@
         const title = card.querySelector('.competition-card__title').textContent.toLowerCase();
         const subtitleEl = card.querySelector('.competition-card__subtitle');
         const subtitleText = subtitleEl ? subtitleEl.textContent.toLowerCase() : '';
-        const description = card.querySelector('.competition-card__description').textContent.toLowerCase();
+        const descriptionEl = card.querySelector('.competition-card__description');
+        const description = descriptionEl ? descriptionEl.textContent.toLowerCase() : '';
 
         const matchesQuery = !query || title.includes(query) || subtitleText.includes(query) || description.includes(query);
         const matchesLevel = !activeFilters.level || card.dataset.level === activeFilters.level;
@@ -1236,7 +1237,7 @@
 
     updateSelectedCount();
 
-    const RANK_LABELS = { gold: '第一名', silver: '第二名', bronze: '第三名', merit: '優勝' };
+    // RANK_LABELS already defined above at line 1050
     const RANK_STYLES = {
       gold: { color: '#a3760e', bg: 'rgba(212,160,18,0.18)' },
       silver: { color: '#4b5563', bg: 'rgba(107,114,128,0.18)' },
@@ -1280,7 +1281,7 @@
             scoreEl && scoreEl.textContent.trim() ? `成績：${scoreEl.textContent.trim().replace('成績: ', '')}` : null,
             teamEl ? `團隊：${teamEl.textContent.trim()}` : null
           ].filter(Boolean),
-          description: card.querySelector('.competition-card__description').textContent.trim().replace(/^競賽說明：/, '')
+          description: (card.querySelector('.competition-card__description')?.textContent?.trim() || '').replace(/^競賽說明：/, '')
         };
       });
 

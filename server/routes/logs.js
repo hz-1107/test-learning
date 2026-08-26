@@ -6,6 +6,9 @@ const { authenticate, authorize } = require('../middleware/auth');
 // 所有路由都需要認證
 router.use(authenticate);
 
+// 手動觸發自動建立日誌（僅管理員）
+router.post('/auto-create', authorize('admin', 'staff'), logsController.triggerAutoCreate);
+
 // 取得教師的課程日誌狀態
 router.get('/my-status', authorize('admin', 'staff', 'teacher'), logsController.getMyLogsStatus);
 
