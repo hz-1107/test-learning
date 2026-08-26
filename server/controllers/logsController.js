@@ -277,6 +277,108 @@ function getExpectedDates(startDate, endDate, dayOfWeek) {
   return dates;
 }
 
+// 取得特定班級的上課日期列表（含日誌狀態）
+exports.getScheduleDates = async (req, res) => {
+  await ensureTablesExist();
+  try {
+    const { schedule_id, start_date, end_date } = req.query;
+
+    if (!schedule_id) {
+      return res.status(400).json({
+        success: false,
+        message: '缺少 schedule_id 參數'
+      });
+    }
+
+    // 取得排程資訊
+    const schedule = await db.queryOne(`
+      SELECT
+        cs.id as schedule_id,
+        cs.course_id,
+        c.name as course_name,
+        cs.day_of_week,
+        cs.start_time,
+        cs.end_time,
+        cs.classroom_id,
+        cr.name as classroom_name,
+        cs.teacher_id
+      FROM course_schedules cs
+      JOIN courses c ON cs.course_id = c.id
+      LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
+      WHERE cs.id = ? AND cs.is_active = 1 AND cs.deleted_at IS NULL
+    `, [schedule_id]);
+
+    if (!schedule) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到該排程'
+      });
+    }
+
+    // 設定日期範圍（預設過去60天到未來7天）
+    const today = new Date();
+    const defaultStart = new Date(today);
+    defaultStart.setDate(defaultStart.getDate() - 60);
+    const defaultEnd = new Date(today);
+    defaultEnd.setDate(defaultEnd.getDate() + 7);
+
+    const startDateStr = start_date || defaultStart.toISOString().split('T')[0];
+    const endDateStr = end_date || defaultEnd.toISOString().split('T')[0];
+
+    // 計算該日期範圍內的上課日期
+    const expectedDates = getExpectedDates(startDateStr, endDateStr, schedule.day_of_week);
+
+    // 查詢這些日期的日誌狀態
+    const logs = await db.query(`
+      SELECT id, log_date, topic, status, created_at, updated_at
+      FROM course_logs
+      WHERE schedule_id = ? AND log_date >= ? AND log_date <= ?
+      ORDER BY log_date DESC
+    `, [schedule_id, startDateStr, endDateStr]);
+
+    // 建立日期到日誌的映射
+    const logMap = {};
+    logs.forEach(log => {
+      logMap[log.log_date.split('T')[0]] = log;
+    });
+
+    // 組合日期列表
+    const dateList = expectedDates.map(date => {
+      const log = logMap[date];
+      const dateObj = new Date(date);
+      const isPast = dateObj <= today;
+
+      return {
+        date,
+        day_of_week: schedule.day_of_week,
+        is_past: isPast,
+        has_log: !!log,
+        log_id: log ? log.id : null,
+        log_status: log ? log.status : null,
+        topic: log ? log.topic : null
+      };
+    }).sort((a, b) => new Date(b.date) - new Date(a.date)); // 依日期降序排列
+
+    res.json({
+      success: true,
+      data: {
+        schedule,
+        dates: dateList,
+        total_dates: expectedDates.length,
+        completed_count: logs.filter(l => l.status === 'completed').length,
+        in_progress_count: logs.filter(l => l.status === 'in_progress' || l.status === 'progress').length,
+        pending_count: expectedDates.filter(d => new Date(d) <= today).length - logs.length
+      }
+    });
+  } catch (error) {
+    console.error('取得上課日期列表錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
 // 取得所有日誌
 exports.getAll = async (req, res) => {
   await ensureTablesExist();
@@ -534,22 +636,56 @@ exports.create = async (req, res) => {
       });
     }
 
-    const logId = await db.insert(`
-      INSERT INTO course_logs (
-        course_id, schedule_id, log_date, start_time, end_time,
-        classroom_id, teacher_id, topic, content, outline, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-    `, [
-      course_id, schedule_id || null, log_date, start_time || null,
-      end_time || null, classroom_id || null, teacher_id,
-      topic || null, content || null, outline ? JSON.stringify(outline) : null
-    ]);
+    // 檢查是否已存在相同 schedule_id 和 log_date 的日誌
+    let existingLog = null;
+    if (schedule_id) {
+      existingLog = await db.queryOne(
+        'SELECT id FROM course_logs WHERE schedule_id = ? AND log_date = ?',
+        [schedule_id, log_date]
+      );
+    }
 
-    res.status(201).json({
-      success: true,
-      message: '日誌建立成功',
-      data: { id: logId }
-    });
+    let logId;
+
+    if (existingLog) {
+      // 更新現有日誌
+      await db.update(`
+        UPDATE course_logs SET
+          topic = ?, content = ?, outline = ?,
+          start_time = ?, end_time = ?, classroom_id = ?
+        WHERE id = ?
+      `, [
+        topic || null, content || null,
+        outline || null,
+        start_time || null, end_time || null, classroom_id || null,
+        existingLog.id
+      ]);
+      logId = existingLog.id;
+
+      res.json({
+        success: true,
+        message: '日誌更新成功',
+        data: { id: logId, updated: true }
+      });
+    } else {
+      // 建立新日誌
+      logId = await db.insert(`
+        INSERT INTO course_logs (
+          course_id, schedule_id, log_date, start_time, end_time,
+          classroom_id, teacher_id, topic, content, outline, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      `, [
+        course_id, schedule_id || null, log_date, start_time || null,
+        end_time || null, classroom_id || null, teacher_id,
+        topic || null, content || null, outline || null
+      ]);
+
+      res.status(201).json({
+        success: true,
+        message: '日誌建立成功',
+        data: { id: logId, updated: false }
+      });
+    }
   } catch (error) {
     console.error('建立日誌錯誤:', error);
     res.status(500).json({
@@ -580,7 +716,7 @@ exports.update = async (req, res) => {
       WHERE id = ?
     `, [
       topic || null, content || null,
-      outline ? JSON.stringify(outline) : null,
+      outline || null,
       status || 'pending', id
     ]);
 
@@ -691,20 +827,47 @@ exports.updateStudentRecord = async (req, res) => {
       `, [recordId, photo_url]);
     }
 
-    // 如果有點數，新增點數交易記錄
-    if (points_earned && points_earned > 0) {
-      // 檢查是否已有該日誌的點數記錄，避免重複
+    // 如果有點數，新增或更新點數交易記錄
+    if (points_earned !== undefined) {
+      // 檢查是否已有該日誌+學生的點數記錄
       const existingTransaction = await db.queryOne(`
-        SELECT id FROM point_transactions
-        WHERE student_id = ? AND description LIKE ? AND DATE(created_at) = CURDATE()
-      `, [student_id, `%日誌ID:${id}%`]);
+        SELECT id, amount FROM point_transactions
+        WHERE student_id = ? AND reference_type = 'log' AND reference_id = ?
+      `, [student_id, id]);
 
-      if (!existingTransaction) {
+      if (existingTransaction) {
+        // 已有記錄，檢查點數是否有變化
+        const oldAmount = existingTransaction.amount || 0;
+        const newAmount = points_earned || 0;
+        const diff = newAmount - oldAmount;
+
+        if (diff !== 0) {
+          // 點數有變化，更新交易記錄
+          await db.update(`
+            UPDATE point_transactions SET amount = ?, updated_at = NOW()
+            WHERE id = ?
+          `, [newAmount, existingTransaction.id]);
+
+          // 更新學生點數餘額（加上差額）
+          await db.update(`
+            UPDATE students SET points_balance = COALESCE(points_balance, 0) + ?
+            WHERE id = ?
+          `, [diff, student_id]);
+        }
+        // 點數沒變化則不做任何事
+      } else if (points_earned > 0) {
+        // 沒有記錄且點數大於0，新增記錄
         await db.insert(`
           INSERT INTO point_transactions (
-            student_id, amount, reason, description, operator_id
-          ) VALUES (?, ?, '課堂表現', ?, ?)
-        `, [student_id, points_earned, `日誌記錄獎勵 (日誌ID:${id})`, req.user.id]);
+            student_id, amount, reason, description, operator_id, reference_type, reference_id
+          ) VALUES (?, ?, '課堂表現', ?, ?, 'log', ?)
+        `, [student_id, points_earned, `日誌記錄獎勵 (日誌ID:${id})`, req.user.id, id]);
+
+        // 更新學生點數餘額
+        await db.update(`
+          UPDATE students SET points_balance = COALESCE(points_balance, 0) + ?
+          WHERE id = ?
+        `, [points_earned, student_id]);
       }
     }
 

@@ -652,121 +652,9 @@
         </div>
 
         <!-- 學習歷程列表 -->
-        <div class="history-list">
-          <!-- 歷程卡片 1 -->
-          <div class="history-card" data-category="動力機械" data-date="2026-05-20">
-            <div class="history-card__top">
-              <h3 class="history-card__title">動力機械</h3>
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-            </div>
-            <p class="history-card__subtitle">齒輪理論 — 戰鬥陀螺</p>
-            <div class="history-card__meta">
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                </svg>
-                2026-05-20
-              </span>
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                2小時
-              </span>
-            </div>
-            <div class="history-card__description">
-              課程大綱：本堂課以樂高積木為實作媒介，引導學生組裝戰鬥陀螺與發射器。教學核心聚焦於「齒輪理論」...
-            </div>
-          </div>
-
-          <!-- 歷程卡片 2 -->
-          <div class="history-card" data-category="程式機械" data-date="2026-05-15">
-            <div class="history-card__top">
-              <h3 class="history-card__title">程式機械</h3>
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-            </div>
-            <p class="history-card__subtitle">Scratch入門</p>
-            <div class="history-card__meta">
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                </svg>
-                2026-05-15
-              </span>
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                2小時
-              </span>
-            </div>
-            <div class="history-card__description">
-              製作互動式遊戲專案，理解事件驅動程式設計概念
-            </div>
-          </div>
-
-          <!-- 歷程卡片 3 -->
-          <div class="history-card" data-category="科創機器人" data-date="2026-05-10">
-            <div class="history-card__top">
-              <h3 class="history-card__title">科創機器人</h3>
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-            </div>
-            <p class="history-card__subtitle">感測器整合應用</p>
-            <div class="history-card__meta">
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                </svg>
-                2026-05-10
-              </span>
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                3小時
-              </span>
-            </div>
-            <div class="history-card__description">
-              結合超音波感測器與馬達控制，完成自動避障機器人
-            </div>
-          </div>
-
-          <!-- 歷程卡片 4 -->
-          <div class="history-card" data-category="動力機械" data-date="2026-05-05">
-            <div class="history-card__top">
-              <h3 class="history-card__title">動力機械</h3>
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-            </div>
-            <p class="history-card__subtitle">問題解決與團隊合作</p>
-            <div class="history-card__meta">
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                </svg>
-                2026-05-05
-              </span>
-              <span class="history-card__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                2小時
-              </span>
-            </div>
-            <div class="history-card__description">
-              分組完成創意挑戰任務，學習腦力激盪與協作技巧
-            </div>
+        <div class="history-list" id="historyList">
+          <div class="loading-message" style="text-align: center; padding: 40px; color: #6a7282;">
+            載入中...
           </div>
         </div>
       </div>
@@ -779,13 +667,154 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="../js/pdf-export.js"></script>
   <script>
+    const API_BASE = 'http://localhost:3000';
     const searchInput = document.getElementById('portfolioSearchInput');
-    const allHistoryCards = Array.from(document.querySelectorAll('.history-card'));
+    let allHistoryCards = [];
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
     const selectedCountLabel = document.getElementById('selectedCountLabel');
     const filterToggleBtn = document.getElementById('filterToggleBtn');
 
     const activeFilters = { category: '', startDate: '', endDate: '' };
+    let recordsData = [];
+
+    // 頁面載入時執行
+    document.addEventListener('DOMContentLoaded', async function() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      // 載入學生資訊
+      try {
+        const profileRes = await fetch(`${API_BASE}/api/students/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          document.querySelector('.student-sidebar__name').textContent = profile.data.name || '學生';
+        }
+      } catch (e) {
+        console.error('載入學生資訊失敗:', e);
+      }
+
+      // 載入學習歷程
+      loadRecords();
+    });
+
+    // 載入學習歷程記錄
+    async function loadRecords() {
+      const token = localStorage.getItem('authToken');
+      const container = document.getElementById('historyList');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/students/me/records`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('載入學習歷程失敗');
+
+        const result = await response.json();
+        recordsData = result.data || [];
+
+        // 更新課程分類篩選選項
+        updateCategoryOptions();
+
+        // 渲染記錄
+        renderRecords();
+
+      } catch (error) {
+        console.error('載入學習歷程錯誤:', error);
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #6a7282;">
+            ${error.message}<br>
+            <small>請確認您已登入學生帳號</small>
+          </div>
+        `;
+      }
+    }
+
+    // 更新課程分類選項
+    function updateCategoryOptions() {
+      const categories = [...new Set(recordsData.map(r => r.course_name || r.course_type))];
+      const select = document.getElementById('categoryFilterSelect');
+      select.innerHTML = '<option value="">全部</option>';
+      categories.forEach(cat => {
+        select.innerHTML += `<option value="${cat}">${cat}</option>`;
+      });
+    }
+
+    // 渲染學習歷程記錄
+    function renderRecords() {
+      const container = document.getElementById('historyList');
+
+      if (recordsData.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #6a7282;">
+            目前沒有學習歷程記錄
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = recordsData.map(record => {
+        const courseName = record.course_name || record.course_type || '課程';
+        const logDate = record.log_date ? record.log_date.split('T')[0] : '';
+        const duration = record.duration || 2;
+        const topic = record.topic || record.course_content || '學習內容';
+        const description = record.performance_note || record.teacher_comment || '本堂課學習表現良好';
+
+        return `
+          <div class="history-card" data-category="${courseName}" data-date="${logDate}" data-record-id="${record.id || record.record_id}">
+            <div class="history-card__top">
+              <h3 class="history-card__title">${courseName}</h3>
+              <label class="card-select" title="選取以匯出">
+                <input type="checkbox" data-export-select>
+              </label>
+            </div>
+            <p class="history-card__subtitle">${topic}</p>
+            <div class="history-card__meta">
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                </svg>
+                ${logDate}
+              </span>
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                ${duration}小時
+              </span>
+              ${record.teacher_name ? `
+              <span class="history-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                ${record.teacher_name}
+              </span>
+              ` : ''}
+            </div>
+            <div class="history-card__description">
+              ${description}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 重新綁定事件
+      allHistoryCards = Array.from(document.querySelectorAll('.history-card'));
+      allHistoryCards.forEach(card => {
+        const checkbox = card.querySelector('[data-export-select]');
+        if (checkbox) {
+          checkbox.addEventListener('change', updateSelectedCount);
+        }
+      });
+
+      updateSelectedCount();
+    }
 
     // 套用搜尋關鍵字 + 篩選條件（AND 條件），即時套用
     function applyAllFilters() {
@@ -868,7 +897,10 @@
 
     function updateSelectedCount() {
       const visible = visibleHistoryCards();
-      const checked = visible.filter(card => card.querySelector('[data-export-select]').checked);
+      const checked = visible.filter(card => {
+        const cb = card.querySelector('[data-export-select]');
+        return cb && cb.checked;
+      });
 
       selectedCountLabel.textContent = `已選擇 ${checked.length} 筆`;
       selectAllCheckbox.checked = visible.length > 0 && checked.length === visible.length;
@@ -877,16 +909,11 @@
 
     selectAllCheckbox.addEventListener('change', function() {
       visibleHistoryCards().forEach(card => {
-        card.querySelector('[data-export-select]').checked = selectAllCheckbox.checked;
+        const cb = card.querySelector('[data-export-select]');
+        if (cb) cb.checked = selectAllCheckbox.checked;
       });
       updateSelectedCount();
     });
-
-    allHistoryCards.forEach(card => {
-      card.querySelector('[data-export-select]').addEventListener('change', updateSelectedCount);
-    });
-
-    updateSelectedCount();
 
     const CATEGORY_STYLES = {
       '動力機械': { color: '#8a5522', bg: 'rgba(176,107,42,0.18)' },

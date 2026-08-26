@@ -9,6 +9,15 @@ router.get('/published', announcementsController.getPublishedAnnouncements);
 // 需要認證的路由
 router.use(authenticate);
 
+// 取得我的公告（含已讀狀態）
+router.get('/my', announcementsController.getMyAnnouncements);
+
+// 標記所有公告為已讀
+router.post('/read-all', announcementsController.markAllAsRead);
+
+// 標記單一公告為已讀
+router.post('/:id/read', announcementsController.markAsRead);
+
 // 取得公告列表
 router.get('/', announcementsController.getAnnouncements);
 

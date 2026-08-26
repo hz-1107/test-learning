@@ -54,7 +54,9 @@
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsIm5hbWUiOiLns7vntbHnrqHnkIblk6EiLCJpYXQiOjE3ODYyMTIxNjMsImV4cCI6MTc4NjgxNjk2M30.7UD5naguH6BVhdPW6AUFktiXbPmlxswnUOeLbcxX6E0\")",
       "Bash(__NEW_LINE_c841d0b7964ee150__ echo \"=== API 回傳的日期格式測試 ===\")",
       "Bash(lsof:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(pgrep:*)",
+      "Bash(ss -tlnp:*)"
     ]
   }
 }

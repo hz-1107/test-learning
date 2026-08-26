@@ -834,7 +834,179 @@
     .class-card__right svg {
       width: 20px;
       height: 20px;
-      transform: rotate(-90deg);
+      transition: transform 0.3s;
+    }
+
+    .class-card.expanded .class-card__right svg {
+      transform: rotate(180deg);
+    }
+
+    /* 日期列表 */
+    .date-list {
+      display: none;
+      background: #f9fafb;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      margin-top: -14px;
+      padding: 20px;
+      padding-top: 28px;
+    }
+
+    .date-list.active {
+      display: block;
+    }
+
+    .date-list__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .date-list__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #364153;
+    }
+
+    .date-list__stats {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #6a7282;
+    }
+
+    .date-list__stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .date-list__stat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .date-list__stat-dot--completed { background: #22c55e; }
+    .date-list__stat-dot--progress { background: #f59e0b; }
+    .date-list__stat-dot--pending { background: #d1d5dc; }
+
+    .date-list__items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    .date-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .date-item:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .date-item--future {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .date-item__left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .date-item__date {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e2939;
+      min-width: 80px;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #c7deff;
+    }
+
+    .date-item__day {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      background: var(--color-primary);
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    .date-item__topic {
+      font-size: 14px;
+      color: #1f2937;
+      margin-left: 16px;
+      font-weight: 500;
+      background: #fef9e7;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #fde68a;
+    }
+
+    .date-item__topic::before {
+      content: '主題：';
+      color: #92400e;
+      font-weight: 600;
+    }
+
+    .date-item__status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .date-item__status--completed {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .date-item__status--progress {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .date-item__status--pending {
+      background: #f3f4f6;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+    }
+
+    .date-list__loading {
+      text-align: center;
+      padding: 20px;
+      color: #6a7282;
+      font-size: 14px;
+    }
+
+    .class-card.expanded {
+      border-radius: 14px 14px 0 0;
+      border-bottom: none;
     }
 
     /* 分頁 */
@@ -1046,7 +1218,7 @@
 
             <div class="form-group">
               <label class="form-label">上課日期</label>
-              <input type="date" id="journalDateInput" class="form-input" value="">
+              <input type="date" id="journalDateInput" class="form-input form-input--readonly" value="" readonly>
             </div>
 
             <div class="form-group">
@@ -1774,8 +1946,8 @@
   <div class="ai-modal" id="commentModal">
     <div class="ai-modal__overlay" onclick="closeCommentModal()"></div>
     <div class="ai-modal__content ai-modal__content--large">
-      <div class="ai-modal__header">
-        <h3 class="ai-modal__title">AI 智能個人化評語生成工具 - <span id="commentStudentName">學生姓名</span></h3>
+      <div class="ai-modal__header ai-modal__header--yellow">
+        <h3 class="ai-modal__title">AI 智能個人化評語生成工具-<span id="commentStudentName">學生姓名</span></h3>
         <button class="ai-modal__close" onclick="closeCommentModal()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -1786,116 +1958,100 @@
       <div class="ai-modal__body">
         <div class="ai-modal__grid ai-modal__grid--three">
           <div class="ai-modal__section">
-            <h4 class="ai-modal__section-title">正面特質表現 <span style="color: #888; font-weight: normal;">*可複選 1-3 項</span></h4>
-            <div class="trait-grid">
-              <label class="trait-option"><input type="checkbox" name="trait"> 課堂專注高</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 主動積極</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 抗挫折力強</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 學習熱忱高</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 思維邏輯靈活</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 觀察細膩</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 空間感敏銳</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 開創性十足</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 同儕小老師</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> 組裝效率高</label>
-              <label class="trait-option"><input type="checkbox" name="trait"> Debug 大師</label>
+            <h4 class="ai-modal__section-title">正面特質表現 <span style="color: #888; font-weight: normal;">*可挑選 1~3 項</span></h4>
+            <div class="trait-tags">
+              <label class="trait-tag"><input type="checkbox" name="trait" value="課堂專注高"><span>課堂專注高</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="主動積極"><span>主動積極</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="抗挫折力強"><span>抗挫折力強</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="學習熱忱高"><span>學習熱忱高</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="思維邏輯靈活"><span>思維邏輯靈活</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="觀察細膩"><span>觀察細膩</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="空間感敏銳"><span>空間感敏銳</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="開創性十足"><span>開創性十足</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="同儕小老師"><span>同儕小老師</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="組裝效率高"><span>組裝效率高</span></label>
+              <label class="trait-tag"><input type="checkbox" name="trait" value="Debug大師"><span>Debug 大師</span></label>
             </div>
-            <h4 class="ai-modal__section-title" style="margin-top: 16px;">成長觀測指標 <span style="color: #888; font-weight: normal;">*可複選 1 項</span></h4>
-            <div class="trait-grid">
-              <label class="trait-option"><input type="checkbox" name="growth"> 社交能量充沛</label>
-              <label class="trait-option"><input type="checkbox" name="growth"> 情緒容易波動</label>
-              <label class="trait-option"><input type="checkbox" name="growth"> 偏好獨立探索</label>
-              <label class="trait-option"><input type="checkbox" name="growth"> 合作默契培養中</label>
-              <label class="trait-option"><input type="checkbox" name="growth"> 動手操作熟練度培養中</label>
-              <label class="trait-option"><input type="checkbox" name="growth"> 挫折容忍度引導中</label>
-              <label class="trait-option"><input type="checkbox" name="growth"> 耐心涵養培養中</label>
+            <h4 class="ai-modal__section-title" style="margin-top: 20px;">待改進項目 <span style="color: #888; font-weight: normal;">*可挑選 1~3 項</span></h4>
+            <div class="trait-tags trait-tags--improvement">
+              <label class="trait-tag trait-tag--improvement"><input type="checkbox" name="improvement" value="社交能量充沛"><span>社交能量充沛</span></label>
+              <label class="trait-tag trait-tag--improvement"><input type="checkbox" name="improvement" value="思緒容易漫遊"><span>思緒容易漫遊</span></label>
+              <label class="trait-tag trait-tag--improvement"><input type="checkbox" name="improvement" value="偏好獨立探索"><span>偏好獨立探索</span></label>
+              <label class="trait-tag trait-tag--improvement"><input type="checkbox" name="improvement" value="合作默契培養中"><span>合作默契培養中</span></label>
+              <label class="trait-tag trait-tag--improvement"><input type="checkbox" name="improvement" value="動手操作熟練度培養中"><span>動手操作熟練度培養中</span></label>
+              <label class="trait-tag trait-tag--improvement"><input type="checkbox" name="improvement" value="挫折容忍度引導中"><span>挫折容忍度引導中</span></label>
+              <label class="trait-tag trait-tag--improvement"><input type="checkbox" name="improvement" value="細心度培養中"><span>細心度培養中</span></label>
             </div>
           </div>
           <div class="ai-modal__section">
-            <h4 class="ai-modal__section-title">手動補充內容 (選填)：主題、課程、具體事例</h4>
+            <h4 class="ai-modal__section-title">手動補充內容（選填）：主題、課程、具體事例</h4>
             <textarea class="ai-modal__textarea" id="commentInput" placeholder="例如：今天學生A協助同學的解決數學問題，主動..."></textarea>
             <button class="ai-modal__generate-btn" onclick="generateComment()">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5"/>
-                <path d="M2 12l10 5 10-5"/>
-              </svg>
               立即智能生成評語與雷達圖
             </button>
             <div class="ai-modal__result">
-              <h4 class="ai-modal__section-title">AI 生成評語 (可直接編輯)</h4>
-              <textarea class="ai-modal__textarea ai-modal__textarea--result" id="commentResult" placeholder="點擊上側「立即智能生成評語」按鈕，系統將根據您選擇的特質標籤和補充內容，自動生成個人化評語。生成後可在此處直接編輯修改。"></textarea>
+              <h4 class="ai-modal__section-title">AI 生成評語</h4>
+              <textarea class="ai-modal__textarea ai-modal__textarea--result" id="commentResult" placeholder="點擊上方「生成」按鈕，系統將根據您選擇的特質標籤和補充內容，自動生成個人化評語。生成後可在此處直接編輯修改。"></textarea>
             </div>
           </div>
-          <div class="ai-modal__section">
+          <div class="ai-modal__section ai-modal__section--radar">
             <h4 class="ai-modal__section-title">雷達圖 <span style="color: #888; font-weight: normal;">*僅智能生成1次，可手動修改分數</span></h4>
             <div class="radar-chart-container">
               <svg class="radar-chart" viewBox="0 0 200 200">
-                <!-- 背景網格 -->
-                <polygon points="100,20 170,60 170,140 100,180 30,140 30,60" fill="none" stroke="#e5e7eb" stroke-width="1"/>
-                <polygon points="100,40 150,70 150,130 100,160 50,130 50,70" fill="none" stroke="#e5e7eb" stroke-width="1"/>
-                <polygon points="100,60 130,80 130,120 100,140 70,120 70,80" fill="none" stroke="#e5e7eb" stroke-width="1"/>
-                <polygon points="100,80 110,90 110,110 100,120 90,110 90,90" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <!-- 背景網格 - 五邊形 (5層，半徑分別為 80, 64, 48, 32, 16) -->
+                <polygon class="radar-grid" points="100,20 176,75 147,165 53,165 24,75" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <polygon class="radar-grid" points="100,36 161,80 138,152 62,152 39,80" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <polygon class="radar-grid" points="100,52 146,85 128,139 72,139 54,85" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <polygon class="radar-grid" points="100,68 130,90 119,126 81,126 70,90" fill="none" stroke="#e5e7eb" stroke-width="1"/>
+                <polygon class="radar-grid" points="100,84 115,95 109,113 91,113 85,95" fill="none" stroke="#e5e7eb" stroke-width="1"/>
                 <!-- 軸線 -->
-                <line x1="100" y1="100" x2="100" y2="20" stroke="#e5e7eb"/>
-                <line x1="100" y1="100" x2="170" y2="60" stroke="#e5e7eb"/>
-                <line x1="100" y1="100" x2="170" y2="140" stroke="#e5e7eb"/>
-                <line x1="100" y1="100" x2="100" y2="180" stroke="#e5e7eb"/>
-                <line x1="100" y1="100" x2="30" y2="140" stroke="#e5e7eb"/>
-                <line x1="100" y1="100" x2="30" y2="60" stroke="#e5e7eb"/>
+                <line x1="100" y1="100" x2="100" y2="20" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="100" y1="100" x2="176" y2="75" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="100" y1="100" x2="147" y2="165" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="100" y1="100" x2="53" y2="165" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="100" y1="100" x2="24" y2="75" stroke="#e5e7eb" stroke-width="1"/>
                 <!-- 數據區域 -->
-                <polygon id="radarData" points="100,40 150,70 130,120 100,140 70,120 50,70" fill="rgba(255,219,88,0.3)" stroke="#ffdb58" stroke-width="2"/>
+                <polygon id="radarData" points="100,36 161,80 138,152 62,152 39,80" fill="rgba(255,219,88,0.3)" stroke="#ffdb58" stroke-width="2"/>
                 <!-- 標籤 -->
-                <text x="100" y="12" text-anchor="middle" font-size="11" fill="#364153">程式</text>
-                <text x="180" y="60" text-anchor="start" font-size="11" fill="#364153">除錯</text>
-                <text x="180" y="145" text-anchor="start" font-size="11" fill="#364153">創意</text>
-                <text x="100" y="195" text-anchor="middle" font-size="11" fill="#364153">結構</text>
-                <text x="20" y="145" text-anchor="end" font-size="11" fill="#364153">團隊合作</text>
-                <text x="20" y="60" text-anchor="end" font-size="11" fill="#364153">?</text>
+                <text x="100" y="10" text-anchor="middle" font-size="11" fill="#364153">程式</text>
+                <text x="185" y="78" text-anchor="start" font-size="11" fill="#364153">除錯</text>
+                <text x="155" y="180" text-anchor="middle" font-size="11" fill="#364153">創意</text>
+                <text x="45" y="180" text-anchor="middle" font-size="11" fill="#364153">結構</text>
+                <text x="15" y="78" text-anchor="end" font-size="11" fill="#364153">團隊合作</text>
               </svg>
             </div>
-            <div class="radar-scores">
+            <div class="radar-scores-grid">
               <div class="radar-score-item">
                 <span>程式</span>
-                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+                <input type="number" id="score_programming" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
               </div>
               <div class="radar-score-item">
                 <span>除錯</span>
-                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+                <input type="number" id="score_debugging" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
               </div>
               <div class="radar-score-item">
                 <span>創意</span>
-                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+                <input type="number" id="score_creativity" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
               </div>
               <div class="radar-score-item">
                 <span>結構</span>
-                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+                <input type="number" id="score_structure" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
               </div>
               <div class="radar-score-item">
                 <span>團隊合作</span>
-                <input type="number" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
+                <input type="number" id="score_teamwork" value="4" min="1" max="5" class="radar-score-input" onchange="updateRadar()">
               </div>
             </div>
+            <button class="ai-modal__save-btn" onclick="saveComment()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              全部儲存
+            </button>
           </div>
         </div>
-      </div>
-      <div class="ai-modal__footer">
-        <button class="ai-modal__btn ai-modal__btn--outline" onclick="saveDraft('comment')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/>
-            <polyline points="7 3 7 8 15 8"/>
-          </svg>
-          存為草稿
-        </button>
-        <button class="ai-modal__btn ai-modal__btn--primary" onclick="saveComment()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/>
-            <polyline points="7 3 7 8 15 8"/>
-          </svg>
-          全部儲存
-        </button>
       </div>
     </div>
   </div>
@@ -1907,9 +2063,10 @@
       position: fixed;
       inset: 0;
       z-index: 1000;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
+      overflow-y: auto;
     }
 
     .ai-modal.active {
@@ -1917,7 +2074,7 @@
     }
 
     .ai-modal__overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.5);
     }
@@ -1926,15 +2083,18 @@
       position: relative;
       background: white;
       border-radius: 16px;
-      max-width: 900px;
       width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-width: 900px;
+      max-height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      margin: auto;
+      overflow: hidden;
     }
 
     .ai-modal__content--large {
-      max-width: 1100px;
+      max-width: min(95vw, 1100px);
     }
 
     .ai-modal__header {
@@ -1943,10 +2103,30 @@
       align-items: center;
       padding: 20px 24px;
       border-bottom: 1px solid #e5e7eb;
+      flex-shrink: 0;
     }
 
+    .ai-modal__header--yellow {
+      background: var(--color-primary);
+      border-bottom: none;
+    }
+
+    .ai-modal__header--yellow .ai-modal__title {
+      color: #1e2939;
+    }
+
+    .ai-modal__header--yellow .ai-modal__close {
+      color: #1e2939;
+    }
+
+    .ai-modal__header--yellow .ai-modal__close:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .ai-modal__body { overflow-y: auto; flex: 1; padding: 24px; }
+
     .ai-modal__title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
       color: #1e2939;
     }
@@ -1968,10 +2148,6 @@
       background: #f3f4f6;
     }
 
-    .ai-modal__body {
-      padding: 24px;
-    }
-
     .ai-modal__grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1979,7 +2155,18 @@
     }
 
     .ai-modal__grid--three {
-      grid-template-columns: 1fr 1fr 280px;
+      grid-template-columns: 1fr 1fr 260px;
+    }
+
+    .ai-modal__section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ai-modal__section--radar {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 16px;
     }
 
     .ai-modal__section-title {
@@ -1989,43 +2176,76 @@
       margin-bottom: 12px;
     }
 
-    .principle-grid, .trait-grid {
+    .ai-modal__section-subtitle {
+      font-size: 12px;
+      color: #6a7282;
+      margin: -8px 0 12px 0;
+    }
+
+    /* 特質標籤樣式 */
+    .trait-tags {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
 
-    .principle-option, .trait-option {
-      display: flex;
+    .trait-tag {
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: #f9fafb;
-      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .trait-tag input {
+      display: none;
+    }
+
+    .trait-tag span {
+      padding: 6px 14px;
+      background: #f3f4f6;
+      border: 2px solid transparent;
+      border-radius: 20px;
       font-size: 13px;
       color: #364153;
-      cursor: pointer;
       transition: all 0.2s;
     }
 
-    .principle-option:hover, .trait-option:hover {
+    .trait-tag:hover span {
       background: #fff7d6;
+      border-color: #ffd54f;
     }
 
-    .principle-option input, .trait-option input {
-      accent-color: var(--color-primary-dark);
+    .trait-tag input:checked + span {
+      background: var(--color-primary);
+      border-color: var(--color-primary-dark);
+      color: #1e2939;
+      font-weight: 500;
+    }
+
+    .trait-tag--improvement span {
+      background: #fef2f2;
+    }
+
+    .trait-tag--improvement:hover span {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+
+    .trait-tag--improvement input:checked + span {
+      background: #fecaca;
+      border-color: #f87171;
+      color: #991b1b;
     }
 
     .ai-modal__textarea {
       width: 100%;
-      min-height: 100px;
+      min-height: 80px;
       padding: 12px;
       border: 1px solid #e5e7eb;
       border-radius: 10px;
       font-size: 14px;
       font-family: inherit;
       resize: vertical;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .ai-modal__textarea:focus {
@@ -2034,9 +2254,10 @@
     }
 
     .ai-modal__textarea--result {
-      min-height: 120px;
+      min-height: 100px;
       background: #fffef5;
       border-style: dashed;
+      flex: 1;
     }
 
     .ai-modal__generate-btn {
@@ -2050,8 +2271,8 @@
       border: none;
       border-radius: 10px;
       font-size: 14px;
-      font-weight: 500;
-      color: var(--color-primary-dark);
+      font-weight: 600;
+      color: #1e2939;
       cursor: pointer;
       transition: all 0.2s;
       margin-bottom: 16px;
@@ -2064,46 +2285,30 @@
 
     .ai-modal__result {
       margin-top: 8px;
-    }
-
-    .ai-modal__footer {
+      flex: 1;
       display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      padding: 20px 24px;
-      border-top: 1px solid #e5e7eb;
-      background: #f9fafb;
+      flex-direction: column;
     }
 
-    .ai-modal__btn {
+    .ai-modal__save-btn {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .ai-modal__btn--outline {
-      background: white;
-      border: 1px solid #d1d5dc;
-      color: #364153;
-    }
-
-    .ai-modal__btn--outline:hover {
-      background: #f3f4f6;
-    }
-
-    .ai-modal__btn--primary {
+      width: 100%;
+      padding: 12px;
       background: var(--color-primary);
       border: none;
-      color: var(--color-primary-dark);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e2939;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 16px;
     }
 
-    .ai-modal__btn--primary:hover {
+    .ai-modal__save-btn:hover {
       background: var(--color-primary-dark);
       color: white;
     }
@@ -2112,7 +2317,7 @@
     .radar-chart-container {
       display: flex;
       justify-content: center;
-      padding: 16px 0;
+      padding: 8px 0 16px 0;
     }
 
     .radar-chart {
@@ -2120,27 +2325,33 @@
       height: 180px;
     }
 
-    .radar-scores {
-      display: flex;
-      flex-direction: column;
+    .radar-scores-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
     }
 
     .radar-score-item {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      font-size: 13px;
+      gap: 4px;
+      font-size: 12px;
       color: #364153;
+    }
+
+    .radar-score-item span {
+      font-weight: 500;
     }
 
     .radar-score-input {
       width: 50px;
-      padding: 4px 8px;
+      padding: 6px 4px;
       border: 1px solid #e5e7eb;
       border-radius: 6px;
       text-align: center;
       font-size: 13px;
+      background: white;
     }
 
     .radar-score-input:focus {
@@ -2167,6 +2378,15 @@
     let schedulesData = [];
     // 當前選擇的班級學生
     let currentStudents = [];
+
+    // 格式化本地日期為 YYYY-MM-DD（避免時區問題）
+    function formatLocalDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     // 分頁設定
     let currentPage = 1;
     const itemsPerPage = 5;
@@ -2192,12 +2412,12 @@
       }
 
       // 設定今天日期為預設
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatLocalDate(new Date());
 
       // 設定篩選器預設日期範圍（過去30天到今天）
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      document.getElementById('filterStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+      document.getElementById('filterStartDate').value = formatLocalDate(thirtyDaysAgo);
       document.getElementById('filterEndDate').value = today;
 
       // 載入教師的班級列表
@@ -2206,10 +2426,11 @@
       // 檢查 URL 參數，如果有 schedule_id 則直接進入日誌填寫頁面
       const urlParams = new URLSearchParams(window.location.search);
       const scheduleId = urlParams.get('schedule_id');
+      const dateParam = urlParams.get('date');
 
       if (scheduleId) {
-        // 直接進入日誌填寫視圖
-        showJournalFormView(parseInt(scheduleId));
+        // 直接進入日誌填寫視圖（帶入日期參數）
+        showJournalFormView(parseInt(scheduleId), dateParam);
       } else {
         // 渲染班級列表
         renderClassList();
@@ -2237,14 +2458,25 @@
     }
 
     // 顯示日誌填寫視圖
-    function showJournalFormView(scheduleId) {
+    function showJournalFormView(scheduleId, date = null) {
       document.getElementById('classListView').classList.add('hidden');
       document.getElementById('journalFormView').classList.add('active');
 
-      // 設定今天日期
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('journalDateInput').value = today;
-      document.getElementById('journalLogDate').value = today;
+      // 重設日誌狀態（重要：避免不同日期載入同一個記錄）
+      currentLogId = null;
+      currentStudentRecords = [];
+
+      // 清空表單內容
+      document.getElementById('journalTopic').value = '';
+      document.getElementById('journalOutline').value = '';
+
+      // 重設課程備註
+      resetCourseNotes();
+
+      // 設定日期（使用傳入的日期或今天）
+      const logDate = date || formatLocalDate(new Date());
+      document.getElementById('journalDateInput').value = logDate;
+      document.getElementById('journalLogDate').value = logDate;
 
       // 選擇對應的班級
       document.getElementById('journalScheduleSelect').value = scheduleId;
@@ -2281,7 +2513,7 @@
       const pageData = dataToRender.slice(startIndex, endIndex);
 
       const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatLocalDate(new Date());
 
       container.innerHTML = pageData.map(schedule => {
         const dayName = dayNames[schedule.day_of_week] || '';
@@ -2289,50 +2521,55 @@
         const endTime = schedule.end_time ? schedule.end_time.slice(0, 5) : '';
 
         return `
-          <div class="class-card" onclick="showJournalFormView(${schedule.schedule_id})">
-            <div class="class-card__left">
-              <div class="class-card__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
-                </svg>
-              </div>
-              <div class="class-card__info">
-                <span class="class-card__name">${schedule.course_name || '未命名課程'}</span>
-                <div class="class-card__meta">
-                  <span class="class-card__meta-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                    ${dayName}
-                  </span>
-                  <span class="class-card__meta-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    ${startTime} - ${endTime}
-                  </span>
-                  ${schedule.classroom_name ? `
-                  <span class="class-card__meta-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                      <polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                    ${schedule.classroom_name}
-                  </span>
-                  ` : ''}
+          <div class="class-card-wrapper" data-schedule-id="${schedule.schedule_id}">
+            <div class="class-card" onclick="toggleDateList(${schedule.schedule_id})">
+              <div class="class-card__left">
+                <div class="class-card__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                  </svg>
+                </div>
+                <div class="class-card__info">
+                  <span class="class-card__name">${schedule.course_name || '未命名課程'}</span>
+                  <div class="class-card__meta">
+                    <span class="class-card__meta-item">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      每${dayName}
+                    </span>
+                    <span class="class-card__meta-item">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      ${startTime} - ${endTime}
+                    </span>
+                    ${schedule.classroom_name ? `
+                    <span class="class-card__meta-item">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                      </svg>
+                      ${schedule.classroom_name}
+                    </span>
+                    ` : ''}
+                  </div>
                 </div>
               </div>
+              <div class="class-card__right">
+                <span>查看上課日期</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
             </div>
-            <div class="class-card__right">
-              <span>填寫 / 查看日誌</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
+            <div class="date-list" id="dateList_${schedule.schedule_id}">
+              <div class="date-list__loading">載入中...</div>
             </div>
           </div>
         `;
@@ -2340,6 +2577,142 @@
 
       // 渲染分頁
       renderPagination(totalPages);
+    }
+
+    // 切換日期列表展開/收合
+    async function toggleDateList(scheduleId) {
+      const wrapper = document.querySelector(`.class-card-wrapper[data-schedule-id="${scheduleId}"]`);
+      const card = wrapper.querySelector('.class-card');
+      const dateList = document.getElementById(`dateList_${scheduleId}`);
+
+      // 收合其他展開的列表
+      document.querySelectorAll('.class-card.expanded').forEach(c => {
+        if (c !== card) {
+          c.classList.remove('expanded');
+          const otherList = c.closest('.class-card-wrapper').querySelector('.date-list');
+          if (otherList) otherList.classList.remove('active');
+        }
+      });
+
+      // 切換當前列表
+      const isExpanded = card.classList.toggle('expanded');
+      dateList.classList.toggle('active', isExpanded);
+
+      // 如果展開且尚未載入資料，則載入
+      if (isExpanded && dateList.querySelector('.date-list__loading')) {
+        await loadScheduleDates(scheduleId);
+      }
+    }
+
+    // 載入班級的上課日期列表
+    async function loadScheduleDates(scheduleId) {
+      const dateList = document.getElementById(`dateList_${scheduleId}`);
+      const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+
+      try {
+        const token = localStorage.getItem('authToken');
+        const startDate = document.getElementById('filterStartDate').value;
+        const endDate = document.getElementById('filterEndDate').value;
+
+        const response = await fetch(`/api/logs/schedule-dates?schedule_id=${scheduleId}&start_date=${startDate}&end_date=${endDate}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          dateList.innerHTML = `<div class="date-list__loading">載入失敗: ${result.message}</div>`;
+          return;
+        }
+
+        const { dates, completed_count, in_progress_count, pending_count } = result.data;
+
+        if (dates.length === 0) {
+          dateList.innerHTML = `
+            <div class="date-list__header">
+              <span class="date-list__title">上課日期</span>
+            </div>
+            <div class="date-list__loading">此時間範圍內沒有上課日期</div>
+          `;
+          return;
+        }
+
+        dateList.innerHTML = `
+          <div class="date-list__header">
+            <span class="date-list__title">上課日期列表</span>
+            <div class="date-list__stats">
+              <span class="date-list__stat">
+                <span class="date-list__stat-dot date-list__stat-dot--completed"></span>
+                已完成 ${completed_count}
+              </span>
+              <span class="date-list__stat">
+                <span class="date-list__stat-dot date-list__stat-dot--progress"></span>
+                填寫中 ${in_progress_count}
+              </span>
+              <span class="date-list__stat">
+                <span class="date-list__stat-dot date-list__stat-dot--pending"></span>
+                未填寫 ${pending_count}
+              </span>
+            </div>
+          </div>
+          <div class="date-list__items">
+            ${dates.map(item => {
+              const dateObj = new Date(item.date);
+              const dayName = dayNames[dateObj.getDay()];
+              const month = dateObj.getMonth() + 1;
+              const day = dateObj.getDate();
+              const year = dateObj.getFullYear();
+              const dateStr = `${year}/${month}/${day}`;
+              const shortDateStr = `${month}月${day}日`;
+
+              let statusClass = 'pending';
+              let statusText = '未填寫';
+
+              if (item.has_log) {
+                if (item.log_status === 'completed') {
+                  statusClass = 'completed';
+                  statusText = '已完成';
+                } else {
+                  statusClass = 'progress';
+                  statusText = '填寫中';
+                }
+              }
+
+              const isFuture = !item.is_past;
+              const futureClass = isFuture ? 'date-item--future' : '';
+              const clickHandler = isFuture ? '' : `onclick="openJournalForDate(${scheduleId}, '${item.date}')"`;
+
+              return `
+                <div class="date-item ${futureClass}" ${clickHandler}>
+                  <div class="date-item__left">
+                    <span class="date-item__date">${shortDateStr}</span>
+                    <span class="date-item__day">${dayName}</span>
+                    ${item.topic ? `<span class="date-item__topic">${item.topic}</span>` : ''}
+                  </div>
+                  <div class="date-item__status date-item__status--${statusClass}">
+                    ${isFuture ? '尚未到課' : statusText}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+
+      } catch (error) {
+        console.error('載入日期列表錯誤:', error);
+        dateList.innerHTML = `<div class="date-list__loading">載入失敗，請稍後再試</div>`;
+      }
+    }
+
+    // 開啟特定日期的日誌
+    function openJournalForDate(scheduleId, date) {
+      // 設定日期
+      document.getElementById('journalDateInput').value = date;
+
+      // 顯示日誌填寫視圖
+      showJournalFormView(scheduleId, date);
     }
 
     // 渲染分頁
@@ -2592,6 +2965,9 @@
           document.getElementById('journalTopic').value = log.topic || '';
           document.getElementById('journalOutline').value = log.outline || '';
 
+          // 還原課程備註勾選狀態
+          restoreCourseNotes(log.content);
+
           // 填充學生記錄
           fillStudentRecords(currentStudentRecords);
 
@@ -2602,10 +2978,68 @@
           currentStudentRecords = [];
           document.getElementById('journalTopic').value = '';
           document.getElementById('journalOutline').value = '';
+
+          // 重設課程備註為預設值（只勾選「正常上課」）
+          resetCourseNotes();
+
+          // 重設所有學生卡片的出席狀態
+          resetAllStudentCards();
         }
       } catch (error) {
         console.error('載入日誌錯誤:', error);
       }
+    }
+
+    // 還原課程備註勾選狀態
+    function restoreCourseNotes(content) {
+      if (!content) {
+        resetCourseNotes();
+        return;
+      }
+
+      // 解析儲存的備註（以逗號分隔）
+      const savedNotes = content.split(', ').map(s => s.trim());
+
+      // 取消所有勾選
+      const checkboxes = document.querySelectorAll('input[name="courseNote"]');
+      checkboxes.forEach(cb => {
+        cb.checked = savedNotes.includes(cb.value);
+      });
+    }
+
+    // 重設課程備註為預設值
+    function resetCourseNotes() {
+      const checkboxes = document.querySelectorAll('input[name="courseNote"]');
+      checkboxes.forEach(cb => {
+        // 預設只勾選「正常上課」
+        cb.checked = (cb.value === '正常上課');
+      });
+    }
+
+    // 重設所有學生卡片為預設狀態
+    function resetAllStudentCards() {
+      const studentList = document.getElementById('studentList');
+      if (!studentList) return;
+
+      const cards = studentList.querySelectorAll('.student-card');
+      cards.forEach(card => {
+        // 重設出席按鈕（全部取消選取，預設選出席）
+        const attendanceBtns = card.querySelectorAll('.attendance-btn');
+        attendanceBtns.forEach(btn => btn.classList.remove('attendance-btn--active'));
+        const presentBtn = card.querySelector('.attendance-btn--present');
+        if (presentBtn) presentBtn.classList.add('attendance-btn--active');
+
+        // 清空評語和備註
+        const performanceText = card.querySelector('.student-card__performance-text');
+        if (performanceText) performanceText.textContent = '點擊填寫評語';
+
+        // 重設雷達圖分數
+        card.dataset.skillProgramming = '0';
+        card.dataset.skillDebugging = '0';
+        card.dataset.skillCreativity = '0';
+        card.dataset.skillStructure = '0';
+        card.dataset.skillTeamwork = '0';
+      });
     }
 
     // 填充學生記錄到表單
@@ -2674,6 +3108,26 @@
               `;
               photoUpload.dataset.photoUrl = photoUrl;
             }
+          }
+        }
+
+        // 還原技能分數到 dataset
+        card.dataset.skillProgramming = record.skill_programming || '0';
+        card.dataset.skillDebugging = record.skill_debugging || '0';
+        card.dataset.skillCreativity = record.skill_creativity || '0';
+        card.dataset.skillStructure = record.skill_structure || '0';
+        card.dataset.skillTeamwork = record.skill_teamwork || '0';
+
+        // 更新評語顯示文字（如果有技能分數）
+        const hasSkills = (record.skill_programming > 0 || record.skill_debugging > 0 ||
+                          record.skill_creativity > 0 || record.skill_structure > 0 ||
+                          record.skill_teamwork > 0);
+        if (hasSkills || record.performance) {
+          const performanceText = card.querySelector('.student-card__performance-text');
+          if (performanceText) {
+            performanceText.textContent = record.performance ?
+              (record.performance.length > 20 ? record.performance.substring(0, 20) + '...' : record.performance) :
+              '已填寫技能評分';
           }
         }
       });
@@ -2750,7 +3204,7 @@
                   </svg>
                   教師評語
                 </label>
-                <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('${student.name}')"></textarea>
+                <textarea class="detail-input" rows="3" placeholder="點擊生成此學生的課堂表現、學習狀況、行為觀察等評語..." onclick="openCommentModal('${student.name}', '${student.id}')"></textarea>
               </div>
               <div class="detail-group">
                 <label class="detail-group__label">
@@ -2793,6 +3247,18 @@
     // 日期變更時更新顯示並載入現有日誌
     document.getElementById('journalDateInput')?.addEventListener('change', async function() {
       document.getElementById('journalLogDate').value = this.value;
+
+      // 重設日誌狀態（重要：避免不同日期載入同一個記錄）
+      currentLogId = null;
+      currentStudentRecords = [];
+
+      // 清空表單內容
+      document.getElementById('journalTopic').value = '';
+      document.getElementById('journalOutline').value = '';
+
+      // 重設課程備註
+      resetCourseNotes();
+
       // 重新觸發班級選擇以更新時間顯示
       const scheduleId = document.getElementById('journalScheduleSelect').value;
       if (scheduleId) {
@@ -2823,9 +3289,52 @@
     }
 
     // 開啟評語 Modal
-    function openCommentModal(studentName) {
-      currentStudent = studentName;
-      document.getElementById('commentStudentName').textContent = studentName;
+    function openCommentModal(studentName, studentId = null) {
+      currentStudent = { name: studentName, id: studentId };
+      document.getElementById('commentStudentName').textContent = studentName + (studentId ? ` (${studentId})` : '');
+
+      // 重置所有表單欄位
+      document.querySelectorAll('#commentModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById('commentInput').value = '';
+      document.getElementById('commentResult').value = '';
+
+      // 從學生卡片讀取已儲存的技能分數
+      const card = document.querySelector(`.student-card[data-student-id="${studentId}"]`);
+      let skillProgramming = 4, skillDebugging = 4, skillCreativity = 4, skillStructure = 4, skillTeamwork = 4;
+
+      if (card) {
+        // 如果有儲存的分數，則載入；否則使用預設值 4
+        const savedProgramming = parseInt(card.dataset.skillProgramming);
+        const savedDebugging = parseInt(card.dataset.skillDebugging);
+        const savedCreativity = parseInt(card.dataset.skillCreativity);
+        const savedStructure = parseInt(card.dataset.skillStructure);
+        const savedTeamwork = parseInt(card.dataset.skillTeamwork);
+
+        // 只有當分數大於 0 時才載入（0 表示未評分）
+        if (savedProgramming > 0) skillProgramming = savedProgramming;
+        if (savedDebugging > 0) skillDebugging = savedDebugging;
+        if (savedCreativity > 0) skillCreativity = savedCreativity;
+        if (savedStructure > 0) skillStructure = savedStructure;
+        if (savedTeamwork > 0) skillTeamwork = savedTeamwork;
+
+        // 如果有儲存的評語，載入到輸入框
+        const details = card.querySelector('.student-card__details');
+        if (details) {
+          const commentField = details.querySelector('textarea[placeholder*="評語"]');
+          if (commentField && commentField.value) {
+            document.getElementById('commentResult').value = commentField.value;
+          }
+        }
+      }
+
+      // 設定雷達圖分數
+      document.getElementById('score_programming').value = skillProgramming;
+      document.getElementById('score_debugging').value = skillDebugging;
+      document.getElementById('score_creativity').value = skillCreativity;
+      document.getElementById('score_structure').value = skillStructure;
+      document.getElementById('score_teamwork').value = skillTeamwork;
+      updateRadar();
+
       document.getElementById('commentModal').classList.add('active');
     }
 
@@ -2873,12 +3382,12 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
     }
 
     // 生成評語
-    function generateComment() {
+    async function generateComment() {
       const input = document.getElementById('commentInput').value;
       const traits = Array.from(document.querySelectorAll('input[name="trait"]:checked'))
-        .map(cb => cb.parentElement.textContent.trim());
-      const growth = Array.from(document.querySelectorAll('input[name="growth"]:checked'))
-        .map(cb => cb.parentElement.textContent.trim());
+        .map(cb => cb.value);
+      const improvements = Array.from(document.querySelectorAll('input[name="improvement"]:checked'))
+        .map(cb => cb.value);
 
       if (traits.length === 0) {
         if (typeof showMessage === 'function') {
@@ -2887,13 +3396,85 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         return;
       }
 
-      // 模擬 AI 生成
-      const result = `${currentStudent}同學在本次課程中表現優異，展現出${traits.join('、')}等特質。在團隊合作環節中積極參與，能夠獨立完成機器人組裝任務，展現出良好的邏輯思維能力。${growth.length > 0 ? '在' + growth.join('、') + '方面持續進步中，' : ''}建議繼續保持這樣的學習態度。`;
+      const studentName = currentStudent?.name || '學生';
+      const generateBtn = document.querySelector('.ai-modal__generate-btn');
+      const originalBtnText = generateBtn.textContent;
+
+      // 顯示載入狀態
+      generateBtn.disabled = true;
+      generateBtn.textContent = '生成中...';
+
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('/api/ai/generate-comment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            studentName,
+            traits,
+            improvements,
+            manualInput: input
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 設定評語
+          document.getElementById('commentResult').value = data.data.comment;
+
+          // 設定雷達圖分數
+          document.getElementById('score_programming').value = data.data.scores.programming;
+          document.getElementById('score_debugging').value = data.data.scores.debugging;
+          document.getElementById('score_creativity').value = data.data.scores.creativity;
+          document.getElementById('score_structure').value = data.data.scores.structure;
+          document.getElementById('score_teamwork').value = data.data.scores.teamwork;
+          updateRadar();
+
+          if (typeof showMessage === 'function') {
+            showMessage('AI 評語與雷達圖已生成', 'success');
+          }
+        } else {
+          // API 回傳錯誤，使用備用方案
+          console.warn('AI API 錯誤，使用備用生成方案:', data.message);
+          generateCommentFallback(studentName, traits, improvements, input);
+        }
+      } catch (error) {
+        // 網路錯誤，使用備用方案
+        console.warn('AI API 請求失敗，使用備用生成方案:', error);
+        generateCommentFallback(studentName, traits, improvements, input);
+      } finally {
+        // 恢復按鈕狀態
+        generateBtn.disabled = false;
+        generateBtn.textContent = originalBtnText;
+      }
+    }
+
+    // 備用評語生成（當 API 無法使用時）
+    function generateCommentFallback(studentName, traits, improvements, input) {
+      const result = `${studentName}同學在本次課程中表現優異，展現出${traits.join('、')}等特質。在團隊合作環節中積極參與，能夠獨立完成機器人組裝任務，展現出良好的邏輯思維能力。${improvements.length > 0 ? '在' + improvements.join('、') + '方面持續成長中，建議持續關注與引導。' : '建議繼續保持這樣的學習態度。'}${input ? '\n\n補充：' + input : ''}`;
 
       document.getElementById('commentResult').value = result;
 
+      // 根據特質給予分數
+      const hasDebug = traits.includes('Debug大師') || traits.includes('Debug 大師');
+      const hasLogic = traits.includes('思維邏輯靈活');
+      const hasCreative = traits.includes('開創性十足');
+      const hasTeacher = traits.includes('同儕小老師');
+      const hasStructure = traits.includes('組裝效率高');
+
+      document.getElementById('score_programming').value = hasLogic ? 5 : 4;
+      document.getElementById('score_debugging').value = hasDebug ? 5 : 4;
+      document.getElementById('score_creativity').value = hasCreative ? 5 : 4;
+      document.getElementById('score_structure').value = hasStructure ? 5 : 4;
+      document.getElementById('score_teamwork').value = hasTeacher ? 5 : 4;
+      updateRadar();
+
       if (typeof showMessage === 'function') {
-        showMessage('個人化評語已生成', 'success');
+        showMessage('已使用備用方案生成評語', 'warning');
       }
     }
 
@@ -2937,33 +3518,89 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         return;
       }
 
+      // 取得雷達圖分數
+      const scores = {
+        programming: parseInt(document.getElementById('score_programming')?.value || 4),
+        debugging: parseInt(document.getElementById('score_debugging')?.value || 4),
+        creativity: parseInt(document.getElementById('score_creativity')?.value || 4),
+        structure: parseInt(document.getElementById('score_structure')?.value || 4),
+        teamwork: parseInt(document.getElementById('score_teamwork')?.value || 4)
+      };
+
       // 將評語填入對應學生的欄位
       if (currentStudent) {
-        const studentCards = document.querySelectorAll('.student-card');
-        studentCards.forEach(card => {
-          const nameElement = card.querySelector('.student-card__name');
-          if (nameElement && nameElement.textContent === currentStudent) {
-            const commentField = card.querySelector('.detail-input[rows="3"]');
+        const studentId = currentStudent.id;
+        const card = document.querySelector(`.student-card[data-student-id="${studentId}"]`);
+
+        if (card) {
+          // 儲存評語到 textarea
+          const details = card.querySelector('.student-card__details');
+          if (details) {
+            const commentField = details.querySelector('textarea[placeholder*="評語"]');
             if (commentField) {
               commentField.value = result;
             }
           }
-        });
+
+          // 儲存雷達圖分數到學生卡片的 data 屬性
+          card.dataset.skillProgramming = scores.programming;
+          card.dataset.skillDebugging = scores.debugging;
+          card.dataset.skillCreativity = scores.creativity;
+          card.dataset.skillStructure = scores.structure;
+          card.dataset.skillTeamwork = scores.teamwork;
+
+          // 更新評語顯示文字
+          const performanceText = card.querySelector('.student-card__performance-text');
+          if (performanceText) {
+            performanceText.textContent = result.length > 20 ? result.substring(0, 20) + '...' : result;
+          }
+        }
       }
 
       closeCommentModal();
       updateProgressStats();
 
       if (typeof showMessage === 'function') {
-        showMessage('評語已儲存至學生資料', 'success');
+        showMessage('評語與雷達圖分數已儲存至學生資料', 'success');
       }
     }
 
     // 更新雷達圖
     function updateRadar() {
-      // 簡化版雷達圖更新 - 實際應用可使用 Chart.js 等圖表庫
-      if (typeof showMessage === 'function') {
-        showMessage('分數已更新', 'success');
+      // 取得各項分數 (1-5)
+      const programming = parseInt(document.getElementById('score_programming')?.value || 4);
+      const debugging = parseInt(document.getElementById('score_debugging')?.value || 4);
+      const creativity = parseInt(document.getElementById('score_creativity')?.value || 4);
+      const structure = parseInt(document.getElementById('score_structure')?.value || 4);
+      const teamwork = parseInt(document.getElementById('score_teamwork')?.value || 4);
+
+      // 五邊形各頂點的角度（從頂部開始，順時針）
+      // 程式(上), 除錯(右上), 創意(右下), 結構(左下), 團隊合作(左上)
+      const angles = [
+        -Math.PI / 2,           // 程式 (頂部, -90度)
+        -Math.PI / 2 + 2 * Math.PI / 5,   // 除錯 (右上)
+        -Math.PI / 2 + 4 * Math.PI / 5,   // 創意 (右下)
+        -Math.PI / 2 + 6 * Math.PI / 5,   // 結構 (左下)
+        -Math.PI / 2 + 8 * Math.PI / 5    // 團隊合作 (左上)
+      ];
+
+      const scores = [programming, debugging, creativity, structure, teamwork];
+      const centerX = 100;
+      const centerY = 100;
+      const maxRadius = 80; // 最大半徑
+
+      // 計算各頂點座標
+      const points = scores.map((score, i) => {
+        const radius = (score / 5) * maxRadius;
+        const x = centerX + radius * Math.cos(angles[i]);
+        const y = centerY + radius * Math.sin(angles[i]);
+        return `${x.toFixed(0)},${y.toFixed(0)}`;
+      });
+
+      // 更新 SVG 多邊形
+      const radarData = document.getElementById('radarData');
+      if (radarData) {
+        radarData.setAttribute('points', points.join(' '));
       }
     }
 
@@ -3083,13 +3720,6 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
       }
     }
 
-    // 開啟評語 AI 生成模態框
-    function openCommentModal(studentName) {
-      if (typeof showMessage === 'function') {
-        showMessage(`AI 智能個人化評語生成工具 - ${studentName}`, 'warning');
-      }
-    }
-
     // 清除表單
     function clearForm() {
       if (confirm('確定要清除所有填寫的內容嗎？')) {
@@ -3168,7 +3798,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         // 取得日期
         let logDate = document.getElementById('journalLogDate').value;
         if (!logDate) {
-          logDate = new Date().toISOString().split('T')[0]; // 使用今天日期
+          logDate = formatLocalDate(new Date()); // 使用今天日期
         }
 
         // 顯示載入中
@@ -3275,6 +3905,13 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             }
           }
 
+          // 取得雷達圖技能分數
+          const skillProgramming = parseInt(card.dataset.skillProgramming) || 0;
+          const skillDebugging = parseInt(card.dataset.skillDebugging) || 0;
+          const skillCreativity = parseInt(card.dataset.skillCreativity) || 0;
+          const skillStructure = parseInt(card.dataset.skillStructure) || 0;
+          const skillTeamwork = parseInt(card.dataset.skillTeamwork) || 0;
+
           // 呼叫 API 儲存學生記錄
           const promise = fetch(`/api/logs/${logId}/students/${studentId}`, {
             method: 'PUT',
@@ -3287,7 +3924,12 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
               performance: performance,
               notes: studentNotes,
               points_earned: pointsEarned,
-              photo_url: photoUrl
+              photo_url: photoUrl,
+              skill_programming: skillProgramming,
+              skill_debugging: skillDebugging,
+              skill_creativity: skillCreativity,
+              skill_structure: skillStructure,
+              skill_teamwork: skillTeamwork
             })
           });
 
@@ -3296,6 +3938,18 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
         // 等待所有學生記錄儲存完成
         await Promise.all(studentPromises);
+
+        // 3. 更新日誌狀態為已完成
+        await fetch(`/api/logs/${logId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            status: 'completed'
+          })
+        });
 
         showMessage(isUpdate ? '日誌已成功更新！' : '日誌已成功提交！', 'success');
 

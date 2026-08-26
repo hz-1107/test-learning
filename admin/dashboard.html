@@ -855,6 +855,8 @@
   <script src="../js/announcements-data.js"></script>
   <script src="../js/admin-notifications.js"></script>
   <script>
+    const API_BASE = 'http://localhost:3000';
+
     // 更新日期
     const dateEl = document.getElementById('currentDate');
     const now = new Date();
@@ -865,13 +867,211 @@
     const weekDay = weekDays[now.getDay()];
     dateEl.textContent = `${year} / ${month} / ${day} (${weekDay})`;
 
-    // ===== 今日教師日誌：點擊項目後標記選取並導向 teachers.html 教師日誌分頁的該筆詳情 =====
-    function goToJournalDetail(el, teacher, course, logId) {
+    // 頁面載入時執行
+    document.addEventListener('DOMContentLoaded', async function() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      // 載入使用者資訊
+      try {
+        const profileRes = await fetch(`${API_BASE}/api/auth/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          document.querySelector('.admin-sidebar__name').textContent = profile.data.name;
+        }
+      } catch (e) {
+        console.error('載入使用者資訊失敗:', e);
+      }
+
+      // 載入今日課程和日誌狀態
+      loadTodaySchedules();
+      loadJournalStatus();
+    });
+
+    // 載入今日課程
+    async function loadTodaySchedules() {
+      const token = localStorage.getItem('authToken');
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const response = await fetch(`${API_BASE}/api/schedule-calendar/daily?date=${today}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('載入課程失敗');
+
+        const result = await response.json();
+        const schedules = result.data || [];
+
+        // 按教師分組
+        const teacherSchedules = {};
+        schedules.forEach(schedule => {
+          const teacherName = schedule.teacher_name || '未指定教師';
+          if (!teacherSchedules[teacherName]) {
+            teacherSchedules[teacherName] = [];
+          }
+          teacherSchedules[teacherName].push(schedule);
+        });
+
+        renderTeacherCards(teacherSchedules);
+      } catch (error) {
+        console.error('載入今日課程錯誤:', error);
+        document.querySelector('.course-cards-grid').innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6a7282;">
+            載入課程失敗: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    // 渲染教師課程卡片
+    function renderTeacherCards(teacherSchedules) {
+      const container = document.querySelector('.course-cards-grid');
+      const teachers = Object.keys(teacherSchedules);
+
+      if (teachers.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6a7282;">
+            今日沒有排定課程
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = teachers.map(teacher => {
+        const courses = teacherSchedules[teacher];
+        return `
+          <div class="teacher-schedule-card">
+            <div class="teacher-schedule-card__header">
+              <span class="teacher-schedule-card__name">${teacher}</span>
+              <span class="teacher-schedule-card__count">今日${courses.length}堂課</span>
+            </div>
+            ${courses.map(course => `
+              <div class="teacher-schedule-card__item">
+                <span class="teacher-schedule-card__course">${course.course_name || course.name}</span>
+                <span class="teacher-schedule-card__time">${formatTime(course.start_time)}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 格式化時間
+    function formatTime(time) {
+      if (!time) return '';
+      const parts = time.split(':');
+      return `${parts[0]}：${parts[1]}`;
+    }
+
+    // 載入日誌完成狀態
+    async function loadJournalStatus() {
+      const token = localStorage.getItem('authToken');
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const response = await fetch(`${API_BASE}/api/logs/my-status?start_date=${today}&end_date=${today}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('載入日誌狀態失敗');
+
+        const result = await response.json();
+
+        // 取得所有教師的日誌狀態
+        const allTeachersRes = await fetch(`${API_BASE}/api/logs?log_date=${today}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const allLogs = allTeachersRes.ok ? (await allTeachersRes.json()).data || [] : [];
+
+        // 取得今日所有排課
+        const schedulesRes = await fetch(`${API_BASE}/api/schedule-calendar/daily?date=${today}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const schedules = schedulesRes.ok ? (await schedulesRes.json()).data || [] : [];
+
+        // 計算完成率
+        const totalSchedules = schedules.length;
+        const completedLogs = allLogs.filter(log => log.status === 'completed').length;
+        const completionRate = totalSchedules > 0 ? Math.round((completedLogs / totalSchedules) * 100) : 0;
+
+        updateJournalProgress(completionRate, completedLogs, totalSchedules);
+        renderJournalList(schedules, allLogs);
+      } catch (error) {
+        console.error('載入日誌狀態錯誤:', error);
+      }
+    }
+
+    // 更新日誌完成進度
+    function updateJournalProgress(rate, completed, total) {
+      document.querySelector('.journal-progress__value').textContent = `${rate}％`;
+      document.querySelector('.journal-progress__count').textContent = `${completed} / ${total}`;
+      document.querySelector('.journal-progress__fill').style.width = `${rate}%`;
+    }
+
+    // 渲染日誌列表
+    function renderJournalList(schedules, logs) {
+      const container = document.querySelector('.journal-list');
+
+      if (schedules.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: #6a7282;">
+            今日沒有排定課程
+          </div>
+        `;
+        return;
+      }
+
+      // 建立日誌狀態映射
+      const logStatusMap = {};
+      logs.forEach(log => {
+        logStatusMap[log.schedule_id] = log.status;
+      });
+
+      container.innerHTML = schedules.map(schedule => {
+        const status = logStatusMap[schedule.id] || logStatusMap[schedule.schedule_id] || 'pending';
+        const isComplete = status === 'completed';
+        const teacherName = schedule.teacher_name || '未指定';
+        const courseName = schedule.course_name || schedule.name || '未知課程';
+
+        return `
+          <div class="journal-item" onclick="goToJournalDetail(this, '${teacherName}', '${courseName}', ${schedule.id || schedule.schedule_id})">
+            <div class="journal-item__info">
+              <div class="journal-item__name">${teacherName}</div>
+              <div class="journal-item__course">${courseName}</div>
+            </div>
+            <span class="journal-item__status journal-item__status--${isComplete ? 'complete' : 'incomplete'}">
+              ${isComplete ? `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                已完成
+              ` : `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                未完成
+              `}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 點擊日誌項目
+    function goToJournalDetail(el, teacher, course, scheduleId) {
       document.querySelectorAll('.journal-item').forEach(item => item.classList.remove('journal-item--selected'));
       el.classList.add('journal-item--selected');
 
       setTimeout(() => {
-        const params = new URLSearchParams({ tab: 'logs', teacher, course, logId });
+        const params = new URLSearchParams({ tab: 'logs', teacher, course, scheduleId });
         window.location.href = `teachers.html?${params.toString()}`;
       }, 150);
     }

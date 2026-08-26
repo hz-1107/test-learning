@@ -306,3 +306,135 @@ exports.publishScheduledAnnouncements = async (req, res) => {
     });
   }
 };
+
+// 取得使用者的公告（含已讀狀態）
+exports.getMyAnnouncements = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const { limit = 20 } = req.query;
+
+    // 根據使用者角色篩選公告
+    let targetFilter = `(a.target_group = 'all'`;
+    if (userRole === 'teacher') {
+      targetFilter += ` OR a.target_group = 'teachers'`;
+    } else if (userRole === 'student') {
+      targetFilter += ` OR a.target_group = 'students'`;
+    } else if (userRole === 'admin' || userRole === 'staff') {
+      targetFilter += ` OR a.target_group = 'teachers' OR a.target_group = 'students'`;
+    }
+    targetFilter += `)`;
+
+    const sql = `
+      SELECT
+        a.*,
+        u.name as author_name,
+        CASE WHEN ar.id IS NOT NULL THEN 1 ELSE 0 END as is_read
+      FROM announcements a
+      LEFT JOIN users u ON a.created_by = u.id
+      LEFT JOIN announcement_reads ar ON a.id = ar.announcement_id AND ar.user_id = ?
+      WHERE a.status = 'published' AND ${targetFilter}
+      ORDER BY a.published_at DESC
+      LIMIT ?
+    `;
+
+    const announcements = await db.query(sql, [userId, parseInt(limit)]);
+
+    // 計算未讀數量
+    const unreadCount = announcements.filter(a => !a.is_read).length;
+
+    res.json({
+      success: true,
+      data: {
+        announcements,
+        unreadCount
+      }
+    });
+  } catch (error) {
+    console.error('取得我的公告錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '取得公告失敗'
+    });
+  }
+};
+
+// 標記公告為已讀
+exports.markAsRead = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    // 檢查公告是否存在
+    const announcement = await db.queryOne('SELECT id FROM announcements WHERE id = ?', [id]);
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到此公告'
+      });
+    }
+
+    // 插入已讀紀錄（如果已存在則忽略）
+    await db.query(`
+      INSERT IGNORE INTO announcement_reads (announcement_id, user_id)
+      VALUES (?, ?)
+    `, [id, userId]);
+
+    res.json({
+      success: true,
+      message: '已標記為已讀'
+    });
+  } catch (error) {
+    console.error('標記已讀錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '標記已讀失敗'
+    });
+  }
+};
+
+// 標記所有公告為已讀
+exports.markAllAsRead = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    // 根據使用者角色篩選公告
+    let targetFilter = `(target_group = 'all'`;
+    if (userRole === 'teacher') {
+      targetFilter += ` OR target_group = 'teachers'`;
+    } else if (userRole === 'student') {
+      targetFilter += ` OR target_group = 'students'`;
+    } else if (userRole === 'admin' || userRole === 'staff') {
+      targetFilter += ` OR target_group = 'teachers' OR target_group = 'students'`;
+    }
+    targetFilter += `)`;
+
+    // 取得所有未讀的公告 ID
+    const unreadAnnouncements = await db.query(`
+      SELECT a.id FROM announcements a
+      LEFT JOIN announcement_reads ar ON a.id = ar.announcement_id AND ar.user_id = ?
+      WHERE a.status = 'published' AND ${targetFilter} AND ar.id IS NULL
+    `, [userId]);
+
+    // 批次插入已讀紀錄
+    if (unreadAnnouncements.length > 0) {
+      const values = unreadAnnouncements.map(a => `(${a.id}, ${userId})`).join(',');
+      await db.query(`
+        INSERT IGNORE INTO announcement_reads (announcement_id, user_id)
+        VALUES ${values}
+      `);
+    }
+
+    res.json({
+      success: true,
+      message: `已將 ${unreadAnnouncements.length} 則公告標記為已讀`
+    });
+  } catch (error) {
+    console.error('標記全部已讀錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '標記全部已讀失敗'
+    });
+  }
+};

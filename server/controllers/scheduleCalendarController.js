@@ -21,6 +21,7 @@ exports.getWeeklySchedule = async (req, res) => {
     const weekEnd = formatDate(endOfWeek);
 
     // 取得基礎課表
+    // 優先使用 course_schedules.teacher_id，若為 NULL 則使用 courses.teacher_id
     let scheduleSql = `
       SELECT
         cs.id as schedule_id,
@@ -30,14 +31,14 @@ exports.getWeeklySchedule = async (req, res) => {
         cs.end_time,
         cs.classroom_id,
         c.name as course_name,
-        c.teacher_id,
+        COALESCE(cs.teacher_id, c.teacher_id) as teacher_id,
         u.name as teacher_name,
         cr.name as classroom_name,
         ct.name as course_type_name,
         ct.color as course_type_color
       FROM course_schedules cs
       JOIN courses c ON cs.course_id = c.id
-      LEFT JOIN teachers t ON c.teacher_id = t.id
+      LEFT JOIN teachers t ON COALESCE(cs.teacher_id, c.teacher_id) = t.id
       LEFT JOIN users u ON t.user_id = u.id
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
       LEFT JOIN course_types ct ON c.course_type_id = ct.id
@@ -46,7 +47,7 @@ exports.getWeeklySchedule = async (req, res) => {
     const params = [];
 
     if (teacher_id) {
-      scheduleSql += ' AND c.teacher_id = ?';
+      scheduleSql += ' AND COALESCE(cs.teacher_id, c.teacher_id) = ?';
       params.push(teacher_id);
     }
 
@@ -194,6 +195,7 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
     `);
 
     // 取得這天的基礎課表
+    // 優先使用 course_schedules.teacher_id，若為 NULL 則使用 courses.teacher_id
     const schedules = await db.query(`
       SELECT
         cs.id as schedule_id,
@@ -203,14 +205,14 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
         cs.end_time,
         cs.classroom_id,
         c.name as course_name,
-        c.teacher_id,
+        COALESCE(cs.teacher_id, c.teacher_id) as teacher_id,
         u.name as teacher_name,
         cr.name as classroom_name,
         ct.name as course_type_name,
         ct.color as course_type_color
       FROM course_schedules cs
       JOIN courses c ON cs.course_id = c.id
-      LEFT JOIN teachers t ON c.teacher_id = t.id
+      LEFT JOIN teachers t ON COALESCE(cs.teacher_id, c.teacher_id) = t.id
       LEFT JOIN users u ON t.user_id = u.id
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
       LEFT JOIN course_types ct ON c.course_type_id = ct.id

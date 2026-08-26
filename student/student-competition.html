@@ -977,13 +977,158 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="../js/pdf-export.js"></script>
   <script>
+    const API_BASE = 'http://localhost:3000';
     const searchInput = document.getElementById('competitionSearchInput');
-    const allCompetitionCards = Array.from(document.querySelectorAll('.competition-card'));
+    let allCompetitionCards = Array.from(document.querySelectorAll('.competition-card'));
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
     const selectedCountLabel = document.getElementById('selectedCountLabel');
     const filterToggleBtn = document.getElementById('filterToggleBtn');
 
     const activeFilters = { level: '', rank: '', startDate: '', endDate: '' };
+
+    // 頁面載入時執行
+    document.addEventListener('DOMContentLoaded', async function() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      // 載入學生資訊
+      try {
+        const profileRes = await fetch(`${API_BASE}/api/students/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          document.querySelector('.student-sidebar__name').textContent = profile.data.name || '學生';
+        }
+      } catch (e) {
+        console.error('載入學生資訊失敗:', e);
+      }
+
+      // 嘗試從 API 載入競賽記錄
+      loadCompetitions();
+    });
+
+    // 載入競賽記錄
+    async function loadCompetitions() {
+      const token = localStorage.getItem('authToken');
+      const container = document.querySelector('.competition-list');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/competitions/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          console.log('使用靜態競賽資料');
+          return; // 使用靜態 HTML
+        }
+
+        const result = await response.json();
+        const competitions = result.data || [];
+
+        if (competitions.length > 0) {
+          renderCompetitions(competitions);
+        }
+        // 如果沒有 API 資料，保留靜態 HTML 作為示範
+      } catch (error) {
+        console.log('載入競賽記錄失敗，使用靜態資料:', error.message);
+      }
+    }
+
+    // 等級標籤
+    const LEVEL_LABELS = {
+      'national': '全國賽',
+      'regional': '區域賽',
+      'county': '縣市賽',
+      'school': '校內賽'
+    };
+
+    // 名次標籤
+    const RANK_LABELS = {
+      'gold': '第一名',
+      'silver': '第二名',
+      'bronze': '第三名',
+      'merit': '優勝',
+      'participant': '參賽'
+    };
+
+    // 渲染競賽記錄
+    function renderCompetitions(competitions) {
+      const container = document.querySelector('.competition-list');
+
+      container.innerHTML = competitions.map(comp => {
+        const level = comp.level || 'school';
+        const rankType = comp.rank_type || 'participant';
+        const compDate = comp.competition_date ? comp.competition_date.split('T')[0] : '';
+
+        return `
+          <div class="competition-card" data-level="${level}" data-rank="${rankType}" data-date="${compDate}" data-id="${comp.id}">
+            <div class="competition-card__main">
+              <div class="competition-card__header">
+                <div class="competition-card__icon competition-card__icon--${rankType}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
+                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+                  </svg>
+                </div>
+                <h3 class="competition-card__title">${comp.title}</h3>
+              </div>
+              ${comp.subtitle ? `<p class="competition-card__subtitle">${comp.subtitle}</p>` : ''}
+              <div class="competition-card__meta">
+                <span class="competition-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                  </svg>
+                  ${compDate}
+                </span>
+                <span class="competition-card__badge competition-card__badge--${level}">${LEVEL_LABELS[level] || level}</span>
+                ${comp.team_members ? `
+                <span class="competition-card__team">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 010 7.75"/>
+                  </svg>
+                  ${comp.team_members}
+                </span>
+                ` : ''}
+              </div>
+              ${comp.description ? `
+              <div class="competition-card__description">
+                競賽說明：${comp.description}
+              </div>
+              ` : ''}
+            </div>
+            <div class="competition-card__ranking">
+              <label class="card-select" title="選取以匯出">
+                <input type="checkbox" data-export-select>
+              </label>
+              <span class="competition-card__rank competition-card__rank--${rankType}">${comp.rank_name || RANK_LABELS[rankType]}</span>
+              ${comp.score ? `<span class="competition-card__score">成績: ${comp.score}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 重新綁定事件
+      allCompetitionCards = Array.from(document.querySelectorAll('.competition-card'));
+      allCompetitionCards.forEach(card => {
+        const checkbox = card.querySelector('[data-export-select]');
+        if (checkbox) {
+          checkbox.addEventListener('change', updateSelectedCount);
+        }
+      });
+
+      updateSelectedCount();
+    }
 
     // 套用搜尋關鍵字 + 篩選條件（AND 條件），即時套用
     function applyAllFilters() {

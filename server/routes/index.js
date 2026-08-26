@@ -13,6 +13,8 @@ const scheduleCalendarRoutes = require('./scheduleCalendar');
 const announcementsRoutes = require('./announcements');
 const pointsRoutes = require('./points');
 const uploadRoutes = require('./upload');
+const competitionsRoutes = require('./competitions');
+const aiRoutes = require('./ai');
 
 // 註冊路由
 router.use('/auth', authRoutes);
@@ -26,6 +28,8 @@ router.use('/schedule-calendar', scheduleCalendarRoutes);
 router.use('/announcements', announcementsRoutes);
 router.use('/points', pointsRoutes);
 router.use('/upload', uploadRoutes);
+router.use('/competitions', competitionsRoutes);
+router.use('/ai', aiRoutes);
 
 // API 首頁
 router.get('/', (req, res) => {

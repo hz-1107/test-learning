@@ -155,14 +155,23 @@
   background: white;
   border-radius: 15px;
   box-shadow: 0 25px 25px rgba(0, 0, 0, 0.25);
-  width: 480px;
-  max-width: 100%;
+  width: fit-content;
+  min-width: 400px;
+  max-width: min(95vw, 600px);
   max-height: calc(100vh - 120px);
-  overflow-y: auto;
   transform: translateY(-20px);
   transition: transform 0.2s ease;
   display: flex;
   flex-direction: column;
+}
+
+.announcement-modal__body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.announcement-modal__footer {
+  flex-shrink: 0;
 }
 
 .announcement-modal-overlay.active .announcement-modal {

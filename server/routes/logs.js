@@ -12,6 +12,9 @@ router.get('/my-status', authorize('admin', 'staff', 'teacher'), logsController.
 // 根據排程和日期取得日誌
 router.get('/by-schedule', authorize('admin', 'staff', 'teacher'), logsController.getByScheduleAndDate);
 
+// 取得特定班級的上課日期列表
+router.get('/schedule-dates', authorize('admin', 'staff', 'teacher'), logsController.getScheduleDates);
+
 // 日誌管理路由
 router.get('/', logsController.getAll);
 router.get('/:id', logsController.getOne);

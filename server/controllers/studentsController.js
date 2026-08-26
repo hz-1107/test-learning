@@ -125,14 +125,8 @@ exports.getOne = async (req, res) => {
       });
     }
 
-    // 取得學生的點數餘額
-    const pointsResult = await db.queryOne(`
-      SELECT COALESCE(SUM(amount), 0) as total_points
-      FROM point_transactions
-      WHERE student_id = ?
-    `, [id]);
-
-    student.total_points = pointsResult.total_points;
+    // 取得學生的點數餘額 (使用 students.points_balance 欄位)
+    student.total_points = student.points_balance || 0;
 
     // 取得學生的班級
     const enrollments = await db.query(`
@@ -377,6 +371,15 @@ exports.getPoints = async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
+    // 取得學生的點數餘額 (使用 students.points_balance 欄位)
+    const student = await db.queryOne('SELECT points_balance FROM students WHERE id = ?', [id]);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到學生'
+      });
+    }
+
     // 註: LIMIT/OFFSET 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
     // (mysql2 prepared statement 對 LIMIT/OFFSET 使用佔位符在部分版本會出錯)
     const transactions = await db.query(`
@@ -388,17 +391,11 @@ exports.getPoints = async (req, res) => {
       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `, [id]);
 
-    const balance = await db.queryOne(`
-      SELECT COALESCE(SUM(amount), 0) as balance
-      FROM point_transactions
-      WHERE student_id = ?
-    `, [id]);
-
     res.json({
       success: true,
       data: {
         transactions,
-        balance: balance.balance
+        balance: student.points_balance || 0
       }
     });
   } catch (error) {
@@ -440,11 +437,8 @@ exports.getMe = async (req, res) => {
       return res.status(404).json({ success: false, message: '找不到學生資料，請聯絡管理人員建立學生檔案' });
     }
 
-    // 點數餘額與最近交易紀錄
-    const balanceResult = await db.queryOne(
-      'SELECT COALESCE(SUM(amount), 0) as balance FROM point_transactions WHERE student_id = ?',
-      [student.id]
-    );
+    // 點數餘額與最近交易紀錄 (使用 students.points_balance 欄位)
+    const pointsBalance = student.points_balance || 0;
     const recentTransactions = await db.query(
       'SELECT id, amount, reason, description, created_at FROM point_transactions WHERE student_id = ? ORDER BY created_at DESC LIMIT 20',
       [student.id]
@@ -531,7 +525,7 @@ exports.getMe = async (req, res) => {
       data: {
         student,
         points: {
-          balance: balanceResult.balance,
+          balance: pointsBalance,
           transactions: recentTransactions
         },
         skills,
@@ -741,6 +735,72 @@ exports.getCourseTypes = async (req, res) => {
     });
   } catch (error) {
     console.error('取得課程類型錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
+
+// 取得學生平均技能分數
+exports.getSkillAverages = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 取得該學生所有課堂的技能分數平均值
+    const result = await db.queryOne(`
+      SELECT
+        ROUND(AVG(NULLIF(skill_programming, 0)), 1) as avg_programming,
+        ROUND(AVG(NULLIF(skill_debugging, 0)), 1) as avg_debugging,
+        ROUND(AVG(NULLIF(skill_creativity, 0)), 1) as avg_creativity,
+        ROUND(AVG(NULLIF(skill_structure, 0)), 1) as avg_structure,
+        ROUND(AVG(NULLIF(skill_teamwork, 0)), 1) as avg_teamwork,
+        COUNT(*) as total_records,
+        COUNT(CASE WHEN skill_programming > 0 OR skill_debugging > 0 OR
+                        skill_creativity > 0 OR skill_structure > 0 OR
+                        skill_teamwork > 0 THEN 1 END) as records_with_skills
+      FROM student_log_records
+      WHERE student_id = ?
+    `, [id]);
+
+    // 取得最近 10 堂課的技能分數（用於趨勢圖）
+    const recentRecords = await db.query(`
+      SELECT
+        slr.skill_programming,
+        slr.skill_debugging,
+        slr.skill_creativity,
+        slr.skill_structure,
+        slr.skill_teamwork,
+        cl.log_date,
+        c.name as course_name
+      FROM student_log_records slr
+      JOIN course_logs cl ON slr.log_id = cl.id
+      JOIN courses c ON cl.course_id = c.id
+      WHERE slr.student_id = ?
+        AND (slr.skill_programming > 0 OR slr.skill_debugging > 0 OR
+             slr.skill_creativity > 0 OR slr.skill_structure > 0 OR
+             slr.skill_teamwork > 0)
+      ORDER BY cl.log_date DESC
+      LIMIT 10
+    `, [id]);
+
+    res.json({
+      success: true,
+      data: {
+        averages: {
+          programming: result.avg_programming || 0,
+          debugging: result.avg_debugging || 0,
+          creativity: result.avg_creativity || 0,
+          structure: result.avg_structure || 0,
+          teamwork: result.avg_teamwork || 0
+        },
+        total_records: result.total_records || 0,
+        records_with_skills: result.records_with_skills || 0,
+        recent_records: recentRecords.reverse() // 按日期正序
+      }
+    });
+  } catch (error) {
+    console.error('取得學生技能平均分數錯誤:', error);
     res.status(500).json({
       success: false,
       message: '伺服器錯誤'

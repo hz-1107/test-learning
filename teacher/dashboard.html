@@ -9,6 +9,67 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* 版面 Grid 佈局 */
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: 68px 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      grid-area: sidebar;
+      padding: var(--spacing-lg) 0;
+      overflow-y: auto;
+    }
+
+    .header {
+      grid-area: header;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .main-content {
+      grid-area: main;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .header__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      overflow: hidden;
+    }
+
+    .header__icon-btn {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .header__icon-btn:hover {
+      background: var(--color-surface-alt);
+    }
+
     /* AI 工具區塊 */
     .ai-tools-section {
       margin-top: var(--spacing-xl);
@@ -119,19 +180,7 @@
     <header class="header">
       <h1 class="header__logo">智慧學習歷程系統</h1>
 
-      <div class="header__search">
-        <svg class="header__search-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="currentColor"/>
-        </svg>
-        <input type="text" class="header__search-input" placeholder="搜尋...">
-      </div>
-
       <div class="header__actions">
-        <button class="header__icon-btn" aria-label="語言設定">
-          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM9 17.93C5.05 17.44 2 14.08 2 10C2 9.38 2.08 8.79 2.21 8.21L7 13V14C7 15.1 7.9 16 9 16V17.93ZM15.9 15.39C15.64 14.58 14.9 14 14 14H13V11C13 10.45 12.55 10 12 10H6V8H8C8.55 8 9 7.55 9 7V5H11C12.1 5 13 4.1 13 3V2.59C15.93 3.78 18 6.65 18 10C18 12.08 17.2 13.97 15.9 15.39Z" fill="currentColor"/>
-          </svg>
-        </button>
         <button class="header__icon-btn" aria-label="通知">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -139,7 +188,7 @@
           </svg>
         </button>
         <div class="header__avatar">
-          <img src="https://via.placeholder.com/36" alt="使用者頭像">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=teacher" alt="使用者頭像">
         </div>
       </div>
     </header>
@@ -322,7 +371,6 @@
   </div>
 
   <script src="../js/main.js"></script>
-  <script src="../js/notifications.js"></script>
   <script>
     const API_BASE = 'http://localhost:3000/api';
 
@@ -443,6 +491,10 @@
         return;
       }
 
+      // 取得今天日期字串
+      const todayDate = new Date();
+      const todayDateStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
+
       let html = '';
 
       schedules.forEach(schedule => {
@@ -479,7 +531,7 @@
             <h4 class="course-card__title">${schedule.course_name || '未命名課程'}</h4>
             <div class="course-card__footer">
               <span class="course-card__time">${startTime} ~ ${endTime}</span>
-              <a href="records.html" class="course-card__action">
+              <a href="journal.html?schedule_id=${schedule.schedule_id}&date=${todayDateStr}" class="course-card__action">
                 <svg class="course-card__action-icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0 11.875V15H3.125L12.3417 5.78333L9.21667 2.65833L0 11.875ZM14.7583 3.36667C15.0833 3.04167 15.0833 2.51667 14.7583 2.19167L12.8083 0.241667C12.4833 -0.0833333 11.9583 -0.0833333 11.6333 0.241667L10.1083 1.76667L13.2333 4.89167L14.7583 3.36667Z" fill="currentColor"/>
                 </svg>
@@ -517,9 +569,28 @@
     }
 
     // 渲染日誌區塊
-    function renderJournalSection() {
+    async function renderJournalSection() {
       const totalClasses = mySchedules.length;
-      const completedClasses = 0; // TODO: 從 API 取得已完成日誌數量
+
+      // 從 API 取得本週已完成日誌數量
+      let completedClasses = 0;
+      try {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        const startDate = startOfWeek.toISOString().split('T')[0];
+        const endDate = endOfWeek.toISOString().split('T')[0];
+
+        const logResponse = await apiRequest(`/logs/my-status?start_date=${startDate}&end_date=${endDate}`);
+        const schedules = logResponse.data?.schedules || [];
+        completedClasses = schedules.filter(s => s.log_status === 'completed').length;
+      } catch (error) {
+        console.warn('取得日誌狀態失敗:', error);
+      }
+
       const percent = totalClasses > 0 ? Math.round((completedClasses / totalClasses) * 100) : 0;
 
       document.getElementById('journalTotal').textContent = `本週共 ${totalClasses} 堂課`;
@@ -547,14 +618,19 @@
         else if (dayDiff === 1) dateLabel = '昨日';
         else dateLabel = `${dayDiff}天前`;
 
+        // 計算該課程的實際日期
+        const courseDate = new Date(now);
+        courseDate.setDate(now.getDate() - dayDiff);
+        const courseDateStr = `${courseDate.getFullYear()}-${String(courseDate.getMonth() + 1).padStart(2, '0')}-${String(courseDate.getDate()).padStart(2, '0')}`;
+
         const journalItem = document.createElement('div');
         journalItem.className = 'journal-item';
         journalItem.innerHTML = `
           <div class="journal-item__header">
             <h4 class="journal-item__title">${schedule.course_name || '未命名課程'}</h4>
-            <p class="journal-item__date">${formatDate(now)} • ${dateLabel}</p>
+            <p class="journal-item__date">${formatDate(courseDate)} • ${dateLabel}</p>
           </div>
-          <a href="records.html" class="journal-item__btn">填寫日誌</a>
+          <a href="journal.html?schedule_id=${schedule.schedule_id}&date=${courseDateStr}" class="journal-item__btn">填寫日誌</a>
         `;
         journalContent.appendChild(journalItem);
       });
@@ -642,5 +718,6 @@
       loadTodayCourses();
     });
   </script>
+  <script src="js/notifications.js"></script>
 </body>
 </html>

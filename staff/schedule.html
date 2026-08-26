@@ -76,15 +76,16 @@
     .schedule-block__badge { position: absolute; top: 2px; right: 2px; padding: 1px 4px; font-size: 9px; background: #ff6b6b; color: white; border-radius: 2px; }
 
     /* 調課 Modal */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; padding: 20px; overflow-y: auto; }
     .modal-overlay.active { opacity: 1; visibility: visible; }
-    .modal { background: var(--color-surface); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; margin: auto; }
-    .modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-surface-alt); }
+    .modal { background: var(--color-surface); border-radius: var(--radius-lg); width: 100%; max-width: 600px; max-height: calc(100vh - 40px); display: flex; flex-direction: column; margin: auto; }
+    .modal form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-surface-alt); flex-shrink: 0; }
     .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
     .modal__close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted); }
     .modal__close:hover { background: var(--color-surface-alt); }
-    .modal__body { padding: var(--spacing-lg); }
-    .modal__footer { display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); }
+    .modal__body { padding: var(--spacing-lg); overflow-y: auto; flex: 1; }
+    .modal__footer { display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); flex-shrink: 0; }
     .form-group { margin-bottom: var(--spacing-lg); }
     .form-group label { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-sm); }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); }

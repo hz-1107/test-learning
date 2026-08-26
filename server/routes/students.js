@@ -25,4 +25,7 @@ router.delete('/:id', authorize('admin', 'staff'), studentsController.delete);
 // 學生點數
 router.get('/:id/points', studentsController.getPoints);
 
+// 學生技能平均分數
+router.get('/:id/skill-averages', studentsController.getSkillAverages);
+
 module.exports = router;

@@ -1493,14 +1493,15 @@
       }
 
       listEl.innerHTML = me.points.transactions.map(t => {
-        const isPositive = t.points >= 0;
+        const amount = t.amount || 0;
+        const isPositive = amount >= 0;
         const date = new Date(t.created_at);
         const dateStr = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
         return `
           <div class="points-detail__item">
             <span class="points-detail__date">${dateStr}</span>
             <span class="points-detail__reason">${t.reason || ''}</span>
-            <span class="points-detail__value points-detail__value--${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${t.points}</span>
+            <span class="points-detail__value points-detail__value--${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${amount}</span>
           </div>
         `;
       }).join('');

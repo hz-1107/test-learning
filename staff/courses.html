@@ -301,19 +301,26 @@
       background: rgba(0, 0, 0, 0.5);
       z-index: 1000;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
+      padding: 20px;
+      overflow-y: auto;
     }
     .modal-overlay.active { display: flex; }
     .modal {
       background: var(--color-surface);
       border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-width: 600px;
+      max-height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
       box-shadow: var(--shadow-lg);
       margin: auto;
     }
+    .modal form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .modal__header { flex-shrink: 0; }
+    .modal__body { overflow-y: auto; flex: 1; padding: var(--spacing-lg); }
+    .modal__footer { flex-shrink: 0; display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); }
     .modal__header {
       display: flex;
       justify-content: space-between;
