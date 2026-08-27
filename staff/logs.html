@@ -782,7 +782,7 @@
       <div class="staff-content">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg);">
           <h2 class="page-title" style="margin-bottom: 0;">日誌管理</h2>
-          <button class="action-btn action-btn--outline" onclick="triggerAutoCreate()" title="為已結束的課程自動建立待填寫日誌">
+          <button class="action-btn action-btn--outline" onclick="triggerAutoCreate()" title="為已開始的課程自動建立待填寫日誌">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
               <path d="M21 12a9 9 0 11-9-9"/>
               <polyline points="21 3 21 9 15 9"/>
@@ -1002,13 +1002,33 @@
       // 載入使用者資訊
       loadUserProfile();
 
-      // 載入篩選選項和日誌
+      // 載入篩選選項
       loadFilterOptions();
-      loadLogs();
+
+      // 自動建立已開始課程的日誌，然後載入日誌列表
+      autoCreateAndLoadLogs();
 
       // 綁定事件
       bindEvents();
     });
+
+    // 頁面載入時自動建立日誌並載入列表
+    async function autoCreateAndLoadLogs() {
+      const token = getAuthToken();
+
+      try {
+        // 先自動建立已開始課程的日誌（靜默執行，不顯示訊息）
+        await fetch(`${API_BASE}/api/logs/auto-create`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.log('自動建立日誌檢查:', error.message);
+      }
+
+      // 載入日誌列表
+      loadLogs();
+    }
 
     async function loadUserProfile() {
       const token = getAuthToken();

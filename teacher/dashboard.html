@@ -715,8 +715,27 @@
 
       updateWelcome();
       loadUserInfo();
-      loadTodayCourses();
+
+      // 自動建立已開始課程的日誌，然後載入今日課程
+      autoCreateAndLoadCourses();
     });
+
+    // 自動建立日誌並載入課程
+    async function autoCreateAndLoadCourses() {
+      const token = getAuthToken();
+      try {
+        // 先自動建立已開始課程的日誌（靜默執行）
+        await fetch(`${API_BASE}/api/logs/auto-create-my`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.log('自動建立日誌檢查:', error.message);
+      }
+
+      // 載入今日課程
+      loadTodayCourses();
+    }
   </script>
   <script src="js/notifications.js"></script>
 </body>

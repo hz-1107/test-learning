@@ -4,7 +4,6 @@ const cors = require('cors');
 const path = require('path');
 const db = require('./config/db');
 const routes = require('./routes');
-const logsController = require('./controllers/logsController');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,39 +73,6 @@ app.use((err, req, res, next) => {
 // =====================
 
 // =====================
-// 排程任務：自動建立日誌
-// =====================
-
-let autoCreateInterval = null;
-
-function startAutoCreateScheduler() {
-  // 每 30 分鐘執行一次自動建立日誌
-  const intervalMinutes = 30;
-  const intervalMs = intervalMinutes * 60 * 1000;
-
-  console.log(`⏰ 自動建立日誌排程已啟動 (每 ${intervalMinutes} 分鐘執行)`);
-
-  // 伺服器啟動後延遲 10 秒執行第一次（確保資料庫連接完成）
-  setTimeout(async () => {
-    console.log('📋 執行初始日誌檢查...');
-    await logsController.autoCreatePendingLogs();
-  }, 10000);
-
-  // 設定定期執行
-  autoCreateInterval = setInterval(async () => {
-    await logsController.autoCreatePendingLogs();
-  }, intervalMs);
-}
-
-function stopAutoCreateScheduler() {
-  if (autoCreateInterval) {
-    clearInterval(autoCreateInterval);
-    autoCreateInterval = null;
-    console.log('⏰ 自動建立日誌排程已停止');
-  }
-}
-
-// =====================
 // 啟動伺服器
 // =====================
 
@@ -117,9 +83,6 @@ async function startServer() {
   if (!dbConnected) {
     console.error('⚠️  資料庫連接失敗，請檢查設定');
     console.log('💡 提示: 請確認 .env 檔案中的資料庫設定是否正確');
-  } else {
-    // 資料庫連接成功，啟動自動建立日誌排程
-    startAutoCreateScheduler();
   }
 
   app.listen(PORT, () => {
@@ -140,18 +103,5 @@ async function startServer() {
     console.log('');
   });
 }
-
-// 優雅關閉
-process.on('SIGTERM', () => {
-  console.log('收到 SIGTERM 信號，正在關閉伺服器...');
-  stopAutoCreateScheduler();
-  process.exit(0);
-});
-
-process.on('SIGINT', () => {
-  console.log('收到 SIGINT 信號，正在關閉伺服器...');
-  stopAutoCreateScheduler();
-  process.exit(0);
-});
 
 startServer();

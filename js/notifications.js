@@ -1,88 +1,100 @@
 /**
  * 公告通知系統
  * 處理鈴鐺圖示點擊顯示公告面板的功能
+ * 從資料庫 API 載入公告
  */
 
+// API 基底路徑
+const NOTIFICATION_API_BASE = window.API_BASE || 'http://localhost:3000';
+
 // 公告資料
-const announcements = [
-  {
-    id: 1,
-    title: 'Fun心學習歷程系統上線',
-    content: '歡迎使用全新的智慧學習歷程系統，讓我們一起記錄學習的每一刻！',
-    date: '2026-07-22',
-    type: 'system',
-    isNew: true
-  },
-  {
-    id: 2,
-    title: '暑期課程開放報名',
-    content: '2026年暑期機器人營隊開始報名囉！名額有限，請盡早報名。',
-    date: '2026-07-20',
-    type: 'course',
-    isNew: true
-  },
-  {
-    id: 3,
-    title: '系統維護通知',
-    content: '本系統將於7月25日凌晨2:00-4:00進行例行維護，届時將暫停服務。',
-    date: '2026-07-18',
-    type: 'system',
-    isNew: false
-  },
-  {
-    id: 4,
-    title: '機器人競賽報名截止提醒',
-    content: '2026全國青少年機器人競賽報名即將於7月31日截止，請把握機會！',
-    date: '2026-07-15',
-    type: 'event',
-    isNew: false
-  },
-  {
-    id: 5,
-    title: '新功能上線：學習歷程匯出',
-    content: '現在可以將您的學習歷程匯出為PDF格式，方便列印與保存。',
-    date: '2026-07-10',
-    type: 'feature',
-    isNew: false
+let announcements = [];
+let unreadCount = 0;
+
+// 取得認證 Token
+function getAuthToken() {
+  return localStorage.getItem('authToken');
+}
+
+// 從 API 載入公告
+async function loadAnnouncements() {
+  const token = getAuthToken();
+  if (!token) {
+    console.log('Notification: 未登入，無法載入公告');
+    return;
   }
-];
 
-// 建立通知面板 HTML
-function createNotificationPanel() {
-  const panel = document.createElement('div');
-  panel.className = 'notification-panel';
-  panel.id = 'notificationPanel';
+  try {
+    const response = await fetch(`${NOTIFICATION_API_BASE}/api/announcements/my`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
-  const newCount = announcements.filter(a => a.isNew).length;
+    if (!response.ok) {
+      throw new Error('載入公告失敗');
+    }
 
-  panel.innerHTML = `
-    <div class="notification-panel__header">
-      <h3 class="notification-panel__title">公告消息</h3>
-      <span class="notification-panel__count">${announcements.length} 則公告</span>
-    </div>
-    <div class="notification-panel__list">
-      ${announcements.map(announcement => `
-        <div class="notification-item ${announcement.isNew ? 'notification-item--new' : ''}" data-id="${announcement.id}">
-          <div class="notification-item__icon notification-item__icon--${announcement.type}">
-            ${getTypeIcon(announcement.type)}
-          </div>
-          <div class="notification-item__content">
-            <div class="notification-item__header">
-              <span class="notification-item__title">${announcement.title}</span>
-              ${announcement.isNew ? '<span class="notification-item__badge">NEW</span>' : ''}
-            </div>
-            <p class="notification-item__text">${announcement.content}</p>
-            <span class="notification-item__date">${formatDate(announcement.date)}</span>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    <div class="notification-panel__footer">
-      <a href="#" class="notification-panel__link">查看全部公告</a>
-    </div>
-  `;
+    const result = await response.json();
+    if (result.success) {
+      announcements = result.data.announcements || [];
+      unreadCount = result.data.unreadCount || 0;
+      console.log('Notification: 載入公告成功，共', announcements.length, '則，未讀', unreadCount, '則');
+    }
+  } catch (error) {
+    console.error('Notification: 載入公告錯誤:', error);
+    // 保持空陣列
+    announcements = [];
+    unreadCount = 0;
+  }
+}
 
-  return panel;
+// 標記公告為已讀
+async function markAnnouncementAsRead(id) {
+  const token = getAuthToken();
+  if (!token) return;
+
+  try {
+    await fetch(`${NOTIFICATION_API_BASE}/api/announcements/${id}/read`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  } catch (error) {
+    console.error('Notification: 標記已讀錯誤:', error);
+  }
+}
+
+// 標記所有公告為已讀
+async function markAllAsRead() {
+  const token = getAuthToken();
+  if (!token) return;
+
+  try {
+    await fetch(`${NOTIFICATION_API_BASE}/api/announcements/read-all`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    // 更新本地狀態
+    announcements.forEach(a => a.is_read = 1);
+    unreadCount = 0;
+
+    // 更新 UI
+    document.querySelectorAll('.notification-item--new').forEach(item => {
+      item.classList.remove('notification-item--new');
+      const badge = item.querySelector('.notification-item__badge');
+      if (badge) badge.remove();
+    });
+
+    updateBadgeCount();
+    updatePanelCount();
+  } catch (error) {
+    console.error('Notification: 標記全部已讀錯誤:', error);
+  }
 }
 
 // 取得類型圖示
@@ -105,6 +117,20 @@ function getTypeIcon(type) {
     </svg>`,
     feature: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>`,
+    all: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+      <path d="M16 3.13a4 4 0 010 7.75"/>
+    </svg>`,
+    students: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+      <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+    </svg>`,
+    teachers: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
     </svg>`
   };
   return icons[type] || icons.system;
@@ -112,6 +138,7 @@ function getTypeIcon(type) {
 
 // 格式化日期
 function formatDate(dateStr) {
+  if (!dateStr) return '';
   const date = new Date(dateStr);
   const now = new Date();
   const diffTime = now - date;
@@ -124,19 +151,214 @@ function formatDate(dateStr) {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
+// 建立通知面板 HTML
+function createNotificationPanel() {
+  const panel = document.createElement('div');
+  panel.className = 'notification-panel';
+  panel.id = 'notificationPanel';
+
+  updatePanelContent(panel);
+
+  return panel;
+}
+
+// 更新面板內容
+function updatePanelContent(panel) {
+  if (!panel) panel = document.getElementById('notificationPanel');
+  if (!panel) return;
+
+  if (announcements.length === 0) {
+    panel.innerHTML = `
+      <div class="notification-panel__header">
+        <h3 class="notification-panel__title">公告消息</h3>
+        <span class="notification-panel__count">0 則公告</span>
+      </div>
+      <div class="notification-panel__list">
+        <div class="notification-panel__empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          <p>目前沒有公告</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="notification-panel__header">
+      <h3 class="notification-panel__title">公告消息</h3>
+      <div class="notification-panel__header-right">
+        ${unreadCount > 0 ? `<button class="notification-panel__mark-all" onclick="markAllAsRead()">全部已讀</button>` : ''}
+        <span class="notification-panel__count">${announcements.length} 則公告</span>
+      </div>
+    </div>
+    <div class="notification-panel__list">
+      ${announcements.map(announcement => {
+        const isNew = !announcement.is_read;
+        const type = announcement.target_group || 'system';
+        const dateStr = announcement.published_at || announcement.created_at;
+
+        return `
+          <div class="notification-item ${isNew ? 'notification-item--new' : ''}" data-id="${announcement.id}">
+            <div class="notification-item__icon notification-item__icon--${type}">
+              ${getTypeIcon(type)}
+            </div>
+            <div class="notification-item__content">
+              <div class="notification-item__header">
+                <span class="notification-item__title">${announcement.title}</span>
+                ${isNew ? '<span class="notification-item__badge">NEW</span>' : ''}
+              </div>
+              <p class="notification-item__text">${announcement.content || ''}</p>
+              <div class="notification-item__footer">
+                <span class="notification-item__date">${formatDate(dateStr)}</span>
+                ${announcement.author_name ? `<span class="notification-item__author">${announcement.author_name}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="notification-panel__footer">
+      <span class="notification-panel__refresh" onclick="refreshAnnouncements()">重新整理</span>
+    </div>
+  `;
+
+  // 重新綁定點擊事件
+  bindNotificationItemEvents(panel);
+}
+
+// 綁定通知項目事件
+function bindNotificationItemEvents(panel) {
+  panel.querySelectorAll('.notification-item').forEach(item => {
+    item.addEventListener('click', async () => {
+      const id = item.dataset.id;
+
+      // 如果是未讀，標記為已讀
+      if (item.classList.contains('notification-item--new')) {
+        await markAnnouncementAsRead(id);
+
+        // 更新本地狀態
+        const announcement = announcements.find(a => a.id == id);
+        if (announcement) {
+          announcement.is_read = 1;
+          unreadCount = Math.max(0, unreadCount - 1);
+        }
+
+        // 更新 UI
+        item.classList.remove('notification-item--new');
+        const badgeEl = item.querySelector('.notification-item__badge');
+        if (badgeEl) badgeEl.remove();
+
+        updateBadgeCount();
+        updatePanelCount();
+      }
+
+      // 顯示公告詳情 (可擴展)
+      showAnnouncementDetail(id);
+    });
+  });
+}
+
+// 顯示公告詳情
+function showAnnouncementDetail(id) {
+  const announcement = announcements.find(a => a.id == id);
+  if (!announcement) return;
+
+  // 建立詳情對話框
+  const existingModal = document.querySelector('.announcement-modal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'announcement-modal';
+  modal.innerHTML = `
+    <div class="announcement-modal__backdrop"></div>
+    <div class="announcement-modal__content">
+      <div class="announcement-modal__header">
+        <h3>${announcement.title}</h3>
+        <button class="announcement-modal__close">&times;</button>
+      </div>
+      <div class="announcement-modal__body">
+        <p>${announcement.content || ''}</p>
+      </div>
+      <div class="announcement-modal__footer">
+        <span>${formatDate(announcement.published_at || announcement.created_at)}</span>
+        ${announcement.author_name ? `<span>發布者: ${announcement.author_name}</span>` : ''}
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // 關閉事件
+  modal.querySelector('.announcement-modal__backdrop').addEventListener('click', () => modal.remove());
+  modal.querySelector('.announcement-modal__close').addEventListener('click', () => modal.remove());
+
+  // 動畫顯示
+  requestAnimationFrame(() => modal.classList.add('announcement-modal--active'));
+}
+
+// 重新整理公告
+async function refreshAnnouncements() {
+  await loadAnnouncements();
+  updatePanelContent();
+  updateBadgeCount();
+}
+
 // 建立通知徽章
 function createNotificationBadge() {
-  const newCount = announcements.filter(a => a.isNew).length;
-  if (newCount === 0) return null;
+  if (unreadCount === 0) return null;
 
   const badge = document.createElement('span');
   badge.className = 'notification-badge';
-  badge.textContent = newCount > 9 ? '9+' : newCount;
+  badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
   return badge;
 }
 
+// 更新徽章計數
+function updateBadgeCount() {
+  const badge = document.querySelector('.notification-badge');
+  const btn = document.querySelector('[data-notification-btn]');
+
+  if (unreadCount === 0) {
+    if (badge) badge.remove();
+  } else if (badge) {
+    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+  } else if (btn) {
+    const newBadge = createNotificationBadge();
+    if (newBadge) btn.appendChild(newBadge);
+  }
+}
+
+// 更新面板計數
+function updatePanelCount() {
+  const countEl = document.querySelector('.notification-panel__count');
+  if (countEl) {
+    countEl.textContent = `${announcements.length} 則公告`;
+  }
+
+  // 更新全部已讀按鈕顯示
+  const headerRight = document.querySelector('.notification-panel__header-right');
+  if (headerRight) {
+    const markAllBtn = headerRight.querySelector('.notification-panel__mark-all');
+    if (unreadCount === 0 && markAllBtn) {
+      markAllBtn.remove();
+    } else if (unreadCount > 0 && !markAllBtn) {
+      const btn = document.createElement('button');
+      btn.className = 'notification-panel__mark-all';
+      btn.textContent = '全部已讀';
+      btn.onclick = markAllAsRead;
+      headerRight.insertBefore(btn, headerRight.firstChild);
+    }
+  }
+}
+
 // 初始化通知系統
-function initNotifications() {
+async function initNotifications() {
+  // 先載入公告
+  await loadAnnouncements();
+
   // 找到所有鈴鐺按鈕 (通過 SVG path 的 d 屬性來識別)
   const allPaths = document.querySelectorAll('svg path');
   let notificationBtn = null;
@@ -159,8 +381,9 @@ function initNotifications() {
 
   console.log('Notification: 找到鈴鐺按鈕', notificationBtn);
 
-  // 設置按鈕為相對定位
+  // 設置按鈕為相對定位並標記
   notificationBtn.style.position = 'relative';
+  notificationBtn.setAttribute('data-notification-btn', 'true');
 
   // 添加通知徽章到按鈕
   const badge = createNotificationBadge();
@@ -189,32 +412,6 @@ function initNotifications() {
       panel.classList.remove('notification-panel--active');
     }
   });
-
-  // 點擊通知項目
-  panel.querySelectorAll('.notification-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const id = item.dataset.id;
-      // 標記為已讀
-      item.classList.remove('notification-item--new');
-      const badgeEl = item.querySelector('.notification-item__badge');
-      if (badgeEl) badgeEl.remove();
-
-      // 更新徽章計數
-      updateBadgeCount();
-    });
-  });
-}
-
-// 更新徽章計數
-function updateBadgeCount() {
-  const newItems = document.querySelectorAll('.notification-item--new');
-  const badge = document.querySelector('.notification-badge');
-
-  if (newItems.length === 0 && badge) {
-    badge.remove();
-  } else if (badge) {
-    badge.textContent = newItems.length > 9 ? '9+' : newItems.length;
-  }
 }
 
 // 添加通知面板樣式
@@ -247,8 +444,8 @@ function addNotificationStyles() {
       position: fixed;
       top: 60px;
       right: 80px;
-      width: 380px;
-      max-height: 480px;
+      width: 400px;
+      max-height: 520px;
       background: var(--color-surface, #ffffff);
       border-radius: var(--radius-lg, 12px);
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -282,6 +479,27 @@ function addNotificationStyles() {
       margin: 0;
     }
 
+    .notification-panel__header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .notification-panel__mark-all {
+      padding: 4px 10px;
+      background: rgba(90, 74, 0, 0.1);
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--color-primary-dark, #5a4a00);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .notification-panel__mark-all:hover {
+      background: rgba(90, 74, 0, 0.2);
+    }
+
     .notification-panel__count {
       font-size: 12px;
       color: var(--color-primary-dark, #5a4a00);
@@ -289,9 +507,28 @@ function addNotificationStyles() {
     }
 
     .notification-panel__list {
-      max-height: 360px;
+      max-height: 400px;
       overflow-y: auto;
       background: var(--color-surface, #ffffff);
+    }
+
+    .notification-panel__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--color-text-muted, #9aa0a6);
+    }
+
+    .notification-panel__empty svg {
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .notification-panel__empty p {
+      margin: 0;
+      font-size: 14px;
     }
 
     /* 通知項目 */
@@ -323,7 +560,8 @@ function addNotificationStyles() {
       flex-shrink: 0;
     }
 
-    .notification-item__icon--system {
+    .notification-item__icon--system,
+    .notification-item__icon--all {
       background: #E3F2FD;
       color: #1565C0;
     }
@@ -341,6 +579,16 @@ function addNotificationStyles() {
     .notification-item__icon--feature {
       background: var(--color-primary, #ffdb58);
       color: var(--color-primary-dark, #5a4a00);
+    }
+
+    .notification-item__icon--students {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+
+    .notification-item__icon--teachers {
+      background: #E3F2FD;
+      color: #1565C0;
     }
 
     .notification-item__content {
@@ -380,7 +628,18 @@ function addNotificationStyles() {
       overflow: hidden;
     }
 
+    .notification-item__footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .notification-item__date {
+      font-size: 12px;
+      color: var(--color-text-muted, #9aa0a6);
+    }
+
+    .notification-item__author {
       font-size: 12px;
       color: var(--color-text-muted, #9aa0a6);
     }
@@ -392,22 +651,118 @@ function addNotificationStyles() {
       background: var(--color-surface, #ffffff);
     }
 
-    .notification-panel__link {
+    .notification-panel__refresh {
       font-size: 14px;
       font-weight: 500;
       color: var(--color-primary-dark, #5a4a00);
-      text-decoration: none;
+      cursor: pointer;
     }
 
-    .notification-panel__link:hover {
+    .notification-panel__refresh:hover {
       text-decoration: underline;
+    }
+
+    /* 公告詳情對話框 */
+    .announcement-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .announcement-modal--active {
+      opacity: 1;
+    }
+
+    .announcement-modal__backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .announcement-modal__content {
+      position: relative;
+      width: 90%;
+      max-width: 500px;
+      background: var(--color-surface, #ffffff);
+      border-radius: var(--radius-lg, 12px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .announcement-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--color-primary, #ffdb58);
+    }
+
+    .announcement-modal__header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-primary-dark, #5a4a00);
+    }
+
+    .announcement-modal__close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      color: var(--color-primary-dark, #5a4a00);
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+
+    .announcement-modal__close:hover {
+      background: rgba(90, 74, 0, 0.1);
+    }
+
+    .announcement-modal__body {
+      padding: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .announcement-modal__body p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--color-text-primary, #1a1c1c);
+      white-space: pre-wrap;
+    }
+
+    .announcement-modal__footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--color-background, #f8f9fa);
+      font-size: 12px;
+      color: var(--color-text-muted, #9aa0a6);
     }
 
     /* 響應式調整 */
     @media (max-width: 480px) {
       .notification-panel {
         width: calc(100vw - 32px);
-        right: -60px;
+        right: 16px;
+        left: 16px;
       }
     }
   `;
@@ -415,9 +770,9 @@ function addNotificationStyles() {
 }
 
 // DOM 載入完成後初始化
-function init() {
+async function init() {
   addNotificationStyles();
-  initNotifications();
+  await initNotifications();
 }
 
 // 確保在 DOM 準備好後執行

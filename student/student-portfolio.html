@@ -692,7 +692,7 @@
         });
         if (profileRes.ok) {
           const profile = await profileRes.json();
-          document.querySelector('.student-sidebar__name').textContent = profile.data.name || '學生';
+          document.querySelector('.student-sidebar__name').textContent = profile.data.student?.name || '學生';
         }
       } catch (e) {
         console.error('載入學生資訊失敗:', e);
@@ -715,7 +715,7 @@
         if (!response.ok) throw new Error('載入學習歷程失敗');
 
         const result = await response.json();
-        recordsData = result.data || [];
+        recordsData = result.data?.records || [];
 
         // 更新課程分類篩選選項
         updateCategoryOptions();

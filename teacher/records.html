@@ -608,8 +608,31 @@
       document.getElementById('startDate').value = formatLocalDate(firstDay);
       document.getElementById('endDate').value = formatLocalDate(lastDay);
 
-      loadMyClasses();
+      // 自動建立已開始課程的日誌，然後載入列表
+      autoCreateAndLoadClasses();
     });
+
+    // 自動建立日誌並載入課程列表
+    async function autoCreateAndLoadClasses() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      try {
+        // 先自動建立已開始課程的日誌（靜默執行）
+        await fetch(`${API_BASE}/api/logs/auto-create-my`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.log('自動建立日誌檢查:', error.message);
+      }
+
+      // 載入課程列表
+      loadMyClasses();
+    }
 
     // API 基礎網址
     const API_BASE = 'http://localhost:3000';
