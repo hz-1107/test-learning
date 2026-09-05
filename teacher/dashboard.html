@@ -70,6 +70,17 @@
       background: var(--color-surface-alt);
     }
 
+    /* 篩選下拉選單 */
+    .filter-select {
+      padding: 8px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      cursor: pointer;
+    }
+
     /* AI 工具區塊 */
     .ai-tools-section {
       margin-top: var(--spacing-xl);
@@ -258,9 +269,18 @@
           <div class="courses-list__header">
             <h3 class="courses-list__title">今日課程</h3>
             <div class="courses-list__filters">
-              <button class="filter-btn filter-btn--active" data-filter="all">全部</button>
-              <button class="filter-btn" data-filter="in-progress">進行中</button>
-              <button class="filter-btn" data-filter="pending">未完成</button>
+              <select class="filter-select" id="statusFilter">
+                <option value="all">全部</option>
+                <option value="completed">已完成</option>
+                <option value="in-progress">進行中</option>
+                <option value="pending">未填答</option>
+              </select>
+              <select class="filter-select" id="courseFilter">
+                <option value="all">全部課程</option>
+              </select>
+              <select class="filter-select" id="teacherFilter">
+                <option value="all">全部教師</option>
+              </select>
             </div>
           </div>
 
@@ -370,6 +390,8 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/api.js"></script>
   <script src="../js/main.js"></script>
   <script>
     const API_BASE = 'http://localhost:3000/api';
@@ -406,6 +428,7 @@
 
     // 狀態變數
     let mySchedules = [];
+    let teachers = [];
     let userName = '老師';
     const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -442,6 +465,49 @@
       }
     }
 
+    // 依今日課程更新教師下拉選單選項（只列出今天有排課的老師）
+    function updateTeacherFilterOptions(schedules) {
+      const teacherFilter = document.getElementById('teacherFilter');
+      const currentValue = teacherFilter.value;
+
+      // 收集不重複的老師（依 teacher_id 去重）
+      const seen = new Set();
+      const uniqueTeachers = [];
+      schedules.forEach(s => {
+        if (s.teacher_id && !seen.has(s.teacher_id)) {
+          seen.add(s.teacher_id);
+          uniqueTeachers.push({ id: s.teacher_id, name: s.teacher_name });
+        }
+      });
+
+      teacherFilter.innerHTML = '<option value="all">全部教師</option>';
+      uniqueTeachers.forEach(t => {
+        teacherFilter.innerHTML += `<option value="${t.id}">${t.name || '未命名教師'}</option>`;
+      });
+
+      // 嘗試保留原本選擇的值
+      if ([...teacherFilter.options].some(o => o.value === currentValue)) {
+        teacherFilter.value = currentValue;
+      }
+    }
+
+    // 依今日課程更新課程下拉選單選項
+    function updateCourseFilterOptions(schedules) {
+      const courseFilter = document.getElementById('courseFilter');
+      const currentValue = courseFilter.value;
+      const courses = [...new Set(schedules.map(s => s.course_name).filter(Boolean))];
+
+      courseFilter.innerHTML = '<option value="all">全部課程</option>';
+      courses.forEach(course => {
+        courseFilter.innerHTML += `<option value="${course}">${course}</option>`;
+      });
+
+      // 嘗試保留原本選擇的值
+      if ([...courseFilter.options].some(o => o.value === currentValue)) {
+        courseFilter.value = currentValue;
+      }
+    }
+
     // 載入今日課程
     async function loadTodayCourses() {
       try {
@@ -458,6 +524,8 @@
           return timeA.localeCompare(timeB);
         });
 
+        updateCourseFilterOptions(todaySchedules);
+        updateTeacherFilterOptions(todaySchedules);
         renderTodayCourses(todaySchedules);
         renderJournalSection();
       } catch (error) {
@@ -520,7 +588,7 @@
         }
 
         html += `
-          <div class="course-card course-card--${statusClass}" data-status="${status}" data-schedule-id="${schedule.schedule_id}">
+          <div class="course-card course-card--${statusClass}" data-status="${status}" data-course="${schedule.course_name || ''}" data-teacher-id="${schedule.teacher_id || ''}" data-schedule-id="${schedule.schedule_id}">
             <div class="course-card__header">
               <span class="course-card__status course-card__status--${statusClass}">
                 ${getStatusIcon(status)}
@@ -542,13 +610,10 @@
         `;
       });
 
-      // 可選：新增班級卡片（如果需要）
-      // html += `...add class card...`;
-
       grid.innerHTML = html;
 
       // 篩選功能
-      setupFilterButtons();
+      applyCourseFilters();
     }
 
     // 取得狀態圖示
@@ -600,7 +665,6 @@
 
       // 顯示需要填寫日誌的課程
       const journalContent = document.getElementById('journalContent');
-      const progressCard = journalContent.querySelector('.journal-progress');
 
       // 清除載入中的提示
       const loadingDiv = journalContent.querySelector('div[style*="text-align: center"]');
@@ -636,26 +700,27 @@
       });
     }
 
-    // 設定篩選按鈕
-    function setupFilterButtons() {
-      const filterBtns = document.querySelectorAll('.filter-btn');
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-          filterBtns.forEach(b => b.classList.remove('filter-btn--active'));
-          this.classList.add('filter-btn--active');
+    // 設定篩選下拉選單
+    function setupFilterSelects() {
+      document.getElementById('statusFilter').addEventListener('change', applyCourseFilters);
+      document.getElementById('courseFilter').addEventListener('change', applyCourseFilters);
+      document.getElementById('teacherFilter').addEventListener('change', applyCourseFilters);
+    }
 
-          const filter = this.dataset.filter;
-          const cards = document.querySelectorAll('.course-card');
+    // 套用篩選（狀態、課程、教師）
+    function applyCourseFilters() {
+      const statusValue = document.getElementById('statusFilter').value;
+      const courseValue = document.getElementById('courseFilter').value;
+      const teacherValue = document.getElementById('teacherFilter').value;
 
-          cards.forEach(card => {
-            const status = card.dataset.status;
-            if (filter === 'all' || status === filter) {
-              card.style.display = '';
-            } else {
-              card.style.display = 'none';
-            }
-          });
-        });
+      const cards = document.querySelectorAll('.course-card');
+
+      cards.forEach(card => {
+        const matchesStatus = statusValue === 'all' || card.dataset.status === statusValue;
+        const matchesCourse = courseValue === 'all' || card.dataset.course === courseValue;
+        const matchesTeacher = teacherValue === 'all' || card.dataset.teacherId === teacherValue;
+
+        card.style.display = (matchesStatus && matchesCourse && matchesTeacher) ? '' : 'none';
       });
     }
 
@@ -715,6 +780,7 @@
 
       updateWelcome();
       loadUserInfo();
+      setupFilterSelects();
 
       // 自動建立已開始課程的日誌，然後載入今日課程
       autoCreateAndLoadCourses();
