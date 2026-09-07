@@ -371,6 +371,19 @@
       color: #2563eb;
     }
 
+    .competition-card__badge--international {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+
+    .competition-card__photo {
+      width: 120px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      margin-top: var(--spacing-sm);
+    }
+
     .competition-card__team {
       display: flex;
       align-items: center;
@@ -400,6 +413,33 @@
       align-items: flex-end;
       justify-content: flex-start;
       min-width: 80px;
+      gap: var(--spacing-sm);
+    }
+
+    /* 匯出按鈕 */
+    .card-export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .card-export-btn:hover {
+      filter: brightness(0.95);
+      transform: translateY(-1px);
+    }
+
+    .card-export-btn svg {
+      width: 14px;
+      height: 14px;
     }
 
     .competition-card__rank {
@@ -734,6 +774,7 @@
                     <label class="filter-popover__label">競賽等級</label>
                     <select class="filter-popover__select" id="levelFilterSelect">
                       <option value="">全部</option>
+                      <option value="international">國際賽</option>
                       <option value="national">全國賽</option>
                       <option value="regional">區域賽</option>
                       <option value="county">縣市賽</option>
@@ -1040,10 +1081,10 @@
 
     // 等級標籤
     const LEVEL_LABELS = {
+      'international': '國際賽',
       'national': '全國賽',
       'regional': '區域賽',
-      'county': '縣市賽',
-      'school': '校內賽'
+      'county': '縣市賽'
     };
 
     // 名次標籤
@@ -1055,13 +1096,24 @@
       'participant': '參賽'
     };
 
+    // 根據 rank_name 推斷 rankType
+    function getRankType(rankName) {
+      if (!rankName) return 'participant';
+      const name = rankName.toLowerCase();
+      if (name.includes('第一') || name.includes('金牌') || name.includes('冠軍') || name === '1') return 'gold';
+      if (name.includes('第二') || name.includes('銀牌') || name.includes('亞軍') || name === '2') return 'silver';
+      if (name.includes('第三') || name.includes('銅牌') || name.includes('季軍') || name === '3') return 'bronze';
+      if (name.includes('優') || name.includes('佳作') || name.includes('入選')) return 'merit';
+      return 'participant';
+    }
+
     // 渲染競賽記錄
     function renderCompetitions(competitions) {
       const container = document.querySelector('.competition-list');
 
       container.innerHTML = competitions.map(comp => {
-        const level = comp.level || 'school';
-        const rankType = comp.rank_type || 'participant';
+        const level = comp.level || 'county';
+        const rankType = getRankType(comp.rank_name);
         const compDate = comp.competition_date ? comp.competition_date.split('T')[0] : '';
 
         return `
@@ -1078,9 +1130,9 @@
                     <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
                   </svg>
                 </div>
-                <h3 class="competition-card__title">${comp.title}</h3>
+                <h3 class="competition-card__title">${comp.title || '未命名競賽'}</h3>
               </div>
-              ${comp.subtitle ? `<p class="competition-card__subtitle">${comp.subtitle}</p>` : ''}
+              ${comp.organizer ? `<p class="competition-card__subtitle">主辦單位：${comp.organizer}</p>` : ''}
               <div class="competition-card__meta">
                 <span class="competition-card__meta-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1089,7 +1141,7 @@
                   ${compDate}
                 </span>
                 <span class="competition-card__badge competition-card__badge--${level}">${LEVEL_LABELS[level] || level}</span>
-                ${comp.team_members ? `
+                ${comp.team_name ? `
                 <span class="competition-card__team">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -1097,10 +1149,11 @@
                     <path d="M23 21v-2a4 4 0 00-3-3.87"/>
                     <path d="M16 3.13a4 4 0 010 7.75"/>
                   </svg>
-                  ${comp.team_members}
+                  ${comp.team_name}
                 </span>
                 ` : ''}
               </div>
+              ${comp.photo_url ? `<img class="competition-card__photo" src="${comp.photo_url}" alt="競賽照片">` : ''}
               ${comp.description ? `
               <div class="competition-card__description">
                 競賽說明：${comp.description}
@@ -1108,10 +1161,18 @@
               ` : ''}
             </div>
             <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
+              <button class="card-export-btn" onclick="exportSingleCompetition('${comp.id}')" title="匯出此筆記錄">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                匯出
+              </button>
+              <label class="card-select" title="選取以批量匯出">
                 <input type="checkbox" data-export-select>
               </label>
-              <span class="competition-card__rank competition-card__rank--${rankType}">${comp.rank_name || RANK_LABELS[rankType]}</span>
+              <span class="competition-card__rank competition-card__rank--${rankType}">${comp.rank_name || RANK_LABELS[rankType] || '參賽'}</span>
               ${comp.score ? `<span class="competition-card__score">成績: ${comp.score}</span>` : ''}
             </div>
           </div>
@@ -1309,6 +1370,11 @@
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
       return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+    }
+
+    // 匯出單筆競賽記錄 (跳轉到匯出頁面)
+    function exportSingleCompetition(competitionId) {
+      window.location.href = `competition-export.html?id=${competitionId}`;
     }
   </script>
 </body>

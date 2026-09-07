@@ -13,14 +13,15 @@ async function ensureTableExists() {
         CREATE TABLE competitions (
           id INT PRIMARY KEY AUTO_INCREMENT,
           student_id INT NOT NULL,
+          organizer VARCHAR(255),
           title VARCHAR(255) NOT NULL,
           subtitle VARCHAR(255),
           competition_date DATE,
-          level ENUM('national', 'regional', 'county', 'school') DEFAULT 'school',
-          rank_type ENUM('gold', 'silver', 'bronze', 'merit', 'participant') DEFAULT 'participant',
+          level ENUM('international', 'national', 'regional', 'county') DEFAULT 'county',
           rank_name VARCHAR(50),
           score VARCHAR(50),
-          team_members TEXT,
+          team_name VARCHAR(255),
+          photo_url VARCHAR(500),
           description TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -29,6 +30,15 @@ async function ensureTableExists() {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
       `);
       console.log('✅ 已建立 competitions 資料表');
+    } else {
+      // 檢查是否有 photo_url 和 organizer 欄位，沒有則新增
+      try {
+        await db.query(`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500)`);
+        await db.query(`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS organizer VARCHAR(255)`);
+        await db.query(`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS team_name VARCHAR(255)`);
+      } catch (e) {
+        // 忽略欄位已存在的錯誤
+      }
     }
   } catch (error) {
     console.error('初始化競賽資料表錯誤:', error.message);
@@ -101,19 +111,26 @@ exports.getStudentCompetitions = async (req, res) => {
 // 新增競賽記錄
 exports.create = async (req, res) => {
   try {
-    const { student_id, title, subtitle, competition_date, level, rank_type, rank_name, score, team_members, description } = req.body;
+    const { student_id, organizer, title, competition_date, level, rank_name, score, team_name, photo_url, description } = req.body;
 
-    if (!student_id || !title) {
+    if (!student_id) {
       return res.status(400).json({
         success: false,
-        message: '請提供學生 ID 和競賽名稱'
+        message: '請提供學生 ID'
+      });
+    }
+
+    if (!organizer) {
+      return res.status(400).json({
+        success: false,
+        message: '請提供主辦單位'
       });
     }
 
     const id = await db.insert(`
-      INSERT INTO competitions (student_id, title, subtitle, competition_date, level, rank_type, rank_name, score, team_members, description)
+      INSERT INTO competitions (student_id, organizer, title, competition_date, level, rank_name, score, team_name, photo_url, description)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [student_id, title, subtitle || null, competition_date || null, level || 'school', rank_type || 'participant', rank_name || null, score || null, team_members || null, description || null]);
+    `, [student_id, organizer, title || null, competition_date || null, level || 'county', rank_name || null, score || null, team_name || null, photo_url || null, description || null]);
 
     res.json({
       success: true,

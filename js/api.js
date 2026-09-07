@@ -171,7 +171,30 @@ const api = {
     getMyRecords: (params = {}) => apiClient.get('/students/me/records', { params }),
 
     // 取得本人能力趨勢 (供趨勢圖使用)
-    getMyTrend: (params = {}) => apiClient.get('/students/me/trend', { params })
+    getMyTrend: (params = {}) => apiClient.get('/students/me/trend', { params }),
+
+    // 取得學生技能平均分數
+    getSkillAverages: (id) => apiClient.get(`/students/${id}/skill-averages`)
+  },
+
+  // =====================
+  // 競賽管理
+  // =====================
+  competitions: {
+    // 取得本人競賽記錄
+    getMine: () => apiClient.get('/competitions/me'),
+
+    // 取得指定學生的競賽記錄
+    getByStudent: (studentId) => apiClient.get(`/competitions/student/${studentId}`),
+
+    // 新增競賽記錄
+    create: (data) => apiClient.post('/competitions', data),
+
+    // 更新競賽記錄
+    update: (id, data) => apiClient.put(`/competitions/${id}`, data),
+
+    // 刪除競賽記錄
+    delete: (id) => apiClient.delete(`/competitions/${id}`)
   },
 
   // =====================

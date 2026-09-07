@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>查看完整檔案 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="student-page">
+    <!-- 模態框 -->
+    <div class="modal" id="profileModal">
+      <div class="modal__content" style="max-width: 1200px;">
+        <!-- 模態框頭部 -->
+        <header class="modal__header">
+          <h1 class="modal__title">查看完整檔案</h1>
+          <button class="modal__close" onclick="closeModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </header>
+
+        <!-- 模態框內容 -->
+        <div class="modal__body">
+          <div class="profile-layout">
+            <!-- 左側學生資訊 -->
+            <aside class="profile-sidebar">
+              <div class="profile-avatar">李</div>
+              <h2 class="profile-name">李美華</h2>
+              <p class="profile-id">S002</p>
+
+              <!-- 個人資訊 -->
+              <div class="profile-info-section">
+                <div class="profile-info-header">
+                  <span class="profile-info-title">個人資訊</span>
+                  <svg class="profile-info-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">電子郵件</span>
+                  <span class="profile-info-value">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">電話</span>
+                  <span class="profile-info-value">—</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">就讀學校</span>
+                  <span class="profile-info-value">新光國小</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">年級</span>
+                  <span class="profile-info-value">三年級</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">性別</span>
+                  <span class="profile-info-value">女</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">生日</span>
+                  <span class="profile-info-value">2017 / 01 / 30</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">累積點數</span>
+                  <span class="profile-info-value" style="color: var(--color-primary-dark); font-weight: 600;">90 點</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">課程階段</span>
+                  <span class="profile-course-tag">程式機械</span>
+                </div>
+              </div>
+
+              <!-- 家長資訊 -->
+              <div class="profile-info-section">
+                <div class="profile-info-header">
+                  <span class="profile-info-title">家長資訊</span>
+                  <svg class="profile-info-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">聯絡人(母)</span>
+                  <span class="profile-info-value">黃淑芬</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">電話</span>
+                  <span class="profile-info-value">0923-456-789</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">聯絡人(父)</span>
+                  <span class="profile-info-value">李威</span>
+                </div>
+                <div class="profile-info-item">
+                  <span class="profile-info-label">電話</span>
+                  <span class="profile-info-value">0987-676-789</span>
+                </div>
+              </div>
+
+              <!-- 歷史課程 -->
+              <div class="profile-info-section">
+                <div class="profile-info-header">
+                  <span class="profile-info-title">歷史課程</span>
+                  <span style="font-size: 18px; cursor: pointer;">+</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px;">幼兒簡易機械</span>
+                    <button class="btn btn--outline" style="padding: 4px 12px; font-size: 12px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      查看
+                    </button>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px;">動力機械</span>
+                    <button class="btn btn--outline" style="padding: 4px 12px; font-size: 12px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      查看
+                    </button>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px;">程式機械</span>
+                    <button class="btn btn--primary" style="padding: 4px 12px; font-size: 12px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12,6 12,12 16,14"/>
+                      </svg>
+                      目前課程
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <!-- 右側主要內容 -->
+            <main class="profile-main">
+              <!-- 能力雷達圖 -->
+              <section class="chart-section">
+                <div class="chart-header">
+                  <div>
+                    <h3 class="chart-title">能力雷達圖</h3>
+                    <p class="chart-subtitle">＊更新時間：2026 / 04 / 24(二)</p>
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <div class="radar-chart">
+                    <canvas id="radarChart"></canvas>
+                  </div>
+                  <div class="chart-legend">
+                    <div class="legend-item">
+                      <span class="legend-label">程式 <span class="legend-score">4 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--yellow" style="width: 80%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">除錯 <span class="legend-score">4 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--green" style="width: 80%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">創意 <span class="legend-score">3 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--orange" style="width: 60%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">結構 <span class="legend-score">3 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--blue" style="width: 60%;"></div></div>
+                    </div>
+                    <div class="legend-item">
+                      <span class="legend-label">團隊合作 <span class="legend-score">2 / 5</span></span>
+                      <div class="legend-bar"><div class="legend-bar-fill legend-bar-fill--red" style="width: 40%;"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 能力趨勢圖 -->
+              <section class="chart-section">
+                <h3 class="chart-title">能力趨勢圖</h3>
+                <div class="trend-filters">
+                  <div class="trend-filter-group">
+                    <span class="trend-filter-label">日期區間</span>
+                    <button class="trend-btn">近 6 週</button>
+                    <button class="trend-btn trend-btn--active">近 12 週</button>
+                    <button class="trend-btn">📅</button>
+                    <button class="trend-btn">📅</button>
+                    <button class="trend-btn">套用</button>
+                  </div>
+                  <div class="trend-filter-group">
+                    <span class="trend-filter-label">指標項目</span>
+                    <button class="trend-btn trend-btn--active">★ 全部</button>
+                    <button class="trend-btn">★ 程式</button>
+                    <button class="trend-btn">★ 除錯</button>
+                    <button class="trend-btn">★ 創意</button>
+                    <button class="trend-btn">★ 結構</button>
+                    <button class="trend-btn">★ 團隊合作</button>
+                  </div>
+                </div>
+                <div class="trend-chart">
+                  <canvas id="trendChart"></canvas>
+                </div>
+              </section>
+
+              <!-- 學習成就 -->
+              <section class="achievement-section">
+                <h3 class="chart-title" style="margin-bottom: var(--spacing-lg);">學習成就</h3>
+                <div class="achievement-tabs">
+                  <button class="achievement-tab achievement-tab--active" data-tab="records">課程紀錄</button>
+                  <button class="achievement-tab" data-tab="competitions">競賽經歷</button>
+                </div>
+
+                <!-- 課程紀錄列表 -->
+                <div class="achievement-list" id="recordsTab">
+                  <div class="achievement-item">
+                    <div class="achievement-dot"></div>
+                    <div class="achievement-content">
+                      <div class="achievement-header">
+                        <span class="achievement-date">2026-04-24</span>
+                        <span class="achievement-course">程式機械</span>
+                        <span class="achievement-status achievement-status--present">出席</span>
+                      </div>
+                      <p class="achievement-description">
+                        李美華同學在本次課程中表現優異，能夠獨立完成機器人組裝任務，展現出良好的邏輯思維能力。在團隊合作環節中積極與同學交流，提出創新的解決方案。建議繼續保持這樣學習態度。
+                      </p>
+                      <div class="achievement-meta">
+                        <span class="achievement-points">🏆 獲得點數: 5</span>
+                        <span>｜</span>
+                        <span>備註：完成所有課堂練習</span>
+                      </div>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=160&h=120&fit=crop" alt="課程照片" class="achievement-image">
+                  </div>
+
+                  <div class="achievement-item">
+                    <div class="achievement-dot" style="background: var(--color-warning);"></div>
+                    <div class="achievement-content">
+                      <div class="achievement-header">
+                        <span class="achievement-date">2026-04-17</span>
+                        <span class="achievement-course">程式機械</span>
+                        <span class="achievement-status achievement-status--late">遲到</span>
+                      </div>
+                      <p class="achievement-description">
+                        今日課程學習程式邏輯概念，美華能夠快速理解並應用到實際操作中。在除錯環節表現積極，主動協助其他同學。
+                      </p>
+                      <div class="achievement-meta">
+                        <span class="achievement-points">🏆 獲得點數: 3</span>
+                        <span>｜</span>
+                        <span>備註：主動幫助同學</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="achievement-item">
+                    <div class="achievement-dot"></div>
+                    <div class="achievement-content">
+                      <div class="achievement-header">
+                        <span class="achievement-date">2026-04-10</span>
+                        <span class="achievement-course">程式機械</span>
+                        <span class="achievement-status achievement-status--present">出席</span>
+                      </div>
+                      <p class="achievement-description">
+                        創意思維表現突出，設計的機械作品具有獨特性。需要在結構穩定性方面多加練習。
+                      </p>
+                      <div class="achievement-meta">
+                        <span class="achievement-points">🏆 獲得點數: 5</span>
+                        <span>｜</span>
+                        <span>備註：作品創意獲得讚賞</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 競賽經歷列表 -->
+                <div class="achievement-list" id="competitionsTab" style="display: none;">
+                  <div class="achievement-item">
+                    <div class="achievement-dot" style="background: var(--color-success);"></div>
+                    <div class="achievement-content">
+                      <div class="achievement-header">
+                        <span class="achievement-date">2026-03-15</span>
+                        <span class="achievement-course">全國機器人大賽</span>
+                        <span class="achievement-status achievement-status--present">第一名</span>
+                      </div>
+                      <p class="achievement-description">
+                        參加 2026 全國青少年機器人創意大賽，榮獲國小組第一名。團隊表現出色，設計的機器人兼具創意與實用性。
+                      </p>
+                      <div class="achievement-meta">
+                        <span class="achievement-points">🏆 獲得點數: 20</span>
+                        <span>｜</span>
+                        <span>主辦：台灣青少年機器人協會</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="achievement-item">
+                    <div class="achievement-dot" style="background: var(--color-primary);"></div>
+                    <div class="achievement-content">
+                      <div class="achievement-header">
+                        <span class="achievement-date">2025-11-20</span>
+                        <span class="achievement-course">縣市科學競賽</span>
+                        <span class="achievement-status" style="background: #e0f2fe; color: #0284c7;">優等</span>
+                      </div>
+                      <p class="achievement-description">
+                        參加新竹縣科學創意競賽，獲得優等獎。展現良好的科學探究精神和實驗設計能力。
+                      </p>
+                      <div class="achievement-meta">
+                        <span class="achievement-points">🏆 獲得點數: 10</span>
+                        <span>｜</span>
+                        <span>主辦：新竹縣教育局</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="view-more-btn">查看更多</button>
+              </section>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // 關閉模態框
+    function closeModal() {
+      window.history.back();
+    }
+
+    // 點擊模態框外部關閉
+    document.getElementById('profileModal').addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        closeModal();
+      }
+    });
+
+    // ESC鍵關閉
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // 標籤頁切換
+    document.querySelectorAll('.achievement-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // 更新標籤狀態
+        document.querySelectorAll('.achievement-tab').forEach(t => t.classList.remove('achievement-tab--active'));
+        tab.classList.add('achievement-tab--active');
+
+        // 顯示對應內容
+        const tabName = tab.dataset.tab;
+        document.getElementById('recordsTab').style.display = tabName === 'records' ? 'flex' : 'none';
+        document.getElementById('competitionsTab').style.display = tabName === 'competitions' ? 'flex' : 'none';
+      });
+    });
+
+    // 初始化雷達圖
+    const radarCtx = document.getElementById('radarChart').getContext('2d');
+    new Chart(radarCtx, {
+      type: 'radar',
+      data: {
+        labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
+        datasets: [{
+          label: '能力值',
+          data: [4, 4, 3, 3, 2],
+          backgroundColor: 'rgba(255, 219, 88, 0.3)',
+          borderColor: '#ffdb58',
+          borderWidth: 2,
+          pointBackgroundColor: '#ffdb58',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: '#ffdb58'
+        }]
+      },
+      options: {
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 5,
+            ticks: {
+              stepSize: 1
+            },
+            grid: {
+              color: '#e5e7eb'
+            },
+            angleLines: {
+              color: '#e5e7eb'
+            },
+            pointLabels: {
+              font: {
+                size: 12
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        maintainAspectRatio: true
+      }
+    });
+
+    // 初始化趨勢圖
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: ['2/8', '2/13', '2/20', '2/27', '3/6', '3/13', '3/20', '3/27', '4/3', '4/10', '4/17', '4/24'],
+        datasets: [
+          {
+            label: '程式',
+            data: [2, 2.5, 3, 3, 3.5, 3.5, 4, 3.5, 4, 4, 4.5, 4],
+            borderColor: '#ffdb58',
+            backgroundColor: '#ffdb58',
+            tension: 0.3,
+            pointRadius: 4
+          },
+          {
+            label: '除錯',
+            data: [2, 2, 2.5, 3, 3, 3.5, 3, 3.5, 4, 3.5, 4, 4],
+            borderColor: '#41e654',
+            backgroundColor: '#41e654',
+            tension: 0.3,
+            pointRadius: 4
+          },
+          {
+            label: '創意',
+            data: [3, 2.5, 3, 2.5, 3, 2.5, 3, 3, 2.5, 3, 3, 3],
+            borderColor: '#ff9f43',
+            backgroundColor: '#ff9f43',
+            tension: 0.3,
+            pointRadius: 4
+          },
+          {
+            label: '結構',
+            data: [2, 2.5, 2, 2.5, 3, 2.5, 3, 3, 2.5, 3, 2.5, 3],
+            borderColor: '#54a0ff',
+            backgroundColor: '#54a0ff',
+            tension: 0.3,
+            pointRadius: 4
+          },
+          {
+            label: '團隊合作',
+            data: [2, 1.5, 2, 2, 1.5, 2, 2.5, 2, 2, 2.5, 2, 2],
+            borderColor: '#ff6b6b',
+            backgroundColor: '#ff6b6b',
+            tension: 0.3,
+            pointRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 5,
+            ticks: {
+              stepSize: 1
+            },
+            grid: {
+              color: '#f3f4f6'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              padding: 20
+            }
+          }
+        }
+      }
+    });
+
+    // 趨勢按鈕切換
+    document.querySelectorAll('.trend-filter-group .trend-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const group = btn.closest('.trend-filter-group');
+        group.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('trend-btn--active'));
+        btn.classList.add('trend-btn--active');
+      });
+    });
+  </script>
+</body>
+</html>

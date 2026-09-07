@@ -625,13 +625,18 @@ exports.getMyRecords = async (req, res) => {
     // (mysql2 prepared statement 對 LIMIT/OFFSET 使用佔位符在部分版本會出錯)
     const records = await db.query(`
       SELECT
-        slr.id, slr.attendance, slr.performance, slr.notes, slr.points_earned,
+        slr.id, slr.log_id, slr.attendance, slr.performance, slr.notes, slr.points_earned,
         slr.skill_programming, slr.skill_debugging, slr.skill_creativity,
         slr.skill_structure, slr.skill_teamwork,
-        DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, cl.topic, c.name as course_name
+        DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, cl.topic, cl.content,
+        c.name as course_name, ct.name as course_type_name,
+        u.name as teacher_name
       FROM student_log_records slr
       JOIN course_logs cl ON slr.log_id = cl.id
       JOIN courses c ON cl.course_id = c.id
+      LEFT JOIN course_types ct ON c.course_type_id = ct.id
+      LEFT JOIN teachers t ON cl.teacher_id = t.id
+      LEFT JOIN users u ON t.user_id = u.id
       ${filterSql}
       ORDER BY cl.log_date DESC
       LIMIT ${limit} OFFSET ${offset}

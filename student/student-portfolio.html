@@ -473,6 +473,38 @@
       accent-color: var(--color-primary);
     }
 
+    /* 卡片操作按鈕 */
+    .history-card__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .card-export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .card-export-btn:hover {
+      filter: brightness(0.95);
+      transform: translateY(-1px);
+    }
+
+    .card-export-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
     /* 響應式 */
     @media (max-width: 992px) {
       .student-dashboard {
@@ -758,19 +790,31 @@
       }
 
       container.innerHTML = recordsData.map(record => {
-        const courseName = record.course_name || record.course_type || '課程';
+        const courseName = record.course_type_name || record.course_name || record.course_type || '課程';
         const logDate = record.log_date ? record.log_date.split('T')[0] : '';
         const duration = record.duration || 2;
         const topic = record.topic || record.course_content || '學習內容';
-        const description = record.performance_note || record.teacher_comment || '本堂課學習表現良好';
+        const description = record.performance || record.notes || record.performance_note || record.teacher_comment || '本堂課學習表現良好';
+        const recordId = record.id || record.record_id || '';
+        const logId = record.log_id || '';
 
         return `
-          <div class="history-card" data-category="${courseName}" data-date="${logDate}" data-record-id="${record.id || record.record_id}">
+          <div class="history-card" data-category="${courseName}" data-date="${logDate}" data-record-id="${recordId}" data-log-id="${logId}">
             <div class="history-card__top">
               <h3 class="history-card__title">${courseName}</h3>
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
+              <div class="history-card__actions">
+                <button class="card-export-btn" onclick="exportSingleRecord('${recordId}', '${logId}')" title="匯出此筆記錄">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  匯出
+                </button>
+                <label class="card-select" title="選取以批量匯出">
+                  <input type="checkbox" data-export-select>
+                </label>
+              </div>
             </div>
             <p class="history-card__subtitle">${topic}</p>
             <div class="history-card__meta">
@@ -986,6 +1030,14 @@
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
       return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+    }
+
+    // 匯出單筆記錄 (跳轉到匯出頁面)
+    function exportSingleRecord(recordId, logId) {
+      const params = new URLSearchParams();
+      if (recordId) params.set('id', recordId);
+      if (logId) params.set('log_id', logId);
+      window.location.href = `learning-export.html?${params.toString()}`;
     }
   </script>
 </body>

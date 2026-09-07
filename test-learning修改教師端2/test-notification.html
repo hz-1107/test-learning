@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通知功能測試</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+    .test-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .test-header h1 {
+      flex: 1;
+      margin: 0;
+      font-size: 18px;
+    }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      background: #f0f0f0;
+    }
+    .debug {
+      margin-top: 20px;
+      padding: 16px;
+      background: #fff3cd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-header">
+    <h1>通知功能測試頁面</h1>
+    <button class="icon-btn" id="globeBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+      </svg>
+    </button>
+    <button class="icon-btn" id="bellBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="debug" id="debugOutput">
+    <strong>偵錯資訊：</strong><br>
+    請點擊鈴鐺按鈕測試通知功能...
+  </div>
+
+  <script src="js/notifications.js"></script>
+  <script>
+    const debug = document.getElementById('debugOutput');
+
+    // 檢查通知系統是否初始化
+    setTimeout(() => {
+      const panel = document.querySelector('.notification-panel');
+      const badge = document.querySelector('.notification-badge');
+      const bellBtn = document.getElementById('bellBtn');
+
+      debug.innerHTML = `
+        <strong>偵錯資訊：</strong><br>
+        - 通知面板: ${panel ? '已建立' : '未找到'}<br>
+        - 通知徽章: ${badge ? '已建立 (顯示 ' + badge.textContent + ' 則新通知)' : '未找到'}<br>
+        - 鈴鐺按鈕位置: ${bellBtn ? 'relative' : '未設定'}<br>
+        - 現在請點擊鈴鐺按鈕測試！打開瀏覽器 Console 查看更多資訊。
+      `;
+    }, 500);
+  </script>
+</body>
+</html>

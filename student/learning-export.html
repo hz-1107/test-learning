@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學習歷程匯出 - 智慧學習歷程系統</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #FFDB58;
+      --color-primary-dark: #5C5A40;
+      --color-orange: #FF9500;
+      --color-bg: #F5F5F5;
+      --color-surface: #FFFFFF;
+      --font-family: 'Noto Sans TC', 'Inter', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* 頂部導覽列 */
+    .top-bar {
+      background: var(--color-primary);
+      padding: 12px 24px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .top-bar__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .top-bar__student-id {
+      font-size: 14px;
+      color: var(--color-primary-dark);
+      opacity: 0.8;
+    }
+
+    /* 主卡片容器 */
+    .export-card {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--color-surface);
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .export-card__content {
+      padding: 32px 48px 40px;
+    }
+
+    /* 裝飾性標題區 */
+    .header-decoration {
+      background: linear-gradient(135deg, #FFF9E6 0%, #FFF5D6 100%);
+      border: 2px solid var(--color-primary);
+      border-radius: 12px;
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-decoration__bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.15;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ctext x='10' y='30' font-size='12' fill='%23666'>V(n)=%3C/text%3E%3Ctext x='60' y='60' font-size='10' fill='%23666'>x²+K%3C/text%3E%3Ctext x='20' y='80' font-size='11' fill='%23666'>∑%3C/text%3E%3C/svg%3E");
+      background-size: 150px;
+    }
+
+    .header-decoration__gears {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .header-decoration__gears--left {
+      left: 20px;
+    }
+
+    .header-decoration__gears--right {
+      right: 20px;
+    }
+
+    .gear {
+      width: 24px;
+      height: 24px;
+      opacity: 0.6;
+    }
+
+    .gear--sm { width: 16px; height: 16px; }
+    .gear--lg { width: 32px; height: 32px; }
+
+    .header-decoration__title {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-decoration__main-text {
+      font-size: 32px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .header-decoration__main-text .fun {
+      color: var(--color-orange);
+    }
+
+    .header-decoration__main-text .heart {
+      color: #FF6B6B;
+    }
+
+    .header-decoration__main-text .text {
+      color: var(--color-primary-dark);
+    }
+
+    /* 資訊區段 */
+    .info-section {
+      margin-bottom: 28px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .info-row--split {
+      display: flex;
+      justify-content: flex-start;
+      gap: 48px;
+    }
+
+    .info-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .info-tag {
+      display: inline-block;
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .info-value {
+      font-size: 18px;
+      font-weight: 500;
+      color: #333;
+      letter-spacing: 0.5em;
+    }
+
+    .info-value--normal {
+      letter-spacing: normal;
+    }
+
+    .info-value--date {
+      letter-spacing: normal;
+      font-weight: 600;
+    }
+
+    /* 課程說明區 */
+    .description-section {
+      margin-bottom: 28px;
+    }
+
+    .description-section__tag {
+      margin-bottom: 12px;
+    }
+
+    .description-section__content {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #444;
+      text-align: justify;
+      padding-left: 8px;
+    }
+
+    /* 學習照片區 */
+    .photo-section {
+      margin-bottom: 32px;
+    }
+
+    .photo-section__tag {
+      margin-bottom: 16px;
+    }
+
+    .photo-section__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .photo-section__item {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .photo-section__item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+
+    /* 頁尾區 */
+    .footer-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-top: 24px;
+      border-top: 1px solid #eee;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-logo__brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .footer-logo__main {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .footer-logo__main .fun {
+      color: var(--color-orange);
+    }
+
+    .footer-logo__main .robot {
+      color: #4A90A4;
+    }
+
+    .footer-logo__sub {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .footer-logo__qr {
+      width: 60px;
+      height: 60px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer-logo__qr img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn--outline {
+      background: white;
+      border: 1px solid #ddd;
+      color: #666;
+    }
+
+    .btn--outline:hover {
+      background: #f5f5f5;
+      border-color: #ccc;
+    }
+
+    .btn--primary {
+      background: var(--color-primary);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .btn--primary:hover {
+      filter: brightness(0.95);
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 列印樣式 */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .top-bar {
+        border-radius: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .export-card {
+        box-shadow: none;
+        border-radius: 0;
+        max-width: 100%;
+      }
+
+      .footer-actions {
+        display: none;
+      }
+
+      .header-decoration {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .info-tag {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* 響應式 */
+    @media (max-width: 600px) {
+      .export-card__content {
+        padding: 24px 20px 32px;
+      }
+
+      .info-row--split {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .header-decoration__main-text {
+        font-size: 24px;
+      }
+
+      .footer-section {
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 頂部導覽列 -->
+  <div class="export-card" style="max-width: 800px; margin: 0 auto;">
+    <div class="top-bar">
+      <span class="top-bar__title" id="topBarTitle">學習歷程－載入中...</span>
+      <span class="top-bar__student-id" id="topBarStudentId"></span>
+    </div>
+
+    <div class="export-card__content">
+      <!-- 裝飾性標題區 -->
+      <div class="header-decoration">
+        <div class="header-decoration__bg"></div>
+
+        <!-- 左側齒輪 -->
+        <div class="header-decoration__gears header-decoration__gears--left">
+          <svg class="gear gear--sm" viewBox="0 0 24 24" fill="#FF9500">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          <svg class="gear" viewBox="0 0 24 24" fill="#4A90A4">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          <svg class="gear gear--lg" viewBox="0 0 24 24" fill="#FFDB58">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        </div>
+
+        <!-- 主標題 -->
+        <div class="header-decoration__title">
+          <span class="header-decoration__main-text">
+            <span class="fun">Fun</span><span class="heart">心</span><span class="text">學習歷程</span>
+          </span>
+        </div>
+
+        <!-- 右側齒輪 -->
+        <div class="header-decoration__gears header-decoration__gears--right">
+          <svg class="gear gear--lg" viewBox="0 0 24 24" fill="#FFDB58">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          <svg class="gear" viewBox="0 0 24 24" fill="#4A90A4">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          <svg class="gear gear--sm" viewBox="0 0 24 24" fill="#FF9500">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 學生資訊 -->
+      <div class="info-section">
+        <div class="info-row info-row--split">
+          <div class="info-group">
+            <span class="info-tag">學生姓名</span>
+            <span class="info-value" id="studentName">載入中</span>
+          </div>
+          <div class="info-group">
+            <span class="info-tag">學習時間</span>
+            <span class="info-value info-value--date" id="learningDate">----.--.--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 課程名稱 -->
+      <div class="info-section">
+        <div class="info-row">
+          <span class="info-tag">課程名稱</span>
+          <span class="info-value info-value--normal" id="courseName">載入中</span>
+        </div>
+      </div>
+
+      <!-- 課程說明 -->
+      <div class="description-section">
+        <div class="description-section__tag">
+          <span class="info-tag">課程說明</span>
+        </div>
+        <p class="description-section__content" id="courseDescription">
+          載入中...
+        </p>
+      </div>
+
+      <!-- 學習照片 -->
+      <div class="photo-section" id="photoSection" style="display: none;">
+        <div class="photo-section__tag">
+          <span class="info-tag">學習照片</span>
+        </div>
+        <div class="photo-section__grid" id="photoGrid">
+          <!-- 動態插入照片 -->
+        </div>
+      </div>
+
+      <!-- 頁尾 -->
+      <div class="footer-section">
+        <div class="footer-logo">
+          <div class="footer-logo__brand">
+            <span class="footer-logo__main">
+              <span class="fun">Fun</span>
+              <span class="robot">Robot</span>
+            </span>
+            <span class="footer-logo__sub">Fun 學機器人</span>
+          </div>
+          <div class="footer-logo__qr" id="qrCode">
+            <!-- QR Code placeholder -->
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+              <rect x="5" y="5" width="12" height="12" fill="#333"/>
+              <rect x="33" y="5" width="12" height="12" fill="#333"/>
+              <rect x="5" y="33" width="12" height="12" fill="#333"/>
+              <rect x="8" y="8" width="6" height="6" fill="white"/>
+              <rect x="36" y="8" width="6" height="6" fill="white"/>
+              <rect x="8" y="36" width="6" height="6" fill="white"/>
+              <rect x="20" y="5" width="4" height="4" fill="#333"/>
+              <rect x="20" y="12" width="4" height="4" fill="#333"/>
+              <rect x="20" y="20" width="4" height="4" fill="#333"/>
+              <rect x="26" y="20" width="4" height="4" fill="#333"/>
+              <rect x="33" y="20" width="4" height="4" fill="#333"/>
+              <rect x="20" y="33" width="10" height="4" fill="#333"/>
+              <rect x="33" y="33" width="4" height="12" fill="#333"/>
+              <rect x="40" y="33" width="4" height="4" fill="#333"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="btn btn--outline" onclick="goBack()">
+            返回
+          </button>
+          <button class="btn btn--primary" onclick="printOrSave()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            列印或儲存成PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000';
+
+    // 從 URL 取得參數
+    function getUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        recordId: params.get('id'),
+        logId: params.get('log_id'),
+        studentId: params.get('student_id')
+      };
+    }
+
+    // 格式化日期
+    function formatDate(dateStr) {
+      if (!dateStr) return '----.--.--';
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}.${month}.${day}`;
+    }
+
+    // 載入學習紀錄資料
+    async function loadLearningRecord() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      const params = getUrlParams();
+
+      try {
+        // 先取得學生基本資訊
+        const profileRes = await fetch(`${API_BASE}/api/students/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          const studentData = profile.data.student;
+          const studentName = studentData?.name || '學生';
+          const studentNo = studentData?.student_no || '';
+
+          document.getElementById('studentName').textContent = studentName.split('').join(' ');
+          document.getElementById('topBarStudentId').textContent = studentNo ? `${studentNo}${studentName}` : studentName;
+        }
+
+        // 取得學習紀錄
+        if (params.logId) {
+          // 取得日誌基本資訊
+          const logRes = await fetch(`${API_BASE}/api/logs/${params.logId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (logRes.ok) {
+            const logData = await logRes.json();
+            const log = logData.data;
+            const courseName = log.course_type || log.course_name || log.title || '課程';
+
+            // 更新頁面資訊
+            document.getElementById('topBarTitle').textContent = `學習歷程－${courseName}`;
+            document.getElementById('learningDate').textContent = formatDate(log.log_date);
+            document.getElementById('courseName').textContent = courseName;
+
+            // 組合課程說明內容
+            let description = '';
+            if (log.topic) description += log.topic + '\n\n';
+            if (log.content) description += log.content;
+            document.getElementById('courseDescription').textContent = description.trim() || '無課程說明';
+
+            // 嘗試取得日誌照片
+            try {
+              const photosRes = await fetch(`${API_BASE}/api/logs/${params.logId}/photos`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (photosRes.ok) {
+                const photosData = await photosRes.json();
+                const photos = photosData.data || [];
+                if (photos.length > 0) {
+                  const photoSection = document.getElementById('photoSection');
+                  const photoGrid = document.getElementById('photoGrid');
+                  photoSection.style.display = 'block';
+                  photoGrid.innerHTML = photos.map(photo => `
+                    <div class="photo-section__item">
+                      <img src="${photo.photo_url || photo.url || photo}" alt="學習照片">
+                    </div>
+                  `).join('');
+                }
+              }
+            } catch (e) {
+              console.log('無法取得照片:', e);
+            }
+
+            // 更新頁面標題
+            document.title = `學習歷程－${courseName}`;
+          }
+        } else if (params.recordId) {
+          // 從學習紀錄取得
+          const recordRes = await fetch(`${API_BASE}/api/students/me/records?limit=100`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (recordRes.ok) {
+            const recordData = await recordRes.json();
+            const records = recordData.data?.records || [];
+            const record = records.find(r => r.id == params.recordId);
+
+            if (record) {
+              const courseName = record.course_type_name || record.course_name || '課程';
+              document.getElementById('topBarTitle').textContent = `學習歷程－${courseName}`;
+              document.getElementById('learningDate').textContent = formatDate(record.log_date);
+              document.getElementById('courseName').textContent = courseName;
+
+              // 組合課程說明內容
+              let description = '';
+              if (record.topic) description += record.topic + '\n\n';
+              if (record.content) description += record.content + '\n\n';
+              if (record.performance) description += '課堂表現：' + record.performance;
+              document.getElementById('courseDescription').textContent = description.trim() || '無課程說明';
+
+              // 如果有照片
+              if (record.photos && record.photos.length > 0) {
+                const photoSection = document.getElementById('photoSection');
+                const photoGrid = document.getElementById('photoGrid');
+                photoSection.style.display = 'block';
+                photoGrid.innerHTML = record.photos.map(photo => `
+                  <div class="photo-section__item">
+                    <img src="${photo.photo_url || photo.url || photo}" alt="學習照片">
+                  </div>
+                `).join('');
+              }
+
+              document.title = `學習歷程－${courseName}`;
+            }
+          }
+        } else {
+          // 沒有指定紀錄，顯示預設訊息
+          document.getElementById('topBarTitle').textContent = '學習歷程';
+          document.getElementById('courseDescription').textContent = '請從學習歷程列表選擇要匯出的紀錄';
+        }
+
+      } catch (error) {
+        console.error('載入學習紀錄失敗:', error);
+        document.getElementById('courseDescription').textContent = '載入失敗，請稍後再試';
+      }
+    }
+
+    // 返回
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'student-portfolio.html';
+      }
+    }
+
+    // 列印或儲存成 PDF
+    // 列印或儲存成 PDF
+    async function printOrSave() {
+      const exportCard = document.querySelector('.export-card');
+      const footerSection = document.querySelector('.footer-section');
+
+      if (!exportCard) {
+        alert('找不到匯出內容');
+        return;
+      }
+
+      // 檢查 html2canvas 和 jsPDF 是否載入
+      if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+        alert('PDF 匯出元件載入失敗，請檢查網路連線後重試');
+        return;
+      }
+
+      // 暫時隱藏按鈕區域
+      if (footerSection) footerSection.style.display = 'none';
+
+      try {
+        // 等待字型載入
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        // 等待圖片載入完成
+        const images = exportCard.querySelectorAll('img');
+        await Promise.all(Array.from(images).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        }));
+
+        // 使用 html2canvas 截圖
+        const canvas = await html2canvas(exportCard, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          allowTaint: true,
+          logging: false
+        });
+
+        // 使用 JPEG 格式減少檔案大小
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+        // 建立 PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'p',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // 如果內容超過一頁，需要分頁
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        // 第一頁
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+        heightLeft -= pageHeight;
+
+        // 後續頁面
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+          heightLeft -= pageHeight;
+        }
+
+        // 產生檔名
+        const studentName = document.getElementById('studentName').textContent.replace(/\s/g, '') || '學生';
+        const courseName = document.getElementById('courseName').textContent || '課程';
+        const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+        const filename = `學習歷程_${studentName}_${courseName}_${dateStr}.pdf`;
+
+        // 下載 PDF
+        pdf.save(filename);
+
+      } catch (error) {
+        console.error('PDF 匯出失敗:', error);
+        alert('PDF 匯出失敗，請稍後再試');
+      } finally {
+        // 恢復按鈕區域顯示
+        if (footerSection) footerSection.style.display = '';
+      }
+    }
+
+    // 頁面載入
+    document.addEventListener('DOMContentLoaded', loadLearningRecord);
+  </script>
+</body>
+</html>

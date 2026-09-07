@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>競賽經歷匯出 - 智慧學習歷程系統</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #FFDB58;
+      --color-primary-dark: #5C5A40;
+      --color-orange: #FF9500;
+      --color-bg: #F5F5F5;
+      --color-surface: #FFFFFF;
+      --font-family: 'Noto Sans TC', 'Inter', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* 頂部導覽列 */
+    .top-bar {
+      background: var(--color-primary);
+      padding: 12px 24px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .top-bar__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .top-bar__student-id {
+      font-size: 14px;
+      color: var(--color-primary-dark);
+      opacity: 0.8;
+    }
+
+    /* 主卡片容器 */
+    .export-card {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--color-surface);
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .export-card__content {
+      padding: 32px 48px 40px;
+    }
+
+    /* 裝飾性標題區 - 競賽版 */
+    .header-decoration {
+      background: linear-gradient(135deg, #E8F4E8 0%, #D4E8D4 100%);
+      border: 2px solid #7CB07C;
+      border-radius: 12px;
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-decoration__bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.12;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='100' viewBox='0 0 150 100'%3E%3Ctext x='10' y='25' font-size='10' fill='%23666'>x=%3C/text%3E%3Ctext x='30' y='25' font-size='10' fill='%23666'>-b±√b²%3C/text%3E%3Ctext x='20' y='40' font-size='10' fill='%23666'>2a%3C/text%3E%3Ctext x='80' y='30' font-size='9' fill='%23666'>V(n)=2ⁿ%3C/text%3E%3Ctext x='100' y='60' font-size='8' fill='%23666'>start%3C/text%3E%3Crect x='95' y='50' width='30' height='15' fill='none' stroke='%23666' stroke-width='0.5' rx='2'/%3E%3Ctext x='110' y='85' font-size='8' fill='%23666'>process%3C/text%3E%3Crect x='100' y='70' width='35' height='18' fill='none' stroke='%23666' stroke-width='0.5'/%3E%3Cline x1='115' y1='65' x2='115' y2='70' stroke='%23666' stroke-width='0.5'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+
+    .header-decoration__formula-left {
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: #666;
+      opacity: 0.5;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .header-decoration__flowchart {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      opacity: 0.4;
+    }
+
+    .header-decoration__title {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-decoration__main-text {
+      font-size: 32px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .header-decoration__main-text .fun {
+      color: var(--color-orange);
+    }
+
+    .header-decoration__main-text .heart {
+      color: #FF6B6B;
+    }
+
+    .header-decoration__main-text .text {
+      color: var(--color-primary-dark);
+    }
+
+    /* 資訊區段 */
+    .info-section {
+      margin-bottom: 24px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .info-row--split {
+      display: flex;
+      justify-content: flex-start;
+      gap: 48px;
+    }
+
+    .info-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .info-tag {
+      display: inline-block;
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .info-value {
+      font-size: 18px;
+      font-weight: 500;
+      color: #333;
+      letter-spacing: 0.5em;
+    }
+
+    .info-value--normal {
+      letter-spacing: normal;
+    }
+
+    .info-value--date {
+      letter-spacing: normal;
+      font-weight: 600;
+    }
+
+    /* 競賽說明區 */
+    .description-section {
+      margin-bottom: 28px;
+    }
+
+    .description-section__tag {
+      margin-bottom: 12px;
+    }
+
+    .description-section__content {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #444;
+      text-align: justify;
+      padding-left: 8px;
+    }
+
+    /* 參賽證明區 */
+    .photo-section {
+      margin-bottom: 32px;
+    }
+
+    .photo-section__tag {
+      margin-bottom: 16px;
+    }
+
+    .photo-section__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .photo-section__item {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .photo-section__item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+
+    /* 頁尾區 */
+    .footer-section {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid #eee;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn--outline {
+      background: white;
+      border: 1px solid #ddd;
+      color: #666;
+    }
+
+    .btn--outline:hover {
+      background: #f5f5f5;
+      border-color: #ccc;
+    }
+
+    .btn--primary {
+      background: var(--color-primary);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .btn--primary:hover {
+      filter: brightness(0.95);
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 列印樣式 */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .top-bar {
+        border-radius: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .export-card {
+        box-shadow: none;
+        border-radius: 0;
+        max-width: 100%;
+      }
+
+      .footer-section {
+        display: none;
+      }
+
+      .header-decoration {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .info-tag {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* 響應式 */
+    @media (max-width: 600px) {
+      .export-card__content {
+        padding: 24px 20px 32px;
+      }
+
+      .info-row--split {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .header-decoration__main-text {
+        font-size: 24px;
+      }
+
+      .footer-section {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 頂部導覽列 -->
+  <div class="export-card" style="max-width: 800px; margin: 0 auto;">
+    <div class="top-bar">
+      <span class="top-bar__title" id="topBarTitle">競賽經歷－載入中...</span>
+      <span class="top-bar__student-id" id="topBarStudentId"></span>
+    </div>
+
+    <div class="export-card__content">
+      <!-- 裝飾性標題區 -->
+      <div class="header-decoration">
+        <div class="header-decoration__bg"></div>
+
+        <!-- 左側公式 -->
+        <div class="header-decoration__formula-left">
+          <div>x<sub>1,2</sub> = <sup>-b±√b²-4ac</sup>/<sub>2a</sub></div>
+        </div>
+
+        <!-- 主標題 -->
+        <div class="header-decoration__title">
+          <span class="header-decoration__main-text">
+            <span class="fun">Fun</span><span class="heart">心</span><span class="text">競賽經歷</span>
+          </span>
+        </div>
+
+        <!-- 右側流程圖 -->
+        <div class="header-decoration__flowchart">
+          <svg width="80" height="70" viewBox="0 0 80 70">
+            <rect x="20" y="2" width="40" height="16" rx="8" fill="none" stroke="#666" stroke-width="1"/>
+            <text x="40" y="13" text-anchor="middle" font-size="8" fill="#666">start</text>
+            <line x1="40" y1="18" x2="40" y2="26" stroke="#666" stroke-width="1"/>
+            <polygon points="40,26 37,22 43,22" fill="#666"/>
+            <rect x="15" y="28" width="50" height="18" fill="none" stroke="#666" stroke-width="1"/>
+            <text x="40" y="40" text-anchor="middle" font-size="8" fill="#666">process</text>
+            <line x1="40" y1="46" x2="40" y2="52" stroke="#666" stroke-width="1"/>
+            <polygon points="40,68 25,52 55,52" fill="none" stroke="#666" stroke-width="1"/>
+            <text x="40" y="62" text-anchor="middle" font-size="7" fill="#666">decision</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 學生資訊 -->
+      <div class="info-section">
+        <div class="info-row info-row--split">
+          <div class="info-group">
+            <span class="info-tag">學生姓名</span>
+            <span class="info-value" id="studentName">載入中</span>
+          </div>
+          <div class="info-group">
+            <span class="info-tag">競賽日期</span>
+            <span class="info-value info-value--date" id="competitionDate">----.--.--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 競賽名稱 -->
+      <div class="info-section">
+        <div class="info-row">
+          <span class="info-tag">競賽名稱</span>
+          <span class="info-value info-value--normal" id="competitionTitle">載入中</span>
+        </div>
+      </div>
+
+      <!-- 主辦單位 -->
+      <div class="info-section">
+        <div class="info-row">
+          <span class="info-tag">主辦單位</span>
+          <span class="info-value info-value--normal" id="organizer">載入中</span>
+        </div>
+      </div>
+
+      <!-- 競賽等級與名次 -->
+      <div class="info-section">
+        <div class="info-row info-row--split">
+          <div class="info-group">
+            <span class="info-tag">競賽等級</span>
+            <span class="info-value info-value--normal" id="competitionLevel">—</span>
+          </div>
+          <div class="info-group">
+            <span class="info-tag">競賽名次</span>
+            <span class="info-value info-value--normal" id="competitionRank">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 競賽說明 -->
+      <div class="description-section">
+        <div class="description-section__tag">
+          <span class="info-tag">競賽說明</span>
+        </div>
+        <p class="description-section__content" id="competitionDescription">
+          載入中...
+        </p>
+      </div>
+
+      <!-- 參賽證明 -->
+      <div class="photo-section" id="photoSection" style="display: none;">
+        <div class="photo-section__tag">
+          <span class="info-tag">參賽證明</span>
+        </div>
+        <div class="photo-section__grid" id="photoGrid">
+          <!-- 動態插入照片 -->
+        </div>
+      </div>
+
+      <!-- 頁尾 -->
+      <div class="footer-section">
+        <button class="btn btn--outline" onclick="goBack()">
+          返回
+        </button>
+        <button class="btn btn--primary" onclick="printOrSave()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          列印或儲存成PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000';
+
+    // 等級對應
+    const LEVEL_LABELS = {
+      'international': '國際賽',
+      'national': '全國賽',
+      'regional': '區域賽',
+      'county': '縣市賽'
+    };
+
+    // 從 URL 取得參數
+    function getUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        competitionId: params.get('id')
+      };
+    }
+
+    // 格式化日期
+    function formatDate(dateStr) {
+      if (!dateStr) return '----.--.--';
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}.${month}.${day}`;
+    }
+
+    // 載入競賽資料
+    async function loadCompetition() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      const params = getUrlParams();
+
+      try {
+        // 先取得學生基本資訊
+        const profileRes = await fetch(`${API_BASE}/api/students/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          const studentData = profile.data.student;
+          const studentName = studentData?.name || '學生';
+          const studentNo = studentData?.student_no || '';
+
+          document.getElementById('studentName').textContent = studentName.split('').join(' ');
+          document.getElementById('topBarStudentId').textContent = studentNo ? `${studentNo}${studentName}` : studentName;
+        }
+
+        // 取得競賽記錄
+        if (params.competitionId) {
+          const compRes = await fetch(`${API_BASE}/api/competitions/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (compRes.ok) {
+            const compData = await compRes.json();
+            const competitions = compData.data || [];
+            const competition = competitions.find(c => c.id == params.competitionId);
+
+            if (competition) {
+              // 更新頁面資訊
+              const title = competition.title || '未命名競賽';
+              document.getElementById('topBarTitle').textContent = `競賽經歷－${title}`;
+              document.getElementById('competitionDate').textContent = formatDate(competition.competition_date);
+              document.getElementById('competitionTitle').textContent = title;
+              document.getElementById('organizer').textContent = competition.organizer || '未填寫';
+              document.getElementById('competitionLevel').textContent = LEVEL_LABELS[competition.level] || competition.level || '—';
+              document.getElementById('competitionRank').textContent = competition.rank_name || '—';
+              document.getElementById('competitionDescription').textContent = competition.description || '無競賽說明';
+
+              // 如果有照片
+              if (competition.photo_url) {
+                const photoSection = document.getElementById('photoSection');
+                const photoGrid = document.getElementById('photoGrid');
+                photoSection.style.display = 'block';
+                photoGrid.innerHTML = `
+                  <div class="photo-section__item">
+                    <img src="${competition.photo_url}" alt="參賽證明">
+                  </div>
+                `;
+              }
+
+              // 更新頁面標題
+              document.title = `競賽經歷－${title}`;
+            } else {
+              document.getElementById('topBarTitle').textContent = '競賽經歷';
+              document.getElementById('competitionDescription').textContent = '找不到指定的競賽記錄';
+            }
+          }
+        } else {
+          // 沒有指定競賽，顯示預設訊息
+          document.getElementById('topBarTitle').textContent = '競賽經歷';
+          document.getElementById('competitionDescription').textContent = '請從競賽歷程列表選擇要匯出的紀錄';
+        }
+
+      } catch (error) {
+        console.error('載入競賽記錄失敗:', error);
+        document.getElementById('competitionDescription').textContent = '載入失敗，請稍後再試';
+      }
+    }
+
+    // 返回
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = 'student-competition.html';
+      }
+    }
+
+    // 儲存的競賽資料（用於產生檔名）
+    let currentCompetition = null;
+
+    // 列印或儲存成 PDF
+    async function printOrSave() {
+      const exportCard = document.querySelector('.export-card');
+      const footerSection = document.querySelector('.footer-section');
+
+      if (!exportCard) {
+        alert('找不到匯出內容');
+        return;
+      }
+
+      // 檢查 html2canvas 和 jsPDF 是否載入
+      if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+        alert('PDF 匯出元件載入失敗，請檢查網路連線後重試');
+        return;
+      }
+
+      // 暫時隱藏按鈕區域
+      if (footerSection) footerSection.style.display = 'none';
+
+      try {
+        // 等待字型載入
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        // 等待圖片載入完成
+        const images = exportCard.querySelectorAll('img');
+        await Promise.all(Array.from(images).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        }));
+
+        // 使用 html2canvas 截圖
+        const canvas = await html2canvas(exportCard, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          allowTaint: true,
+          logging: false
+        });
+
+        // 使用 JPEG 格式減少檔案大小
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+        // 建立 PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'p',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // 如果內容超過一頁，需要分頁
+        const totalPages = Math.max(1, Math.ceil(imgHeight / pageHeight));
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        // 第一頁
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+        heightLeft -= pageHeight;
+
+        // 後續頁面
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+          heightLeft -= pageHeight;
+        }
+
+        // 產生檔名
+        const studentName = document.getElementById('studentName').textContent.replace(/\s/g, '') || '學生';
+        const competitionTitle = document.getElementById('competitionTitle').textContent || '競賽';
+        const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+        const filename = `競賽經歷_${studentName}_${competitionTitle}_${dateStr}.pdf`;
+
+        // 下載 PDF
+        pdf.save(filename);
+
+      } catch (error) {
+        console.error('PDF 匯出失敗:', error);
+        alert('PDF 匯出失敗，請稍後再試');
+      } finally {
+        // 恢復按鈕區域顯示
+        if (footerSection) footerSection.style.display = '';
+      }
+    }
+
+    // 頁面載入
+    document.addEventListener('DOMContentLoaded', loadCompetition);
+  </script>
+</body>
+</html>

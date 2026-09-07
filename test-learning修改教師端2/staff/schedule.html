@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課表排程 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .staff-layout { display: grid; grid-template-columns: 224px 1fr; min-height: 100vh; background: var(--color-background); }
+    .staff-sidebar { background: var(--color-surface-alt); padding: var(--spacing-lg) var(--spacing-md); display: flex; flex-direction: column; }
+    .staff-sidebar__header { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__profile { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__avatar { width: 36px; height: 36px; background: var(--color-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-md); font-weight: 600; color: var(--color-primary-dark); }
+    .staff-sidebar__info { display: flex; flex-direction: column; }
+    .staff-sidebar__name { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
+    .staff-sidebar__role { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .staff-sidebar__nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .staff-sidebar__nav-item { display: flex; align-items: center; gap: var(--spacing-md); padding: 10px 12px; font-size: var(--font-size-md); color: var(--color-text-secondary); text-decoration: none; border-radius: var(--radius-md); transition: all 0.2s; }
+    .staff-sidebar__nav-item:hover { background: rgba(117, 95, 0, 0.08); color: var(--color-text-primary); }
+    .staff-sidebar__nav-item--active { background: var(--color-primary); color: var(--color-primary-dark); }
+    .staff-sidebar__nav-item svg { width: 18px; height: 18px; }
+    .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
+    .staff-main { display: flex; flex-direction: column; overflow: hidden; }
+    .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
+    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
+    .staff-header__search { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); width: 240px; }
+    .staff-header__search input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
+    .staff-header__icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-secondary); cursor: pointer; }
+    .staff-header__avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); overflow: hidden; }
+    .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .btn-primary { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 20px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: var(--color-primary-dark); cursor: pointer; }
+
+    /* 篩選列 */
+    .schedule-filters { display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+    .tabs { display: flex; gap: var(--spacing-sm); }
+    .tab { padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+    .tab--active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); }
+    .filter-select { padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); cursor: pointer; }
+    .date-picker { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); }
+    .weekday-tabs { display: flex; gap: 4px; margin-left: auto; }
+    .weekday-tab { width: 40px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+    .weekday-tab--active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); }
+
+    /* 課表 */
+    .schedule-grid { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .schedule-header { display: grid; grid-template-columns: 60px repeat(7, 1fr); border-bottom: 1px solid var(--color-surface-alt); }
+    .schedule-header__cell { padding: var(--spacing-md); text-align: center; font-size: var(--font-size-md); font-weight: 500; color: var(--color-text-primary); border-right: 1px dashed var(--color-surface-alt); }
+    .schedule-header__cell:first-child { border-right: 1px solid var(--color-surface-alt); }
+    .schedule-header__cell:last-child { border-right: none; }
+    .schedule-body { display: grid; grid-template-columns: 60px repeat(7, 1fr); }
+    .schedule-time { padding: var(--spacing-sm); font-size: var(--font-size-sm); color: var(--color-text-primary); border-right: 1px solid var(--color-surface-alt); border-bottom: 1px dashed var(--color-surface-alt); display: flex; flex-direction: column; }
+    .schedule-time__main { font-weight: 500; }
+    .schedule-time__sub { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .schedule-cell { position: relative; min-height: 50px; border-right: 1px dashed var(--color-surface-alt); border-bottom: 1px dashed var(--color-surface-alt); }
+    .schedule-cell:last-child { border-right: none; }
+
+    /* 課程方塊 */
+    .schedule-block { position: absolute; left: 2px; right: 2px; padding: 6px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); overflow: hidden; }
+    .schedule-block--yellow { background: rgba(255, 219, 88, 0.3); border-left: 3px solid #ffdb58; }
+    .schedule-block--orange { background: rgba(255, 183, 120, 0.3); border-left: 3px solid #ffb778; }
+    .schedule-block--purple { background: rgba(200, 180, 255, 0.3); border-left: 3px solid #c8b4ff; }
+    .schedule-block--blue { background: rgba(135, 206, 250, 0.3); border-left: 3px solid #87CEEB; }
+    .schedule-block__title { font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .schedule-block__location { color: var(--color-text-muted); }
+    .schedule-block__teacher { color: var(--color-text-secondary); margin-top: 2px; }
+
+    @media (max-width: 992px) { .staff-layout { grid-template-columns: 1fr; } .staff-sidebar { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="staff-layout">
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>學生管理</a>
+        <a href="teachers.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>老師管理</a>
+        <a href="logs.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>日誌管理</a>
+        <a href="courses.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>課程資訊</a>
+        <a href="schedule.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>課表排程</a>
+        <a href="points.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>點數管理</a>
+        <a href="settings.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系統設定</a>
+      </nav>
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="currentDate">2026年6月15日</span>
+      </div>
+    </aside>
+
+    <main class="staff-main">
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <div class="staff-header__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="搜尋歷程或資源...">
+          </div>
+          <button class="staff-header__icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></button>
+          <button class="staff-header__icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+          <div class="staff-header__avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像"></div>
+        </div>
+      </header>
+
+      <div class="staff-content">
+        <div class="page-header">
+          <h2 class="page-title">課表排程</h2>
+          <button class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            調課
+          </button>
+        </div>
+
+        <div class="schedule-filters">
+          <div class="tabs">
+            <button class="tab tab--active">課表</button>
+            <button class="tab">課程列表</button>
+          </div>
+          <select class="filter-select">
+            <option>全部老師</option>
+            <option>顏老師</option>
+            <option>王老師</option>
+            <option>陳老師</option>
+          </select>
+          <div class="date-picker">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            115/05/26(二)
+          </div>
+          <div class="weekday-tabs">
+            <button class="weekday-tab">週一</button>
+            <button class="weekday-tab weekday-tab--active">週二</button>
+            <button class="weekday-tab">週三</button>
+            <button class="weekday-tab">週四</button>
+            <button class="weekday-tab">週五</button>
+            <button class="weekday-tab">週六</button>
+            <button class="weekday-tab">週日</button>
+          </div>
+        </div>
+
+        <div class="schedule-grid">
+          <div class="schedule-header">
+            <div class="schedule-header__cell"></div>
+            <div class="schedule-header__cell">顏老師</div>
+            <div class="schedule-header__cell">王老師</div>
+            <div class="schedule-header__cell">陳老師</div>
+            <div class="schedule-header__cell">廖老師</div>
+            <div class="schedule-header__cell">何老師</div>
+            <div class="schedule-header__cell">羅老師</div>
+            <div class="schedule-header__cell">柯老師</div>
+          </div>
+          <div class="schedule-body" id="scheduleBody">
+            <!-- 時間格會由 JS 生成 -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/notifications.js"></script>
+  <script>
+    const dateEl = document.getElementById('currentDate');
+    const now = new Date();
+    dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+    // 生成課表
+    const scheduleBody = document.getElementById('scheduleBody');
+    const times = ['9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+
+    // 課程資料
+    const courses = [
+      { teacher: 0, start: 14, duration: 2, title: '動力機械', location: '[西屯]', color: 'yellow' },
+      { teacher: 1, start: 15, duration: 2, title: '程式機械', location: '[沙鹿]', color: 'orange' },
+      { teacher: 5, start: 16, duration: 2, title: '動力機械', location: '[西屯]', color: 'yellow' },
+      { teacher: 3, start: 17, duration: 2, title: '科創機器人', location: '[西屯]', color: 'purple' },
+      { teacher: 4, start: 17, duration: 2, title: '程式機械', location: '[西屯]', color: 'orange' },
+      { teacher: 0, start: 18, duration: 2, title: '動力機械', location: '[西屯]', color: 'yellow' },
+      { teacher: 2, start: 18, duration: 2, title: '程式機械', location: '[西屯]', color: 'orange' },
+      { teacher: 6, start: 17, duration: 2, title: '動力機械', location: '[沙鹿]', color: 'blue' },
+      { teacher: 5, start: 19, duration: 2, title: '動力機械', location: '[西屯]', color: 'yellow' },
+    ];
+
+    times.forEach((time, index) => {
+      // 時間欄
+      const timeCell = document.createElement('div');
+      timeCell.className = 'schedule-time';
+      const hour = parseInt(time);
+      timeCell.innerHTML = `<span class="schedule-time__main">${time}</span><span class="schedule-time__sub">${hour}:30</span>`;
+      scheduleBody.appendChild(timeCell);
+
+      // 7 個老師欄位
+      for (let t = 0; t < 7; t++) {
+        const cell = document.createElement('div');
+        cell.className = 'schedule-cell';
+
+        // 檢查是否有課程在這個時間開始
+        const course = courses.find(c => c.teacher === t && c.start === hour);
+        if (course) {
+          const block = document.createElement('div');
+          block.className = `schedule-block schedule-block--${course.color}`;
+          block.style.top = '2px';
+          block.style.height = `${course.duration * 50 - 4}px`;
+          block.innerHTML = `
+            <div class="schedule-block__title">${course.title} ${course.location}</div>
+            <div class="schedule-block__teacher">${['顏老師', '王老師', '陳老師', '廖老師', '何老師', '羅老師', '柯老師'][t]}</div>
+          `;
+          cell.appendChild(block);
+        }
+
+        scheduleBody.appendChild(cell);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Figma__get_metadata",
+      "Bash(python3 -c:*)",
+      "mcp__claude_ai_Figma__get_design_context",
+      "mcp__claude_ai_Figma__get_screenshot",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(node --check:*)",
+      "Bash(node -e \"require\\(''/mnt/c/Users/oli/Desktop/test-learning/js/notifications.js''\\)\")",
+      "WebFetch(domain:www.figma.com)",
+      "Bash(file:*)"
+    ]
+  }
+}

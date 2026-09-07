@@ -70,100 +70,136 @@
       background: var(--color-surface-alt);
     }
 
-    /* AI 工具區塊 */
-    .ai-tools-section {
-      margin-top: var(--spacing-xl);
-    }
-
-    .ai-tools-section__title {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      font-size: var(--font-size-lg);
-      font-weight: 600;
+    /* 下拉式選單樣式 */
+    .filter-select {
+      padding: 8px 32px 8px 12px;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
       color: var(--color-text-primary);
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .ai-tools-section__title svg {
-      color: var(--color-primary-dark);
-    }
-
-    .ai-tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: var(--spacing-lg);
-    }
-
-    .ai-tool-card {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-lg);
       background: var(--color-surface);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
       cursor: pointer;
-      transition: all 0.2s;
-      border: 2px solid transparent;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a7282' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .ai-tool-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
+    .filter-select:hover {
       border-color: var(--color-primary);
     }
 
-    .ai-tool-card__icon {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-md);
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(255, 219, 88, 0.3);
+    }
+
+    /* 日誌區塊標題列 */
+    .journal-section__header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-md);
     }
 
-    .ai-tool-card__icon--yellow {
-      background: rgba(255, 219, 88, 0.2);
+    .journal-section__link {
+      font-size: var(--font-size-sm);
       color: var(--color-primary-dark);
+      text-decoration: none;
+      font-weight: 500;
     }
 
-    .ai-tool-card__icon--green {
-      background: rgba(65, 230, 84, 0.15);
-      color: #22c55e;
+    .journal-section__link:hover {
+      text-decoration: underline;
     }
 
-    .ai-tool-card__icon--blue {
-      background: rgba(84, 160, 255, 0.15);
-      color: #3b82f6;
+    /* 未完成日誌項目樣式 */
+    .incomplete-journal-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      border-left: 3px solid #f59e0b;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .ai-tool-card__content {
+    .incomplete-journal-item:hover {
+      transform: translateX(4px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .incomplete-journal-item__info {
       flex: 1;
     }
 
-    .ai-tool-card__title {
+    .incomplete-journal-item__course {
+      font-weight: 600;
+      color: var(--color-text-primary);
       font-size: var(--font-size-md);
+      margin-bottom: 4px;
+    }
+
+    .incomplete-journal-item__meta {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .incomplete-journal-item__btn {
+      padding: 6px 12px;
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .incomplete-journal-item__btn:hover {
+      background: #f5cd3a;
+    }
+
+    .journal-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--color-text-muted);
+    }
+
+    .journal-empty svg {
+      margin-bottom: 12px;
+      color: #22c55e;
+    }
+
+    .journal-empty__title {
       font-weight: 600;
       color: var(--color-text-primary);
       margin-bottom: 4px;
     }
 
-    .ai-tool-card__desc {
+    /* 其他教師課程樣式 */
+    .course-card--other-teacher {
+      opacity: 0.75;
+      border-left: 3px solid #9ca3af;
+    }
+
+    .course-card--other-teacher:hover {
+      opacity: 0.9;
+    }
+
+    .course-card__teacher {
       font-size: var(--font-size-sm);
       color: var(--color-text-muted);
-      margin: 0;
-    }
-
-    .ai-tool-card__arrow {
-      color: var(--color-text-muted);
-      transition: transform 0.2s;
-    }
-
-    .ai-tool-card:hover .ai-tool-card__arrow {
-      transform: translateX(4px);
-      color: var(--color-primary-dark);
+      margin-top: 4px;
+      padding: 4px 8px;
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-sm);
+      display: inline-block;
     }
 
     /* 響應式調整 */
@@ -258,9 +294,12 @@
           <div class="courses-list__header">
             <h3 class="courses-list__title">今日課程</h3>
             <div class="courses-list__filters">
-              <button class="filter-btn filter-btn--active" data-filter="all">全部</button>
-              <button class="filter-btn" data-filter="in-progress">進行中</button>
-              <button class="filter-btn" data-filter="pending">未完成</button>
+              <select class="filter-select" id="statusFilter" onchange="filterCourses(this.value)">
+                <option value="all">全部</option>
+                <option value="in-progress">進行中</option>
+                <option value="pending">未完成</option>
+                <option value="completed">已結束</option>
+              </select>
             </div>
           </div>
 
@@ -271,102 +310,19 @@
           </div>
         </div>
 
-        <!-- 本週教師日誌 -->
+        <!-- 尚未完成日誌 -->
         <div class="journal-section">
-          <h3 class="journal-section__title">本週教師日誌</h3>
+          <div class="journal-section__header">
+            <h3 class="journal-section__title">尚未完成日誌</h3>
+            <a href="records.html" class="journal-section__link">查看全部</a>
+          </div>
 
           <div class="journal-section__content" id="journalContent">
-            <!-- 進度卡 -->
-            <div class="journal-progress">
-              <div class="journal-progress__info">
-                <p class="journal-progress__title" id="journalTotal">本週共 - 堂課</p>
-                <div class="journal-progress__stats">
-                  <span id="journalPercent">完成度 -％</span>
-                  <span id="journalCount">- / -</span>
-                </div>
-                <div class="journal-progress__bar">
-                  <div class="journal-progress__bar-fill" id="journalProgressBar" style="width: 0%"></div>
-                </div>
-              </div>
-              <a href="records.html" class="journal-progress__btn">查看所有日誌</a>
-            </div>
             <div style="text-align: center; padding: 20px; color: #6a7282;">載入中...</div>
           </div>
         </div>
       </section>
 
-      <!-- AI 智慧工具區塊 -->
-      <section class="ai-tools-section">
-        <h3 class="ai-tools-section__title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
-            <path d="M2 12l10 5 10-5"/>
-          </svg>
-          AI 智慧工具
-        </h3>
-        <div class="ai-tools-grid">
-          <!-- AI 課綱生成 -->
-          <div class="ai-tool-card" onclick="openAITool('outline')">
-            <div class="ai-tool-card__icon ai-tool-card__icon--yellow">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-              </svg>
-            </div>
-            <div class="ai-tool-card__content">
-              <h4 class="ai-tool-card__title">AI 課綱生成</h4>
-              <p class="ai-tool-card__desc">智慧生成課程大綱，輕鬆規劃教學內容</p>
-            </div>
-            <div class="ai-tool-card__arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- AI 個人化評語 -->
-          <div class="ai-tool-card" onclick="openAITool('comment')">
-            <div class="ai-tool-card__icon ai-tool-card__icon--green">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-              </svg>
-            </div>
-            <div class="ai-tool-card__content">
-              <h4 class="ai-tool-card__title">AI 個人化評語</h4>
-              <p class="ai-tool-card__desc">依學生表現自動生成專屬學習評語</p>
-            </div>
-            <div class="ai-tool-card__arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- AI 學習建議 -->
-          <div class="ai-tool-card" onclick="openAITool('suggestion')">
-            <div class="ai-tool-card__icon ai-tool-card__icon--blue">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </div>
-            <div class="ai-tool-card__content">
-              <h4 class="ai-tool-card__title">AI 學習建議</h4>
-              <p class="ai-tool-card__desc">分析學生數據，提供個人化學習建議</p>
-            </div>
-            <div class="ai-tool-card__arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
   </div>
 
@@ -406,6 +362,8 @@
 
     // 狀態變數
     let mySchedules = [];
+    let allSchedules = [];
+    let currentTeacherId = null;
     let userName = '老師';
     const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
 
@@ -434,6 +392,7 @@
         const response = await apiRequest('/auth/profile');
         if (response.success && response.data) {
           userName = response.data.name || response.data.username || '老師';
+          currentTeacherId = response.data.teacher_id || null;
           document.getElementById('sidebarUserName').textContent = userName + ' 老師';
           updateWelcome();
         }
@@ -445,14 +404,33 @@
     // 載入今日課程
     async function loadTodayCourses() {
       try {
-        const response = await apiRequest('/schedules/my-classes');
-        mySchedules = response.data.schedules || [];
+        // 同時取得自己的課程和所有課程
+        const [myResponse, allResponse] = await Promise.all([
+          apiRequest('/schedules/my-classes'),
+          apiRequest('/schedules')
+        ]);
+
+        mySchedules = myResponse.data.schedules || [];
+        allSchedules = allResponse.data || [];
 
         const today = new Date().getDay();
-        const todaySchedules = mySchedules.filter(s => s.day_of_week === today);
 
-        // 按時間排序
+        // 取得自己的 schedule_id 列表
+        const myScheduleIds = new Set(mySchedules.map(s => s.schedule_id));
+
+        // 篩選今日課程
+        const todaySchedules = allSchedules.filter(s => s.day_of_week === today);
+
+        // 標記是否為自己的課程，並排序（自己的在前）
+        todaySchedules.forEach(s => {
+          s.is_mine = myScheduleIds.has(s.id) || myScheduleIds.has(s.schedule_id);
+        });
+
         todaySchedules.sort((a, b) => {
+          // 自己的課程優先
+          if (a.is_mine && !b.is_mine) return -1;
+          if (!a.is_mine && b.is_mine) return 1;
+          // 同類別按時間排序
           const timeA = a.start_time || '00:00:00';
           const timeB = b.start_time || '00:00:00';
           return timeA.localeCompare(timeB);
@@ -498,8 +476,11 @@
       let html = '';
 
       schedules.forEach(schedule => {
+        const scheduleId = schedule.schedule_id || schedule.id;
         const startTime = formatTime(schedule.start_time);
         const endTime = formatTime(schedule.end_time);
+        const isMine = schedule.is_mine;
+        const teacherName = schedule.teacher_name || '未指定';
 
         // 判斷課程狀態
         const startMinutes = parseTimeToMinutes(schedule.start_time);
@@ -519,8 +500,11 @@
           statusClass = 'in-progress';
         }
 
+        // 其他教師的課程加上額外樣式
+        const otherTeacherClass = isMine ? '' : 'course-card--other-teacher';
+
         html += `
-          <div class="course-card course-card--${statusClass}" data-status="${status}" data-schedule-id="${schedule.schedule_id}">
+          <div class="course-card course-card--${statusClass} ${otherTeacherClass}" data-status="${status}" data-schedule-id="${scheduleId}" data-is-mine="${isMine}">
             <div class="course-card__header">
               <span class="course-card__status course-card__status--${statusClass}">
                 ${getStatusIcon(status)}
@@ -529,9 +513,10 @@
               <span class="course-card__students">${schedule.student_count || 0} 位學生</span>
             </div>
             <h4 class="course-card__title">${schedule.course_name || '未命名課程'}</h4>
+            ${!isMine ? `<div class="course-card__teacher">授課教師：${teacherName}</div>` : ''}
             <div class="course-card__footer">
               <span class="course-card__time">${startTime} ~ ${endTime}</span>
-              <a href="journal.html?schedule_id=${schedule.schedule_id}&date=${todayDateStr}" class="course-card__action">
+              <a href="journal.html?schedule_id=${scheduleId}&date=${todayDateStr}" class="course-card__action">
                 <svg class="course-card__action-icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0 11.875V15H3.125L12.3417 5.78333L9.21667 2.65833L0 11.875ZM14.7583 3.36667C15.0833 3.04167 15.0833 2.51667 14.7583 2.19167L12.8083 0.241667C12.4833 -0.0833333 11.9583 -0.0833333 11.6333 0.241667L10.1083 1.76667L13.2333 4.89167L14.7583 3.36667Z" fill="currentColor"/>
                 </svg>
@@ -542,13 +527,7 @@
         `;
       });
 
-      // 可選：新增班級卡片（如果需要）
-      // html += `...add class card...`;
-
       grid.innerHTML = html;
-
-      // 篩選功能
-      setupFilterButtons();
     }
 
     // 取得狀態圖示
@@ -568,94 +547,152 @@
       }
     }
 
-    // 渲染日誌區塊
+    // 渲染尚未完成的日誌區塊
     async function renderJournalSection() {
-      const totalClasses = mySchedules.length;
-
-      // 從 API 取得本週已完成日誌數量
-      let completedClasses = 0;
-      try {
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-        const startDate = startOfWeek.toISOString().split('T')[0];
-        const endDate = endOfWeek.toISOString().split('T')[0];
-
-        const logResponse = await apiRequest(`/logs/my-status?start_date=${startDate}&end_date=${endDate}`);
-        const schedules = logResponse.data?.schedules || [];
-        completedClasses = schedules.filter(s => s.log_status === 'completed').length;
-      } catch (error) {
-        console.warn('取得日誌狀態失敗:', error);
-      }
-
-      const percent = totalClasses > 0 ? Math.round((completedClasses / totalClasses) * 100) : 0;
-
-      document.getElementById('journalTotal').textContent = `本週共 ${totalClasses} 堂課`;
-      document.getElementById('journalPercent').textContent = `完成度 ${percent}％`;
-      document.getElementById('journalCount').textContent = `${completedClasses} / ${totalClasses}`;
-      document.getElementById('journalProgressBar').style.width = `${percent}%`;
-
-      // 顯示需要填寫日誌的課程
       const journalContent = document.getElementById('journalContent');
-      const progressCard = journalContent.querySelector('.journal-progress');
 
-      // 清除載入中的提示
-      const loadingDiv = journalContent.querySelector('div[style*="text-align: center"]');
-      if (loadingDiv) loadingDiv.remove();
+      try {
+        // 取得最近 14 天內的日誌狀態
+        const now = new Date();
+        const startDate = new Date(now);
+        startDate.setDate(now.getDate() - 14);
+        const endDate = new Date(now);
 
-      // 取得今天和近幾天的課程
-      const now = new Date();
-      const today = now.getDay();
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
 
-      // 顯示待填寫的日誌
-      mySchedules.slice(0, 3).forEach(schedule => {
-        const dayDiff = getDayDiff(schedule.day_of_week, today);
-        let dateLabel = '';
-        if (dayDiff === 0) dateLabel = '今日';
-        else if (dayDiff === 1) dateLabel = '昨日';
-        else dateLabel = `${dayDiff}天前`;
+        const logResponse = await apiRequest(`/logs/my-status?start_date=${startDateStr}&end_date=${endDateStr}`);
+        const schedules = logResponse.data?.schedules || [];
 
-        // 計算該課程的實際日期
-        const courseDate = new Date(now);
-        courseDate.setDate(now.getDate() - dayDiff);
-        const courseDateStr = `${courseDate.getFullYear()}-${String(courseDate.getMonth() + 1).padStart(2, '0')}-${String(courseDate.getDate()).padStart(2, '0')}`;
+        // 展開每個排程的未完成日誌
+        const incompleteJournals = [];
 
-        const journalItem = document.createElement('div');
-        journalItem.className = 'journal-item';
-        journalItem.innerHTML = `
-          <div class="journal-item__header">
-            <h4 class="journal-item__title">${schedule.course_name || '未命名課程'}</h4>
-            <p class="journal-item__date">${formatDate(courseDate)} • ${dateLabel}</p>
-          </div>
-          <a href="journal.html?schedule_id=${schedule.schedule_id}&date=${courseDateStr}" class="journal-item__btn">填寫日誌</a>
-        `;
-        journalContent.appendChild(journalItem);
-      });
-    }
+        schedules.forEach(schedule => {
+          // 計算該排程在日期範圍內應該有的日期
+          const expectedDates = getExpectedDatesForSchedule(startDateStr, endDateStr, schedule.day_of_week);
+          const logs = schedule.logs || [];
 
-    // 設定篩選按鈕
-    function setupFilterButtons() {
-      const filterBtns = document.querySelectorAll('.filter-btn');
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-          filterBtns.forEach(b => b.classList.remove('filter-btn--active'));
-          this.classList.add('filter-btn--active');
+          // 找出每個預期日期的日誌狀態
+          expectedDates.forEach(dateStr => {
+            const existingLog = logs.find(l => {
+              const logDateStr = l.log_date ? l.log_date.split('T')[0] : '';
+              return logDateStr === dateStr;
+            });
 
-          const filter = this.dataset.filter;
-          const cards = document.querySelectorAll('.course-card');
-
-          cards.forEach(card => {
-            const status = card.dataset.status;
-            if (filter === 'all' || status === filter) {
-              card.style.display = '';
-            } else {
-              card.style.display = 'none';
+            // 如果沒有日誌或日誌未完成
+            if (!existingLog || existingLog.status !== 'completed') {
+              // 只顯示今天及之前的（不顯示未來的）
+              if (new Date(dateStr) <= now) {
+                incompleteJournals.push({
+                  schedule_id: schedule.schedule_id,
+                  course_name: schedule.course_name,
+                  start_time: schedule.start_time,
+                  end_time: schedule.end_time,
+                  log_date: dateStr,
+                  status: existingLog ? existingLog.status : 'not_filled'
+                });
+              }
             }
           });
         });
+
+        // 按日期排序（最近的在前）
+        incompleteJournals.sort((a, b) => {
+          return new Date(b.log_date) - new Date(a.log_date);
+        });
+
+        // 清空內容
+        journalContent.innerHTML = '';
+
+        if (incompleteJournals.length === 0) {
+          journalContent.innerHTML = `
+            <div class="journal-empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <p class="journal-empty__title">太棒了！</p>
+              <p>所有日誌都已完成</p>
+            </div>
+          `;
+          return;
+        }
+
+        // 顯示未完成的日誌（最多顯示 5 筆）
+        incompleteJournals.slice(0, 5).forEach(journal => {
+          const logDate = new Date(journal.log_date);
+          const daysDiff = Math.floor((now - logDate) / (1000 * 60 * 60 * 24));
+
+          let dateLabel = '';
+          if (daysDiff === 0) dateLabel = '今天';
+          else if (daysDiff === 1) dateLabel = '昨天';
+          else dateLabel = `${daysDiff} 天前`;
+
+          const startTime = journal.start_time ? formatTime(journal.start_time) : '';
+          const endTime = journal.end_time ? formatTime(journal.end_time) : '';
+          const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : '';
+
+          const journalItem = document.createElement('div');
+          journalItem.className = 'incomplete-journal-item';
+          journalItem.innerHTML = `
+            <div class="incomplete-journal-item__info">
+              <div class="incomplete-journal-item__course">${journal.course_name || '未命名課程'}</div>
+              <div class="incomplete-journal-item__meta">
+                ${formatDate(logDate)} (${dateLabel}) ${timeStr ? '• ' + timeStr : ''}
+              </div>
+            </div>
+            <a href="journal.html?schedule_id=${journal.schedule_id}&date=${journal.log_date}" class="incomplete-journal-item__btn">填寫</a>
+          `;
+          journalContent.appendChild(journalItem);
+        });
+
+        // 如果還有更多未完成的
+        if (incompleteJournals.length > 5) {
+          const moreCount = incompleteJournals.length - 5;
+          const moreDiv = document.createElement('div');
+          moreDiv.style.cssText = 'text-align: center; padding: 12px; color: var(--color-text-muted); font-size: var(--font-size-sm);';
+          moreDiv.innerHTML = `還有 ${moreCount} 筆未完成 · <a href="records.html" style="color: var(--color-primary-dark);">查看全部</a>`;
+          journalContent.appendChild(moreDiv);
+        }
+
+      } catch (error) {
+        console.warn('取得日誌狀態失敗:', error);
+        journalContent.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: #dc2626;">
+            載入失敗: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    // 輔助函數：計算日期範圍內特定星期幾的所有日期
+    function getExpectedDatesForSchedule(startDateStr, endDateStr, dayOfWeek) {
+      const dates = [];
+      const start = new Date(startDateStr);
+      const end = new Date(endDateStr);
+      const current = new Date(start);
+
+      while (current <= end) {
+        if (current.getDay() === dayOfWeek) {
+          dates.push(current.toISOString().split('T')[0]);
+        }
+        current.setDate(current.getDate() + 1);
+      }
+
+      return dates;
+    }
+
+    // 課程篩選功能
+    function filterCourses(filter) {
+      const cards = document.querySelectorAll('.course-card');
+
+      cards.forEach(card => {
+        const status = card.dataset.status;
+        if (filter === 'all' || status === filter) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
       });
     }
 
@@ -686,23 +723,6 @@
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}/${month}/${day}`;
-    }
-
-    // AI 工具開啟功能
-    function openAITool(toolType) {
-      const toolNames = {
-        'outline': 'AI 課綱生成',
-        'comment': 'AI 個人化評語',
-        'suggestion': 'AI 學習建議'
-      };
-
-      const toolName = toolNames[toolType] || 'AI 工具';
-
-      if (typeof showMessage === 'function') {
-        showMessage(`${toolName}功能開發中...`, 'warning');
-      } else {
-        alert(`${toolName}功能開發中...`);
-      }
     }
 
     // 頁面載入時初始化

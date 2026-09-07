@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課程日誌詳情 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .staff-layout {
+      display: grid;
+      grid-template-columns: 224px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .staff-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .staff-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .staff-sidebar__header {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .staff-sidebar__avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .staff-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .staff-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .staff-sidebar__role {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .staff-sidebar__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      margin-top: auto;
+    }
+
+    .staff-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .staff-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 10px 12px;
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s;
+    }
+
+    .staff-sidebar__nav-item:hover {
+      background: rgba(117, 95, 0, 0.08);
+      color: var(--color-text-primary);
+    }
+
+    .staff-sidebar__nav-item--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .staff-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 主內容區 */
+    .staff-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導覽 */
+    .staff-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-xl);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .staff-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .staff-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .staff-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 16px;
+      background: var(--color-background);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      width: 220px;
+    }
+
+    .staff-header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .staff-header__icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      position: relative;
+    }
+
+    .staff-header__badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: #fe7560;
+      border-radius: 50%;
+    }
+
+    .staff-header__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .staff-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 頁面內容 */
+    .staff-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* 返回連結 */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-decoration: none;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .back-link:hover {
+      color: var(--color-text-primary);
+    }
+
+    /* 頁面標題 */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+    }
+
+    .status-badge--progress {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    /* 課程資訊卡 */
+    .course-info-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .course-info-card__header {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-md);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .course-info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .course-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .course-info-item__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .course-info-item__value {
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .course-notes {
+      display: flex;
+      gap: var(--spacing-lg);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .course-notes label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .course-outline {
+      margin-top: var(--spacing-lg);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-surface-alt);
+    }
+
+    .course-outline__title {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .course-outline__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .course-outline__list li {
+      padding: var(--spacing-xs) 0;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    /* 學生紀錄區 */
+    .students-section {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+    }
+
+    .students-section__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .students-section__title {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .students-section__count {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* 學生項目 */
+    .student-item {
+      background: var(--color-background);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--spacing-md);
+      overflow: hidden;
+    }
+
+    .student-item__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      cursor: pointer;
+    }
+
+    .student-item__info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .student-item__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .student-item__id {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .student-item__name {
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .student-item__status {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: var(--font-size-xs);
+      font-weight: 500;
+    }
+
+    .student-item__status--present {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .student-item__status--makeup {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+
+    .student-item__status--absent {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .student-item__points {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: #f59e0b;
+    }
+
+    .student-item__toggle {
+      color: var(--color-text-muted);
+      transition: transform 0.3s;
+    }
+
+    .student-item.expanded .student-item__toggle {
+      transform: rotate(180deg);
+    }
+
+    /* 學生詳細資訊 */
+    .student-item__detail {
+      display: none;
+      padding: 0 var(--spacing-lg) var(--spacing-lg);
+    }
+
+    .student-item.expanded .student-item__detail {
+      display: block;
+    }
+
+    .student-detail__section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .student-detail__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .student-detail__content {
+      background: var(--color-surface);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .student-detail__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+    }
+
+    /* 雷達圖區域 */
+    .ability-section {
+      display: flex;
+      gap: var(--spacing-xl);
+      align-items: flex-start;
+    }
+
+    .radar-chart-container {
+      width: 200px;
+      height: 200px;
+    }
+
+    .ability-list {
+      flex: 1;
+    }
+
+    .ability-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-xs) 0;
+      font-size: var(--font-size-sm);
+    }
+
+    .ability-item__name {
+      color: var(--color-text-primary);
+    }
+
+    .ability-item__score {
+      color: var(--color-text-secondary);
+    }
+
+    /* 點數區塊 */
+    .points-box {
+      background: #fef3c7;
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .points-box__value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #b45309;
+    }
+
+    .points-box__unit {
+      font-size: var(--font-size-md);
+      color: #b45309;
+    }
+
+    /* 照片區 */
+    .photos-grid {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .photo-placeholder {
+      width: 120px;
+      height: 90px;
+      background: var(--color-surface);
+      border: 1px dashed var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-xs);
+    }
+
+    .photo-placeholder svg {
+      width: 24px;
+      height: 24px;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    /* 響應式 */
+    @media (max-width: 992px) {
+      .staff-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .staff-sidebar {
+        display: none;
+      }
+
+      .course-info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .student-detail__row {
+        grid-template-columns: 1fr;
+      }
+
+      .ability-section {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="staff-layout">
+    <!-- 側邊欄 -->
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+            <path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+          學生管理
+        </a>
+        <a href="teachers.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          老師管理
+        </a>
+        <a href="logs.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          日誌管理
+        </a>
+        <a href="courses.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+          </svg>
+          課程資訊
+        </a>
+        <a href="schedule.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          課表排程
+        </a>
+        <a href="points.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          點數管理
+        </a>
+        <a href="settings.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          系統設定
+        </a>
+      </nav>
+
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span id="currentDate">2026年7月26日</span>
+      </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="staff-main">
+      <!-- 頂部導覽 -->
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <div class="staff-header__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input type="text" placeholder="搜尋歷程或資源...">
+          </div>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+            </svg>
+          </button>
+          <button class="staff-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span class="staff-header__badge"></span>
+          </button>
+          <div class="staff-header__avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="staff-content">
+        <a href="logs.html" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          返回日誌列表
+        </a>
+
+        <div class="page-header">
+          <h2 class="page-title">課程日誌詳情</h2>
+          <span class="status-badge status-badge--progress">進行中</span>
+        </div>
+
+        <!-- 課程資訊卡 -->
+        <div class="course-info-card">
+          <div class="course-info-card__header">課程資訊</div>
+
+          <div class="course-info-grid">
+            <div class="course-info-item">
+              <span class="course-info-item__label">課程名稱</span>
+              <span class="course-info-item__value">動力機器人</span>
+            </div>
+            <div class="course-info-item">
+              <span class="course-info-item__label">授課教師</span>
+              <span class="course-info-item__value">陳老師</span>
+            </div>
+            <div class="course-info-item">
+              <span class="course-info-item__label">教室</span>
+              <span class="course-info-item__value">西屯</span>
+            </div>
+            <div class="course-info-item">
+              <span class="course-info-item__label">課程時間</span>
+              <span class="course-info-item__value">2026/06/26 18:00~19:30</span>
+            </div>
+            <div class="course-info-item">
+              <span class="course-info-item__label">課程主題</span>
+              <span class="course-info-item__value">感應器模組與條件控制基礎應用</span>
+            </div>
+            <div class="course-info-item">
+              <span class="course-info-item__label">課程備註</span>
+              <div class="course-notes">
+                <label><input type="checkbox" checked disabled> 正常上課</label>
+                <label><input type="checkbox" disabled> 時段異動：_____</label>
+                <label><input type="checkbox" disabled> 師資異動：_____</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="course-outline">
+            <div class="course-outline__title">課程大綱</div>
+            <ol class="course-outline__list">
+              <li>1. 複習上週感度組裝重點</li>
+              <li>2. 介紹超音波感應器原理與接線方式</li>
+              <li>3. 實作：讓機器人偵測障礙物並自動停止</li>
+              <li>4. 成果展示與互評</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- 學生紀錄區 -->
+        <div class="students-section">
+          <div class="students-section__header">
+            <h3 class="students-section__title">學生出缺席與表現紀錄</h3>
+            <span class="students-section__count">4 名學生</span>
+          </div>
+
+          <!-- 學生項目 1 - 展開 -->
+          <div class="student-item expanded" id="student1">
+            <div class="student-item__header" onclick="toggleStudent('student1')">
+              <div class="student-item__info">
+                <div class="student-item__avatar">王</div>
+                <span class="student-item__id">S001</span>
+                <span class="student-item__name">王小明</span>
+                <span class="student-item__status student-item__status--present">出席</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                <span class="student-item__points">+5點</span>
+                <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+            </div>
+            <div class="student-item__detail">
+              <div class="student-detail__section">
+                <div class="student-detail__label">教師評語</div>
+                <div class="student-detail__content">
+                  今日積極參與感應器安裝，主動協助同學解決接線問題，思維清晰，表現優異。建議可嘗試更進階的程式邏輯挑戰。
+                </div>
+              </div>
+
+              <div class="student-detail__section">
+                <div class="student-detail__label">能力評估</div>
+                <div class="ability-section">
+                  <div class="radar-chart-container">
+                    <canvas id="radarChart1"></canvas>
+                  </div>
+                  <div class="ability-list">
+                    <div class="ability-item">
+                      <span class="ability-item__name">程式</span>
+                      <span class="ability-item__score">4 / 5</span>
+                    </div>
+                    <div class="ability-item">
+                      <span class="ability-item__name">除錯</span>
+                      <span class="ability-item__score">4 / 5</span>
+                    </div>
+                    <div class="ability-item">
+                      <span class="ability-item__name">創意</span>
+                      <span class="ability-item__score">4 / 5</span>
+                    </div>
+                    <div class="ability-item">
+                      <span class="ability-item__name">結構</span>
+                      <span class="ability-item__score">3 / 5</span>
+                    </div>
+                    <div class="ability-item">
+                      <span class="ability-item__name">團隊合作</span>
+                      <span class="ability-item__score">4 / 5</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="student-detail__row">
+                <div class="student-detail__section">
+                  <div class="student-detail__label">獲得點數</div>
+                  <div class="points-box">
+                    <span class="points-box__value">+5</span>
+                    <span class="points-box__unit">點</span>
+                  </div>
+                </div>
+                <div class="student-detail__section">
+                  <div class="student-detail__label">備註事項</div>
+                  <div class="student-detail__content">無</div>
+                </div>
+              </div>
+
+              <div class="student-detail__section">
+                <div class="student-detail__label">上課照片</div>
+                <div class="photos-grid">
+                  <div class="photo-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    照片 1
+                  </div>
+                  <div class="photo-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    照片 2
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 學生項目 2 -->
+          <div class="student-item" id="student2">
+            <div class="student-item__header" onclick="toggleStudent('student2')">
+              <div class="student-item__info">
+                <div class="student-item__avatar">李</div>
+                <span class="student-item__id">S002</span>
+                <span class="student-item__name">李美華</span>
+                <span class="student-item__status student-item__status--present">出席</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                <span class="student-item__points">+4點</span>
+                <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+            </div>
+            <div class="student-item__detail">
+              <!-- 詳細內容省略 -->
+            </div>
+          </div>
+
+          <!-- 學生項目 3 -->
+          <div class="student-item" id="student3">
+            <div class="student-item__header" onclick="toggleStudent('student3')">
+              <div class="student-item__info">
+                <div class="student-item__avatar">張</div>
+                <span class="student-item__id">S003</span>
+                <span class="student-item__name">張大偉</span>
+                <span class="student-item__status student-item__status--makeup">補課</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                <span class="student-item__points">+2點</span>
+                <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+            </div>
+            <div class="student-item__detail">
+              <!-- 詳細內容省略 -->
+            </div>
+          </div>
+
+          <!-- 學生項目 4 -->
+          <div class="student-item" id="student4">
+            <div class="student-item__header" onclick="toggleStudent('student4')">
+              <div class="student-item__info">
+                <div class="student-item__avatar">陳</div>
+                <span class="student-item__id">S004</span>
+                <span class="student-item__name">陳小芳</span>
+                <span class="student-item__status student-item__status--absent">缺席</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                <span class="student-item__points"></span>
+                <svg class="student-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+            </div>
+            <div class="student-item__detail">
+              <!-- 詳細內容省略 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // 更新當前日期
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+    document.getElementById('currentDate').textContent = dateStr;
+
+    // 學生項目展開/收合
+    function toggleStudent(id) {
+      const item = document.getElementById(id);
+      item.classList.toggle('expanded');
+    }
+
+    // 雷達圖
+    const ctx = document.getElementById('radarChart1');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
+          datasets: [{
+            data: [4, 4, 4, 3, 4],
+            backgroundColor: 'rgba(255, 219, 88, 0.3)',
+            borderColor: '#ffdb58',
+            borderWidth: 2,
+            pointBackgroundColor: '#ffdb58',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#ffdb58'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 5,
+              ticks: {
+                stepSize: 1,
+                display: false
+              },
+              grid: {
+                color: '#e5e7eb'
+              },
+              angleLines: {
+                color: '#e5e7eb'
+              },
+              pointLabels: {
+                font: {
+                  size: 11
+                },
+                color: '#6b7280'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -733,6 +733,28 @@
     .required-mark {
       color: #dc2626;
     }
+
+    /* 上傳成功狀態 */
+    .upload-area--uploaded {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .upload-area--uploaded .upload-area__icon {
+      color: #22c55e;
+    }
+
+    /* Modal 按鈕並排 */
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .modal-actions .modal-btn {
+      flex: 1;
+    }
   </style>
 </head>
 <body>
@@ -1082,49 +1104,50 @@
       <div class="modal__body">
         <div class="form-group">
           <label class="form-group__label">主辦單位<span class="required-mark">*</span></label>
-          <input type="text" class="form-group__input" placeholder="例如：台灣青少年機器人協會">
+          <input type="text" class="form-group__input" id="compOrganizer" placeholder="例如：台灣青少年機器人協會">
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label class="form-group__label">競賽名稱</label>
-            <input type="text" class="form-group__input" placeholder="例如：機器人大賽台灣公開賽">
+            <input type="text" class="form-group__input" id="compTitle" placeholder="例如：機器人大賽台灣公開賽">
           </div>
           <div class="form-group">
             <label class="form-group__label">競賽日期<span class="required-mark">*</span></label>
-            <input type="date" class="form-group__input" value="2026-06-01">
+            <input type="date" class="form-group__input" id="compDate">
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-group__label">競賽等級<span class="required-mark">*</span></label>
-          <div class="level-buttons">
-            <button class="level-btn level-btn--active" onclick="selectLevel(this)">國際賽</button>
-            <button class="level-btn" onclick="selectLevel(this)">全國賽</button>
-            <button class="level-btn" onclick="selectLevel(this)">區域賽</button>
-            <button class="level-btn" onclick="selectLevel(this)">縣市賽</button>
+          <div class="level-buttons" id="levelButtons">
+            <button type="button" class="level-btn" data-level="international" onclick="selectLevel(this)">國際賽</button>
+            <button type="button" class="level-btn" data-level="national" onclick="selectLevel(this)">全國賽</button>
+            <button type="button" class="level-btn" data-level="regional" onclick="selectLevel(this)">區域賽</button>
+            <button type="button" class="level-btn level-btn--active" data-level="county" onclick="selectLevel(this)">縣市賽</button>
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-group__label">隊伍/組別名稱</label>
-          <input type="text" class="form-group__input" placeholder="例如：FUN學聯隊（3人）">
+          <input type="text" class="form-group__input" id="compTeamName" placeholder="例如：FUN學聯隊（3人）">
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label class="form-group__label">名次</label>
-            <input type="text" class="form-group__input" placeholder="例如：第一名">
+            <input type="text" class="form-group__input" id="compRankName" placeholder="例如：第一名">
           </div>
           <div class="form-group">
             <label class="form-group__label">成績/分數</label>
-            <input type="text" class="form-group__input" placeholder="例如：96分">
+            <input type="text" class="form-group__input" id="compScore" placeholder="例如：96分">
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-group__label">參賽證明<span class="required-mark">*</span></label>
-          <div class="upload-area">
+          <label class="form-group__label">參賽證明</label>
+          <input type="file" id="compPhotoInput" accept="image/*" style="display: none;">
+          <div class="upload-area" id="compUploadArea" onclick="document.getElementById('compPhotoInput').click()">
             <div class="upload-area__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -1132,18 +1155,23 @@
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
             </div>
-            <div class="upload-area__text">點擊上傳學生照片或文件</div>
-            <div class="upload-area__hint">支援 JPG、PNG、PDF、Word 文件</div>
+            <div class="upload-area__text" id="uploadText">點擊上傳參賽照片或證明</div>
+            <div class="upload-area__hint">支援 JPG、PNG、GIF、WebP (最大 10MB)</div>
+          </div>
+          <div id="uploadPreview" style="display: none; margin-top: 12px; text-align: center;">
+            <img id="previewImage" style="max-width: 100%; max-height: 150px; border-radius: 8px;">
+            <button type="button" onclick="clearUpload()" style="margin-top: 8px; padding: 4px 12px; background: #f3f4f6; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">移除照片</button>
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-group__label">競賽說明</label>
-          <textarea class="form-group__textarea" placeholder="詳述競賽內容、學生表現及其他補充資訊..."></textarea>
+          <textarea class="form-group__textarea" id="compDescription" placeholder="詳述競賽內容、學生表現及其他補充資訊..."></textarea>
         </div>
 
         <div class="modal-actions">
-          <button class="modal-btn modal-btn--confirm" onclick="submitCompetition()" style="width: 100%;">新增競賽歷程</button>
+          <button class="modal-btn modal-btn--cancel" onclick="closeModal('competitionModal')">取消</button>
+          <button class="modal-btn modal-btn--confirm" id="submitCompBtn" onclick="submitCompetition()">新增競賽歷程</button>
         </div>
       </div>
     </div>
@@ -1527,6 +1555,25 @@
         alert('請先選擇學生');
         return;
       }
+      // 重設表單
+      document.getElementById('compOrganizer').value = '';
+      document.getElementById('compTitle').value = '';
+      document.getElementById('compDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('compTeamName').value = '';
+      document.getElementById('compRankName').value = '';
+      document.getElementById('compScore').value = '';
+      document.getElementById('compDescription').value = '';
+
+      // 重設等級選擇
+      selectedLevel = 'county';
+      document.querySelectorAll('.level-btn').forEach(b => {
+        b.classList.remove('level-btn--active');
+        if (b.dataset.level === 'county') b.classList.add('level-btn--active');
+      });
+
+      // 清除上傳
+      clearUpload();
+
       document.getElementById('competitionStudentName').textContent = currentStudent;
       document.getElementById('competitionModal').classList.add('active');
     }
@@ -1537,9 +1584,64 @@
     }
 
     // 選擇競賽等級
+    let selectedLevel = 'county';
     function selectLevel(btn) {
       document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('level-btn--active'));
       btn.classList.add('level-btn--active');
+      selectedLevel = btn.dataset.level;
+    }
+
+    // 照片上傳相關
+    let uploadedPhotoUrl = null;
+
+    document.getElementById('compPhotoInput')?.addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // 顯示預覽
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('previewImage').src = e.target.result;
+        document.getElementById('uploadPreview').style.display = 'block';
+        document.getElementById('compUploadArea').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+
+      // 上傳到伺服器
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      try {
+        const token = getAuthToken();
+        const response = await fetch(`${API_BASE}/upload/photo`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          uploadedPhotoUrl = result.data.url;
+          document.getElementById('uploadText').textContent = '照片已上傳';
+        } else {
+          alert('上傳失敗: ' + result.message);
+          clearUpload();
+        }
+      } catch (error) {
+        console.error('上傳錯誤:', error);
+        alert('上傳失敗，請稍後再試');
+        clearUpload();
+      }
+    });
+
+    function clearUpload() {
+      uploadedPhotoUrl = null;
+      document.getElementById('compPhotoInput').value = '';
+      document.getElementById('uploadPreview').style.display = 'none';
+      document.getElementById('compUploadArea').style.display = 'block';
+      document.getElementById('uploadText').textContent = '點擊上傳參賽照片或證明';
     }
 
     // 點數預覽計算
@@ -1597,10 +1699,65 @@
     }
 
     // 提交競賽
-    function submitCompetition() {
-      // TODO: 實作競賽記錄 API
-      alert('競賽紀錄已新增！');
-      closeModal('competitionModal');
+    async function submitCompetition() {
+      if (!currentStudentId) {
+        alert('請先選擇學生');
+        return;
+      }
+
+      const organizer = document.getElementById('compOrganizer').value.trim();
+      const title = document.getElementById('compTitle').value.trim();
+      const competitionDate = document.getElementById('compDate').value;
+      const teamName = document.getElementById('compTeamName').value.trim();
+      const rankName = document.getElementById('compRankName').value.trim();
+      const score = document.getElementById('compScore').value.trim();
+      const description = document.getElementById('compDescription').value.trim();
+
+      // 驗證必填欄位
+      if (!organizer) {
+        alert('請填寫主辦單位');
+        return;
+      }
+
+      if (!competitionDate) {
+        alert('請選擇競賽日期');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitCompBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '提交中...';
+
+      try {
+        const response = await apiRequest('/competitions', {
+          method: 'POST',
+          body: JSON.stringify({
+            student_id: currentStudentId,
+            organizer,
+            title,
+            competition_date: competitionDate,
+            level: selectedLevel,
+            rank_name: rankName,
+            score,
+            team_name: teamName,
+            photo_url: uploadedPhotoUrl,
+            description
+          })
+        });
+
+        if (response.success) {
+          alert('競賽紀錄已新增！');
+          closeModal('competitionModal');
+        } else {
+          alert('新增失敗: ' + response.message);
+        }
+      } catch (error) {
+        console.error('提交競賽錯誤:', error);
+        alert('新增失敗: ' + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '新增競賽歷程';
+      }
     }
 
     // 搜尋與篩選
