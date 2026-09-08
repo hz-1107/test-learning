@@ -495,7 +495,7 @@ exports.enrollStudents = async (req, res) => {
     }
 
     // 確認班級存在
-    const schedule = await db.queryOne('SELECT id FROM course_schedules WHERE id = ?', [id]);
+    const schedule = await db.queryOne('SELECT id, course_id FROM course_schedules WHERE id = ?', [id]);
 
     if (!schedule) {
       return res.status(404).json({
@@ -524,8 +524,8 @@ exports.enrollStudents = async (req, res) => {
         }
       } else {
         await db.insert(
-          'INSERT INTO course_enrollments (schedule_id, student_id, status) VALUES (?, ?, "enrolled")',
-          [scheduleId, studentId]
+          'INSERT INTO course_enrollments (course_id, schedule_id, student_id, status) VALUES (?, ?, ?, "enrolled")',
+          [schedule.course_id, scheduleId, studentId]
         );
         enrolledCount++;
       }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>老師管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -126,7 +127,7 @@
     }
 
     .staff-header__title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--color-primary-dark);
     }
@@ -195,7 +196,7 @@
     }
 
     .page-title {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       color: var(--color-text-primary);
     }
@@ -369,24 +370,37 @@
       align-items: center;
     }
     .modal-overlay.active { display: flex; }
-    .modal {
+    .modal-overlay .modal {
+      position: static;
+      inset: auto;
+      z-index: auto;
+      display: block;
       background: var(--color-surface);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-xl);
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       max-height: 90vh;
+      padding: 0;
       overflow-y: auto;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
-    .modal__header {
+    .modal-overlay .modal__header {
+      position: static;
+      z-index: auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: var(--spacing-lg);
-      border-bottom: 1px solid var(--color-surface-alt);
+      background: var(--color-surface);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     }
-    .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
-    .modal__close {
+    .modal-overlay .modal__title {
+      font-size: var(--font-size-xl);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+    .modal-overlay .modal__close {
       width: 32px;
       height: 32px;
       display: flex;
@@ -397,53 +411,81 @@
       cursor: pointer;
       color: var(--color-text-muted);
       border-radius: var(--radius-sm);
+      flex: none;
     }
-    .modal__close:hover { background: var(--color-surface-alt); }
-    .modal__body { padding: var(--spacing-lg); }
+    .modal-overlay .modal__close:hover { background: var(--color-surface-alt); }
+    .modal-overlay .modal__body {
+      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
     .modal__footer {
       display: flex;
       justify-content: flex-end;
-      gap: var(--spacing-md);
+      gap: 12px;
       padding: var(--spacing-lg);
-      border-top: 1px solid var(--color-surface-alt);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
     }
-    .form-group { margin-bottom: var(--spacing-md); }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
     .form-group label {
-      display: block;
       font-size: var(--font-size-sm);
       font-weight: 500;
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-xs);
+      color: #0a0a0a;
+      letter-spacing: 0.02em;
     }
     .form-group input,
     .form-group select,
     .form-group textarea {
       width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--color-surface-alt);
-      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-lg);
       font-size: var(--font-size-md);
       color: var(--color-text-primary);
-      background: var(--color-background);
+      background: #f5f5f5;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--color-text-muted);
     }
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
+      background: var(--color-surface);
       border-color: var(--color-primary-dark);
     }
-    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group input[readonly] {
+      background: #ececec;
+      color: var(--color-text-muted);
+      cursor: not-allowed;
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
-    .btn-secondary {
-      padding: 10px 20px;
-      background: var(--color-surface-alt);
-      border: none;
-      border-radius: var(--radius-md);
+    .modal__footer .btn-primary,
+    .modal__footer .btn-secondary {
+      padding: 10px 22px;
+      border-radius: var(--radius-lg);
       font-size: var(--font-size-md);
-      color: var(--color-text-secondary);
+      font-weight: 500;
       cursor: pointer;
     }
-    .btn-secondary:hover { background: var(--color-surface); }
+    .btn-secondary {
+      padding: 10px 22px;
+      background: var(--color-surface);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: #f5f5f5; }
   </style>
   <link rel="stylesheet" href="../css/admin-notifications.css">
 </head>

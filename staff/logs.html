@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>日誌管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -203,7 +204,7 @@
     }
 
     .page-title {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       color: var(--color-text-primary);
       margin-bottom: var(--spacing-lg);
@@ -837,7 +838,6 @@
                 <th>教室</th>
                 <th>授課教師</th>
                 <th>填寫狀態</th>
-                <th>權限設定</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -848,9 +848,7 @@
                 <td>西屯</td>
                 <td>陳老師</td>
                 <td><span class="status-badge status-badge--progress"><span class="status-badge__dot"></span>進行中</span></td>
-                <td>原教師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -860,9 +858,7 @@
                 <td>西屯</td>
                 <td>廖老師</td>
                 <td><span class="status-badge status-badge--completed"><span class="status-badge__dot"></span>已完成</span></td>
-                <td>原教師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -872,9 +868,7 @@
                 <td>西屯</td>
                 <td>顏老師</td>
                 <td><span class="status-badge status-badge--completed"><span class="status-badge__dot"></span>已完成</span></td>
-                <td>原教師 + 代課：李老師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -884,9 +878,7 @@
                 <td>沙鹿</td>
                 <td>廖老師</td>
                 <td><span class="status-badge status-badge--completed"><span class="status-badge__dot"></span>已完成</span></td>
-                <td>原教師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -896,9 +888,7 @@
                 <td>西屯</td>
                 <td>楊老師</td>
                 <td><span class="status-badge status-badge--pending"><span class="status-badge__dot"></span>未填寫</span></td>
-                <td>原教師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -908,9 +898,7 @@
                 <td>沙鹿</td>
                 <td>李老師</td>
                 <td><span class="status-badge status-badge--completed"><span class="status-badge__dot"></span>已完成</span></td>
-                <td>原教師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -920,9 +908,7 @@
                 <td>西屯</td>
                 <td>鄧老師</td>
                 <td><span class="status-badge status-badge--completed"><span class="status-badge__dot"></span>已完成</span></td>
-                <td>原教師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -932,9 +918,7 @@
                 <td>沙鹿</td>
                 <td>盧老師</td>
                 <td><span class="status-badge status-badge--pending"><span class="status-badge__dot"></span>未填寫</span></td>
-                <td>原教師</td>
                 <td>
-                  <button class="action-btn action-btn--outline" onclick="openPermissionModal()">權限</button>
                   <button class="action-btn action-btn--primary" onclick="viewLog()">查看</button>
                 </td>
               </tr>
@@ -951,85 +935,6 @@
         </div>
       </div>
     </main>
-  </div>
-
-  <!-- 權限設定 Modal -->
-  <div class="modal-overlay" id="permissionModal">
-    <div class="modal">
-      <div class="modal__header">
-        <h3 class="modal__title">日誌填寫權限設定</h3>
-        <button class="modal__close" onclick="closePermissionModal()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="modal__body">
-        <div class="modal__info-bar">
-          2026-06-26 14:00 • 動力機器人 • 陳老師
-        </div>
-
-        <div class="modal__option">
-          <input type="checkbox" class="modal__option-checkbox" id="defaultTeacher" checked>
-          <div class="modal__option-content">
-            <div class="modal__option-title">預設主開課教師</div>
-            <div class="modal__option-subtitle">陳老師</div>
-          </div>
-        </div>
-
-        <div class="modal__option">
-          <input type="checkbox" class="modal__option-checkbox" id="allowOthers">
-          <div class="modal__option-content">
-            <div class="modal__option-title">
-              開放其他老師填寫
-              <span class="modal__option-note">*可同時指派多位老師</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal__search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-          </svg>
-          <input type="text" placeholder="搜尋老師姓名...">
-        </div>
-
-        <div class="modal__list-header">
-          <span>已選老師（0 位）</span>
-          <a href="#">全選</a>
-        </div>
-
-        <div class="modal__teacher-item">
-          <input type="checkbox" class="modal__option-checkbox">
-          <div class="modal__option-content">
-            <div class="modal__option-title">王老師</div>
-            <div class="modal__option-subtitle">台中教育大學</div>
-          </div>
-        </div>
-
-        <div class="modal__teacher-item">
-          <input type="checkbox" class="modal__option-checkbox">
-          <div class="modal__option-content">
-            <div class="modal__option-title">李老師</div>
-            <div class="modal__option-subtitle">逢甲大學</div>
-          </div>
-        </div>
-
-        <div class="modal__teacher-item">
-          <input type="checkbox" class="modal__option-checkbox">
-          <div class="modal__option-content">
-            <div class="modal__option-title">張老師</div>
-            <div class="modal__option-subtitle">靜宜大學</div>
-          </div>
-        </div>
-      </div>
-      <div class="modal__footer">
-        <button class="modal__btn modal__btn--cancel" onclick="closePermissionModal()">取消</button>
-        <button class="modal__btn modal__btn--primary" onclick="savePermission()">儲存權限</button>
-      </div>
-    </div>
   </div>
 
   <script src="../js/main.js"></script>
@@ -1050,35 +955,27 @@
     });
 
     function filterByStatus(status) {
-      // 篩選邏輯
-      console.log('Filter by status:', status);
-    }
-
-    // 權限 Modal
-    function openPermissionModal() {
-      document.getElementById('permissionModal').classList.add('active');
-    }
-
-    function closePermissionModal() {
-      document.getElementById('permissionModal').classList.remove('active');
-    }
-
-    function savePermission() {
-      showMessage('權限設定已儲存', 'success');
-      closePermissionModal();
+      const statusClassMap = {
+        completed: 'status-badge--completed',
+        progress: 'status-badge--progress',
+        pending: 'status-badge--pending'
+      };
+      const rows = document.querySelectorAll('#logsTableBody tr');
+      rows.forEach(row => {
+        if (status === 'all') {
+          row.style.display = '';
+          return;
+        }
+        const badge = row.querySelector('.status-badge');
+        const match = badge && badge.classList.contains(statusClassMap[status]);
+        row.style.display = match ? '' : 'none';
+      });
     }
 
     // 查看日誌
     function viewLog() {
       window.location.href = 'log-detail.html';
     }
-
-    // 點擊 Modal 外部關閉
-    document.getElementById('permissionModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closePermissionModal();
-      }
-    });
   </script>
   <script src="../js/admin-notifications.js"></script>
 </body>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>課表排程 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,31 +26,57 @@
     .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
     .staff-main { display: flex; flex-direction: column; overflow: hidden; }
     .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
-    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__title { font-size: 24px; font-weight: 700; color: var(--color-primary-dark); }
     .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
     .staff-header__icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-secondary); cursor: pointer; }
     .staff-header__avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); overflow: hidden; }
     .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
     .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
-    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .page-title { font-size: 26px; font-weight: 700; color: var(--color-text-primary); }
     .btn-primary { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 20px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: var(--color-primary-dark); cursor: pointer; }
     .btn-secondary { padding: 10px 20px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-secondary); cursor: pointer; }
 
     /* 篩選列 */
     .schedule-filters { display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
     .filter-select { padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); cursor: pointer; }
-    .date-nav { display: flex; align-items: center; gap: var(--spacing-sm); }
+
+    /* 課表 / 課程列表 切換鈕 */
+    .view-toggle { display: inline-flex; gap: 2px; padding: 3px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); }
+    .view-toggle__btn { padding: 6px 14px; background: transparent; border: none; border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .view-toggle__btn:hover { color: var(--color-text-primary); }
+    .view-toggle__btn--active { background: var(--color-primary); color: var(--color-primary-dark); font-weight: 600; }
+
+    .date-nav { position: relative; display: flex; align-items: center; gap: var(--spacing-sm); }
     .date-nav__btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-secondary); }
     .date-nav__btn:hover { background: var(--color-surface-alt); }
-    .date-nav__current { padding: 8px 16px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); min-width: 180px; text-align: center; }
-    .date-nav__input { padding: 8px 12px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-primary); }
+    .date-nav__current { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 7px 14px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); font-weight: 600; color: var(--color-primary-dark); min-width: 160px; cursor: pointer; font-family: inherit; }
+    .date-nav__current:hover { border-color: var(--color-primary); }
+    .date-nav__current svg { flex-shrink: 0; color: var(--color-primary-dark); }
     .weekday-tabs { display: flex; gap: 4px; margin-left: auto; }
     .weekday-tab { width: 40px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
     .weekday-tab--active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); }
 
+    /* 日期選擇彈窗 */
+    .cal-popup { position: absolute; top: calc(100% + 8px); left: 36px; width: 236px; padding: 10px; background: #fff; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.28); z-index: 60; }
+    .cal-popup[hidden] { display: none; }
+    .cal-popup__head { display: flex; align-items: center; justify-content: space-between; background: var(--color-primary); border-radius: var(--radius-sm); padding: 4px 6px; margin-bottom: 6px; }
+    .cal-popup__title { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-primary-dark); }
+    .cal-popup__nav { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; font-size: 17px; line-height: 1; color: var(--color-primary-dark); border-radius: var(--radius-sm); }
+    .cal-popup__nav:hover { background: rgba(255, 255, 255, 0.55); }
+    .cal-popup__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cal-popup__weekdays span { text-align: center; font-size: var(--font-size-xs); color: #6e7781; padding: 4px 0; }
+    .cal-popup__grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cal-day { height: 30px; display: flex; align-items: center; justify-content: center; font-size: var(--font-size-sm); color: #262d33; cursor: pointer; user-select: none; }
+    .cal-day--empty { cursor: default; }
+    .cal-day--range { background: rgba(255, 219, 88, 0.5); }
+    .cal-day--range-start { border-top-left-radius: var(--radius-sm); border-bottom-left-radius: var(--radius-sm); }
+    .cal-day--range-end { border-top-right-radius: var(--radius-sm); border-bottom-right-radius: var(--radius-sm); }
+    .cal-day--anchor { box-shadow: inset 0 0 0 2px var(--color-primary); border-radius: var(--radius-sm); font-weight: 600; }
+    .cal-day:not(.cal-day--empty):hover { background: var(--color-primary-light); border-radius: var(--radius-sm); }
+
     /* 課表 */
-    .schedule-grid { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .schedule-grid { position: relative; background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
     .schedule-header { display: grid; border-bottom: 1px solid var(--color-surface-alt); }
     .schedule-header__cell { padding: var(--spacing-md); text-align: center; font-size: var(--font-size-md); font-weight: 500; color: var(--color-text-primary); border-right: 1px dashed var(--color-surface-alt); }
     .schedule-header__cell:first-child { border-right: 1px solid var(--color-surface-alt); }
@@ -60,6 +87,23 @@
     .schedule-time__sub { font-size: var(--font-size-xs); color: var(--color-text-muted); }
     .schedule-cell { position: relative; min-height: 50px; border-right: 1px dashed var(--color-surface-alt); border-bottom: 1px dashed var(--color-surface-alt); }
     .schedule-cell:last-child { border-right: none; }
+
+    /* 週課表表頭：星期 + 日期 */
+    .schedule-header__day { display: block; }
+    .schedule-header__date { display: block; margin-top: 2px; font-size: var(--font-size-xs); font-weight: 400; color: var(--color-text-muted); }
+
+    /* 單一老師週課表：當日欄位 —— 僅外框發光，框內無填色（與其它天相同） */
+    .schedule-header__cell.schedule-header__cell--today { color: var(--color-primary-dark); font-weight: 600; }
+    .today-frame {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-md);
+      box-shadow: 0 0 12px 2px rgba(255, 219, 88, 0.65);
+      pointer-events: none;
+      z-index: 4;
+    }
 
     /* 課程方塊 */
     .schedule-block { position: absolute; left: 2px; right: 2px; padding: 6px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
@@ -73,28 +117,108 @@
     .schedule-block__title { font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .schedule-block__location { color: var(--color-text-muted); }
     .schedule-block__teacher { color: var(--color-text-secondary); margin-top: 2px; }
-    .schedule-block__badge { position: absolute; top: 2px; right: 2px; padding: 1px 4px; font-size: 9px; background: #ff6b6b; color: white; border-radius: 2px; }
+    .schedule-block__badge { position: absolute; top: 2px; right: 2px; padding: 1px 4px; font-size: 10px; background: #ff6b6b; color: white; border-radius: 2px; }
 
     /* 調課 Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; }
     .modal-overlay.active { opacity: 1; visibility: visible; }
-    .modal { background: var(--color-surface); border-radius: var(--radius-lg); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-    .modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-surface-alt); }
+    .modal { display: block; position: static; inset: auto; padding: 0; background: var(--color-surface); border-radius: var(--radius-lg); width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal__header { position: static; display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-lg); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
     .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
     .modal__close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted); }
     .modal__close:hover { background: var(--color-surface-alt); }
     .modal__body { padding: var(--spacing-lg); }
     .modal__footer { display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); }
+    .modal__hint { display: flex; gap: 8px; background: var(--color-warning-bg); color: var(--color-warning); font-size: var(--font-size-sm); line-height: 1.6; padding: 10px 12px; border-radius: var(--radius-md); margin-bottom: var(--spacing-lg); }
+    .modal__hint svg { flex-shrink: 0; margin-top: 2px; }
     .form-group { margin-bottom: var(--spacing-lg); }
-    .form-group label { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-sm); }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-group > label { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-sm); }
+    .form-group__req { color: var(--color-error); margin-left: 2px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-primary); font-family: inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--color-primary); background: var(--color-surface); }
+    .form-group textarea { resize: vertical; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+    .form-row--single { grid-template-columns: 1fr; }
     .adjustment-type-btns { display: flex; gap: var(--spacing-sm); }
-    .adjustment-type-btn { flex: 1; padding: 10px; text-align: center; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); cursor: pointer; font-size: var(--font-size-sm); }
-    .adjustment-type-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); }
+    .adjustment-type-btn { flex: 1; padding: 10px 8px; text-align: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); cursor: pointer; font-size: var(--font-size-sm); color: var(--color-text-secondary); transition: all 0.15s; }
+    .adjustment-type-btn:hover { border-color: var(--color-primary); }
+    .adjustment-type-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); font-weight: 600; }
     .schedule-info { background: var(--color-background); border-radius: var(--radius-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
     .schedule-info__title { font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--spacing-xs); }
     .schedule-info__detail { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+    .form-error { color: var(--color-error); font-size: var(--font-size-sm); margin-top: var(--spacing-sm); min-height: 0; }
+    .modal__footer .btn-primary { justify-content: center; }
+    .modal__footer .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ===== 課程列表分頁 ===== */
+    .schedule-list[hidden] { display: none; }
+    .schedule-list table { width: 100%; border-collapse: collapse; background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .schedule-list th, .schedule-list td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--color-surface-alt); }
+    .schedule-list th { background: var(--color-background); font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-secondary); }
+    .schedule-list td { font-size: var(--font-size-md); color: var(--color-text-primary); }
+    .schedule-list tbody tr:hover { background: var(--color-background); }
+    .schedule-list tbody tr:last-child td { border-bottom: none; }
+    .schedule-list .col-actions { text-align: right; }
+    .col-sort { display: inline-flex; align-items: center; gap: 4px; padding: 0; background: none; border: none; font: inherit; font-weight: 600; color: var(--color-text-secondary); cursor: pointer; }
+    .col-sort:hover { color: var(--color-text-primary); }
+    .col-sort__ico { font-size: 11px; line-height: 1; opacity: 0.4; }
+    .col-sort--active .col-sort__ico { opacity: 1; color: var(--color-primary-dark); }
+    .class-actions { display: inline-flex; gap: var(--spacing-sm); }
+    .class-actions button { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-muted); cursor: pointer; }
+    .class-actions button:hover { background: var(--color-surface-alt); color: var(--color-text-primary); }
+    .schedule-list__empty { padding: 40px 20px; text-align: center; color: var(--color-text-muted); }
+    .pagination { display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); padding: var(--spacing-lg); }
+    .pagination__btn { min-width: 32px; height: 32px; padding: 0 6px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-surface-alt); background: var(--color-surface); border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+    .pagination__btn:hover:not(:disabled) { background: var(--color-surface-alt); }
+    .pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pagination__btn--active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); font-weight: 600; }
+
+    /* 學生名單 Modal */
+    .student-list-modal .modal__body { padding: 0; }
+    .student-modal__info { display: flex; gap: var(--spacing-md); padding: var(--spacing-md) var(--spacing-lg); border-bottom: 1px solid var(--color-surface-alt); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+    .student-modal__list { padding: var(--spacing-lg); max-height: 400px; overflow-y: auto; }
+    .student-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-background); border-radius: var(--radius-md); margin-bottom: var(--spacing-sm); }
+    .student-item:last-child { margin-bottom: 0; }
+    .student-item__left { display: flex; align-items: center; gap: 12px; }
+    .student-item__avatar { width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 219, 88, 0.4); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
+    .student-item__name { font-size: var(--font-size-md); font-weight: 500; color: var(--color-text-primary); }
+    .student-item__right { display: flex; align-items: center; gap: var(--spacing-sm); }
+    .student-item__school { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+    .student-item__remove { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid #f3c6c6; border-radius: var(--radius-md); background: #fff5f5; color: #c0392b; font-size: var(--font-size-sm); font-weight: 500; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .student-item__remove:hover { background: #fde3e3; border-color: #e5a5a5; }
+    .student-item__remove svg { width: 14px; height: 14px; }
+    .course-type-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: var(--font-size-xs); font-weight: 500; }
+    .course-type-badge--dynamics { background: #ffedd4; color: #ca3500; }
+    .course-type-badge--programming { background: #d0fae5; color: #007a55; }
+    .course-type-badge--creative { background: #ede9fe; color: #7008e7; }
+    .course-type-badge--default { background: #e8e8e8; color: #666; }
+
+    /* 新增學生 Modal */
+    .add-student-modal .modal__body { padding: 0; }
+    .add-student-modal__banner { margin: var(--spacing-lg); padding: 12px 16px; background: #fffbea; border: 1px solid rgba(255, 219, 88, 0.3); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+    .add-student-modal__banner strong { font-weight: 500; color: var(--color-text-primary); }
+    .add-student-modal__search { display: flex; align-items: center; gap: var(--spacing-sm); margin: 0 var(--spacing-lg) var(--spacing-md); padding: 10px 12px; background: var(--color-background); border-radius: var(--radius-md); }
+    .add-student-modal__search input { border: none; background: transparent; width: 100%; font-size: var(--font-size-md); color: var(--color-text-primary); }
+    .add-student-modal__header { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-lg) var(--spacing-md); }
+    .add-student-modal__count { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+    .btn-link { background: none; border: none; font-size: var(--font-size-sm); font-weight: 500; color: #b8960a; cursor: pointer; }
+    .btn-link:hover { text-decoration: underline; }
+    .add-student-modal__list { padding: 0 var(--spacing-lg) var(--spacing-md); max-height: 300px; overflow-y: auto; }
+    .student-checkbox-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); margin-bottom: 6px; cursor: pointer; transition: all 0.2s; }
+    .student-checkbox-item:hover { background: var(--color-surface-alt); }
+    .student-checkbox-item.selected { background: rgba(255, 219, 88, 0.1); border-color: var(--color-primary); }
+    /* 已在班級的學生：可取消勾選以移出班級 */
+    .student-checkbox-item.enrolled { background: #ecfdf3; border-color: #b7e8c9; }
+    .student-checkbox-item.enrolled .student-checkbox-item__name::after { content: '已在班級'; margin-left: 8px; padding: 1px 6px; border-radius: 20px; background: #d0fae5; color: #007a55; font-size: var(--font-size-xs); font-weight: 500; }
+    .student-checkbox-item.to-remove { background: #fff5f5; border-color: #f3c6c6; }
+    .student-checkbox-item.to-remove .student-checkbox-item__name { text-decoration: line-through; color: var(--color-text-muted); }
+    .student-checkbox-item.to-remove .student-checkbox-item__name::after { content: '將移出班級'; background: #fde3e3; color: #c0392b; }
+    .student-checkbox-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+    .student-checkbox-item__info { flex: 1; }
+    .student-checkbox-item__name { font-size: var(--font-size-md); font-weight: 500; color: var(--color-text-primary); }
+    .student-checkbox-item__detail { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+    .empty-students { text-align: center; padding: 40px 20px; color: var(--color-text-muted); }
 
     /* 載入中 */
     .loading { display: flex; align-items: center; justify-content: center; padding: var(--spacing-xl); color: var(--color-text-muted); }
@@ -148,22 +272,37 @@
         </div>
 
         <div class="schedule-filters">
+          <div class="view-toggle" id="scheduleViewToggle">
+            <button type="button" class="view-toggle__btn view-toggle__btn--active" data-view="calendar" onclick="setScheduleView('calendar')">課表</button>
+            <button type="button" class="view-toggle__btn" data-view="list" onclick="setScheduleView('list')">課程列表</button>
+          </div>
           <select class="filter-select" id="filterTeacher" onchange="loadSchedule()">
             <option value="">全部老師</option>
           </select>
           <select class="filter-select" id="filterClassroom" onchange="loadSchedule()">
             <option value="">全部教室</option>
           </select>
-          <div class="date-nav">
-            <button class="date-nav__btn" onclick="changeWeek(-1)">
+          <div class="date-nav" id="dateNav">
+            <button class="date-nav__btn" onclick="navigate(-1)">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <span class="date-nav__current" id="weekDisplay">2026/08/01 ~ 2026/08/07</span>
-            <button class="date-nav__btn" onclick="changeWeek(1)">
+            <button type="button" class="date-nav__current" id="dateField" onclick="toggleCalendarPopup(event)" title="選擇日期">
+              <span id="weekDisplay">2026/08/01 ~ 2026/08/07</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+            <button class="date-nav__btn" onclick="navigate(1)">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
-            <input type="date" class="date-nav__input" id="datePicker" onchange="goToDate(this.value)">
-            <button class="btn-secondary" onclick="goToToday()">今天</button>
+            <button class="btn-secondary" id="todayBtn" onclick="goToToday()">今天</button>
+            <div class="cal-popup" id="calendarPopup" hidden>
+              <div class="cal-popup__head">
+                <button type="button" class="cal-popup__nav" onclick="calShiftMonth(-1)" aria-label="上個月">&#8249;</button>
+                <span class="cal-popup__title" id="calTitle"></span>
+                <button type="button" class="cal-popup__nav" onclick="calShiftMonth(1)" aria-label="下個月">&#8250;</button>
+              </div>
+              <div class="cal-popup__weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+              <div class="cal-popup__grid" id="calGrid"></div>
+            </div>
           </div>
           <div class="weekday-tabs" id="weekdayTabs">
             <button class="weekday-tab" data-day="1">週一</button>
@@ -176,7 +315,7 @@
           </div>
         </div>
 
-        <div class="schedule-grid">
+        <div class="schedule-grid" id="calendarView">
           <div class="schedule-header" id="scheduleHeader">
             <!-- 由 JS 動態生成 -->
           </div>
@@ -184,79 +323,146 @@
             <div class="loading">載入中...</div>
           </div>
         </div>
+
+        <div class="schedule-list" id="listView" hidden>
+          <table>
+            <thead>
+              <tr>
+                <th><button type="button" class="col-sort" data-key="day_of_week" onclick="sortCourseList('day_of_week')">星期 <span class="col-sort__ico">⇅</span></button></th>
+                <th><button type="button" class="col-sort" data-key="course_name" onclick="sortCourseList('course_name')">課程名稱 <span class="col-sort__ico">⇅</span></button></th>
+                <th><button type="button" class="col-sort" data-key="start_time" onclick="sortCourseList('start_time')">時間 <span class="col-sort__ico">⇅</span></button></th>
+                <th><button type="button" class="col-sort" data-key="classroom_name" onclick="sortCourseList('classroom_name')">教室 <span class="col-sort__ico">⇅</span></button></th>
+                <th><button type="button" class="col-sort" data-key="teacher_name" onclick="sortCourseList('teacher_name')">老師 <span class="col-sort__ico">⇅</span></button></th>
+                <th class="col-actions">操作</th>
+              </tr>
+            </thead>
+            <tbody id="courseListBody"></tbody>
+          </table>
+          <div class="pagination" id="courseListPagination"></div>
+        </div>
       </div>
     </main>
+  </div>
+
+  <!-- 學生名單 Modal -->
+  <div class="modal-overlay" id="studentListModal">
+    <div class="modal student-list-modal">
+      <div class="modal__header">
+        <h3 class="modal__title" id="studentListTitle">學生名單</h3>
+        <button class="modal__close" onclick="closeModal('studentListModal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="student-modal__info" id="studentListInfo"></div>
+        <div class="student-modal__list" id="studentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增學生 Modal -->
+  <div class="modal-overlay" id="addStudentModal">
+    <div class="modal add-student-modal">
+      <div class="modal__header">
+        <h3 class="modal__title" id="addStudentTitle">新增學生</h3>
+        <button class="modal__close" onclick="closeModal('addStudentModal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="add-student-modal__banner" id="addStudentBanner"></div>
+        <div class="add-student-modal__search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="addStudentSearch" placeholder="搜尋姓名或學校...">
+        </div>
+        <div class="add-student-modal__header">
+          <span class="add-student-modal__count" id="selectedStudentCount">尚未變更</span>
+          <button type="button" class="btn-link" onclick="selectAllClassStudents()">全選</button>
+        </div>
+        <div class="add-student-modal__list" id="availableStudentList"></div>
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('addStudentModal')">取消</button>
+        <button type="button" class="btn-primary" onclick="enrollClassStudents()">儲存變更</button>
+      </div>
+    </div>
   </div>
 
   <!-- 調課 Modal -->
   <div class="modal-overlay" id="adjustmentModal">
     <div class="modal">
       <div class="modal__header">
-        <h3 class="modal__title" id="adjustmentModalTitle">新增調課</h3>
+        <h3 class="modal__title" id="adjustmentModalTitle">調課</h3>
         <button class="modal__close" onclick="closeModal('adjustmentModal')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal__body">
+        <div class="modal__hint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>調課為單次調整，不影響班級固定課表。若要永久修改時段，請至「課程資訊 → 班級管理」編輯班級。</span>
+        </div>
+
         <div class="schedule-info" id="scheduleInfo" style="display: none;">
           <div class="schedule-info__title" id="scheduleInfoTitle"></div>
           <div class="schedule-info__detail" id="scheduleInfoDetail"></div>
         </div>
 
         <div class="form-group">
-          <label>選擇班級</label>
-          <select id="adjustScheduleId">
-            <option value="">請選擇班級</option>
+          <label>選擇要調整的課<span class="form-group__req">*</span></label>
+          <select id="adjustScheduleId" onchange="onAdjustScheduleChange()">
+            <option value="">請選擇課程名稱</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>原上課日期</label>
-          <input type="date" id="adjustOriginalDate">
-        </div>
-
-        <div class="form-group">
-          <label>調課類型</label>
+          <label>調課類型<span class="form-group__req">*</span></label>
           <div class="adjustment-type-btns">
-            <div class="adjustment-type-btn active" data-type="reschedule" onclick="setAdjustmentType('reschedule')">改期</div>
-            <div class="adjustment-type-btn" data-type="cancel" onclick="setAdjustmentType('cancel')">取消</div>
-            <div class="adjustment-type-btn" data-type="makeup" onclick="setAdjustmentType('makeup')">補課</div>
+            <div class="adjustment-type-btn active" data-type="time" onclick="setAdjustmentType('time')">時段</div>
+            <div class="adjustment-type-btn" data-type="teacher" onclick="setAdjustmentType('teacher')">老師</div>
+            <div class="adjustment-type-btn" data-type="time_teacher" onclick="setAdjustmentType('time_teacher')">時段及老師</div>
           </div>
         </div>
 
-        <div id="adjustedFields">
+        <div class="form-row" id="fieldDateRow">
           <div class="form-group">
-            <label>調整後日期</label>
+            <label>原課日期<span class="form-group__req">*</span></label>
+            <input type="date" id="adjustOriginalDate">
+          </div>
+          <div class="form-group" id="fieldAdjustedDate">
+            <label>調至日期<span class="form-group__req">*</span></label>
             <input type="date" id="adjustAdjustedDate">
           </div>
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>調整後開始時間</label>
-              <input type="time" id="adjustStartTime">
-            </div>
-            <div class="form-group">
-              <label>調整後結束時間</label>
-              <input type="time" id="adjustEndTime">
-            </div>
-          </div>
-
+        <div class="form-row" id="fieldTimeRow">
           <div class="form-group">
-            <label>調整後教室</label>
-            <select id="adjustClassroom">
-              <option value="">維持原教室</option>
-            </select>
+            <label>開始時間<span class="form-group__req">*</span></label>
+            <input type="time" id="adjustStartTime">
           </div>
+          <div class="form-group">
+            <label>結束時間<span class="form-group__req">*</span></label>
+            <input type="time" id="adjustEndTime">
+          </div>
+        </div>
+
+        <div class="form-group" id="fieldSubTeacher" style="display: none;">
+          <label>代課老師<span class="form-group__req">*</span></label>
+          <select id="adjustSubTeacher">
+            <option value="">請選擇代課老師</option>
+          </select>
         </div>
 
         <div class="form-group">
-          <label>調課原因</label>
-          <textarea id="adjustReason" rows="2" placeholder="請輸入調課原因（選填）"></textarea>
+          <label>備註（選填）</label>
+          <textarea id="adjustReason" rows="2" placeholder="例：場地維修、老師出差…"></textarea>
         </div>
+
+        <div class="form-error" id="adjustError"></div>
       </div>
       <div class="modal__footer">
         <button class="btn-secondary" onclick="closeModal('adjustmentModal')">取消</button>
-        <button class="btn-primary" onclick="saveAdjustment()">確認</button>
+        <button class="btn-primary" id="adjustSubmitBtn" onclick="saveAdjustment()">確認調課</button>
       </div>
     </div>
   </div>
@@ -268,10 +474,19 @@
     // 狀態
     let currentDate = new Date();
     let currentDayOfWeek = currentDate.getDay(); // 0=週日
+    let currentViewMode = 'daily'; // 'daily'=全部老師當日課表；'weekly'=單一老師當週課表
+    let weeklyAnchor = null;       // 週課表起始日：null=顯示 currentDate 所在的週一～週日；有值=顯示該日往後 7 天
+    let calMonth = null;           // 日期選擇彈窗目前顯示的月份（該月 1 號）
     let teachers = [];
     let classrooms = [];
     let schedules = [];
-    let currentAdjustmentType = 'reschedule';
+    let currentAdjustmentType = 'time'; // 'time'=改時段；'teacher'=換代課老師；'time_teacher'=兩者皆調
+
+    // 課表 / 課程列表 檢視
+    let scheduleView = 'calendar';
+    let courseListSort = { key: 'day_of_week', dir: 'asc' };
+    let courseListPage = 1;
+    const COURSE_LIST_PAGE_SIZE = 12;
 
     // 初始化
     document.addEventListener('DOMContentLoaded', async () => {
@@ -279,7 +494,28 @@
       await loadFilters();
       await loadSchedule();
       setupWeekdayTabs();
+      window.addEventListener('resize', positionTodayFrame);
     });
+
+    // 移除當日外框
+    function clearTodayFrame() {
+      const frame = document.querySelector('.schedule-grid .today-frame');
+      if (frame) frame.remove();
+    }
+
+    // 於單一老師週課表，在「當日」整欄外圍畫一個發光外框
+    function positionTodayFrame() {
+      clearTodayFrame();
+      if (currentViewMode !== 'weekly') return;
+      const grid = document.querySelector('.schedule-grid');
+      const cell = document.querySelector('.schedule-header__cell--today');
+      if (!grid || !cell) return;
+      const frame = document.createElement('div');
+      frame.className = 'today-frame';
+      frame.style.left = cell.offsetLeft + 'px';
+      frame.style.width = cell.offsetWidth + 'px';
+      grid.appendChild(frame);
+    }
 
     // 更新日期顯示
     function updateCurrentDateDisplay() {
@@ -287,13 +523,25 @@
       const now = new Date();
       dateEl.textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
 
-      // 更新週顯示
-      const weekStart = getWeekStart(currentDate);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-      document.getElementById('weekDisplay').textContent =
-        `${formatDate(weekStart)} ~ ${formatDate(weekEnd)}`;
-      document.getElementById('datePicker').value = formatDateISO(currentDate);
+      // 依檢視模式更新日期／週次顯示
+      const label = document.getElementById('weekDisplay');
+      if (currentViewMode === 'weekly') {
+        const weekStart = weeklyWindowStart();
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        label.textContent = `${toROCDate(weekStart)} ~${toROCDate(weekEnd)}`;
+      } else {
+        label.textContent = toROCDate(currentDate);
+      }
+    }
+
+    // 轉民國年格式，例：115/05/26(二)
+    function toROCDate(date) {
+      const y = date.getFullYear() - 1911;
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const w = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()];
+      return `${y}/${m}/${d}(${w})`;
     }
 
     // 取得週一日期
@@ -304,13 +552,19 @@
       return new Date(d.setDate(diff));
     }
 
+    // 週課表起始日：未指定日期時＝該週週一；由日曆選定日期後＝該日
+    function weeklyWindowStart() {
+      return weeklyAnchor ? new Date(weeklyAnchor) : getWeekStart(currentDate);
+    }
+
     // 格式化日期
     function formatDate(date) {
       return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
     }
 
+    // 以「本地」時間輸出 yyyy-mm-dd（避免 toISOString 因時區偏移到前一天）
     function formatDateISO(date) {
-      return date.toISOString().split('T')[0];
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
 
     // 載入篩選器選項
@@ -328,19 +582,22 @@
         const classroomsResult = await api.schedules.getClassrooms();
         classrooms = classroomsResult.data || [];
         const classroomSelect = document.getElementById('filterClassroom');
-        const adjustClassroomSelect = document.getElementById('adjustClassroom');
         classrooms.forEach(c => {
           classroomSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-          adjustClassroomSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
         });
 
-        // 載入班級到調課選單
+        // 載入老師到「代課老師」選單
+        const subTeacherSelect = document.getElementById('adjustSubTeacher');
+        teachers.forEach(t => {
+          subTeacherSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+        });
+
+        // 載入班級（課程時段）到「選擇要調整的課」選單
         const schedulesResult = await api.schedules.getAll();
         schedules = schedulesResult.data || [];
         const scheduleSelect = document.getElementById('adjustScheduleId');
         schedules.forEach(s => {
-          const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-          const dayName = dayNames[s.day_of_week];
+          const dayName = DAY_NAMES[s.day_of_week];
           const time = s.start_time ? s.start_time.substring(0, 5) : '';
           scheduleSelect.innerHTML += `<option value="${s.id}">${s.course_name} - ${dayName} ${time} (${s.teacher_name || '未指派'})</option>`;
         });
@@ -349,79 +606,110 @@
       }
     }
 
-    // 載入課表
+    const SCHEDULE_TIMES = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
+    const DAY_NAMES = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+
+    // 時間欄
+    function buildTimeCell(time, hour) {
+      const timeCell = document.createElement('div');
+      timeCell.className = 'schedule-time';
+      timeCell.innerHTML = `<span class="schedule-time__main">${time}</span><span class="schedule-time__sub">${hour}:30</span>`;
+      return timeCell;
+    }
+
+    // 若課程於這個時段開始，產生課程方塊並加入欄位
+    function appendBlockIfStartsAt(cell, schedule, hour) {
+      const startHour = parseInt(schedule.start_time.split(':')[0]);
+      const endHour = parseInt(schedule.end_time.split(':')[0]);
+      if (startHour !== hour) return;
+
+      const duration = Math.max(1, endHour - startHour);
+      const block = document.createElement('div');
+      const colorClass = getColorClass(schedule.course_type_name || schedule.course_name);
+      block.className = `schedule-block schedule-block--${colorClass}${schedule.is_adjusted ? ' schedule-block--adjusted' : ''}`;
+      block.style.top = '2px';
+      block.style.height = `${duration * 50 - 4}px`;
+
+      const locationName = schedule.classroom_name ? `[${schedule.classroom_name.replace('教室', '')}]` : '';
+      block.innerHTML = `
+        <div class="schedule-block__title">${schedule.course_name} ${locationName}</div>
+        <div class="schedule-block__teacher">${schedule.teacher_name || ''}</div>
+        ${schedule.is_adjusted ? '<span class="schedule-block__badge">調</span>' : ''}
+      `;
+      block.onclick = () => openScheduleDetail(schedule);
+      cell.appendChild(block);
+    }
+
+    // 載入課表（下拉選單「全部老師」＝當日課表；選單「單一老師」＝該老師當週課表）
     async function loadSchedule() {
+      const teacherId = document.getElementById('filterTeacher').value;
+      currentViewMode = teacherId ? 'weekly' : 'daily';
+      if (currentViewMode === 'daily') weeklyAnchor = null;
+      updateFilterBarMode();
+      updateCurrentDateDisplay();
+
+      if (currentViewMode === 'weekly') {
+        await renderWeeklyView(teacherId);
+      } else {
+        await renderDailyView();
+        updateWeekdayTabs();
+      }
+    }
+
+    // 依檢視模式切換篩選列（週檢視隱藏星期分頁與「今天」）
+    function updateFilterBarMode() {
+      const weekly = currentViewMode === 'weekly';
+      document.getElementById('weekdayTabs').style.display = weekly ? 'none' : 'flex';
+      document.getElementById('todayBtn').style.display = weekly ? 'none' : '';
+      closeCalendarPopup();
+    }
+
+    // 上一頁／下一頁（週檢視移動一週＝7 天，日檢視移動一天）
+    function navigate(delta) {
+      if (currentViewMode === 'weekly' && weeklyAnchor) {
+        weeklyAnchor.setDate(weeklyAnchor.getDate() + delta * 7);
+        currentDate = new Date(weeklyAnchor);
+      } else {
+        currentDate.setDate(currentDate.getDate() + delta * (currentViewMode === 'weekly' ? 7 : 1));
+      }
+      currentDayOfWeek = currentDate.getDay();
+      updateCurrentDateDisplay();
+      loadSchedule();
+      updateWeekdayTabs();
+    }
+
+    // 全部老師：當日課表（欄位＝老師）
+    async function renderDailyView() {
       const scheduleBody = document.getElementById('scheduleBody');
       const scheduleHeader = document.getElementById('scheduleHeader');
+      clearTodayFrame();
       scheduleBody.innerHTML = '<div class="loading">載入中...</div>';
 
       try {
-        const teacherId = document.getElementById('filterTeacher').value;
         const classroomId = document.getElementById('filterClassroom').value;
 
         const result = await api.scheduleCalendar.getDaily({
           date: formatDateISO(currentDate),
-          teacher_id: teacherId || undefined,
           classroom_id: classroomId || undefined
         });
 
-        const data = result.data;
-        const teacherList = data.teachers.filter(t => t.schedules.length > 0 || !teacherId);
+        const displayTeachers = (result.data.teachers || []).slice(0, 7);
 
-        // 如果沒有選擇特定老師，顯示所有有排課的老師
-        const displayTeachers = teacherId ? teacherList : teacherList.slice(0, 7);
-
-        // 生成表頭
-        const cols = displayTeachers.length + 1;
         scheduleHeader.style.gridTemplateColumns = `60px repeat(${displayTeachers.length}, 1fr)`;
         scheduleHeader.innerHTML = '<div class="schedule-header__cell"></div>' +
           displayTeachers.map(t => `<div class="schedule-header__cell">${t.teacher_name}</div>`).join('');
 
-        // 生成課表內容
         scheduleBody.style.gridTemplateColumns = `60px repeat(${displayTeachers.length}, 1fr)`;
         scheduleBody.innerHTML = '';
 
-        const times = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'];
-
-        times.forEach((time, index) => {
+        SCHEDULE_TIMES.forEach((time) => {
           const hour = parseInt(time);
+          scheduleBody.appendChild(buildTimeCell(time, hour));
 
-          // 時間欄
-          const timeCell = document.createElement('div');
-          timeCell.className = 'schedule-time';
-          timeCell.innerHTML = `<span class="schedule-time__main">${time}</span><span class="schedule-time__sub">${hour}:30</span>`;
-          scheduleBody.appendChild(timeCell);
-
-          // 老師欄位
-          displayTeachers.forEach((teacher, tIndex) => {
+          displayTeachers.forEach((teacher) => {
             const cell = document.createElement('div');
             cell.className = 'schedule-cell';
-
-            // 找這個老師在這個時間的課程
-            teacher.schedules.forEach(schedule => {
-              const startHour = parseInt(schedule.start_time.split(':')[0]);
-              const endHour = parseInt(schedule.end_time.split(':')[0]);
-
-              if (startHour === hour) {
-                const duration = endHour - startHour;
-                const block = document.createElement('div');
-                const colorClass = getColorClass(schedule.course_type_name || schedule.course_name);
-                block.className = `schedule-block schedule-block--${colorClass}${schedule.is_adjusted ? ' schedule-block--adjusted' : ''}`;
-                block.style.top = '2px';
-                block.style.height = `${duration * 50 - 4}px`;
-
-                const locationName = schedule.classroom_name ? `[${schedule.classroom_name.replace('教室', '')}]` : '';
-                block.innerHTML = `
-                  <div class="schedule-block__title">${schedule.course_name} ${locationName}</div>
-                  <div class="schedule-block__teacher">${schedule.teacher_name || ''}</div>
-                  ${schedule.is_adjusted ? '<span class="schedule-block__badge">調</span>' : ''}
-                `;
-
-                block.onclick = () => openScheduleDetail(schedule);
-                cell.appendChild(block);
-              }
-            });
-
+            teacher.schedules.forEach(schedule => appendBlockIfStartsAt(cell, schedule, hour));
             scheduleBody.appendChild(cell);
           });
         });
@@ -429,12 +717,535 @@
         if (displayTeachers.length === 0) {
           scheduleBody.innerHTML = '<div class="loading">今日無排課</div>';
         }
-
       } catch (error) {
         console.error('載入課表失敗:', error);
         scheduleBody.innerHTML = '<div class="loading">載入失敗</div>';
       }
     }
+
+    // 取得「起始日往後 7 天」的每日課程資料。後端週課表以週一～週日為單位，
+    // 若起始日非週一，視窗會跨到下一週，因此需再取一次下一週再依日期挑出所需 7 天。
+    async function fetchWindowDays(startDate, teacherId, classroomId) {
+      const wanted = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate() + i);
+        wanted.push(formatDateISO(d));
+      }
+      const calls = [api.scheduleCalendar.getWeekly({ date: wanted[0], teacher_id: teacherId, classroom_id: classroomId || undefined })];
+      if (startDate.getDay() !== 1) {
+        calls.push(api.scheduleCalendar.getWeekly({ date: wanted[6], teacher_id: teacherId, classroom_id: classroomId || undefined }));
+      }
+      const results = await Promise.all(calls);
+      const byDate = {};
+      results.forEach(r => (r.data.schedules || []).forEach(day => { byDate[day.date] = day; }));
+      return wanted.map(iso => byDate[iso] || { date: iso, schedules: [] });
+    }
+
+    // 單一老師：當週課表（欄位＝起始日往後 7 天，當日欄位以發光邊框標記）
+    async function renderWeeklyView(teacherId) {
+      const scheduleBody = document.getElementById('scheduleBody');
+      const scheduleHeader = document.getElementById('scheduleHeader');
+      scheduleBody.innerHTML = '<div class="loading">載入中...</div>';
+
+      try {
+        const classroomId = document.getElementById('filterClassroom').value;
+        const days = await fetchWindowDays(weeklyWindowStart(), teacherId, classroomId);
+        const todayISO = formatDateISO(new Date());
+        const WD = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+
+        scheduleHeader.style.gridTemplateColumns = `60px repeat(7, 1fr)`;
+        scheduleHeader.innerHTML = '<div class="schedule-header__cell"></div>' +
+          days.map(d => {
+            const dayName = WD[new Date(d.date + 'T00:00:00').getDay()];
+            const todayCls = d.date === todayISO ? ' schedule-header__cell--today' : '';
+            return `<div class="schedule-header__cell${todayCls}">` +
+              `<span class="schedule-header__day">${dayName}</span>` +
+              `<span class="schedule-header__date">${d.date.replace(/-/g, '/')}</span></div>`;
+          }).join('');
+
+        scheduleBody.style.gridTemplateColumns = `60px repeat(7, 1fr)`;
+        scheduleBody.innerHTML = '';
+
+        SCHEDULE_TIMES.forEach((time) => {
+          const hour = parseInt(time);
+          scheduleBody.appendChild(buildTimeCell(time, hour));
+
+          days.forEach(day => {
+            const isToday = day.date === todayISO;
+            const cell = document.createElement('div');
+            cell.className = 'schedule-cell' + (isToday ? ' schedule-cell--today' : '');
+            day.schedules.forEach(schedule => appendBlockIfStartsAt(cell, schedule, hour));
+            scheduleBody.appendChild(cell);
+          });
+        });
+
+        positionTodayFrame();
+      } catch (error) {
+        console.error('載入週課表失敗:', error);
+        scheduleBody.innerHTML = '<div class="loading">載入失敗</div>';
+      }
+    }
+
+    // ========== 日期選擇彈窗 ==========
+    function toggleCalendarPopup(evt) {
+      if (evt) evt.stopPropagation();
+      const pop = document.getElementById('calendarPopup');
+      if (pop.hidden) openCalendarPopup(); else closeCalendarPopup();
+    }
+
+    function openCalendarPopup() {
+      const base = currentViewMode === 'weekly' ? weeklyWindowStart() : currentDate;
+      calMonth = new Date(base.getFullYear(), base.getMonth(), 1);
+      renderCalendar();
+      document.getElementById('calendarPopup').hidden = false;
+    }
+
+    function closeCalendarPopup() {
+      const pop = document.getElementById('calendarPopup');
+      if (pop) pop.hidden = true;
+    }
+
+    function calShiftMonth(delta) {
+      calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + delta, 1);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      document.getElementById('calTitle').textContent =
+        `${calMonth.getFullYear() - 1911} 年 ${calMonth.getMonth() + 1} 月`;
+
+      const grid = document.getElementById('calGrid');
+      grid.innerHTML = '';
+
+      const year = calMonth.getFullYear();
+      const month = calMonth.getMonth();
+      const firstWeekday = new Date(year, month, 1).getDay();      // 0=週日
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // 週檢視：標示 7 天視窗；日檢視：僅標示當前選定日
+      const weekly = currentViewMode === 'weekly';
+      const start = weekly ? weeklyWindowStart() : currentDate;
+      const startT = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+      const endT = weekly ? startT + 6 * 86400000 : startT;
+
+      for (let i = 0; i < firstWeekday; i++) {
+        const e = document.createElement('div');
+        e.className = 'cal-day cal-day--empty';
+        grid.appendChild(e);
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cellDate = new Date(year, month, d);
+        const t = cellDate.getTime();
+        const cell = document.createElement('div');
+        cell.className = 'cal-day';
+        cell.textContent = d;
+        if (t >= startT && t <= endT) {
+          const col = cellDate.getDay();
+          cell.classList.add('cal-day--range');
+          if (t === startT || col === 0) cell.classList.add('cal-day--range-start');
+          if (t === endT || col === 6) cell.classList.add('cal-day--range-end');
+          if (t === startT) cell.classList.add('cal-day--anchor');
+        }
+        cell.addEventListener('click', () => pickCalendarDate(cellDate));
+        grid.appendChild(cell);
+      }
+    }
+
+    // 選定單日：週檢視 → 以該日往後 7 天為視窗；日檢視 → 跳至該日
+    function pickCalendarDate(date) {
+      closeCalendarPopup();
+      if (currentViewMode === 'weekly') {
+        weeklyAnchor = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        currentDate = new Date(weeklyAnchor);
+        currentDayOfWeek = currentDate.getDay();
+        updateCurrentDateDisplay();
+        loadSchedule();
+        updateWeekdayTabs();
+      } else {
+        goToDate(formatDateISO(date));
+      }
+    }
+
+    // 點彈窗以外處關閉
+    document.addEventListener('click', (e) => {
+      const pop = document.getElementById('calendarPopup');
+      if (!pop || pop.hidden) return;
+      if (pop.contains(e.target) || e.target.closest('#dateField')) return;
+      closeCalendarPopup();
+    });
+
+    // ========== 課表 / 課程列表 切換 ==========
+    function setScheduleView(view) {
+      scheduleView = view;
+      document.querySelectorAll('#scheduleViewToggle .view-toggle__btn').forEach(b => {
+        b.classList.toggle('view-toggle__btn--active', b.dataset.view === view);
+      });
+
+      const isList = view === 'list';
+      // 課程列表僅需切換鈕，其餘篩選控制項僅在課表檢視顯示
+      ['filterTeacher', 'filterClassroom', 'dateNav', 'weekdayTabs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = isList ? 'none' : '';
+      });
+      document.getElementById('calendarView').hidden = isList;
+      document.getElementById('listView').hidden = !isList;
+
+      if (isList) {
+        closeCalendarPopup();
+        renderCourseList();
+      } else {
+        updateFilterBarMode(); // 還原課表檢視下各控制項的顯示狀態
+      }
+    }
+
+    // ========== 課程列表 ==========
+    const WEEKDAY_CH = ['日', '一', '二', '三', '四', '五', '六'];
+
+    // 週日排在最後
+    function weekdayOrder(dow) {
+      return dow === 0 ? 7 : dow;
+    }
+
+    function sortCourseList(key) {
+      if (courseListSort.key === key) {
+        courseListSort.dir = courseListSort.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        courseListSort = { key, dir: 'asc' };
+      }
+      courseListPage = 1;
+      renderCourseList();
+    }
+
+    function getSortedCourseList() {
+      const { key, dir } = courseListSort;
+      const factor = dir === 'asc' ? 1 : -1;
+      return [...schedules].sort((a, b) => {
+        let av, bv;
+        if (key === 'day_of_week') {
+          av = weekdayOrder(a.day_of_week); bv = weekdayOrder(b.day_of_week);
+        } else if (key === 'start_time') {
+          av = a.start_time || ''; bv = b.start_time || '';
+        } else {
+          av = a[key] || ''; bv = b[key] || '';
+        }
+        let cmp;
+        if (typeof av === 'number' && typeof bv === 'number') {
+          cmp = av - bv;
+        } else {
+          cmp = String(av).localeCompare(String(bv), 'zh-Hant');
+        }
+        // 次要排序：星期 → 時間，其餘 → 星期＋時間
+        if (cmp === 0) {
+          cmp = weekdayOrder(a.day_of_week) - weekdayOrder(b.day_of_week)
+             || String(a.start_time || '').localeCompare(String(b.start_time || ''));
+        }
+        return cmp * factor;
+      });
+    }
+
+    function updateSortIndicators() {
+      document.querySelectorAll('#listView .col-sort').forEach(btn => {
+        const active = btn.dataset.key === courseListSort.key;
+        btn.classList.toggle('col-sort--active', active);
+        btn.querySelector('.col-sort__ico').textContent = active
+          ? (courseListSort.dir === 'asc' ? '▲' : '▼')
+          : '⇅';
+      });
+    }
+
+    function renderCourseList() {
+      updateSortIndicators();
+
+      const body = document.getElementById('courseListBody');
+      const sorted = getSortedCourseList();
+      const totalPages = Math.max(1, Math.ceil(sorted.length / COURSE_LIST_PAGE_SIZE));
+      courseListPage = Math.min(Math.max(1, courseListPage), totalPages);
+      const startIdx = (courseListPage - 1) * COURSE_LIST_PAGE_SIZE;
+      const pageRows = sorted.slice(startIdx, startIdx + COURSE_LIST_PAGE_SIZE);
+
+      if (!pageRows.length) {
+        body.innerHTML = '<tr><td colspan="6" class="schedule-list__empty">目前沒有課程班級</td></tr>';
+        renderCourseListPagination(1);
+        return;
+      }
+
+      body.innerHTML = pageRows.map(s => {
+        const start = s.start_time ? s.start_time.substring(0, 5) : '';
+        const end = s.end_time ? s.end_time.substring(0, 5) : '';
+        return `
+          <tr>
+            <td>${WEEKDAY_CH[s.day_of_week] ?? '-'}</td>
+            <td>${s.course_name || '-'}</td>
+            <td>${start && end ? `${start}–${end}` : '-'}</td>
+            <td>${(s.classroom_name || '-').replace('教室', '')}</td>
+            <td>${s.teacher_name || '未指派'}</td>
+            <td class="col-actions">
+              <div class="class-actions">
+                <button type="button" title="學生列表" onclick="openClassStudentList(${s.id})">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                </button>
+                <button type="button" title="新增學生" onclick="openClassAddStudent(${s.id})">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      renderCourseListPagination(totalPages);
+    }
+
+    function renderCourseListPagination(totalPages) {
+      const el = document.getElementById('courseListPagination');
+      if (totalPages <= 1) { el.innerHTML = ''; return; }
+      let html = `<button class="pagination__btn" ${courseListPage <= 1 ? 'disabled' : ''} onclick="gotoCourseListPage(${courseListPage - 1})">&lt;</button>`;
+      for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="pagination__btn${p === courseListPage ? ' pagination__btn--active' : ''}" onclick="gotoCourseListPage(${p})">${p}</button>`;
+      }
+      html += `<button class="pagination__btn" ${courseListPage >= totalPages ? 'disabled' : ''} onclick="gotoCourseListPage(${courseListPage + 1})">&gt;</button>`;
+      el.innerHTML = html;
+    }
+
+    function gotoCourseListPage(p) {
+      courseListPage = p;
+      renderCourseList();
+    }
+
+    // ========== 學生名單 / 新增學生 Modal（沿用班級管理流程） ==========
+    let currentClassScheduleId = null;
+    let availableClassStudents = [];
+
+    function courseTypeBadgeClass(typeName) {
+      if (!typeName) return 'course-type-badge--default';
+      if (typeName.includes('動力')) return 'course-type-badge--dynamics';
+      if (typeName.includes('程式')) return 'course-type-badge--programming';
+      if (typeName.includes('科創')) return 'course-type-badge--creative';
+      return 'course-type-badge--default';
+    }
+
+    function courseTypeShortName(typeName) {
+      if (!typeName) return '';
+      if (typeName.includes('動力')) return '動力';
+      if (typeName.includes('程式')) return '程式';
+      if (typeName.includes('科創')) return '科創';
+      if (typeName.includes('幼兒')) return '幼兒';
+      if (typeName.includes('專題')) return '專題';
+      return typeName.substring(0, 2);
+    }
+
+    async function openClassStudentList(scheduleId) {
+      currentClassScheduleId = scheduleId;
+      document.getElementById('studentListModal').classList.add('active');
+      document.getElementById('studentList').innerHTML = '<div class="empty-students">載入中...</div>';
+
+      try {
+        const result = await api.schedules.getStudents(scheduleId);
+        const { schedule, students } = result.data;
+        const start = schedule.start_time ? schedule.start_time.substring(0, 5) : '';
+        const end = schedule.end_time ? schedule.end_time.substring(0, 5) : '';
+
+        document.getElementById('studentListTitle').textContent = `${schedule.course_name} — 學生名單`;
+        document.getElementById('studentListInfo').innerHTML = `
+          <span>老師：${schedule.teacher_name || '未指派'}</span>
+          <span>教室：${(schedule.classroom_name || '未指定').replace('教室', '')}</span>
+          <span>時間：${WEEKDAY_CH[schedule.day_of_week] ?? ''} ${start}–${end}</span>
+        `;
+
+        const listEl = document.getElementById('studentList');
+        if (!students.length) {
+          listEl.innerHTML = '<div class="empty-students">目前沒有學生，請點擊「新增學生」加入。</div>';
+          return;
+        }
+        listEl.innerHTML = students.map(st => {
+          const safeName = (st.name || '').replace(/"/g, '&quot;');
+          return `
+          <div class="student-item" data-student-id="${st.id}">
+            <div class="student-item__left">
+              <div class="student-item__avatar">${(st.name || '').charAt(0)}</div>
+              <span class="student-item__name">${st.name || '-'}</span>
+            </div>
+            <div class="student-item__right">
+              ${st.course_type_name ? `<span class="course-type-badge ${courseTypeBadgeClass(st.course_type_name)}">${courseTypeShortName(st.course_type_name)}</span>` : ''}
+              <span class="student-item__school">${st.school || ''}</span>
+              <button type="button" class="student-item__remove" title="從班級移除" onclick="removeClassStudent(${st.id}, &quot;${safeName}&quot;)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                移除
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      } catch (error) {
+        console.error('載入學生名單失敗:', error);
+        document.getElementById('studentList').innerHTML = '<div class="empty-students">載入失敗</div>';
+      }
+    }
+
+    // 從班級移除單一學生（加錯學生時可修正）
+    async function removeClassStudent(studentId, studentName) {
+      if (!currentClassScheduleId) return;
+      if (!confirm(`確定要將「${studentName || '這位學生'}」從此班級移除嗎？`)) return;
+
+      try {
+        const result = await api.schedules.removeStudent(currentClassScheduleId, studentId);
+        if (result.success) {
+          if (typeof showMessage === 'function') showMessage(result.message || '學生已從班級移除', 'success');
+          await openClassStudentList(currentClassScheduleId); // 重新載入名單
+          const fresh = await api.schedules.getAll();
+          schedules = fresh.data || [];
+          if (scheduleView === 'list') renderCourseList();
+        }
+      } catch (error) {
+        if (typeof showMessage === 'function') showMessage('移除學生失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      }
+    }
+
+    async function openClassAddStudent(scheduleId) {
+      currentClassScheduleId = scheduleId;
+      document.getElementById('addStudentSearch').value = '';
+      document.getElementById('addStudentModal').classList.add('active');
+      await loadAvailableClassStudents(scheduleId);
+    }
+
+    async function loadAvailableClassStudents(scheduleId, search = '') {
+      try {
+        const result = await api.schedules.getAvailableStudents(scheduleId, search ? { search } : {});
+        const { schedule, students } = result.data;
+        availableClassStudents = students;
+
+        document.getElementById('addStudentTitle').textContent = `新增學生 — ${schedule.course_name}`;
+        document.getElementById('addStudentBanner').innerHTML =
+          `${schedule.teacher_name || '未指派'} 授課・${(schedule.classroom_name || '未指定').replace('教室', '')}・現有 <strong>${schedule.student_count || 0}</strong> 名學生`;
+        renderAvailableClassStudents();
+      } catch (error) {
+        console.error('載入可選學生失敗:', error);
+        document.getElementById('availableStudentList').innerHTML = '<div class="empty-students">載入失敗</div>';
+      }
+    }
+
+    function renderAvailableClassStudents() {
+      const listEl = document.getElementById('availableStudentList');
+      if (!availableClassStudents.length) {
+        listEl.innerHTML = '<div class="empty-students">沒有可加入的學生</div>';
+        updateClassSelectedCount();
+        return;
+      }
+      listEl.innerHTML = availableClassStudents.map(st => {
+        const enrolled = st.is_enrolled === 1;
+        return `
+          <label class="student-checkbox-item ${enrolled ? 'enrolled' : ''}" data-student-id="${st.id}" data-enrolled="${enrolled ? '1' : '0'}">
+            <input type="checkbox" value="${st.id}" ${enrolled ? 'checked' : ''}>
+            <div class="student-checkbox-item__info">
+              <div class="student-checkbox-item__name">${st.name || '-'}</div>
+              <div class="student-checkbox-item__detail">${st.school || ''} ${st.grade || ''}</div>
+            </div>
+            ${st.course_type_name ? `<span class="course-type-badge ${courseTypeBadgeClass(st.course_type_name)}">${courseTypeShortName(st.course_type_name)}</span>` : ''}
+          </label>
+        `;
+      }).join('');
+
+      // 綁定 checkbox 變更事件：已在班級的學生取消勾選即代表要移出班級
+      listEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', function () {
+          const label = this.closest('.student-checkbox-item');
+          const wasEnrolled = label.dataset.enrolled === '1';
+          label.classList.toggle('selected', this.checked && !wasEnrolled);
+          label.classList.toggle('to-remove', !this.checked && wasEnrolled);
+          updateClassSelectedCount();
+        });
+      });
+      updateClassSelectedCount();
+    }
+
+    // 計算相對於目前班級名單的變更（新增 / 移出）
+    function getClassStudentChanges() {
+      const toAdd = [];
+      const toRemove = [];
+      document.querySelectorAll('#availableStudentList .student-checkbox-item').forEach(label => {
+        const cb = label.querySelector('input[type="checkbox"]');
+        if (!cb) return;
+        const id = parseInt(cb.value);
+        const wasEnrolled = label.dataset.enrolled === '1';
+        if (cb.checked && !wasEnrolled) toAdd.push(id);
+        if (!cb.checked && wasEnrolled) toRemove.push(id);
+      });
+      return { toAdd, toRemove };
+    }
+
+    function updateClassSelectedCount() {
+      const { toAdd, toRemove } = getClassStudentChanges();
+      const el = document.getElementById('selectedStudentCount');
+      if (!toAdd.length && !toRemove.length) {
+        el.textContent = '尚未變更';
+        return;
+      }
+      const parts = [];
+      if (toAdd.length) parts.push(`新增 ${toAdd.length} 位`);
+      if (toRemove.length) parts.push(`移出 ${toRemove.length} 位`);
+      el.textContent = parts.join('・');
+    }
+
+    function selectAllClassStudents() {
+      document.querySelectorAll('#availableStudentList .student-checkbox-item').forEach(label => {
+        const cb = label.querySelector('input[type="checkbox"]');
+        if (!cb) return;
+        cb.checked = true;
+        label.classList.remove('to-remove');
+        if (label.dataset.enrolled !== '1') label.classList.add('selected');
+      });
+      updateClassSelectedCount();
+    }
+
+    async function enrollClassStudents() {
+      const { toAdd, toRemove } = getClassStudentChanges();
+
+      if (!toAdd.length && !toRemove.length) {
+        if (typeof showMessage === 'function') showMessage('沒有任何變更', 'error');
+        return;
+      }
+
+      if (toRemove.length > 0 &&
+          !confirm(`將有 ${toRemove.length} 位學生被移出此班級，確定套用變更？`)) {
+        return;
+      }
+
+      try {
+        if (toAdd.length > 0) {
+          await api.schedules.enrollStudents(currentClassScheduleId, toAdd);
+        }
+        for (const sid of toRemove) {
+          await api.schedules.removeStudent(currentClassScheduleId, sid);
+        }
+        if (typeof showMessage === 'function') showMessage('班級學生已更新', 'success');
+        closeModal('addStudentModal');
+        const fresh = await api.schedules.getAll();
+        schedules = fresh.data || [];
+        if (scheduleView === 'list') renderCourseList();
+      } catch (error) {
+        if (typeof showMessage === 'function') showMessage('更新學生失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      }
+    }
+
+    // 搜尋（新增學生 Modal）
+    let classStudentSearchTimer = null;
+    document.getElementById('addStudentSearch').addEventListener('input', function () {
+      clearTimeout(classStudentSearchTimer);
+      const search = this.value.trim();
+      classStudentSearchTimer = setTimeout(() => loadAvailableClassStudents(currentClassScheduleId, search), 300);
+    });
+
+    // 點背景關閉
+    document.getElementById('studentListModal').addEventListener('click', function (e) {
+      if (e.target === this) closeModal('studentListModal');
+    });
+    document.getElementById('addStudentModal').addEventListener('click', function (e) {
+      if (e.target === this) closeModal('addStudentModal');
+    });
 
     // 取得課程顏色
     function getColorClass(name) {
@@ -455,6 +1266,7 @@
 
     // 跳到今天
     function goToToday() {
+      weeklyAnchor = null;
       currentDate = new Date();
       currentDayOfWeek = currentDate.getDay();
       updateCurrentDateDisplay();
@@ -504,25 +1316,77 @@
       });
     }
 
-    // 開啟課程詳情
+    // 開啟課程詳情（點課表方塊）→ 開啟調課 Modal 並帶入該堂課
     function openScheduleDetail(schedule) {
-      // 可以顯示課程詳情或開啟調課 Modal
       openAdjustmentModal(schedule);
     }
 
-    // 開啟調課 Modal
+    // 取得「今天（含）之後第一個符合指定星期」的日期（yyyy-mm-dd）
+    function nextDateForWeekday(dow) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      const diff = (dow - d.getDay() + 7) % 7;
+      d.setDate(d.getDate() + diff);
+      return formatDateISO(d);
+    }
+
+    // 依 schedule_id 取得已載入的班級時段資料
+    function findSchedule(id) {
+      return schedules.find(s => String(s.id) === String(id)) || null;
+    }
+
+    function setAdjustError(msg) {
+      document.getElementById('adjustError').textContent = msg || '';
+    }
+
+    // 重置調課表單
+    function resetAdjustmentForm() {
+      document.getElementById('adjustScheduleId').value = '';
+      document.getElementById('adjustOriginalDate').value = '';
+      document.getElementById('adjustAdjustedDate').value = '';
+      document.getElementById('adjustStartTime').value = '';
+      document.getElementById('adjustEndTime').value = '';
+      document.getElementById('adjustSubTeacher').value = '';
+      document.getElementById('adjustReason').value = '';
+      document.getElementById('scheduleInfo').style.display = 'none';
+      setAdjustError('');
+      setAdjustmentType('time');
+    }
+
+    // 選擇要調整的課 → 自動帶入原時段與最近一次上課日期
+    function onAdjustScheduleChange() {
+      const s = findSchedule(document.getElementById('adjustScheduleId').value);
+      const info = document.getElementById('scheduleInfo');
+      if (!s) { info.style.display = 'none'; return; }
+
+      const start = s.start_time ? s.start_time.substring(0, 5) : '';
+      const end = s.end_time ? s.end_time.substring(0, 5) : '';
+
+      if (!document.getElementById('adjustOriginalDate').value) {
+        document.getElementById('adjustOriginalDate').value = nextDateForWeekday(s.day_of_week);
+      }
+      if (!document.getElementById('adjustStartTime').value) document.getElementById('adjustStartTime').value = start;
+      if (!document.getElementById('adjustEndTime').value) document.getElementById('adjustEndTime').value = end;
+
+      info.style.display = 'block';
+      document.getElementById('scheduleInfoTitle').textContent = s.course_name;
+      document.getElementById('scheduleInfoDetail').textContent =
+        `${DAY_NAMES[s.day_of_week]} ${start}-${end} | ${s.teacher_name || '未指派'} | ${s.classroom_name || '未指定教室'}`;
+      setAdjustError('');
+    }
+
+    // 開啟調課 Modal（schedule：由課表方塊點入時帶入的該堂課資料）
     function openAdjustmentModal(schedule = null) {
+      resetAdjustmentForm();
+
       if (schedule) {
         document.getElementById('adjustScheduleId').value = schedule.schedule_id;
-        document.getElementById('adjustOriginalDate').value = formatDateISO(currentDate);
-        document.getElementById('scheduleInfo').style.display = 'block';
-        document.getElementById('scheduleInfoTitle').textContent = schedule.course_name;
-        document.getElementById('scheduleInfoDetail').textContent =
-          `${schedule.teacher_name || '未指派'} | ${schedule.classroom_name || '未指定'} | ${schedule.start_time?.substring(0, 5)} - ${schedule.end_time?.substring(0, 5)}`;
-      } else {
-        document.getElementById('scheduleInfo').style.display = 'none';
-        document.getElementById('adjustOriginalDate').value = formatDateISO(currentDate);
+        document.getElementById('adjustOriginalDate').value = schedule.date || formatDateISO(currentDate);
+        document.getElementById('adjustStartTime').value = schedule.start_time ? schedule.start_time.substring(0, 5) : '';
+        document.getElementById('adjustEndTime').value = schedule.end_time ? schedule.end_time.substring(0, 5) : '';
+        onAdjustScheduleChange();
       }
+
       document.getElementById('adjustmentModal').classList.add('active');
     }
 
@@ -531,48 +1395,90 @@
       document.getElementById(modalId).classList.remove('active');
     }
 
-    // 設置調課類型
+    // 設置調課類型，並依類型顯示對應欄位
     function setAdjustmentType(type) {
       currentAdjustmentType = type;
       document.querySelectorAll('.adjustment-type-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.type === type);
       });
 
-      // 取消類型不需要調整後欄位
-      document.getElementById('adjustedFields').style.display = type === 'cancel' ? 'none' : 'block';
+      const withTime = type === 'time' || type === 'time_teacher';
+      const withTeacher = type === 'teacher' || type === 'time_teacher';
+
+      document.getElementById('fieldAdjustedDate').style.display = withTime ? '' : 'none';
+      document.getElementById('fieldDateRow').classList.toggle('form-row--single', !withTime);
+      document.getElementById('fieldTimeRow').style.display = withTime ? '' : 'none';
+      document.getElementById('fieldSubTeacher').style.display = withTeacher ? '' : 'none';
+      setAdjustError('');
     }
 
     // 儲存調課
     async function saveAdjustment() {
+      const btn = document.getElementById('adjustSubmitBtn');
       const scheduleId = document.getElementById('adjustScheduleId').value;
       const originalDate = document.getElementById('adjustOriginalDate').value;
+      const type = currentAdjustmentType;
+      const withTime = type === 'time' || type === 'time_teacher';
+      const withTeacher = type === 'teacher' || type === 'time_teacher';
+
+      const s = findSchedule(scheduleId);
+      setAdjustError('');
 
       if (!scheduleId || !originalDate) {
-        alert('請選擇班級和原上課日期');
+        setAdjustError('請選擇要調整的課與原課日期');
+        return;
+      }
+      if (s && new Date(originalDate + 'T00:00:00').getDay() !== s.day_of_week) {
+        setAdjustError(`原課日期須為${DAY_NAMES[s.day_of_week]}（該班固定上課日）`);
         return;
       }
 
       const data = {
         schedule_id: parseInt(scheduleId),
         original_date: originalDate,
-        adjustment_type: currentAdjustmentType,
-        reason: document.getElementById('adjustReason').value || null
+        adjustment_type: type,
+        reason: document.getElementById('adjustReason').value.trim() || null
       };
 
-      if (currentAdjustmentType !== 'cancel') {
-        data.adjusted_date = document.getElementById('adjustAdjustedDate').value || null;
-        data.adjusted_start_time = document.getElementById('adjustStartTime').value || null;
-        data.adjusted_end_time = document.getElementById('adjustEndTime').value || null;
-        data.adjusted_classroom_id = document.getElementById('adjustClassroom').value || null;
+      if (withTime) {
+        const adjustedDate = document.getElementById('adjustAdjustedDate').value;
+        const startTime = document.getElementById('adjustStartTime').value;
+        const endTime = document.getElementById('adjustEndTime').value;
+        if (!adjustedDate || !startTime || !endTime) {
+          setAdjustError('請填寫調至日期與開始／結束時間');
+          return;
+        }
+        if (endTime <= startTime) {
+          setAdjustError('結束時間須晚於開始時間');
+          return;
+        }
+        data.adjusted_date = adjustedDate;
+        data.adjusted_start_time = startTime;
+        data.adjusted_end_time = endTime;
       }
 
+      if (withTeacher) {
+        const subTeacherId = document.getElementById('adjustSubTeacher').value;
+        if (!subTeacherId) {
+          setAdjustError('請選擇代課老師');
+          return;
+        }
+        if (s && String(subTeacherId) === String(s.teacher_id)) {
+          setAdjustError('代課老師與原老師相同');
+          return;
+        }
+        data.adjusted_teacher_id = parseInt(subTeacherId);
+      }
+
+      btn.disabled = true;
       try {
         await api.scheduleCalendar.adjustments.create(data);
-        alert('調課建立成功');
         closeModal('adjustmentModal');
-        loadSchedule();
+        await loadSchedule();
       } catch (error) {
-        alert('調課建立失敗: ' + (error.response?.data?.message || '未知錯誤'));
+        setAdjustError('調課建立失敗：' + (error.response?.data?.message || '未知錯誤'));
+      } finally {
+        btn.disabled = false;
       }
     }
 

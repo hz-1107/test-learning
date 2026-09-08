@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>點數管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,7 +26,7 @@
     .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
     .staff-main { display: flex; flex-direction: column; overflow: hidden; }
     .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
-    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__title { font-size: 24px; font-weight: 700; color: var(--color-primary-dark); }
     .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
     .staff-header__search { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); width: 240px; }
     .staff-header__search input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
@@ -34,7 +35,7 @@
     .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
     .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
     .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--spacing-lg); }
-    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .page-title { font-size: 26px; font-weight: 700; color: var(--color-text-primary); }
     .page-subtitle { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: 4px; }
 
     .filter-bar { display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
@@ -52,9 +53,9 @@
     .course-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary-light); border-radius: 20px; font-size: var(--font-size-sm); color: var(--color-primary-dark); }
     .points-value { color: var(--color-primary-dark); font-weight: 600; }
 
-    .btn-outline { display: inline-flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: transparent; border: 1px solid var(--color-primary); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-primary-dark); cursor: pointer; transition: all 0.2s; }
-    .btn-outline:hover { background: var(--color-primary-light); }
-    .btn-text { display: inline-flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: transparent; border: none; font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+    .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer; transition: all 0.2s; background: none; border: none; }
+    .action-btn:hover { background: var(--color-surface-alt); color: var(--color-text-primary); }
+    .action-cell { display: flex; align-items: center; gap: 4px; }
 
     .pagination { display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); padding: var(--spacing-lg); }
     .pagination__btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
@@ -72,7 +73,7 @@
     .points-modal__close:hover { background: var(--color-surface-alt); color: var(--color-text-primary); }
     .points-modal__body { display: flex; flex-direction: column; gap: var(--spacing-md); padding: 22px; }
     .points-current-box { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--color-warning-bg); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
-    .points-current-box__value { font-size: 20px; font-weight: 700; color: var(--color-primary-dark); }
+    .points-current-box__value { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
     .points-field { display: flex; flex-direction: column; gap: 6px; }
     .points-field__label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
     .points-field select, .points-field input { width: 100%; padding: 8px 12px; background: #f5f5f5; border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-family: inherit; color: var(--color-text-primary); }
@@ -167,7 +168,6 @@
             <option>幼兒簡易機械</option>
             <option>科創機器人</option>
           </select>
-          <button class="btn-outline" id="pointsApplyFilterBtn">套用</button>
         </div>
 
         <div class="data-table">
@@ -333,11 +333,14 @@
             <td>${s.room}教室</td>
             <td><span class="points-value">${record.points}</span></td>
             <td>
-              <button class="btn-outline" data-action="manage">點數管理</button>
-              <button class="btn-text" data-action="history">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                紀錄
-              </button>
+              <div class="action-cell">
+                <button class="action-btn" data-action="manage" title="點數管理">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                </button>
+                <button class="action-btn" data-action="history" title="點數紀錄">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -350,10 +353,10 @@
       renderPointsPage(1);
     }
 
-    document.getElementById('pointsApplyFilterBtn').addEventListener('click', applyPointsFilters);
-    pointsSearchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') applyPointsFilters();
-    });
+    // 選擇 / 輸入篩選條件時即時篩選，不需另按套用
+    pointsSearchInput.addEventListener('input', applyPointsFilters);
+    pointsClassroomFilter.addEventListener('change', applyPointsFilters);
+    pointsCourseFilter.addEventListener('change', applyPointsFilters);
 
     pointsPagination.addEventListener('click', function (e) {
       const pageBtn = e.target.closest('[data-page]');

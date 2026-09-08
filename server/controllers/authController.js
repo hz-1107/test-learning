@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
         redirectUrl = '/admin/dashboard.html';
         break;
       case 'staff':
-        redirectUrl = '/staff/schedule.html';
+        redirectUrl = '/staff/students.html';
         break;
       case 'teacher':
         redirectUrl = '/teacher/dashboard.html';

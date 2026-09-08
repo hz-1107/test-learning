@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學生管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,7 +26,7 @@
     .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
     .staff-main { display: flex; flex-direction: column; overflow: hidden; }
     .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
-    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__title { font-size: 24px; font-weight: 700; color: var(--color-primary-dark); }
     .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
     .staff-header__search { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); width: 240px; }
     .staff-header__search input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
@@ -34,7 +35,7 @@
     .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
     .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
-    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .page-title { font-size: 26px; font-weight: 700; color: var(--color-text-primary); }
     .page-subtitle { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: 4px; }
     .btn-primary { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 20px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: var(--color-primary-dark); cursor: pointer; }
     .btn-primary:hover { background: #f5d038; }
@@ -64,22 +65,34 @@
     .pagination__btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* Modal 彈窗樣式 */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center; }
-    .modal-overlay.active { display: flex; }
-    .modal { background: var(--color-surface); border-radius: var(--radius-lg); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
-    .modal__header { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-surface-alt); }
-    .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
-    .modal__close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: var(--color-text-muted); border-radius: var(--radius-sm); }
-    .modal__close:hover { background: var(--color-surface-alt); }
-    .modal__body { padding: var(--spacing-lg); }
-    .modal__footer { display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); }
-    .form-group { margin-bottom: var(--spacing-md); }
-    .form-group label { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-xs); }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-primary); background: var(--color-background); }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--color-primary-dark); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
-    .btn-secondary { padding: 10px 20px; background: var(--color-surface-alt); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-secondary); cursor: pointer; }
-    .btn-secondary:hover { background: var(--color-surface); }
+    .modal-overlay { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; padding: 24px; box-sizing: border-box; }
+    .modal-overlay.active { display: flex; justify-content: center; align-items: center; }
+    .modal { position: static; inset: auto; display: block; padding: 0; background: #fff; border-radius: 16px; width: 100%; max-width: 640px; max-height: calc(100vh - 48px); overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); margin: auto; }
+    .modal__header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid rgba(0, 0, 0, 0.08); position: sticky; top: 0; background: #fff; border-radius: 16px 16px 0 0; z-index: 1; }
+    .modal__title { font-size: 18px; font-weight: 600; color: #1a1a1a; letter-spacing: 0.02em; }
+    .modal__close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; color: #888; border-radius: 8px; transition: background 0.15s, color 0.15s; }
+    .modal__close:hover { background: #f0f0f0; color: #1a1a1a; }
+    .modal__body { padding: 24px; }
+    .modal__footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px 24px; }
+    .modal__footer .btn-primary { border-radius: 10px; padding: 9px 20px; color: #1a1a1a; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 15px; font-weight: 500; color: #0a0a0a; margin-bottom: 6px; letter-spacing: 0.02em; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid transparent; border-radius: 10px; font-size: 16px; color: #1a1a1a; background: #f5f5f5; box-sizing: border-box; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; }
+    .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(26, 26, 26, 0.45); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; background: #fff; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(255, 219, 88, 0.35); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
+    .btn-secondary { padding: 9px 20px; background: #fff; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; font-size: 16px; font-weight: 500; color: #1a1a1a; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .btn-secondary:hover { background: #f5f5f5; border-color: rgba(0, 0, 0, 0.22); }
+
+    /* 出缺席紀錄 Modal（依 Figma 設計，彈出置中於畫面） */
+    .attendance-record-list { display: flex; flex-direction: column; gap: 10px; }
+    .attendance-record-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 12px; background: #fafafa; }
+    .attendance-record-row__date { font-size: 17px; color: #0a0a0a; }
+    .attendance-record-badge { flex-shrink: 0; padding: 3px 10px; border-radius: 999px; font-size: 15px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
+    .attendance-record-badge--present { background: #d0fae5; color: #007a55; }
+    .attendance-record-badge--absent { background: #ffe2e2; color: #e7000b; }
+    .attendance-record-badge--makeup { background: #fef3c6; color: #bb4d00; }
+    .attendance-record-empty { padding: 24px; text-align: center; font-size: 16px; color: var(--color-text-muted); }
 
     /* 班級選擇器 */
     .class-selector { border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); max-height: 250px; overflow-y: auto; background: var(--color-background); }
@@ -429,6 +442,21 @@
     </div>
   </div>
 
+  <!-- 出缺席紀錄 Modal（依 Figma 設計，彈出置中於畫面） -->
+  <div class="modal-overlay" id="attendanceModal">
+    <div class="modal attendance-modal">
+      <div class="modal__header">
+        <h3 class="modal__title"><span id="attendanceStudentName">學生</span> — 出缺席紀錄</h3>
+        <button class="modal__close" onclick="closeModal('attendanceModal')" aria-label="關閉">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="attendance-record-list" id="attendanceRecordList"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/main.js"></script>
@@ -438,6 +466,7 @@
     let classroomsData = [];
     let courseTypesData = [];
     let schedulesData = [];
+    let studentsData = [];
     let currentPage = 1;
     const limit = 20;
 
@@ -591,6 +620,7 @@
     }
 
     function renderStudentsTable(students) {
+      studentsData = students || [];
       const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
       const tbody = document.getElementById('studentsTableBody');
 
@@ -615,7 +645,7 @@
             <td>${student.teacher_name || '-'}</td>
             <td>${student.school || '-'}</td>
             <td>
-              <button class="action-btn" title="查看日誌">
+              <button class="action-btn" title="出缺席紀錄" onclick="openAttendanceModal(${student.id})">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               </button>
               <button class="action-btn" onclick="openEditStudentModal(${student.id})" title="編輯">
@@ -739,12 +769,64 @@
       }
     });
 
+    // ===== 出缺席紀錄 Modal =====
+    const ATTENDANCE_RECORD_META = { present: '出席', absent: '缺席', makeup: '補課' };
+
+    // 依字串產生 0~1 的可重現亂數，讓每位學生的示範紀錄固定不變
+    function attendanceSeed(str) {
+      let h = 2166136261;
+      for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+      return ((h >>> 0) % 1000) / 1000;
+    }
+
+    // 產生學生的出缺席紀錄（由近到遠，每週一筆）
+    // NOTE: 目前後端尚未提供「單一學生出缺席清單」API，先以可重現的示範資料呈現畫面；
+    //       待 API 完成後，將此函式替換為 api.students.getRecords(studentId) 即可。
+    function buildAttendanceRecords(studentId) {
+      const student = studentsData.find(s => String(s.id) === String(studentId));
+      const weeks = Math.min(Math.max(Number(student && student.lesson_count) || 8, 6), 12);
+      const records = [];
+      const today = new Date();
+      for (let i = 0; i < weeks; i++) {
+        const d = new Date(today.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+        const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const r = attendanceSeed(studentId + '-' + i);
+        const status = r < 0.72 ? 'present' : (r < 0.88 ? 'absent' : 'makeup');
+        records.push({ date, status });
+      }
+      return records;
+    }
+
+    // 開啟「出缺席紀錄」Modal（彈出置中於畫面）
+    function openAttendanceModal(studentId) {
+      const student = studentsData.find(s => String(s.id) === String(studentId));
+      document.getElementById('attendanceStudentName').textContent = (student && student.name) || '學生';
+
+      const records = buildAttendanceRecords(studentId);
+      const list = document.getElementById('attendanceRecordList');
+      list.innerHTML = records.length
+        ? records.map(r => {
+            const label = ATTENDANCE_RECORD_META[r.status] || ATTENDANCE_RECORD_META.present;
+            return `
+              <div class="attendance-record-row">
+                <span class="attendance-record-row__date">${r.date}</span>
+                <span class="attendance-record-badge attendance-record-badge--${r.status}">${label}</span>
+              </div>`;
+          }).join('')
+        : '<div class="attendance-record-empty">尚無出缺席紀錄</div>';
+
+      document.getElementById('attendanceModal').classList.add('active');
+    }
+
     // 點擊背景關閉 Modal
     document.getElementById('addStudentModal').addEventListener('click', function(e) {
       if (e.target === this) closeModal('addStudentModal');
     });
     document.getElementById('editStudentModal').addEventListener('click', function(e) {
       if (e.target === this) closeModal('editStudentModal');
+    });
+    document.getElementById('attendanceModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('attendanceModal');
     });
   </script>
   <script src="../js/admin-notifications.js"></script>

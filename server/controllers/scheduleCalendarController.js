@@ -30,14 +30,14 @@ exports.getWeeklySchedule = async (req, res) => {
         cs.end_time,
         cs.classroom_id,
         c.name as course_name,
-        c.teacher_id,
+        COALESCE(cs.teacher_id, c.teacher_id) as teacher_id,
         u.name as teacher_name,
         cr.name as classroom_name,
         ct.name as course_type_name,
         ct.color as course_type_color
       FROM course_schedules cs
       JOIN courses c ON cs.course_id = c.id
-      LEFT JOIN teachers t ON c.teacher_id = t.id
+      LEFT JOIN teachers t ON COALESCE(cs.teacher_id, c.teacher_id) = t.id
       LEFT JOIN users u ON t.user_id = u.id
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
       LEFT JOIN course_types ct ON c.course_type_id = ct.id
@@ -46,7 +46,7 @@ exports.getWeeklySchedule = async (req, res) => {
     const params = [];
 
     if (teacher_id) {
-      scheduleSql += ' AND c.teacher_id = ?';
+      scheduleSql += ' AND COALESCE(cs.teacher_id, c.teacher_id) = ?';
       params.push(teacher_id);
     }
 
@@ -63,9 +63,12 @@ exports.getWeeklySchedule = async (req, res) => {
     const adjustments = await db.query(`
       SELECT
         sa.*,
-        cr.name as adjusted_classroom_name
+        cr.name as adjusted_classroom_name,
+        su.name as adjusted_teacher_name
       FROM schedule_adjustments sa
       LEFT JOIN classrooms cr ON sa.adjusted_classroom_id = cr.id
+      LEFT JOIN teachers st ON sa.adjusted_teacher_id = st.id
+      LEFT JOIN users su ON st.user_id = su.id
       WHERE (sa.original_date BETWEEN ? AND ?)
          OR (sa.adjusted_date BETWEEN ? AND ?)
     `, [weekStart, weekEnd, weekStart, weekEnd]);
@@ -106,7 +109,13 @@ exports.getWeeklySchedule = async (req, res) => {
           return;
         }
 
-        // 如果這天有調課，使用調課資訊
+        // 如果課程被調到其它日期，原本這天就不顯示（改由 adjusted_date 當天補上）
+        const movedToAnotherDay = adjustment && adjustment.adjusted_date && adjustment.adjusted_date !== adjustment.original_date;
+        if (movedToAnotherDay) {
+          return;
+        }
+
+        // 如果這天有調課（僅調時段／教室／代課老師，日期不變），使用調課資訊
         const finalSchedule = {
           ...schedule,
           date: day.date,
@@ -114,6 +123,8 @@ exports.getWeeklySchedule = async (req, res) => {
           end_time: adjustment?.adjusted_end_time || schedule.end_time,
           classroom_id: adjustment?.adjusted_classroom_id || schedule.classroom_id,
           classroom_name: adjustment?.adjusted_classroom_name || schedule.classroom_name,
+          teacher_id: adjustment?.adjusted_teacher_id || schedule.teacher_id,
+          teacher_name: adjustment?.adjusted_teacher_name || schedule.teacher_name,
           is_adjusted: !!adjustment,
           adjustment_type: adjustment?.adjustment_type || null,
           adjustment_reason: adjustment?.reason || null
@@ -122,9 +133,10 @@ exports.getWeeklySchedule = async (req, res) => {
         daySchedules.push(finalSchedule);
       });
 
-      // 檢查是否有補課移到這天
+      // 檢查是否有課程被調到這天（調至日期落在這天）
       adjustments.forEach(adj => {
-        if (adj.adjusted_date === day.date && adj.adjustment_type === 'reschedule') {
+        const movedToAnotherDay = adj.adjusted_date && adj.adjusted_date !== adj.original_date;
+        if (adj.adjusted_date === day.date && movedToAnotherDay) {
           // 找到原本的課程資訊
           const originalSchedule = schedules.find(s => s.schedule_id === adj.schedule_id);
           if (originalSchedule) {
@@ -140,8 +152,10 @@ exports.getWeeklySchedule = async (req, res) => {
                 end_time: adj.adjusted_end_time || originalSchedule.end_time,
                 classroom_id: adj.adjusted_classroom_id || originalSchedule.classroom_id,
                 classroom_name: adj.adjusted_classroom_name || originalSchedule.classroom_name,
+                teacher_id: adj.adjusted_teacher_id || originalSchedule.teacher_id,
+                teacher_name: adj.adjusted_teacher_name || originalSchedule.teacher_name,
                 is_adjusted: true,
-                adjustment_type: 'makeup',
+                adjustment_type: adj.adjustment_type || 'makeup',
                 adjustment_reason: adj.reason,
                 original_date: adj.original_date
               });
@@ -203,14 +217,14 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
         cs.end_time,
         cs.classroom_id,
         c.name as course_name,
-        c.teacher_id,
+        COALESCE(cs.teacher_id, c.teacher_id) as teacher_id,
         u.name as teacher_name,
         cr.name as classroom_name,
         ct.name as course_type_name,
         ct.color as course_type_color
       FROM course_schedules cs
       JOIN courses c ON cs.course_id = c.id
-      LEFT JOIN teachers t ON c.teacher_id = t.id
+      LEFT JOIN teachers t ON COALESCE(cs.teacher_id, c.teacher_id) = t.id
       LEFT JOIN users u ON t.user_id = u.id
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
       LEFT JOIN course_types ct ON c.course_type_id = ct.id
@@ -224,34 +238,55 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
     const adjustments = await db.query(`
       SELECT
         sa.*,
-        cr.name as adjusted_classroom_name
+        cr.name as adjusted_classroom_name,
+        su.name as adjusted_teacher_name
       FROM schedule_adjustments sa
       LEFT JOIN classrooms cr ON sa.adjusted_classroom_id = cr.id
+      LEFT JOIN teachers st ON sa.adjusted_teacher_id = st.id
+      LEFT JOIN users su ON st.user_id = su.id
       WHERE sa.original_date = ? OR sa.adjusted_date = ?
     `, [formattedDate, formattedDate]);
 
     // 建立調課映射
     const cancelledSchedules = new Set();
-    const adjustedSchedules = {};
+    const inPlaceAdjustments = {}; // schedule_id -> adj（日期不變，僅調時段／教室／代課老師）
     const makeupSchedules = [];
 
     adjustments.forEach(adj => {
+      const movedToAnotherDay = adj.adjusted_date && adj.adjusted_date !== adj.original_date;
       if (adj.original_date === formattedDate) {
-        if (adj.adjustment_type === 'cancel') {
+        if (adj.adjustment_type === 'cancel' || movedToAnotherDay) {
+          // 取消，或課程被移到其它日期 → 這天不顯示
           cancelledSchedules.add(adj.schedule_id);
-        } else if (adj.adjustment_type === 'reschedule') {
-          // 原日期的課程被移走
-          cancelledSchedules.add(adj.schedule_id);
+        } else {
+          inPlaceAdjustments[adj.schedule_id] = adj;
         }
       }
-      if (adj.adjusted_date === formattedDate) {
-        // 有課程移到這天
+      if (movedToAnotherDay && adj.adjusted_date === formattedDate) {
+        // 有課程被調到這天
         makeupSchedules.push(adj);
       }
     });
 
-    // 過濾掉被取消/調走的課程
-    let finalSchedules = schedules.filter(s => !cancelledSchedules.has(s.schedule_id));
+    // 過濾掉被取消/調走的課程，並套用「日期不變」的調課（時段／教室／代課老師）
+    let finalSchedules = schedules
+      .filter(s => !cancelledSchedules.has(s.schedule_id))
+      .map(s => {
+        const adj = inPlaceAdjustments[s.schedule_id];
+        if (!adj) return s;
+        return {
+          ...s,
+          start_time: adj.adjusted_start_time || s.start_time,
+          end_time: adj.adjusted_end_time || s.end_time,
+          classroom_id: adj.adjusted_classroom_id || s.classroom_id,
+          classroom_name: adj.adjusted_classroom_name || s.classroom_name,
+          teacher_id: adj.adjusted_teacher_id || s.teacher_id,
+          teacher_name: adj.adjusted_teacher_name || s.teacher_name,
+          is_adjusted: true,
+          adjustment_type: adj.adjustment_type,
+          adjustment_reason: adj.reason
+        };
+      });
 
     // 加入補課/調課到這天的課程
     for (const adj of makeupSchedules) {
@@ -261,13 +296,13 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
           cs.course_id,
           cs.day_of_week,
           c.name as course_name,
-          c.teacher_id,
+          COALESCE(cs.teacher_id, c.teacher_id) as teacher_id,
           u.name as teacher_name,
           ct.name as course_type_name,
           ct.color as course_type_color
         FROM course_schedules cs
         JOIN courses c ON cs.course_id = c.id
-        LEFT JOIN teachers t ON c.teacher_id = t.id
+        LEFT JOIN teachers t ON COALESCE(cs.teacher_id, c.teacher_id) = t.id
         LEFT JOIN users u ON t.user_id = u.id
         LEFT JOIN course_types ct ON c.course_type_id = ct.id
         WHERE cs.id = ?
@@ -276,12 +311,15 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
       if (originalSchedule) {
         finalSchedules.push({
           ...originalSchedule,
-          start_time: adj.adjusted_start_time,
-          end_time: adj.adjusted_end_time,
+          start_time: adj.adjusted_start_time || originalSchedule.start_time,
+          end_time: adj.adjusted_end_time || originalSchedule.end_time,
           classroom_id: adj.adjusted_classroom_id,
           classroom_name: adj.adjusted_classroom_name,
+          teacher_id: adj.adjusted_teacher_id || originalSchedule.teacher_id,
+          teacher_name: adj.adjusted_teacher_name || originalSchedule.teacher_name,
           is_adjusted: true,
           adjustment_type: adj.adjustment_type,
+          adjustment_reason: adj.reason,
           original_date: adj.original_date
         });
       }
@@ -336,14 +374,17 @@ exports.getAdjustments = async (req, res) => {
         cs.end_time as original_end_time,
         c.name as course_name,
         u.name as teacher_name,
+        su.name as adjusted_teacher_name,
         cr1.name as original_classroom_name,
         cr2.name as adjusted_classroom_name,
         cu.name as created_by_name
       FROM schedule_adjustments sa
       JOIN course_schedules cs ON sa.schedule_id = cs.id
       JOIN courses c ON cs.course_id = c.id
-      LEFT JOIN teachers t ON c.teacher_id = t.id
+      LEFT JOIN teachers t ON COALESCE(cs.teacher_id, c.teacher_id) = t.id
       LEFT JOIN users u ON t.user_id = u.id
+      LEFT JOIN teachers st ON sa.adjusted_teacher_id = st.id
+      LEFT JOIN users su ON st.user_id = su.id
       LEFT JOIN classrooms cr1 ON cs.classroom_id = cr1.id
       LEFT JOIN classrooms cr2 ON sa.adjusted_classroom_id = cr2.id
       LEFT JOIN users cu ON sa.created_by = cu.id
@@ -400,6 +441,7 @@ exports.createAdjustment = async (req, res) => {
       adjusted_start_time,
       adjusted_end_time,
       adjusted_classroom_id,
+      adjusted_teacher_id,
       adjustment_type,
       reason
     } = req.body;
@@ -409,6 +451,42 @@ exports.createAdjustment = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: '請提供必要欄位'
+      });
+    }
+
+    // 調課類型：time=改時段；teacher=換代課老師；time_teacher=兩者皆調
+    // （保留舊值 cancel/reschedule/makeup 以相容既有資料與呼叫端）
+    const ALLOWED_TYPES = ['time', 'teacher', 'time_teacher', 'cancel', 'reschedule', 'makeup'];
+    if (!ALLOWED_TYPES.includes(adjustment_type)) {
+      return res.status(400).json({
+        success: false,
+        message: '不支援的調課類型'
+      });
+    }
+
+    const withTime = adjustment_type === 'time' || adjustment_type === 'time_teacher' || adjustment_type === 'reschedule';
+    const withTeacher = adjustment_type === 'teacher' || adjustment_type === 'time_teacher';
+    // 新版表單類型才強制檢核時段欄位；舊值 reschedule 維持寬鬆以相容既有呼叫端
+    const requiresTime = adjustment_type === 'time' || adjustment_type === 'time_teacher';
+
+    if (requiresTime && (!adjusted_date || !adjusted_start_time || !adjusted_end_time)) {
+      return res.status(400).json({
+        success: false,
+        message: '請提供調至日期與開始／結束時間'
+      });
+    }
+
+    if (withTime && adjusted_start_time && adjusted_end_time && adjusted_end_time <= adjusted_start_time) {
+      return res.status(400).json({
+        success: false,
+        message: '結束時間須晚於開始時間'
+      });
+    }
+
+    if (withTeacher && !adjusted_teacher_id) {
+      return res.status(400).json({
+        success: false,
+        message: '請提供代課老師'
       });
     }
 
@@ -423,6 +501,17 @@ exports.createAdjustment = async (req, res) => {
         success: false,
         message: '找不到班級'
       });
+    }
+
+    // 檢查代課老師是否存在
+    if (withTeacher) {
+      const subTeacher = await db.queryOne('SELECT id FROM teachers WHERE id = ?', [adjusted_teacher_id]);
+      if (!subTeacher) {
+        return res.status(404).json({
+          success: false,
+          message: '找不到代課老師'
+        });
+      }
     }
 
     // 檢查是否已有調課記錄
@@ -443,15 +532,16 @@ exports.createAdjustment = async (req, res) => {
       INSERT INTO schedule_adjustments (
         schedule_id, original_date, adjusted_date,
         adjusted_start_time, adjusted_end_time, adjusted_classroom_id,
-        adjustment_type, reason, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        adjusted_teacher_id, adjustment_type, reason, created_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       schedule_id,
       original_date,
-      adjusted_date || null,
-      adjusted_start_time || null,
-      adjusted_end_time || null,
+      withTime ? adjusted_date : null,
+      withTime ? adjusted_start_time : null,
+      withTime ? adjusted_end_time : null,
       adjusted_classroom_id || null,
+      withTeacher ? adjusted_teacher_id : null,
       adjustment_type,
       reason || null,
       req.user?.id || null
@@ -482,6 +572,7 @@ exports.updateAdjustment = async (req, res) => {
       adjusted_start_time,
       adjusted_end_time,
       adjusted_classroom_id,
+      adjusted_teacher_id,
       adjustment_type,
       reason,
       status
@@ -505,6 +596,7 @@ exports.updateAdjustment = async (req, res) => {
         adjusted_start_time = ?,
         adjusted_end_time = ?,
         adjusted_classroom_id = ?,
+        adjusted_teacher_id = ?,
         adjustment_type = ?,
         reason = ?,
         status = ?
@@ -514,6 +606,7 @@ exports.updateAdjustment = async (req, res) => {
       adjusted_start_time || null,
       adjusted_end_time || null,
       adjusted_classroom_id || null,
+      adjusted_teacher_id || null,
       adjustment_type,
       reason || null,
       status || 'confirmed',
