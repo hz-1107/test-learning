@@ -50,29 +50,6 @@
         </div>
 
         <form class="login-form" id="loginForm">
-          <!-- 身份選擇 -->
-          <div class="form-group">
-            <label class="form-group__label">登入身份</label>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-primary); border-radius: 8px; cursor: pointer; border: 2px solid var(--color-primary);">
-                <input type="radio" name="userRole" value="teacher" checked style="accent-color: var(--color-primary-dark);">
-                <span style="font-size: 14px; color: var(--color-primary-dark); font-weight: 500;">教師</span>
-              </label>
-              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-surface-alt); border-radius: 8px; cursor: pointer; border: 2px solid transparent;" id="studentLabel">
-                <input type="radio" name="userRole" value="student" style="accent-color: var(--color-primary-dark);">
-                <span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 500;">學生</span>
-              </label>
-              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-surface-alt); border-radius: 8px; cursor: pointer; border: 2px solid transparent;" id="staffLabel">
-                <input type="radio" name="userRole" value="staff" style="accent-color: var(--color-primary-dark);">
-                <span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 500;">行政人員</span>
-              </label>
-              <label style="flex: 1; min-width: 100px; display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--color-surface-alt); border-radius: 8px; cursor: pointer; border: 2px solid transparent;" id="adminLabel">
-                <input type="radio" name="userRole" value="admin" style="accent-color: var(--color-primary-dark);">
-                <span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 500;">管理者</span>
-              </label>
-            </div>
-          </div>
-
           <!-- 帳號輸入 -->
           <div class="form-group">
             <label class="form-group__label">帳號 / 使用者代碼</label>
@@ -150,24 +127,6 @@
     localStorage.removeItem('authToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
-
-    // 角色選擇視覺反饋
-    document.querySelectorAll('input[name="userRole"]').forEach(radio => {
-      radio.addEventListener('change', function() {
-        document.querySelectorAll('input[name="userRole"]').forEach(r => {
-          const label = r.closest('label');
-          if (r.checked) {
-            label.style.background = 'var(--color-primary)';
-            label.style.borderColor = 'var(--color-primary)';
-            label.querySelector('span').style.color = 'var(--color-primary-dark)';
-          } else {
-            label.style.background = 'var(--color-surface-alt)';
-            label.style.borderColor = 'transparent';
-            label.querySelector('span').style.color = 'var(--color-text-secondary)';
-          }
-        });
-      });
-    });
 
     // 登入表單提交
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
