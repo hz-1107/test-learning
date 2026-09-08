@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>課程資訊 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,7 +26,7 @@
     .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
     .staff-main { display: flex; flex-direction: column; overflow: hidden; }
     .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
-    .staff-header__title { font-size: 22px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__title { font-size: 24px; font-weight: 700; color: var(--color-primary-dark); }
     .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
     .staff-header__search { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); width: 240px; }
     .staff-header__search input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
@@ -34,7 +35,7 @@
     .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
     .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
-    .page-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
+    .page-title { font-size: 26px; font-weight: 700; color: var(--color-text-primary); }
     .btn-primary { display: flex; align-items: center; gap: var(--spacing-sm); padding: 10px 20px; background: var(--color-primary); border: none; border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; color: var(--color-primary-dark); cursor: pointer; }
 
     /* 標籤切換 */
@@ -56,7 +57,7 @@
     .course-card__status--inactive .course-card__status-dot { background: #fe7560; }
     .course-card__edit { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer; }
     .course-card__desc { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--spacing-lg); min-height: 48px; }
-    .course-card__footer { display: flex; align-items: center; gap: var(--spacing-sm); padding-top: var(--spacing-md); border-top: 1px solid var(--color-surface-alt); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+    .course-card__footer { display: flex; justify-content: flex-start; align-items: center; gap: var(--spacing-sm); padding-top: var(--spacing-md); border-top: 1px solid var(--color-surface-alt); font-size: var(--font-size-sm); color: var(--color-text-muted); }
 
     @media (max-width: 1200px) { .course-grid { grid-template-columns: 1fr; } }
     @media (max-width: 992px) { .staff-layout { grid-template-columns: 1fr; } .staff-sidebar { display: none; } }
@@ -292,29 +293,27 @@
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.5);
       z-index: 1000;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px;
-      overflow-y: auto;
+      padding: 24px;
+      box-sizing: border-box;
     }
-    .modal-overlay.active { display: flex; }
+    .modal-overlay.active { display: flex; justify-content: center; align-items: center; }
     .modal {
-      background: var(--color-surface);
-      border-radius: var(--radius-lg);
+      position: static;
+      inset: auto;
+      display: block;
+      padding: 0;
+      background: #fff;
+      border-radius: 16px;
       width: 100%;
-      max-width: 600px;
-      max-height: calc(100vh - 40px);
-      display: flex;
-      flex-direction: column;
-      box-shadow: var(--shadow-lg);
+      max-width: 480px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       margin: auto;
     }
     .modal form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
@@ -325,10 +324,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--spacing-lg);
-      border-bottom: 1px solid var(--color-surface-alt);
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      z-index: 1;
     }
-    .modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
+    .modal__title { font-size: 18px; font-weight: 600; color: #1a1a1a; letter-spacing: 0.02em; }
     .modal__close {
       width: 32px;
       height: 32px;
@@ -338,55 +342,66 @@
       border: none;
       background: transparent;
       cursor: pointer;
-      color: var(--color-text-muted);
-      border-radius: var(--radius-sm);
+      color: #888;
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
     }
-    .modal__close:hover { background: var(--color-surface-alt); }
-    .modal__body { padding: var(--spacing-lg); }
+    .modal__close:hover { background: #f0f0f0; color: #1a1a1a; }
+    .modal__body { padding: 24px; }
     .modal__footer {
       display: flex;
       justify-content: flex-end;
-      gap: var(--spacing-md);
-      padding: var(--spacing-lg);
-      border-top: 1px solid var(--color-surface-alt);
+      gap: 12px;
+      padding: 16px 24px 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
     }
-    .form-group { margin-bottom: var(--spacing-md); }
+    .modal__footer .btn-primary { border-radius: 10px; padding: 9px 20px; color: #1a1a1a; }
+    .form-group { margin-bottom: 16px; }
     .form-group label {
       display: block;
-      font-size: var(--font-size-sm);
+      font-size: 15px;
       font-weight: 500;
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-xs);
+      color: #0a0a0a;
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
     }
     .form-group input,
     .form-group select,
     .form-group textarea {
       width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--color-surface-alt);
-      border-radius: var(--radius-md);
-      font-size: var(--font-size-md);
-      color: var(--color-text-primary);
-      background: var(--color-background);
+      padding: 10px 14px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      box-sizing: border-box;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: rgba(26, 26, 26, 0.45); }
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
-      border-color: var(--color-primary-dark);
+      background: #fff;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(255, 219, 88, 0.35);
     }
     .form-group textarea { resize: vertical; min-height: 80px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
     .btn-secondary {
-      padding: 10px 20px;
-      background: var(--color-surface-alt);
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: var(--font-size-md);
-      color: var(--color-text-secondary);
+      padding: 9px 20px;
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #1a1a1a;
       cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .btn-secondary:hover { background: var(--color-surface); }
+    .btn-secondary:hover { background: #f5f5f5; border-color: rgba(0, 0, 0, 0.22); }
 
     /* 學生列表 Modal 樣式 */
     .student-list-modal { max-width: 480px; }
@@ -444,6 +459,28 @@
     .student-item__school {
       font-size: var(--font-size-sm);
       color: var(--color-text-muted);
+    }
+    .student-item__remove {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border: 1px solid #f3c6c6;
+      border-radius: var(--radius-md);
+      background: #fff5f5;
+      color: #c0392b;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .student-item__remove:hover {
+      background: #fde3e3;
+      border-color: #e5a5a5;
+    }
+    .student-item__remove svg {
+      width: 14px;
+      height: 14px;
     }
     .course-type-badge {
       display: inline-block;
@@ -530,9 +567,33 @@
       background: rgba(255, 219, 88, 0.1);
       border-color: var(--color-primary);
     }
+    /* 已在班級的學生：可取消勾選以移出班級 */
     .student-checkbox-item.enrolled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      background: #ecfdf3;
+      border-color: #b7e8c9;
+    }
+    .student-checkbox-item.enrolled .student-checkbox-item__name::after {
+      content: '已在班級';
+      margin-left: 8px;
+      padding: 1px 6px;
+      border-radius: 20px;
+      background: #d0fae5;
+      color: #007a55;
+      font-size: var(--font-size-xs);
+      font-weight: 500;
+    }
+    .student-checkbox-item.to-remove {
+      background: #fff5f5;
+      border-color: #f3c6c6;
+    }
+    .student-checkbox-item.to-remove .student-checkbox-item__name {
+      text-decoration: line-through;
+      color: var(--color-text-muted);
+    }
+    .student-checkbox-item.to-remove .student-checkbox-item__name::after {
+      content: '將移出班級';
+      background: #fde3e3;
+      color: #c0392b;
     }
     .student-checkbox-item input[type="checkbox"] {
       width: 16px;
@@ -779,7 +840,7 @@
             </div>
             <div class="form-group">
               <label for="courseAgeRange">適合年齡＊</label>
-              <input type="text" id="courseAgeRange" name="age_range" placeholder="例：7-10歲">
+              <input type="text" id="courseAgeRange" name="age_range" placeholder="例：7-10" pattern="[0-9]+(-[0-9]+)?" title="請輸入數字，例如 7-10">
             </div>
           </div>
         </div>
@@ -824,7 +885,7 @@
             </div>
             <div class="form-group">
               <label for="editCourseAgeRange">適合年齡＊</label>
-              <input type="text" id="editCourseAgeRange" name="age_range" placeholder="例：7-10歲">
+              <input type="text" id="editCourseAgeRange" name="age_range" placeholder="例：7-10" pattern="[0-9]+(-[0-9]+)?" title="請輸入數字，例如 7-10">
             </div>
           </div>
         </div>
@@ -1047,7 +1108,7 @@
           <input type="text" id="addStudentSearch" placeholder="搜尋姓名或學校...">
         </div>
         <div class="add-student-modal__header">
-          <span class="add-student-modal__count" id="selectedStudentCount">已選學生(0位)</span>
+          <span class="add-student-modal__count" id="selectedStudentCount">尚未變更</span>
           <button type="button" class="btn-link" onclick="selectAllStudents()">全選</button>
         </div>
         <div class="add-student-modal__list" id="availableStudentList">
@@ -1056,7 +1117,7 @@
       </div>
       <div class="modal__footer">
         <button type="button" class="btn-secondary" onclick="closeModal('addStudentModal')">取消</button>
-        <button type="button" class="btn-primary" onclick="enrollSelectedStudents()">加入班級</button>
+        <button type="button" class="btn-primary" onclick="enrollSelectedStudents()">儲存變更</button>
       </div>
     </div>
   </div>
@@ -1142,7 +1203,7 @@
         name: document.getElementById('courseName').value,
         description: document.getElementById('courseDesc').value || null,
         status: document.getElementById('courseStatus').value,
-        age_range: document.getElementById('courseAgeRange').value || null
+        age_range: document.getElementById('courseAgeRange').value.trim().replace(/歲$/, '') || null
       };
 
       try {
@@ -1151,6 +1212,7 @@
           showMessage('課程新增成功！', 'success');
           closeModal('addCourseModal');
           loadCourses();
+          loadDropdownData(); // 重新載入課程下拉選單，讓新增班級時能選到剛新增的課程
         }
       } catch (error) {
         showMessage('新增課程失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
@@ -1165,7 +1227,7 @@
       document.getElementById('editCourseName').value = name;
       document.getElementById('editCourseDesc').value = description || '';
       document.getElementById('editCourseStatus').value = status;
-      document.getElementById('editCourseAgeRange').value = ageRange || '';
+      document.getElementById('editCourseAgeRange').value = (ageRange || '').replace(/歲$/, '');
       document.getElementById('editCourseModal').classList.add('active');
     }
 
@@ -1177,7 +1239,7 @@
         name: document.getElementById('editCourseName').value,
         description: document.getElementById('editCourseDesc').value || null,
         status: document.getElementById('editCourseStatus').value,
-        age_range: document.getElementById('editCourseAgeRange').value || null
+        age_range: document.getElementById('editCourseAgeRange').value.trim().replace(/歲$/, '') || null
       };
 
       try {
@@ -1186,6 +1248,7 @@
           showMessage('課程更新成功！', 'success');
           closeModal('editCourseModal');
           loadCourses();
+          loadDropdownData(); // 重新載入課程下拉選單，避免班級選單顯示過期的課程名稱/狀態
         }
       } catch (error) {
         showMessage('更新課程失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
@@ -1209,6 +1272,7 @@
           const escapedName = (course.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
           const escapedDesc = (course.description || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
           const escapedAge = (course.age_range || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          const ageDisplay = course.age_range ? `${course.age_range.replace(/歲$/, '')}歲` : '未設定年齡';
           return `
           <div class="course-card">
             <div class="course-card__header">
@@ -1231,7 +1295,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
               </svg>
-              ${course.age_range || '未設定年齡'}
+              ${ageDisplay}
             </div>
           </div>
         `}).join('');
@@ -1382,20 +1446,21 @@
     // ==================
     // 班級 Modal 功能
     // ==================
-    function openAddClassModal() {
+    async function openAddClassModal() {
       document.getElementById('addClassForm').reset();
       document.querySelectorAll('#addWeekdaySelector .weekday-btn').forEach(btn => btn.classList.remove('active'));
-      // 重新填充老師下拉選單
-      populateTeacherDropdowns();
+      // 重新載入課程／老師下拉選單，確保剛新增的課程也會出現
+      await loadDropdownData();
       document.getElementById('addClassModal').classList.add('active');
     }
 
-    function openEditClassModal(schedule) {
+    async function openEditClassModal(schedule) {
+      // 重新載入課程／老師下拉選單，確保剛新增的課程也會出現
+      await loadDropdownData();
+
       document.getElementById('editClassId').value = schedule.id;
       document.getElementById('editClassCourse').value = schedule.course_id;
 
-      // 重新填充老師下拉選單並選擇當前老師
-      populateTeacherDropdowns();
       const teacherSelect = document.getElementById('editClassTeacher');
       teacherSelect.value = schedule.teacher_id || '';
 
@@ -1730,8 +1795,9 @@
 
         studentListEl.innerHTML = students.map(student => {
           const badgeClass = getCourseTypeBadgeClass(student.course_type_name);
+          const safeName = (student.name || '').replace(/"/g, '&quot;');
           return `
-            <div class="student-item">
+            <div class="student-item" data-student-id="${student.id}">
               <div class="student-item__left">
                 <div class="student-item__avatar">${(student.name || '').charAt(0)}</div>
                 <span class="student-item__name">${student.name || '-'}</span>
@@ -1739,6 +1805,13 @@
               <div class="student-item__right">
                 ${student.course_type_name ? `<span class="course-type-badge ${badgeClass}">${getCourseTypeShortName(student.course_type_name)}</span>` : ''}
                 <span class="student-item__school">${student.school || ''}</span>
+                <button type="button" class="student-item__remove" title="從班級移除" onclick="removeStudentFromClass(${student.id}, &quot;${safeName}&quot;)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                  移除
+                </button>
               </div>
             </div>
           `;
@@ -1746,6 +1819,23 @@
       } catch (error) {
         console.error('載入學生列表失敗:', error);
         document.getElementById('studentList').innerHTML = '<div class="empty-students">載入失敗</div>';
+      }
+    }
+
+    // 從班級移除單一學生（加錯學生時可修正）
+    async function removeStudentFromClass(studentId, studentName) {
+      if (!currentScheduleId) return;
+      if (!confirm(`確定要將「${studentName || '這位學生'}」從此班級移除嗎？`)) return;
+
+      try {
+        const result = await api.schedules.removeStudent(currentScheduleId, studentId);
+        if (result.success) {
+          showMessage(result.message || '學生已從班級移除', 'success');
+          await openStudentListModal(currentScheduleId); // 重新載入名單
+          loadClasses(); // 更新班級學生數
+        }
+      } catch (error) {
+        showMessage('移除學生失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
       }
     }
 
@@ -1795,12 +1885,11 @@
       studentListEl.innerHTML = availableStudentsData.map(student => {
         const badgeClass = getCourseTypeBadgeClass(student.course_type_name);
         const isEnrolled = student.is_enrolled === 1;
-        const enrolledClass = isEnrolled ? 'enrolled' : '';
-        const disabledAttr = isEnrolled ? 'disabled' : '';
 
+        // 已在班級的學生預設打勾，但不再 disabled —— 取消勾選即代表要移出班級
         return `
-          <label class="student-checkbox-item ${enrolledClass}" data-student-id="${student.id}">
-            <input type="checkbox" name="student_ids" value="${student.id}" ${disabledAttr} ${isEnrolled ? 'checked' : ''}>
+          <label class="student-checkbox-item ${isEnrolled ? 'enrolled' : ''}" data-student-id="${student.id}" data-enrolled="${isEnrolled ? '1' : '0'}">
+            <input type="checkbox" name="student_ids" value="${student.id}" ${isEnrolled ? 'checked' : ''}>
             <div class="student-checkbox-item__info">
               <div class="student-checkbox-item__name">${student.name || '-'}</div>
               <div class="student-checkbox-item__detail">${student.school || ''} ${student.grade || ''}</div>
@@ -1814,11 +1903,9 @@
       document.querySelectorAll('#availableStudentList input[type="checkbox"]').forEach(cb => {
         cb.addEventListener('change', function() {
           const label = this.closest('.student-checkbox-item');
-          if (this.checked && !label.classList.contains('enrolled')) {
-            label.classList.add('selected');
-          } else {
-            label.classList.remove('selected');
-          }
+          const wasEnrolled = label.dataset.enrolled === '1';
+          label.classList.toggle('selected', this.checked && !wasEnrolled);
+          label.classList.toggle('to-remove', !this.checked && wasEnrolled);
           updateSelectedCount();
         });
       });
@@ -1826,41 +1913,70 @@
       updateSelectedCount();
     }
 
+    // 計算相對於目前班級名單的變更（新增 / 移出）
+    function getStudentChanges() {
+      const toAdd = [];
+      const toRemove = [];
+      document.querySelectorAll('#availableStudentList .student-checkbox-item').forEach(label => {
+        const cb = label.querySelector('input[type="checkbox"]');
+        if (!cb) return;
+        const id = parseInt(cb.value);
+        const wasEnrolled = label.dataset.enrolled === '1';
+        if (cb.checked && !wasEnrolled) toAdd.push(id);
+        if (!cb.checked && wasEnrolled) toRemove.push(id);
+      });
+      return { toAdd, toRemove };
+    }
+
     function updateSelectedCount() {
-      const checkboxes = document.querySelectorAll('#availableStudentList input[type="checkbox"]:checked:not(:disabled)');
-      document.getElementById('selectedStudentCount').textContent = `已選學生(${checkboxes.length}位)`;
+      const { toAdd, toRemove } = getStudentChanges();
+      const el = document.getElementById('selectedStudentCount');
+      if (toAdd.length === 0 && toRemove.length === 0) {
+        el.textContent = '尚未變更';
+        return;
+      }
+      const parts = [];
+      if (toAdd.length) parts.push(`新增 ${toAdd.length} 位`);
+      if (toRemove.length) parts.push(`移出 ${toRemove.length} 位`);
+      el.textContent = parts.join('・');
     }
 
     function selectAllStudents() {
-      const checkboxes = document.querySelectorAll('#availableStudentList input[type="checkbox"]:not(:disabled)');
-      checkboxes.forEach(cb => {
+      document.querySelectorAll('#availableStudentList .student-checkbox-item').forEach(label => {
+        const cb = label.querySelector('input[type="checkbox"]');
+        if (!cb) return;
         cb.checked = true;
-        const label = cb.closest('.student-checkbox-item');
-        if (!label.classList.contains('enrolled')) {
-          label.classList.add('selected');
-        }
+        label.classList.remove('to-remove');
+        if (label.dataset.enrolled !== '1') label.classList.add('selected');
       });
       updateSelectedCount();
     }
 
     async function enrollSelectedStudents() {
-      const checkboxes = document.querySelectorAll('#availableStudentList input[type="checkbox"]:checked:not(:disabled)');
-      const studentIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+      const { toAdd, toRemove } = getStudentChanges();
 
-      if (studentIds.length === 0) {
-        showMessage('請選擇要加入的學生', 'error');
+      if (toAdd.length === 0 && toRemove.length === 0) {
+        showMessage('沒有任何變更', 'error');
+        return;
+      }
+
+      if (toRemove.length > 0 &&
+          !confirm(`將有 ${toRemove.length} 位學生被移出此班級，確定套用變更？`)) {
         return;
       }
 
       try {
-        const result = await api.schedules.enrollStudents(currentScheduleId, studentIds);
-        if (result.success) {
-          showMessage(result.message, 'success');
-          closeModal('addStudentModal');
-          loadClasses(); // 重新載入班級列表以更新學生數
+        if (toAdd.length > 0) {
+          await api.schedules.enrollStudents(currentScheduleId, toAdd);
         }
+        for (const sid of toRemove) {
+          await api.schedules.removeStudent(currentScheduleId, sid);
+        }
+        showMessage('班級學生已更新', 'success');
+        closeModal('addStudentModal');
+        loadClasses(); // 重新載入班級列表以更新學生數
       } catch (error) {
-        showMessage('加入學生失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+        showMessage('更新學生失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
       }
     }
 

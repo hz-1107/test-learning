@@ -56,7 +56,9 @@
       "Bash(lsof:*)",
       "Bash(netstat:*)",
       "Bash(pgrep:*)",
-      "Bash(ss -tlnp:*)"
+      "Bash(ss -tlnp:*)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
+      "Bash(netstat -ano)"
     ]
   }
 }

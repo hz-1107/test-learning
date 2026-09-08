@@ -1,0 +1,20 @@
+/* ========================================
+   行政人員端 - 字體放大覆寫
+   僅套用於 staff/ 頁面，放大共用變數字級，
+   提升可讀性；不影響 admin / teacher / student 端。
+   ======================================== */
+
+:root {
+  --font-size-xs: 12px;   /* 原 10px */
+  --font-size-sm: 14px;   /* 原 12px */
+  --font-size-md: 16px;   /* 原 14px */
+  --font-size-lg: 18px;   /* 原 16px */
+  --font-size-xl: 20px;   /* 原 18px */
+  --font-size-2xl: 27px;  /* 原 24px */
+  --font-size-3xl: 34px;  /* 原 30px */
+  --font-size-4xl: 54px;  /* 原 48px */
+}
+
+body {
+  font-size: var(--font-size-md);
+}

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>系統設定 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -207,7 +208,7 @@
     }
 
     .page-title {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       color: var(--color-text-primary);
     }
@@ -550,8 +551,19 @@
     }
 
     .notification-setting__input--time {
-      width: 90px;
-      text-align: center;
+      width: auto;
+      min-width: 132px;
+      padding: 6px 12px;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .notification-setting__input--time::-webkit-datetime-edit {
+      padding: 0;
+    }
+
+    .notification-setting__input--time::-webkit-datetime-edit-fields-wrapper {
+      padding: 0;
     }
 
     /* 設定區塊標題（含圖示與說明） */
@@ -813,6 +825,26 @@
       color: var(--color-text-primary);
     }
 
+    /* 編輯假日彈窗 */
+    .holiday-modal--compact {
+      max-width: 420px;
+    }
+
+    .holiday-edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .holiday-edit-form .form-field {
+      gap: 8px;
+    }
+
+    .holiday-edit-form .form-field__input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
     @media (max-width: 768px) {
       .staff-layout {
         grid-template-columns: 1fr;
@@ -1029,13 +1061,7 @@
                 <td><span class="holiday-type holiday-type--national">國定假日</span></td>
                 <td>
                   <div class="holiday-actions">
-                    <button class="icon-btn">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                    <button class="icon-btn icon-btn--delete">
+                    <button class="icon-btn icon-btn--delete" title="刪除">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -1050,13 +1076,7 @@
                 <td><span class="holiday-type holiday-type--national">國定假日</span></td>
                 <td>
                   <div class="holiday-actions">
-                    <button class="icon-btn">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                    <button class="icon-btn icon-btn--delete">
+                    <button class="icon-btn icon-btn--delete" title="刪除">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -1071,13 +1091,7 @@
                 <td><span class="holiday-type holiday-type--national">國定假日</span></td>
                 <td>
                   <div class="holiday-actions">
-                    <button class="icon-btn">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                    <button class="icon-btn icon-btn--delete">
+                    <button class="icon-btn icon-btn--delete" title="刪除">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -1092,13 +1106,7 @@
                 <td><span class="holiday-type holiday-type--national">國定假日</span></td>
                 <td>
                   <div class="holiday-actions">
-                    <button class="icon-btn">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                    <button class="icon-btn icon-btn--delete">
+                    <button class="icon-btn icon-btn--delete" title="刪除">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -1113,13 +1121,13 @@
                 <td><span class="holiday-type holiday-type--custom">自訂休假</span></td>
                 <td>
                   <div class="holiday-actions">
-                    <button class="icon-btn">
+                    <button class="icon-btn icon-btn--edit" title="編輯">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                       </svg>
                     </button>
-                    <button class="icon-btn icon-btn--delete">
+                    <button class="icon-btn icon-btn--delete" title="刪除">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -1299,6 +1307,40 @@
       <div class="holiday-modal__footer">
         <button class="btn-secondary" id="cancelHolidayImport">取消</button>
         <button class="btn-primary" id="confirmHolidayImport">確認新增</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 編輯自訂休假 Modal -->
+  <div class="modal-overlay" id="holidayEditModal">
+    <div class="holiday-modal holiday-modal--compact">
+      <div class="holiday-modal__header">
+        <div>
+          <h3 class="holiday-modal__title">編輯自訂休假</h3>
+          <p class="holiday-modal__subtitle">可修改此休假日的日期或名稱</p>
+        </div>
+        <button class="holiday-modal__close" id="closeHolidayEditModal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="holiday-modal__body">
+        <form class="holiday-edit-form" id="holidayEditForm">
+          <div class="form-field">
+            <label class="form-field__label" for="editHolidayDate">日期</label>
+            <input type="date" class="form-field__input" id="editHolidayDate" required>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="editHolidayName">假日名稱</label>
+            <input type="text" class="form-field__input" id="editHolidayName" placeholder="請輸入假日名稱" required>
+          </div>
+        </form>
+      </div>
+      <div class="holiday-modal__footer">
+        <button type="button" class="btn-secondary" id="cancelHolidayEdit">取消</button>
+        <button type="button" class="btn-primary" id="confirmHolidayEdit">儲存</button>
       </div>
     </div>
   </div>
@@ -1553,31 +1595,37 @@
       cb.addEventListener('change', updateSelectAllState);
     });
 
+    // 依假日類型組合「操作」欄按鈕：自訂休假可編輯 + 刪除，國定假日僅刪除
+    function buildHolidayActions(typeClass) {
+      const editBtn = typeClass === 'holiday-type--custom' ? `
+            <button class="icon-btn icon-btn--edit" title="編輯">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>` : '';
+      return `
+          <div class="holiday-actions">${editBtn}
+            <button class="icon-btn icon-btn--delete" title="刪除">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          </div>`;
+    }
+
     function createHolidayRow(dateStr, name, typeClass, typeText) {
       const newRow = document.createElement('tr');
       newRow.innerHTML = `
         <td>${dateStr}</td>
         <td>${name}</td>
         <td><span class="holiday-type ${typeClass}">${typeText}</span></td>
-        <td>
-          <div class="holiday-actions">
-            <button class="icon-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="icon-btn icon-btn--delete">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-              </svg>
-            </button>
-          </div>
-        </td>
+        <td>${buildHolidayActions(typeClass)}</td>
       `;
       holidayTableBody.appendChild(newRow);
       bindDeleteEvents();
+      bindEditEvents();
       return newRow;
     }
 
@@ -1637,7 +1685,61 @@
       });
     }
 
+    // ============ 編輯自訂休假 ============
+    const holidayEditModal = document.getElementById('holidayEditModal');
+    const closeHolidayEditModal = document.getElementById('closeHolidayEditModal');
+    const cancelHolidayEdit = document.getElementById('cancelHolidayEdit');
+    const confirmHolidayEdit = document.getElementById('confirmHolidayEdit');
+    const editHolidayDate = document.getElementById('editHolidayDate');
+    const editHolidayName = document.getElementById('editHolidayName');
+    let editingHolidayRow = null;
+
+    function closeHolidayEdit() {
+      holidayEditModal.classList.remove('active');
+      editingHolidayRow = null;
+    }
+
+    function openHolidayEditModal(row) {
+      editingHolidayRow = row;
+      const dateText = row.children[0]?.textContent.trim() || '';
+      const nameText = row.children[1]?.textContent.trim() || '';
+      editHolidayDate.value = dateText.replace(/\//g, '-');
+      editHolidayName.value = nameText;
+      holidayEditModal.classList.add('active');
+      editHolidayName.focus();
+    }
+
+    // 僅「自訂休假」列會出現編輯按鈕
+    function bindEditEvents() {
+      document.querySelectorAll('.icon-btn--edit').forEach(btn => {
+        btn.onclick = function() {
+          openHolidayEditModal(this.closest('tr'));
+        };
+      });
+    }
+
+    closeHolidayEditModal.addEventListener('click', closeHolidayEdit);
+    cancelHolidayEdit.addEventListener('click', closeHolidayEdit);
+    holidayEditModal.addEventListener('click', (e) => {
+      if (e.target === holidayEditModal) closeHolidayEdit();
+    });
+
+    confirmHolidayEdit.addEventListener('click', () => {
+      if (!editingHolidayRow) return;
+      const date = editHolidayDate.value;
+      const name = editHolidayName.value.trim();
+      if (!date || !name) {
+        alert('請填寫日期和假日名稱');
+        return;
+      }
+      editingHolidayRow.children[0].textContent = date.replace(/-/g, '/');
+      editingHolidayRow.children[1].textContent = name;
+      closeHolidayEdit();
+      showSettingsToast('假日已更新');
+    });
+
     bindDeleteEvents();
+    bindEditEvents();
 
     // ============ 自動通知與提醒機制 ============
     const NOTIFICATION_SETTINGS_KEY = 'slh_notification_settings_v1';

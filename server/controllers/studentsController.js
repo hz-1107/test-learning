@@ -225,11 +225,11 @@ exports.create = async (req, res) => {
 
     // 如果有選擇班級，自動加入班級
     if (schedule_id) {
-      const schedule = await db.queryOne('SELECT id FROM course_schedules WHERE id = ?', [schedule_id]);
+      const schedule = await db.queryOne('SELECT id, course_id FROM course_schedules WHERE id = ?', [schedule_id]);
       if (schedule) {
         await db.insert(
-          'INSERT INTO course_enrollments (schedule_id, student_id, status) VALUES (?, ?, ?)',
-          [schedule_id, studentId, 'enrolled']
+          'INSERT INTO course_enrollments (course_id, schedule_id, student_id, status) VALUES (?, ?, ?, ?)',
+          [schedule.course_id, schedule_id, studentId, 'enrolled']
         );
       }
     }
@@ -295,7 +295,7 @@ exports.update = async (req, res) => {
 
     // 如果有更新班級
     if (schedule_id) {
-      const schedule = await db.queryOne('SELECT id FROM course_schedules WHERE id = ?', [schedule_id]);
+      const schedule = await db.queryOne('SELECT id, course_id FROM course_schedules WHERE id = ?', [schedule_id]);
       if (schedule) {
         // 先取消之前的所有班級
         await db.update(
@@ -309,13 +309,13 @@ exports.update = async (req, res) => {
         );
         if (existing) {
           await db.update(
-            'UPDATE course_enrollments SET status = "enrolled" WHERE id = ?',
-            [existing.id]
+            'UPDATE course_enrollments SET status = "enrolled", course_id = ? WHERE id = ?',
+            [schedule.course_id, existing.id]
           );
         } else {
           await db.insert(
-            'INSERT INTO course_enrollments (schedule_id, student_id, status) VALUES (?, ?, ?)',
-            [schedule_id, id, 'enrolled']
+            'INSERT INTO course_enrollments (course_id, schedule_id, student_id, status) VALUES (?, ?, ?, ?)',
+            [schedule.course_id, schedule_id, id, 'enrolled']
           );
         }
       }

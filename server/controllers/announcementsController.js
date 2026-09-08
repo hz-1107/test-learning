@@ -62,8 +62,7 @@ exports.getPublishedAnnouncements = async (req, res) => {
       sql += ` OR a.target_group = 'students'`;
     }
 
-    sql += `) ORDER BY a.published_at DESC LIMIT ?`;
-    params.push(parseInt(limit));
+   sql += `) ORDER BY a.published_at DESC LIMIT ${parseInt(limit) || 5}`;
 
     const announcements = await db.query(sql, params);
 
