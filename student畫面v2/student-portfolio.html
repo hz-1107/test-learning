@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學習歷程 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .student-dashboard {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+      background: var(--color-background);
+    }
+
+    /* 側邊欄 */
+    .student-sidebar {
+      background: var(--color-surface-alt);
+      padding: var(--spacing-lg) 0;
+    }
+
+    .student-sidebar__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
+      border-bottom: 1px solid var(--color-surface-alt);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .student-sidebar__avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .student-sidebar__avatar svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary-dark);
+    }
+
+    .student-sidebar__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .student-sidebar__name {
+      font-size: var(--font-size-md);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .student-sidebar__subtitle {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .student-sidebar__nav {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .student-sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 12px var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .student-sidebar__nav-item:hover {
+      background: rgba(255, 219, 88, 0.3);
+    }
+
+    .student-sidebar__nav-item--active {
+  background: var(--color-primary);
+  color: var(--color-primary-dark);
+  border-left: none;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+ }
+
+    .student-sidebar__nav-item svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 子導覽項目 */
+    .student-sidebar__nav-sub {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 主內容區 */
+    .student-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導覽 */
+    .student-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+    }
+
+    .student-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .student-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .student-header__icon-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .student-header__icon-btn:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .student-header__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      overflow: hidden;
+    }
+
+    .student-header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 頁面內容 */
+    .page-content {
+      padding: var(--spacing-xl);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* 頁面標題區 */
+    .page-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .page-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .page-actions__group {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .student-header__search {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 8px 16px;
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  width: 240px;
+}
+
+.student-header__search input {
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  width: 100%;
+}
+
+.student-header__search input::placeholder {
+  color: var(--color-text-muted);
+}
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn--outline {
+      background: var(--color-surface);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .action-btn--outline:hover {
+      background: var(--color-primary-light);
+    }
+
+    .action-btn--primary {
+      background: var(--color-primary);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .action-btn--primary:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    /* 灰框次要按鈕：篩選面板「清除」、選取模式「返回」 */
+    .action-btn--gray-outline {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .action-btn--gray-outline:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .action-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 篩選條件面板 */
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-panel {
+      position: absolute;
+      top: calc(100% + var(--spacing-sm));
+      right: 0;
+      width: 500px;
+      max-width: 90vw;
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--spacing-xl);
+      z-index: 50;
+      opacity: 0;
+      transform: translateY(-8px);
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .filter-panel--open {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .filter-panel__title {
+      font-size: var(--font-size-lg);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .filter-panel__field {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .filter-panel__label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .filter-panel__date-range {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .filter-panel__date-range input[type="date"] {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      font-family: var(--font-family);
+      /* 原生日期輸入框右側自帶日曆圖示，點擊即可開啟日期選擇器 */
+    }
+
+    .filter-panel__date-sep {
+      flex-shrink: 0;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .filter-panel__select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      font-family: var(--font-family);
+      background: var(--color-surface);
+      cursor: pointer;
+    }
+
+    .filter-panel__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xl);
+    }
+
+    /* 選取模式：全選列 */
+    .select-all-row {
+      display: none;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .select-all-row--visible {
+      display: flex;
+    }
+
+    .select-all-row input[type="checkbox"],
+    .history-card__checkbox {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* 學習歷程卡片列表 */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .history-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg) var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .history-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .history-card:focus-visible {
+      outline: 2px solid var(--color-primary-dark);
+      outline-offset: 2px;
+    }
+
+    .history-card__title-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .history-card__title {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .history-card__subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .history-card__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xl);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .history-card__meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-primary-dark);
+    }
+
+    .history-card__meta-item svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-primary);
+    }
+
+    .history-card__description {
+      background: var(--color-background);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* 響應式 */
+    @media (max-width: 992px) {
+      .student-dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .student-sidebar {
+        display: none;
+      }
+
+      .page-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+      }
+
+      .page-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .filter-panel {
+        width: 100%;
+        right: 0;
+        left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-dashboard">
+    <!-- 側邊欄 -->
+    <aside class="student-sidebar">
+      <div class="student-sidebar__profile">
+        <div class="student-sidebar__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="student-sidebar__info">
+          <span class="student-sidebar__name">李美華</span>
+          <span class="student-sidebar__subtitle">智慧學習門戶</span>
+        </div>
+      </div>
+
+      <nav class="student-sidebar__nav">
+        <a href="dashboard.html" class="student-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          學習概況
+        </a>
+        <div class="student-sidebar__nav-sub">
+          <a href="student-portfolio.html" class="student-sidebar__nav-item student-sidebar__nav-item--active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            學習歷程
+          </a>
+          <a href="student-competition.html" class="student-sidebar__nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
+              <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+              <path d="M4 22h16"/>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+              <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+            </svg>
+            競賽歷程
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="student-main">
+      <!-- 頂部導覽 -->
+<header class="student-header">
+        <h1 class="student-header__title">智慧學習歷程系統</h1>
+        <div class="student-header__actions">
+          <button class="student-header__icon-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <div class="student-header__avatar">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=student" alt="頭像">
+          </div>
+        </div>
+      </header>
+
+      <!-- 頁面內容 -->
+      <div class="page-content">
+        <!-- 頁面標題區 -->
+        <div class="page-title-row">
+          <h2 class="page-title">學習歷程</h2>
+          <div class="page-actions">
+            <!-- 一般瀏覽模式：篩選條件 + 批量匯出 -->
+            <div class="page-actions__group" id="browseActions">
+              <div class="filter-dropdown" id="filterDropdown">
+                <button type="button" class="action-btn action-btn--outline" id="filterBtn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                  </svg>
+                  篩選條件
+                </button>
+
+                <!-- 篩選面板 -->
+                <div class="filter-panel" id="filterPanel">
+                  <h3 class="filter-panel__title">篩選設定</h3>
+
+                  <div class="filter-panel__field">
+                    <label class="filter-panel__label">日期範圍</label>
+                    <div class="filter-panel__date-range">
+                      <input type="date" id="filterStartDate" aria-label="開始時間">
+                      <span class="filter-panel__date-sep">至</span>
+                      <input type="date" id="filterEndDate" aria-label="結束時間">
+                    </div>
+                  </div>
+
+                  <div class="filter-panel__field">
+                    <label class="filter-panel__label" for="filterCategory">課程類別</label>
+                    <select id="filterCategory" class="filter-panel__select">
+                      <option value="全部">全部</option>
+                    </select>
+                  </div>
+
+                  <div class="filter-panel__actions">
+                    <button type="button" class="action-btn action-btn--gray-outline" id="filterClearBtn">清除</button>
+                    <button type="button" class="action-btn action-btn--primary" id="filterApplyBtn">套用</button>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" class="action-btn action-btn--primary" id="exportModeBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                批量匯出
+              </button>
+            </div>
+
+            <!-- 選取模式：返回 + 匯出已選 -->
+            <div class="page-actions__group" id="selectActions" style="display: none;">
+              <button type="button" class="action-btn action-btn--gray-outline" id="exitSelectModeBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                返回
+              </button>
+              <button type="button" class="action-btn action-btn--primary" id="exportSelectedBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                匯出已選：<span id="exportCount">0</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 選取模式：全選列 -->
+        <div class="select-all-row" id="selectAllRow">
+          <input type="checkbox" id="selectAllCheckbox" aria-label="全選">
+          <label for="selectAllCheckbox">全選</label>
+        </div>
+
+        <!-- 學習歷程列表 -->
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/portfolio-data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script>
+    // ========================================
+    // 狀態
+    // ========================================
+    let isSelectMode = false;
+    let selectedIds = new Set();
+    let activeFilters = { startDate: '', endDate: '', category: '全部' };
+
+    // ========================================
+    // 渲染學習歷程卡片
+    // 一般模式：點擊卡片導向詳細頁
+    // 選取模式：卡片標題左側顯示勾選框，點擊卡片＝勾選/取消勾選
+    // ========================================
+    function renderHistoryList(data) {
+      const container = document.getElementById('historyList');
+
+      if (!data.length) {
+        container.innerHTML = '<div class="history-card__description">目前沒有符合條件的學習歷程紀錄</div>';
+        updateSelectAllState();
+        return;
+      }
+
+      container.innerHTML = data.map(item => {
+        const checked = selectedIds.has(item.id);
+        return `
+        <div class="history-card" data-id="${item.id}" role="${isSelectMode ? 'checkbox' : 'button'}" tabindex="0" ${isSelectMode ? `aria-checked="${checked}"` : ''} aria-label="${isSelectMode ? '選取' : '查看'}「${item.courseName} - ${item.courseSubtitle}」學習歷程${isSelectMode ? '' : '詳情'}">
+          <div class="history-card__title-row">
+            ${isSelectMode ? `<input type="checkbox" class="history-card__checkbox" ${checked ? 'checked' : ''} aria-label="選取「${item.courseName} - ${item.courseSubtitle}」">` : ''}
+            <h3 class="history-card__title">${item.courseName}</h3>
+          </div>
+          <p class="history-card__subtitle">${item.courseSubtitle}</p>
+          <div class="history-card__meta">
+            <span class="history-card__meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+              </svg>
+              ${item.date}
+            </span>
+            <span class="history-card__meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              ${item.duration}
+            </span>
+          </div>
+          <div class="history-card__description">${item.description}</div>
+        </div>
+      `;
+      }).join('');
+
+      container.querySelectorAll('.history-card').forEach(card => {
+        const id = card.dataset.id;
+
+        if (isSelectMode) {
+          const checkbox = card.querySelector('.history-card__checkbox');
+
+          checkbox.addEventListener('change', function() {
+            toggleCardSelection(id, this.checked);
+            card.setAttribute('aria-checked', String(this.checked));
+          });
+
+          const toggleViaCard = (e) => {
+            if (e.target.closest('.history-card__checkbox')) return;
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+          };
+
+          card.addEventListener('click', toggleViaCard);
+          card.addEventListener('keydown', function(e) {
+            // 勾選框本身已有原生鍵盤操作（Space 鍵切換），交給它自己處理即可
+            if (e.target.closest('.history-card__checkbox')) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleViaCard(e);
+            }
+          });
+        } else {
+          const goToDetail = () => {
+            window.location.href = `portfolio-detail.html?id=${encodeURIComponent(id)}`;
+          };
+          card.addEventListener('click', goToDetail);
+          card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              goToDetail();
+            }
+          });
+        }
+      });
+
+      if (isSelectMode) updateSelectAllState();
+    }
+
+    // ========================================
+    // 搜尋 + 篩選：套用後統一交給 renderHistoryList
+    // ========================================
+    const searchInput = document.querySelector('.student-header__search input');
+
+    function getFilteredData() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+
+      return portfolioData.filter(item => {
+        const matchesQuery = !query ||
+          item.courseName.toLowerCase().includes(query) ||
+          item.courseSubtitle.toLowerCase().includes(query) ||
+          item.description.toLowerCase().includes(query);
+
+        const matchesCategory = activeFilters.category === '全部' || item.category === activeFilters.category;
+        const matchesStart = !activeFilters.startDate || item.date >= activeFilters.startDate;
+        const matchesEnd = !activeFilters.endDate || item.date <= activeFilters.endDate;
+
+        return matchesQuery && matchesCategory && matchesStart && matchesEnd;
+      });
+    }
+
+    function refreshList() {
+      renderHistoryList(getFilteredData());
+    }
+
+    refreshList();
+
+    if (searchInput) {
+      searchInput.addEventListener('input', refreshList);
+    }
+
+    // ========================================
+    // 篩選條件面板
+    // ========================================
+    const filterDropdown = document.getElementById('filterDropdown');
+    const filterPanel = document.getElementById('filterPanel');
+    const filterCategorySelect = document.getElementById('filterCategory');
+    const filterStartInput = document.getElementById('filterStartDate');
+    const filterEndInput = document.getElementById('filterEndDate');
+
+    // 課程類別選項：從資料來源的 category 欄位動態帶出，不重複
+    const categories = [...new Set(portfolioData.map(item => item.category))];
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      filterCategorySelect.appendChild(option);
+    });
+
+    function closeFilterPanel() {
+      filterPanel.classList.remove('filter-panel--open');
+    }
+
+    document.getElementById('filterBtn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      filterPanel.classList.toggle('filter-panel--open');
+    });
+
+    // 點擊面板外的區域，面板自動關閉（不套用篩選）
+    document.addEventListener('click', function(e) {
+      if (filterDropdown && !filterDropdown.contains(e.target)) {
+        closeFilterPanel();
+      }
+    });
+
+    // 清除：清空所有篩選條件並立即恢復未篩選列表
+    document.getElementById('filterClearBtn').addEventListener('click', function() {
+      filterStartInput.value = '';
+      filterEndInput.value = '';
+      filterCategorySelect.value = '全部';
+      activeFilters = { startDate: '', endDate: '', category: '全部' };
+      refreshList();
+    });
+
+    // 套用：依篩選條件過濾列表，並關閉面板
+    document.getElementById('filterApplyBtn').addEventListener('click', function() {
+      activeFilters = {
+        startDate: filterStartInput.value,
+        endDate: filterEndInput.value,
+        category: filterCategorySelect.value
+      };
+      closeFilterPanel();
+      refreshList();
+    });
+
+    // ========================================
+    // 批量匯出（選取模式）
+    // ========================================
+    const browseActions = document.getElementById('browseActions');
+    const selectActions = document.getElementById('selectActions');
+    const selectAllRow = document.getElementById('selectAllRow');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const exportCountEl = document.getElementById('exportCount');
+
+    function enterSelectMode() {
+      isSelectMode = true;
+      selectedIds.clear();
+      closeFilterPanel();
+      browseActions.style.display = 'none';
+      selectActions.style.display = 'flex';
+      selectAllRow.classList.add('select-all-row--visible');
+      selectAllCheckbox.checked = false;
+      updateExportCount();
+      refreshList();
+    }
+
+    function exitSelectMode() {
+      isSelectMode = false;
+      selectedIds.clear();
+      browseActions.style.display = 'flex';
+      selectActions.style.display = 'none';
+      selectAllRow.classList.remove('select-all-row--visible');
+      selectAllCheckbox.checked = false;
+      refreshList();
+    }
+
+    function toggleCardSelection(id, checked) {
+      if (checked) {
+        selectedIds.add(id);
+      } else {
+        selectedIds.delete(id);
+      }
+      updateSelectAllState();
+      updateExportCount();
+    }
+
+    // 全選勾選框狀態需與下方個別勾選狀態同步：
+    // 目前顯示的卡片全部被選取時才打勾，取消任一項就自動取消
+    function updateSelectAllState() {
+      if (!isSelectMode) return;
+      const visibleIds = Array.from(document.querySelectorAll('.history-card')).map(card => card.dataset.id);
+      selectAllCheckbox.checked = visibleIds.length > 0 && visibleIds.every(id => selectedIds.has(id));
+    }
+
+    function updateExportCount() {
+      exportCountEl.textContent = selectedIds.size;
+    }
+
+    document.getElementById('exportModeBtn').addEventListener('click', enterSelectMode);
+    document.getElementById('exitSelectModeBtn').addEventListener('click', exitSelectMode);
+
+    selectAllCheckbox.addEventListener('change', function() {
+      const checked = this.checked;
+      document.querySelectorAll('.history-card').forEach(card => {
+        const id = card.dataset.id;
+        const checkbox = card.querySelector('.history-card__checkbox');
+        if (checkbox) checkbox.checked = checked;
+        card.setAttribute('aria-checked', String(checked));
+        if (checked) {
+          selectedIds.add(id);
+        } else {
+          selectedIds.delete(id);
+        }
+      });
+      updateExportCount();
+    });
+
+    // 匯出已選：匯出格式尚未確認，先印出已選 id 陣列，之後再串接實際匯出邏輯（PDF / Excel / CSV）
+    document.getElementById('exportSelectedBtn').addEventListener('click', function() {
+      if (!selectedIds.size) {
+        showMessage('請先勾選要匯出的學習歷程', 'warning');
+        return;
+      }
+      console.log('已選取匯出的學習歷程 id：', Array.from(selectedIds));
+      showMessage(`已選取 ${selectedIds.size} 筆，匯出功能開發中...`, 'success');
+    });
+  </script>
+</body>
+</html>
