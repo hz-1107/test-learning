@@ -1437,7 +1437,7 @@
                   <div class="detail-group">
                     <label class="detail-group__label">給予點數</label>
                     <div class="points-input">
-                      <input type="number" value="1" min="0" max="10">
+                      <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
                         <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
                         <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
@@ -1537,7 +1537,7 @@
                   <div class="detail-group">
                     <label class="detail-group__label">給予點數</label>
                     <div class="points-input">
-                      <input type="number" value="1" min="0" max="10">
+                      <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
                         <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
                         <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
@@ -1637,7 +1637,7 @@
                   <div class="detail-group">
                     <label class="detail-group__label">給予點數</label>
                     <div class="points-input">
-                      <input type="number" value="1" min="0" max="10">
+                      <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
                         <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
                         <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
@@ -1737,7 +1737,7 @@
                   <div class="detail-group">
                     <label class="detail-group__label">給予點數</label>
                     <div class="points-input">
-                      <input type="number" value="1" min="0" max="10">
+                      <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
                         <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
                         <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
@@ -1837,7 +1837,7 @@
                   <div class="detail-group">
                     <label class="detail-group__label">給予點數</label>
                     <div class="points-input">
-                      <input type="number" value="1" min="0" max="10">
+                      <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
                         <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
                         <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
@@ -2372,6 +2372,9 @@
 
   <script src="../js/main.js"></script>
   <script>
+    // API 基礎網址（用絕對網址，避免此頁若非從後端伺服器開啟時，相對路徑打錯位置）
+    const API_BASE = 'http://localhost:3000/api';
+
     // 當前編輯的學生
     let currentStudent = null;
     // 班級資料快取
@@ -2614,7 +2617,7 @@
         const startDate = document.getElementById('filterStartDate').value;
         const endDate = document.getElementById('filterEndDate').value;
 
-        const response = await fetch(`/api/logs/schedule-dates?schedule_id=${scheduleId}&start_date=${startDate}&end_date=${endDate}`, {
+        const response = await fetch(`${API_BASE}/logs/schedule-dates?schedule_id=${scheduleId}&start_date=${startDate}&end_date=${endDate}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -2810,7 +2813,7 @@
     async function loadMySchedules() {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch('/api/schedules/my-classes', {
+        const response = await fetch(`${API_BASE}/schedules/my-classes`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -2906,7 +2909,7 @@
     async function loadScheduleStudents(scheduleId) {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch(`/api/schedules/${scheduleId}/students`, {
+        const response = await fetch(`${API_BASE}/schedules/${scheduleId}/students`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -2947,7 +2950,7 @@
 
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch(`/api/logs/by-schedule?schedule_id=${scheduleId}&log_date=${logDate}`, {
+        const response = await fetch(`${API_BASE}/logs/by-schedule?schedule_id=${scheduleId}&log_date=${logDate}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -3227,7 +3230,7 @@
               <div class="detail-group">
                 <label class="detail-group__label">給予點數</label>
                 <div class="points-input">
-                  <input type="number" value="1" min="0" max="10">
+                  <input type="number" value="1" min="0" max="7">
                   <div class="points-input__arrows">
                     <div class="points-input__arrow" onclick="adjustPoints(this, 1)">▲</div>
                     <div class="points-input__arrow" onclick="adjustPoints(this, -1)">▼</div>
@@ -3406,7 +3409,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch('/api/ai/generate-comment', {
+        const response = await fetch(`${API_BASE}/ai/generate-comment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -3646,7 +3649,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
     function adjustPoints(arrow, delta) {
       const input = arrow.closest('.points-input').querySelector('input');
       let value = parseInt(input.value) || 0;
-      value = Math.max(0, Math.min(10, value + delta));
+      value = Math.max(0, Math.min(7, value + delta));
       input.value = value;
     }
 
@@ -3669,7 +3672,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             const formData = new FormData();
             formData.append('photo', file);
 
-            const response = await fetch('/api/upload/photo', {
+            const response = await fetch(`${API_BASE}/upload/photo`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`
@@ -3809,7 +3812,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
         if (isUpdate) {
           // 更新現有日誌
-          const logResponse = await fetch(`/api/logs/${currentLogId}`, {
+          const logResponse = await fetch(`${API_BASE}/logs/${currentLogId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -3833,7 +3836,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
           logId = currentLogId;
         } else {
           // 建立新日誌
-          const logResponse = await fetch('/api/logs', {
+          const logResponse = await fetch(`${API_BASE}/logs`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -3896,7 +3899,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             if (notesField) studentNotes = notesField.value.trim();
 
             const pointsInput = details.querySelector('.points-input input');
-            if (pointsInput) pointsEarned = parseInt(pointsInput.value) || 0;
+            if (pointsInput) pointsEarned = Math.max(0, Math.min(7, parseInt(pointsInput.value) || 0));
 
             // 取得照片 URL
             const photoUpload = details.querySelector('.photo-upload');
@@ -3913,7 +3916,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
           const skillTeamwork = parseInt(card.dataset.skillTeamwork) || 0;
 
           // 呼叫 API 儲存學生記錄
-          const promise = fetch(`/api/logs/${logId}/students/${studentId}`, {
+          const promise = fetch(`${API_BASE}/logs/${logId}/students/${studentId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -3940,7 +3943,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         await Promise.all(studentPromises);
 
         // 3. 更新日誌狀態為已完成
-        await fetch(`/api/logs/${logId}`, {
+        await fetch(`${API_BASE}/logs/${logId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

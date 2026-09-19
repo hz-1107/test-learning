@@ -304,6 +304,65 @@ style.textContent = `
   .journal-progress:hover {
     transform: translateY(-2px);
   }
+
+  .header-avatar-wrap {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .header-avatar-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 160px;
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-surface-alt, #e5e5e5);
+    border-radius: var(--radius-md, 8px);
+    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.28);
+    padding: 6px;
+    display: none;
+    z-index: 200;
+  }
+
+  .header-avatar-menu.active {
+    display: block;
+  }
+
+  .header-avatar-menu__name {
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary, #333);
+    border-bottom: 1px solid var(--color-surface-alt, #e5e5e5);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-avatar-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: left;
+    color: var(--color-text-secondary, #555);
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .header-avatar-menu__item:hover {
+    background: var(--color-background, #f5f5f5);
+  }
+
+  .header-avatar-menu__item--danger {
+    color: #fe7560;
+  }
 `;
 document.head.appendChild(style);
 
@@ -337,6 +396,83 @@ function updateUserName() {
 }
 
 /**
+ * 登出：清除本機登入資訊並導回登入頁
+ */
+function logout() {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('userName');
+  window.location.href = '/login.html';
+}
+
+/**
+ * 在頁首大頭貼加上下拉選單（登出；學生帳號另外保留「查看個人檔案」）
+ */
+function initHeaderAvatarMenu() {
+  const avatar = document.querySelector(
+    '.admin-header__avatar, .staff-header__avatar, .header__avatar, .student-header__avatar'
+  );
+  if (!avatar || avatar.closest('.header-avatar-wrap')) return;
+
+  const isStudent = avatar.classList.contains('student-header__avatar');
+
+  // 移除舊有「點頭貼直接跳轉個人檔案」的行為，改由選單項目處理
+  avatar.removeAttribute('onclick');
+  avatar.removeAttribute('title');
+  avatar.style.cursor = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'header-avatar-wrap';
+  avatar.parentNode.insertBefore(wrap, avatar);
+  wrap.appendChild(avatar);
+
+  const menu = document.createElement('div');
+  menu.className = 'header-avatar-menu';
+
+  const userName = localStorage.getItem('userName');
+  if (userName) {
+    const nameEl = document.createElement('div');
+    nameEl.className = 'header-avatar-menu__name';
+    nameEl.textContent = userName;
+    menu.appendChild(nameEl);
+  }
+
+  if (isStudent) {
+    const profileBtn = document.createElement('button');
+    profileBtn.type = 'button';
+    profileBtn.className = 'header-avatar-menu__item';
+    profileBtn.dataset.action = 'profile';
+    profileBtn.textContent = '查看個人檔案';
+    menu.appendChild(profileBtn);
+  }
+
+  const logoutBtn = document.createElement('button');
+  logoutBtn.type = 'button';
+  logoutBtn.className = 'header-avatar-menu__item header-avatar-menu__item--danger';
+  logoutBtn.dataset.action = 'logout';
+  logoutBtn.textContent = '登出';
+  menu.appendChild(logoutBtn);
+
+  wrap.appendChild(menu);
+
+  wrap.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const action = e.target.dataset.action;
+    if (action === 'profile') {
+      window.location.href = 'student-profile.html';
+      return;
+    }
+    if (action === 'logout') {
+      logout();
+      return;
+    }
+    menu.classList.toggle('active');
+  });
+
+  document.addEventListener('click', () => menu.classList.remove('active'));
+}
+
+/**
  * 檢查登入狀態，未登入則跳轉到登入頁
  */
 function checkAuth() {
@@ -362,6 +498,7 @@ function init() {
     // 非登入頁面：檢查登入狀態並更新使用者姓名
     checkAuth();
     updateUserName();
+    initHeaderAvatarMenu();
   }
 
   if (isDashboard) {
