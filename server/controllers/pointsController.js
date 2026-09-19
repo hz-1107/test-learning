@@ -24,9 +24,13 @@ async function ensureTablesExist() {
           reason VARCHAR(50) NOT NULL,
           description VARCHAR(255),
           operator_id INT,
+          reference_type VARCHAR(20),
+          reference_id INT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           INDEX idx_student_id (student_id),
-          INDEX idx_created_at (created_at)
+          INDEX idx_created_at (created_at),
+          INDEX idx_reference (reference_type, reference_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
       `);
       console.log('✅ 已建立 point_transactions 資料表');
@@ -51,12 +55,39 @@ async function ensureTablesExist() {
             reason VARCHAR(50) NOT NULL,
             description VARCHAR(255),
             operator_id INT,
+            reference_type VARCHAR(20),
+            reference_id INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_student_id (student_id),
-            INDEX idx_created_at (created_at)
+            INDEX idx_created_at (created_at),
+            INDEX idx_reference (reference_type, reference_id)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         console.log('✅ 已重建 point_transactions 資料表');
+      } else {
+        // 表已存在且有 amount 欄位，檢查較新版本才加入的欄位
+        // (server/controllers/logsController.js 的日誌給點數功能用得到)
+        const newerCols = await db.query(`
+          SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'point_transactions'
+          AND COLUMN_NAME IN ('reference_type', 'reference_id', 'updated_at')
+        `);
+        const existingNewerCols = newerCols.map(c => c.COLUMN_NAME);
+
+        if (!existingNewerCols.includes('reference_type')) {
+          await db.query('ALTER TABLE point_transactions ADD COLUMN reference_type VARCHAR(20) AFTER operator_id');
+          console.log('✅ 已新增 point_transactions.reference_type 欄位');
+        }
+        if (!existingNewerCols.includes('reference_id')) {
+          await db.query('ALTER TABLE point_transactions ADD COLUMN reference_id INT AFTER reference_type');
+          console.log('✅ 已新增 point_transactions.reference_id 欄位');
+        }
+        if (!existingNewerCols.includes('updated_at')) {
+          await db.query('ALTER TABLE point_transactions ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+          console.log('✅ 已新增 point_transactions.updated_at 欄位');
+        }
       }
     }
 
