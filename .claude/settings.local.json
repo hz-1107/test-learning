@@ -58,7 +58,9 @@
       "Bash(pgrep:*)",
       "Bash(ss -tlnp:*)",
       "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
-      "Bash(netstat -ano)"
+      "Bash(netstat -ano)",
+      "Bash(powershell -Command \"Get-Process -Name node -ErrorAction SilentlyContinue | Select-Object Id,ProcessName\" 2>&1)",
+      "Bash(npm start *)"
     ]
   }
 }
