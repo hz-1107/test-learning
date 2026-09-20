@@ -97,6 +97,26 @@
       box-shadow: 0 0 0 3px rgba(255, 219, 88, 0.3);
     }
 
+    /* 篩選列 */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: var(--spacing-md);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter-group__label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+
     /* 日誌區塊標題列 */
     .journal-section__header {
       display: flex;
@@ -269,7 +289,8 @@
             <path d="M10.5 0C4.7 0 0 4.7 0 10.5C0 16.3 4.7 21 10.5 21C16.3 21 21 16.3 21 10.5C21 4.7 16.3 0 10.5 0ZM10.5 3.15C12.24 3.15 13.65 4.56 13.65 6.3C13.65 8.04 12.24 9.45 10.5 9.45C8.76 9.45 7.35 8.04 7.35 6.3C7.35 4.56 8.76 3.15 10.5 3.15ZM10.5 18.06C7.875 18.06 5.544 16.716 4.2 14.7C4.2 12.6 8.4 11.445 10.5 11.445C12.6 11.445 16.8 12.6 16.8 14.7C15.456 16.716 13.125 18.06 10.5 18.06Z" fill="currentColor"/>
           </svg>
           <span>學生管理</span>
-        </a>
+        </a>
+
       </nav>
     </aside>
 
@@ -277,7 +298,6 @@
     <main class="main-content">
       <!-- 歡迎區塊 -->
       <section class="welcome-section">
-        <h2 class="welcome-section__title" id="welcomeTitle">您好，老師</h2>
         <p class="welcome-section__date" id="currentDate">載入中...</p>
       </section>
 
@@ -287,13 +307,28 @@
         <div class="courses-list">
           <div class="courses-list__header">
             <h3 class="courses-list__title">今日課程</h3>
-            <div class="courses-list__filters">
-              <select class="filter-select" id="statusFilter" onchange="filterCourses(this.value)">
-                <option value="all">全部</option>
-                <option value="in-progress">進行中</option>
-                <option value="pending">未完成</option>
-                <option value="completed">已結束</option>
-              </select>
+            <div class="courses-list__filters filter-bar">
+              <div class="filter-group">
+                <span class="filter-group__label">填答狀態</span>
+                <select class="filter-select" id="statusFilter" onchange="applyCourseFilters()">
+                  <option value="all">全部</option>
+                  <option value="in-progress">進行中</option>
+                  <option value="pending">未填答</option>
+                  <option value="completed">已完成</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-group__label">課程</span>
+                <select class="filter-select" id="courseFilter" onchange="applyCourseFilters()">
+                  <option value="all">全部課程</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <span class="filter-group__label">教師</span>
+                <select class="filter-select" id="teacherFilterSelect" onchange="applyCourseFilters()">
+                  <option value="all">全部教師</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -304,10 +339,10 @@
           </div>
         </div>
 
-        <!-- 尚未完成日誌 -->
+        <!-- 待填寫日誌 -->
         <div class="journal-section">
           <div class="journal-section__header">
-            <h3 class="journal-section__title">尚未完成日誌</h3>
+            <h3 class="journal-section__title">待填寫日誌</h3>
             <a href="records.html" class="journal-section__link">查看全部</a>
           </div>
 
@@ -357,6 +392,7 @@
     // 狀態變數
     let mySchedules = [];
     let allSchedules = [];
+    let currentTodaySchedules = [];
     let currentTeacherId = null;
     let userName = '老師';
     const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
@@ -364,19 +400,11 @@
     // 更新日期顯示和歡迎訊息
     function updateWelcome() {
       const now = new Date();
-      const hour = now.getHours();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
       const dayOfWeek = dayNames[now.getDay()];
 
-      // 問候語
-      let greeting = '您好';
-      if (hour >= 5 && hour < 12) greeting = '早安';
-      else if (hour >= 12 && hour < 18) greeting = '午安';
-      else greeting = '晚安';
-
-      document.getElementById('welcomeTitle').textContent = `${greeting}，${userName} 老師`;
       document.getElementById('currentDate').textContent = `${year} / ${month} / ${day} (${dayOfWeek})`;
     }
 
@@ -430,6 +458,8 @@
           return timeA.localeCompare(timeB);
         });
 
+        currentTodaySchedules = todaySchedules;
+        populateCourseTeacherFilters(todaySchedules);
         renderTodayCourses(todaySchedules);
         renderJournalSection();
       } catch (error) {
@@ -676,17 +706,37 @@
       return dates;
     }
 
-    // 課程篩選功能
-    function filterCourses(filter) {
+    // 填充課程／教師篩選下拉選單
+    function populateCourseTeacherFilters(schedules) {
+      const courseSelect = document.getElementById('courseFilter');
+      const teacherSelect = document.getElementById('teacherFilterSelect');
+
+      const courses = [...new Map(schedules.map(s => [s.course_id, s.course_name || '未命名課程'])).entries()];
+      courseSelect.innerHTML = '<option value="all">全部課程</option>' +
+        courses.map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+
+      const teachers = [...new Map(schedules.filter(s => s.teacher_id).map(s => [s.teacher_id, s.teacher_name || '未指定'])).entries()];
+      teacherSelect.innerHTML = '<option value="all">全部教師</option>' +
+        teachers.map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+    }
+
+    // 課程篩選功能（填答狀態、課程、教師）
+    function applyCourseFilters() {
+      const statusValue = document.getElementById('statusFilter').value;
+      const courseValue = document.getElementById('courseFilter').value;
+      const teacherValue = document.getElementById('teacherFilterSelect').value;
+
       const cards = document.querySelectorAll('.course-card');
 
       cards.forEach(card => {
-        const status = card.dataset.status;
-        if (filter === 'all' || status === filter) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-        }
+        const scheduleId = card.dataset.scheduleId;
+        const schedule = currentTodaySchedules.find(s => String(s.schedule_id || s.id) === String(scheduleId));
+
+        const statusMatch = statusValue === 'all' || card.dataset.status === statusValue;
+        const courseMatch = courseValue === 'all' || (schedule && String(schedule.course_id) === courseValue);
+        const teacherMatch = teacherValue === 'all' || (schedule && String(schedule.teacher_id) === teacherValue);
+
+        card.style.display = (statusMatch && courseMatch && teacherMatch) ? '' : 'none';
       });
     }
 

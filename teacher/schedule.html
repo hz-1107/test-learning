@@ -126,28 +126,18 @@
       background-position: right 0 center;
     }
 
-    .date-picker {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      padding: 10px 16px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-surface-alt);
-      border-radius: var(--radius-md);
-      font-size: var(--font-size-md);
-      color: var(--color-text-primary);
-      cursor: pointer;
-      position: relative;
-    }
+    .btn-secondary { padding: 10px 20px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-secondary); cursor: pointer; }
+    .btn-secondary:hover { background: var(--color-surface-alt); }
 
-    .date-picker__icon {
-      width: 18px;
-      height: 18px;
-      color: var(--color-text-muted);
-    }
+    /* 日期導覽 (< 目前日期 >) 與日曆彈窗 */
+    .date-nav { position: relative; display: flex; align-items: center; gap: var(--spacing-sm); }
+    .date-nav__btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-secondary); }
+    .date-nav__btn:hover { background: var(--color-surface-alt); }
+    .date-nav__current { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 7px 14px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); font-weight: 600; color: var(--color-primary-dark); min-width: 160px; cursor: pointer; font-family: inherit; }
+    .date-nav__current:hover { border-color: var(--color-primary); }
+    .date-nav__current svg { flex-shrink: 0; color: var(--color-primary-dark); }
 
-    /* 日期選擇彈窗 */
-    .cal-popup { position: absolute; top: calc(100% + 8px); left: 0; width: 236px; padding: 10px; background: #fff; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.28); z-index: 60; cursor: default; }
+    .cal-popup { position: absolute; top: calc(100% + 8px); left: 36px; width: 236px; padding: 10px; background: #fff; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.28); z-index: 60; }
     .cal-popup[hidden] { display: none; }
     .cal-popup__head { display: flex; align-items: center; justify-content: space-between; background: var(--color-primary); border-radius: var(--radius-sm); padding: 4px 6px; margin-bottom: 6px; }
     .cal-popup__title { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-primary-dark); }
@@ -247,9 +237,13 @@
       color: var(--color-text-muted);
     }
 
-    .schedule-header-cell--active {
+    .schedule-header-cell.schedule-header-cell--active {
       color: var(--color-primary-dark);
-      box-shadow: inset 0 -2px 0 var(--color-primary);
+      border-top: 2px solid var(--color-primary);
+      border-left: 2px solid var(--color-primary);
+      border-right: 2px solid var(--color-primary);
+      position: relative;
+      z-index: 1;
     }
 
     /* 時間欄 */
@@ -285,6 +279,16 @@
 
     .schedule-cell:last-child {
       border-right: none;
+    }
+
+    /* 「今天」整欄外框 */
+    .schedule-cell.schedule-cell--today {
+      border-left: 2px solid var(--color-primary);
+      border-right: 2px solid var(--color-primary);
+    }
+
+    .schedule-cell.schedule-cell--today.schedule-cell--today-last {
+      border-bottom: 2px solid var(--color-primary);
     }
 
     /* 虛線標示 */
@@ -457,6 +461,7 @@
                 <option value="">全部老師</option>
               </select>
             </div>
+<<<<<<< HEAD
             <div class="date-picker" id="datePicker" onclick="toggleCalendarPopup(event)">
               <span id="currentDateDisplay">載入中...</span>
               <svg class="date-picker__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -466,6 +471,20 @@
                 <line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
               <div class="cal-popup" id="calendarPopup" hidden onclick="event.stopPropagation()">
+=======
+            <div class="date-nav" id="dateNav">
+              <button type="button" class="date-nav__btn" onclick="navigate(-1)" aria-label="前一天">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button type="button" class="date-nav__current" id="dateField" onclick="toggleCalendarPopup(event)" title="選擇日期">
+                <span id="currentDateDisplay">載入中...</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </button>
+              <button type="button" class="date-nav__btn" onclick="navigate(1)" aria-label="後一天">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              <div class="cal-popup" id="calendarPopup" hidden>
+>>>>>>> style10716
                 <div class="cal-popup__head">
                   <button type="button" class="cal-popup__nav" onclick="calShiftMonth(-1)" aria-label="上個月">&#8249;</button>
                   <span class="cal-popup__title" id="calTitle"></span>
@@ -475,6 +494,10 @@
                 <div class="cal-popup__grid" id="calGrid"></div>
               </div>
             </div>
+<<<<<<< HEAD
+=======
+            <button type="button" class="btn-secondary" id="todayBtn" onclick="goToToday()">今天</button>
+>>>>>>> style10716
             <div class="day-tabs" id="dayTabs">
               <button class="day-tab" data-day="1">週一</button>
               <button class="day-tab" data-day="2">週二</button>
@@ -540,7 +563,7 @@
     const dayTabsContainer = document.getElementById('dayTabs');
     const teacherFilter = document.getElementById('teacherFilter');
     const dateDisplay = document.getElementById('currentDateDisplay');
-    let calMonth = null; // 日期選擇彈窗目前顯示的月份（該月 1 號）
+    let calMonth = new Date();
 
     // 初始化
     document.addEventListener('DOMContentLoaded', async () => {
@@ -640,7 +663,26 @@
       loadSchedule();
     }
 
-    // ========== 日期選擇彈窗 ==========
+    // 跳到今天
+    function goToToday() {
+      currentDate = new Date();
+      currentDayOfWeek = currentDate.getDay();
+      updateDateDisplay();
+      updateDayTabs();
+      loadSchedule();
+    }
+
+    // 上一頁/下一頁 (單日檢視移動 1 天，週檢視移動 7 天)
+    function navigate(delta) {
+      const step = currentView === 'week' ? 7 : 1;
+      currentDate.setDate(currentDate.getDate() + delta * step);
+      currentDayOfWeek = currentDate.getDay();
+      updateDateDisplay();
+      updateDayTabs();
+      loadSchedule();
+    }
+
+    // 日曆彈窗開關
     function toggleCalendarPopup(evt) {
       if (evt) evt.stopPropagation();
       const pop = document.getElementById('calendarPopup');
@@ -676,7 +718,7 @@
       const firstWeekday = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      // 週檢視：標示 7 天範圍；日檢視：僅標示當前選定日
+      // 週檢視：標示 7 天視窗；單日檢視：僅標示當前選定日
       const weekly = currentView === 'week';
       const start = weekly ? getWeekStart(currentDate) : currentDate;
       const startT = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
@@ -705,7 +747,7 @@
       }
     }
 
-    // 選定日期：關閉彈窗、更新狀態並重新載入課表
+    // 從日曆彈窗選定日期
     function pickCalendarDate(date) {
       closeCalendarPopup();
       currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -719,7 +761,7 @@
     document.addEventListener('click', (e) => {
       const pop = document.getElementById('calendarPopup');
       if (!pop || pop.hidden) return;
-      if (pop.contains(e.target) || e.target.closest('#datePicker')) return;
+      if (pop.contains(e.target) || e.target.closest('#dateField')) return;
       closeCalendarPopup();
     });
 
@@ -941,7 +983,10 @@
 
         weekDates.forEach((d, dayIndex) => {
           const cell = document.createElement('div');
-          cell.className = 'schedule-cell';
+          const isToday = d.toDateString() === new Date().toDateString();
+          cell.className = 'schedule-cell' +
+            (isToday ? ' schedule-cell--today' : '') +
+            (isToday && index === timeSlots.length - 1 ? ' schedule-cell--today-last' : '');
           cell.dataset.day = dayIndex;
           cell.dataset.slot = index;
           cell.dataset.hour = slot.hour;
