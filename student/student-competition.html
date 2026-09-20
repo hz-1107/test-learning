@@ -264,12 +264,18 @@
       display: grid;
       grid-template-columns: 1fr auto;
       gap: var(--spacing-xl);
+      cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .competition-card:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
+    }
+
+    .competition-card:focus-visible {
+      outline: 2px solid var(--color-primary-dark);
+      outline-offset: 2px;
     }
 
     .competition-card__main {
@@ -371,19 +377,6 @@
       color: #2563eb;
     }
 
-    .competition-card__badge--international {
-      background: #f3e8ff;
-      color: #7c3aed;
-    }
-
-    .competition-card__photo {
-      width: 120px;
-      height: 90px;
-      object-fit: cover;
-      border-radius: var(--radius-md);
-      margin-top: var(--spacing-sm);
-    }
-
     .competition-card__team {
       display: flex;
       align-items: center;
@@ -413,33 +406,6 @@
       align-items: flex-end;
       justify-content: flex-start;
       min-width: 80px;
-      gap: var(--spacing-sm);
-    }
-
-    /* 匯出按鈕 */
-    .card-export-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 12px;
-      background: var(--color-primary);
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--color-primary-dark);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .card-export-btn:hover {
-      filter: brightness(0.95);
-      transform: translateY(-1px);
-    }
-
-    .card-export-btn svg {
-      width: 14px;
-      height: 14px;
     }
 
     .competition-card__rank {
@@ -470,7 +436,151 @@
       margin-top: var(--spacing-xs);
     }
 
-    /* 進階篩選 */
+    /* 響應式 */
+    @media (max-width: 992px) {
+      .student-dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .student-sidebar {
+        display: none;
+      }
+
+      .page-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+      }
+
+      .page-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .competition-card {
+        grid-template-columns: 1fr;
+      }
+
+      .competition-card__ranking {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--color-surface-alt);
+      }
+    }
+
+    /* ===== 以下為合併後新增的樣式 ===== */
+
+    /* 頂部搜尋框 */
+    .student-header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 16px;
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      width: 240px;
+    }
+
+    .student-header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .student-header__search input:focus {
+      outline: none;
+    }
+
+    .student-header__search input::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    /* 國際賽標籤與競賽照片 */
+    .competition-card__badge--international {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+
+    .competition-card__photo {
+      width: 120px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      margin-top: var(--spacing-sm);
+    }
+
+    /* 排名區：加入勾選框與匯出鈕後需要間距 */
+    .competition-card__ranking {
+      gap: var(--spacing-sm);
+    }
+
+    /* 卡片內的單筆匯出按鈕 */
+    .card-export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .card-export-btn:hover {
+      filter: brightness(0.95);
+      transform: translateY(-1px);
+    }
+
+    .card-export-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* 卡片勾選框 */
+    .card-select {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .card-select input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--color-primary);
+    }
+
+    /* 批量選取工具列 */
+    .list-toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .list-toolbar__select-all {
+      cursor: pointer;
+    }
+
+    .list-toolbar__count {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* 進階篩選面板 */
     .filter-popover-wrap {
       position: relative;
     }
@@ -592,73 +702,20 @@
       flex: 1;
     }
 
-    /* 批量選取工具列 */
-    .list-toolbar {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-lg);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .list-toolbar__select-all {
-      cursor: pointer;
-    }
-
-    .list-toolbar__count {
-      font-size: var(--font-size-sm);
+    /* 列表狀態訊息（載入中／查無資料／載入失敗） */
+    .list-state {
+      padding: var(--spacing-xl);
+      text-align: center;
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
       color: var(--color-text-muted);
+      font-size: var(--font-size-md);
     }
 
-    /* 卡片勾選框 */
-    .card-select {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    .card-select input {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: var(--color-primary);
-    }
-
-    /* 響應式 */
     @media (max-width: 992px) {
-      .student-dashboard {
-        grid-template-columns: 1fr;
-      }
-
-      .student-sidebar {
-        display: none;
-      }
-
-      .page-title-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-md);
-      }
-
-      .page-actions {
-        width: 100%;
-        flex-wrap: wrap;
-      }
-
-      .search-box {
-        flex: 1;
-        min-width: 200px;
-      }
-
-      .competition-card {
-        grid-template-columns: 1fr;
-      }
-
-      .competition-card__ranking {
-        flex-direction: row;
-        align-items: center;
-        gap: var(--spacing-md);
-        padding-top: var(--spacing-md);
-        border-top: 1px solid var(--color-surface-alt);
+      .student-header__search {
+        width: 160px;
       }
     }
   </style>
@@ -676,7 +733,7 @@
           </svg>
         </div>
         <div class="student-sidebar__info">
-          <span class="student-sidebar__name">李美華</span>
+          <span class="student-sidebar__name" id="sidebarStudentName">載入中</span>
           <span class="student-sidebar__subtitle">智慧學習門戶</span>
         </div>
       </div>
@@ -717,7 +774,7 @@
     <!-- 主內容區 -->
     <main class="student-main">
       <!-- 頂部導覽 -->
-<header class="student-header">
+      <header class="student-header">
         <h1 class="student-header__title">智慧學習歷程系統</h1>
         <div class="student-header__actions">
           <div class="student-header__search">
@@ -746,7 +803,7 @@
           <h2 class="page-title">競賽歷程</h2>
           <div class="page-actions">
             <div class="filter-popover-wrap">
-              <button class="action-btn action-btn--outline" id="filterToggleBtn" onclick="toggleFilterPopover()">
+              <button class="action-btn action-btn--outline" id="filterToggleBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
                 </svg>
@@ -755,7 +812,7 @@
               <div class="filter-popover" id="filterPopover">
                 <div class="filter-popover__header">
                   <h3 class="filter-popover__title">篩選條件</h3>
-                  <button class="filter-popover__close" onclick="closeFilterPopover()">
+                  <button class="filter-popover__close" id="filterCloseBtn" aria-label="關閉篩選">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <line x1="18" y1="6" x2="6" y2="18"/>
                       <line x1="6" y1="6" x2="18" y2="18"/>
@@ -764,7 +821,7 @@
                 </div>
                 <div class="filter-popover__body">
                   <div class="filter-popover__group">
-                    <label class="filter-popover__label">競賽等級</label>
+                    <label class="filter-popover__label" for="levelFilterSelect">競賽等級</label>
                     <select class="filter-popover__select" id="levelFilterSelect">
                       <option value="">全部</option>
                       <option value="international">國際賽</option>
@@ -774,13 +831,14 @@
                     </select>
                   </div>
                   <div class="filter-popover__group">
-                    <label class="filter-popover__label">名次</label>
+                    <label class="filter-popover__label" for="rankFilterSelect">名次</label>
                     <select class="filter-popover__select" id="rankFilterSelect">
                       <option value="">全部</option>
                       <option value="gold">第一名</option>
                       <option value="silver">第二名</option>
                       <option value="bronze">第三名</option>
                       <option value="merit">優勝</option>
+                      <option value="participant">參賽</option>
                     </select>
                   </div>
                   <div class="filter-popover__group">
@@ -792,12 +850,12 @@
                   </div>
                 </div>
                 <div class="filter-popover__footer">
-                  <button type="button" class="btn btn--outline" onclick="resetCompetitionFilters()">重置</button>
-                  <button type="button" class="btn btn--primary" onclick="applyCompetitionFilters()">套用篩選</button>
+                  <button type="button" class="btn btn--outline" id="filterResetBtn">重置</button>
+                  <button type="button" class="btn btn--primary" id="filterApplyBtn">套用篩選</button>
                 </div>
               </div>
             </div>
-            <button class="action-btn action-btn--primary" onclick="exportSelectedCompetitions()">
+            <button class="action-btn action-btn--primary" id="batchExportBtn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
@@ -818,193 +876,14 @@
         </div>
 
         <!-- 競賽歷程列表 -->
-        <div class="competition-list">
-          <!-- 競賽卡片 1 - 第一名 -->
-          <div class="competition-card" data-level="national" data-rank="gold" data-date="2026-05-15">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--gold">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">2026 全國機器人創意競賽</h3>
-              </div>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-05-15
-                </span>
-                <span class="competition-card__badge competition-card__badge--national">全國賽</span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：設計自動避障機器人，完成複雜賽道挑戰，以最快速度抵達終點
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--gold">第一名</span>
-              <span class="competition-card__score"></span>
-            </div>
-          </div>
-
-          <!-- 競賽卡片 2 - 第二名 -->
-          <div class="competition-card" data-level="regional" data-rank="silver" data-date="2026-04-20">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--silver">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">青少年程式設計大賽</h3>
-              </div>
-              <p class="competition-card__subtitle">Scratch創意組</p>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-04-20
-                </span>
-                <span class="competition-card__badge competition-card__badge--regional">區域賽</span>
-                <span class="competition-card__team">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 010 7.75"/>
-                  </svg>
-                  創意編程隊 (2人)
-                </span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：運用Scratch製作互動式教育遊戲，主題為環境保護與永續發展
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--silver">第二名</span>
-              <span class="competition-card__score">成績: 92分</span>
-            </div>
-          </div>
-
-          <!-- 競賽卡片 3 - 第三名 -->
-          <div class="competition-card" data-level="county" data-rank="bronze" data-date="2026-03-10">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--bronze">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">STEAM創客馬拉松</h3>
-              </div>
-              <p class="competition-card__subtitle">機械結構組</p>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-03-10
-                </span>
-                <span class="competition-card__badge competition-card__badge--county">縣市賽</span>
-                <span class="competition-card__team">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 010 7.75"/>
-                  </svg>
-                  機械工匠 (4人)
-                </span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：24小時限時挑戰，設計並製作能搬運物品的機械手臂
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--bronze">第三名</span>
-              <span class="competition-card__score">成績: 88分</span>
-            </div>
-          </div>
-
-          <!-- 競賽卡片 4 - 優勝 -->
-          <div class="competition-card" data-level="national" data-rank="merit" data-date="2026-02-05">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--merit">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">FLL樂高機器人競賽</h3>
-              </div>
-              <p class="competition-card__subtitle">任務挑戰組</p>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-02-05
-                </span>
-                <span class="competition-card__badge competition-card__badge--national">全國賽</span>
-                <span class="competition-card__team">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 010 7.75"/>
-                  </svg>
-                  樂高大師 (3人)
-                </span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：完成指定任務挑戰，展現機器人編程與操控技巧
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--merit">優勝</span>
-              <span class="competition-card__score">成績: 85分</span>
-            </div>
-          </div>
+        <div class="competition-list" id="competitionList">
+          <div class="list-state">載入中...</div>
         </div>
       </div>
     </main>
   </div>
 
+  <script src="../js/competition-data.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/notifications.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -1012,87 +891,65 @@
   <script src="../js/pdf-export.js"></script>
   <script>
     const API_BASE = 'http://localhost:3000';
+
+    const listContainer = document.getElementById('competitionList');
     const searchInput = document.getElementById('competitionSearchInput');
-    let allCompetitionCards = Array.from(document.querySelectorAll('.competition-card'));
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
     const selectedCountLabel = document.getElementById('selectedCountLabel');
     const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterPopover = document.getElementById('filterPopover');
 
     const activeFilters = { level: '', rank: '', startDate: '', endDate: '' };
+    let allCompetitionCards = [];
 
-    // 頁面載入時執行
-    document.addEventListener('DOMContentLoaded', async function() {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        window.location.href = '../login.html';
-        return;
-      }
+    const LEVEL_LABELS = {
+      international: '國際賽',
+      national: '全國賽',
+      regional: '區域賽',
+      county: '縣市賽'
+    };
 
-      // 載入學生資訊
-      try {
-        const profileRes = await fetch(`${API_BASE}/api/students/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (profileRes.ok) {
-          const profile = await profileRes.json();
-          document.querySelector('.student-sidebar__name').textContent = profile.data.student?.name || '學生';
-        }
-      } catch (e) {
-        console.error('載入學生資訊失敗:', e);
-      }
+    const RANK_LABELS = {
+      gold: '第一名',
+      silver: '第二名',
+      bronze: '第三名',
+      merit: '優勝',
+      participant: '參賽'
+    };
 
-      // 嘗試從 API 載入競賽記錄
-      loadCompetitions();
-    });
+    const RANK_STYLES = {
+      gold: { color: '#a3760e', bg: 'rgba(212,160,18,0.18)' },
+      silver: { color: '#4b5563', bg: 'rgba(107,114,128,0.18)' },
+      bronze: { color: '#8a5522', bg: 'rgba(176,107,42,0.18)' },
+      merit: { color: '#376775', bg: 'rgba(74,144,164,0.18)' },
+      participant: { color: '#6b7280', bg: 'rgba(107,114,128,0.12)' }
+    };
 
-    // 載入競賽記錄
-    async function loadCompetitions() {
-      const token = localStorage.getItem('authToken');
-      const container = document.querySelector('.competition-list');
-
-      try {
-        const response = await fetch(`${API_BASE}/api/competitions/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) {
-          console.log('使用靜態競賽資料');
-          return; // 使用靜態 HTML
-        }
-
-        const result = await response.json();
-        const competitions = result.data || [];
-
-        if (competitions.length > 0) {
-          renderCompetitions(competitions);
-        }
-        // 如果沒有 API 資料，保留靜態 HTML 作為示範
-      } catch (error) {
-        console.log('載入競賽記錄失敗，使用靜態資料:', error.message);
+    // main.js 未載入時的訊息備援
+    function notify(message, type) {
+      if (typeof showMessage === 'function') {
+        showMessage(message, type || 'success');
+      } else {
+        console.log(`[${type || 'info'}] ${message}`);
       }
     }
 
-    // 等級標籤
-    const LEVEL_LABELS = {
-      'international': '國際賽',
-      'national': '全國賽',
-      'regional': '區域賽',
-      'county': '縣市賽'
-    };
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
 
-    // 名次標籤
-    const RANK_LABELS = {
-      'gold': '第一名',
-      'silver': '第二名',
-      'bronze': '第三名',
-      'merit': '優勝',
-      'participant': '參賽'
-    };
+    function showListState(message) {
+      listContainer.innerHTML = `<div class="list-state">${escapeHtml(message)}</div>`;
+      allCompetitionCards = [];
+      updateSelectedCount();
+    }
 
-    // 根據 rank_name 推斷 rankType
+    // 依名次文字推斷樣式分類
     function getRankType(rankName) {
       if (!rankName) return 'participant';
-      const name = rankName.toLowerCase();
+      const name = String(rankName).toLowerCase();
       if (name.includes('第一') || name.includes('金牌') || name.includes('冠軍') || name === '1') return 'gold';
       if (name.includes('第二') || name.includes('銀牌') || name.includes('亞軍') || name === '2') return 'silver';
       if (name.includes('第三') || name.includes('銅牌') || name.includes('季軍') || name === '3') return 'bronze';
@@ -1100,116 +957,220 @@
       return 'participant';
     }
 
-    // 渲染競賽記錄
-    function renderCompetitions(competitions) {
-      const container = document.querySelector('.competition-list');
-
-      container.innerHTML = competitions.map(comp => {
-        const level = comp.level || 'county';
-        const rankType = getRankType(comp.rank_name);
-        const compDate = comp.competition_date ? comp.competition_date.split('T')[0] : '';
-
-        return `
-          <div class="competition-card" data-level="${level}" data-rank="${rankType}" data-date="${compDate}" data-id="${comp.id}">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--${rankType}">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">${comp.title || '未命名競賽'}</h3>
-              </div>
-              ${comp.organizer ? `<p class="competition-card__subtitle">主辦單位：${comp.organizer}</p>` : ''}
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  ${compDate}
-                </span>
-                <span class="competition-card__badge competition-card__badge--${level}">${LEVEL_LABELS[level] || level}</span>
-                ${comp.team_name ? `
-                <span class="competition-card__team">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 010 7.75"/>
-                  </svg>
-                  ${comp.team_name}
-                </span>
-                ` : ''}
-              </div>
-              ${comp.photo_url ? `<img class="competition-card__photo" src="${comp.photo_url}" alt="競賽照片">` : ''}
-              ${comp.description ? `
-              <div class="competition-card__description">
-                競賽說明：${comp.description}
-              </div>
-              ` : ''}
-            </div>
-            <div class="competition-card__ranking">
-              <button class="card-export-btn" onclick="exportSingleCompetition('${comp.id}')" title="匯出此筆記錄">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                匯出
-              </button>
-              <label class="card-select" title="選取以批量匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--${rankType}">${comp.rank_name || RANK_LABELS[rankType] || '參賽'}</span>
-              ${comp.score ? `<span class="competition-card__score">成績: ${comp.score}</span>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // 重新綁定事件
-      allCompetitionCards = Array.from(document.querySelectorAll('.competition-card'));
-      allCompetitionCards.forEach(card => {
-        const checkbox = card.querySelector('[data-export-select]');
-        if (checkbox) {
-          checkbox.addEventListener('change', updateSelectedCount);
-        }
-      });
-
-      updateSelectedCount();
+    // 將後端資料與本地示範資料統一成同一種結構
+    function normalizeFromApi(comp) {
+      const level = LEVEL_LABELS[comp.level] ? comp.level : 'county';
+      const rankType = getRankType(comp.rank_name);
+      return {
+        id: comp.id,
+        title: comp.title || '未命名競賽',
+        subtitle: comp.organizer ? `主辦單位：${comp.organizer}` : '',
+        date: comp.competition_date ? String(comp.competition_date).split('T')[0] : '',
+        level,
+        levelLabel: LEVEL_LABELS[level],
+        team: comp.team_name || '',
+        description: comp.description || '',
+        photo: comp.photo_url || '',
+        rankType,
+        rankLabel: comp.rank_name || RANK_LABELS[rankType],
+        score: comp.score ? `成績: ${comp.score}` : ''
+      };
     }
 
-    // 套用搜尋關鍵字 + 篩選條件（AND 條件），即時套用
+    function normalizeFromLocal(item) {
+      const level = LEVEL_LABELS[item.levelClass] ? item.levelClass : 'county';
+      return {
+        id: item.id,
+        title: item.title || '未命名競賽',
+        subtitle: item.subtitle || '',
+        date: item.date || '',
+        level,
+        levelLabel: item.levelLabel || LEVEL_LABELS[level],
+        team: item.team || '',
+        description: item.description || '',
+        photo: item.photo || '',
+        rankType: item.rankClass || getRankType(item.rank),
+        rankLabel: item.rank || RANK_LABELS[item.rankClass] || '參賽',
+        score: item.score || ''
+      };
+    }
+
+    // 渲染卡片（沿用原本版型，並加上勾選框與單筆匯出鈕）
+    function renderCompetitionList(items) {
+      if (!items.length) {
+        showListState('目前沒有符合條件的競賽歷程紀錄');
+        return;
+      }
+
+      listContainer.innerHTML = items.map(item => `
+        <div class="competition-card"
+             data-id="${escapeHtml(item.id)}"
+             data-level="${escapeHtml(item.level)}"
+             data-rank="${escapeHtml(item.rankType)}"
+             data-date="${escapeHtml(item.date)}"
+             role="button" tabindex="0"
+             aria-label="查看「${escapeHtml(item.title)}」競賽歷程詳情">
+          <div class="competition-card__main">
+            <div class="competition-card__header">
+              <div class="competition-card__icon competition-card__icon--${escapeHtml(item.rankType)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
+                  <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+                  <path d="M4 22h16"/>
+                  <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                  <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+                </svg>
+              </div>
+              <h3 class="competition-card__title">${escapeHtml(item.title)}</h3>
+            </div>
+            ${item.subtitle ? `<p class="competition-card__subtitle">${escapeHtml(item.subtitle)}</p>` : ''}
+            <div class="competition-card__meta">
+              <span class="competition-card__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                </svg>
+                ${escapeHtml(item.date)}
+              </span>
+              <span class="competition-card__badge competition-card__badge--${escapeHtml(item.level)}">${escapeHtml(item.levelLabel)}</span>
+              ${item.team ? `
+              <span class="competition-card__team">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+                ${escapeHtml(item.team)}
+              </span>` : ''}
+            </div>
+            ${item.photo ? `<img class="competition-card__photo" src="${escapeHtml(item.photo)}" alt="競賽照片">` : ''}
+            ${item.description ? `<div class="competition-card__description">${escapeHtml(item.description)}</div>` : ''}
+          </div>
+          <div class="competition-card__ranking">
+            <label class="card-select" title="選取以批量匯出">
+              <input type="checkbox" data-export-select>
+            </label>
+            <span class="competition-card__rank competition-card__rank--${escapeHtml(item.rankType)}">${escapeHtml(item.rankLabel)}</span>
+            ${item.score ? `<span class="competition-card__score">${escapeHtml(item.score)}</span>` : ''}
+            <button type="button" class="card-export-btn" data-export-single title="匯出此筆記錄">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              匯出
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      allCompetitionCards = Array.from(listContainer.querySelectorAll('.competition-card'));
+      bindCardEvents();
+      applyAllFilters();
+    }
+
+    // 卡片事件：點擊進詳細頁，勾選框與匯出鈕不觸發導頁
+    function bindCardEvents() {
+      allCompetitionCards.forEach(card => {
+        const goToDetail = () => {
+          window.location.href = `competition-detail.html?id=${encodeURIComponent(card.dataset.id)}`;
+        };
+
+        card.addEventListener('click', function(e) {
+          if (e.target.closest('.card-select') || e.target.closest('.card-export-btn')) return;
+          goToDetail();
+        });
+
+        card.addEventListener('keydown', function(e) {
+          if (e.target.closest('.card-select') || e.target.closest('.card-export-btn')) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            goToDetail();
+          }
+        });
+
+        card.querySelector('[data-export-select]').addEventListener('change', updateSelectedCount);
+
+        card.querySelector('[data-export-single]').addEventListener('click', function(e) {
+          e.stopPropagation();
+          window.location.href = `competition-export.html?id=${encodeURIComponent(card.dataset.id)}`;
+        });
+      });
+    }
+
+    // 載入學生資訊
+    async function loadStudentProfile(token) {
+      try {
+        const res = await fetch(`${API_BASE}/api/students/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const profile = await res.json();
+        document.getElementById('sidebarStudentName').textContent = profile.data?.student?.name || '學生';
+      } catch (e) {
+        console.error('載入學生資訊失敗:', e);
+        document.getElementById('sidebarStudentName').textContent = '學生';
+      }
+    }
+
+    // 載入競賽紀錄：API 為主，失敗時才退回本地示範資料
+    async function loadCompetitions(token) {
+      try {
+        const res = await fetch(`${API_BASE}/api/competitions/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const result = await res.json();
+        const competitions = result.data || [];
+        renderCompetitionList(competitions.map(normalizeFromApi));
+      } catch (error) {
+        console.error('載入競賽紀錄失敗:', error);
+
+        if (typeof competitionData !== 'undefined' && competitionData.length) {
+          notify('無法連線後端，目前顯示的是示範資料', 'warning');
+          renderCompetitionList(competitionData.map(normalizeFromLocal));
+        } else {
+          showListState('載入競賽歷程失敗，請確認網路連線後重新整理頁面');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      await loadStudentProfile(token);
+      await loadCompetitions(token);
+    });
+
+    // 搜尋關鍵字 + 篩選條件（AND 條件）
     function applyAllFilters() {
       const query = searchInput.value.trim().toLowerCase();
 
       allCompetitionCards.forEach(card => {
         const title = card.querySelector('.competition-card__title').textContent.toLowerCase();
         const subtitleEl = card.querySelector('.competition-card__subtitle');
-        const subtitleText = subtitleEl ? subtitleEl.textContent.toLowerCase() : '';
+        const subtitle = subtitleEl ? subtitleEl.textContent.toLowerCase() : '';
         const descriptionEl = card.querySelector('.competition-card__description');
         const description = descriptionEl ? descriptionEl.textContent.toLowerCase() : '';
 
-        const matchesQuery = !query || title.includes(query) || subtitleText.includes(query) || description.includes(query);
-        const matchesLevel = !activeFilters.level || card.dataset.level === activeFilters.level;
-        const matchesRank = !activeFilters.rank || card.dataset.rank === activeFilters.rank;
         const cardDate = card.dataset.date || '';
-        const matchesStart = !activeFilters.startDate || cardDate >= activeFilters.startDate;
-        const matchesEnd = !activeFilters.endDate || cardDate <= activeFilters.endDate;
+        const visible =
+          (!query || title.includes(query) || subtitle.includes(query) || description.includes(query)) &&
+          (!activeFilters.level || card.dataset.level === activeFilters.level) &&
+          (!activeFilters.rank || card.dataset.rank === activeFilters.rank) &&
+          (!activeFilters.startDate || cardDate >= activeFilters.startDate) &&
+          (!activeFilters.endDate || cardDate <= activeFilters.endDate);
 
-        const visible = matchesQuery && matchesLevel && matchesRank && matchesStart && matchesEnd;
         card.style.display = visible ? '' : 'none';
 
         // 隱藏的卡片不列入匯出選取範圍
-        if (!visible) {
-          const checkbox = card.querySelector('[data-export-select]');
-          if (checkbox) checkbox.checked = false;
-        }
+        if (!visible) card.querySelector('[data-export-select]').checked = false;
       });
 
       updateSelectedCount();
@@ -1217,24 +1178,16 @@
 
     searchInput.addEventListener('input', applyAllFilters);
 
-    // 篩選面板開關
-    function toggleFilterPopover() {
-      document.getElementById('filterPopover').classList.toggle('active');
-    }
-
-    function closeFilterPopover() {
-      document.getElementById('filterPopover').classList.remove('active');
-    }
+    // 篩選面板
+    filterToggleBtn.addEventListener('click', () => filterPopover.classList.toggle('active'));
+    document.getElementById('filterCloseBtn').addEventListener('click', () => filterPopover.classList.remove('active'));
 
     document.addEventListener('click', function(e) {
       const wrap = document.querySelector('.filter-popover-wrap');
-      if (wrap && !wrap.contains(e.target)) {
-        closeFilterPopover();
-      }
+      if (wrap && !wrap.contains(e.target)) filterPopover.classList.remove('active');
     });
 
-    // 套用篩選：競賽等級、名次、日期範圍，按下「套用篩選」才生效
-    function applyCompetitionFilters() {
+    document.getElementById('filterApplyBtn').addEventListener('click', function() {
       activeFilters.level = document.getElementById('levelFilterSelect').value;
       activeFilters.rank = document.getElementById('rankFilterSelect').value;
       activeFilters.startDate = document.getElementById('startDateFilterInput').value;
@@ -1246,14 +1199,12 @@
       );
 
       applyAllFilters();
-      closeFilterPopover();
-    }
+      filterPopover.classList.remove('active');
+    });
 
-    function resetCompetitionFilters() {
-      document.getElementById('levelFilterSelect').value = '';
-      document.getElementById('rankFilterSelect').value = '';
-      document.getElementById('startDateFilterInput').value = '';
-      document.getElementById('endDateFilterInput').value = '';
+    document.getElementById('filterResetBtn').addEventListener('click', function() {
+      ['levelFilterSelect', 'rankFilterSelect', 'startDateFilterInput', 'endDateFilterInput']
+        .forEach(id => { document.getElementById(id).value = ''; });
 
       activeFilters.level = '';
       activeFilters.rank = '';
@@ -1262,7 +1213,7 @@
 
       filterToggleBtn.classList.remove('filter-toggle-btn--active');
       applyAllFilters();
-    }
+    });
 
     // 批量選取
     function visibleCompetitionCards() {
@@ -1285,34 +1236,25 @@
       updateSelectedCount();
     });
 
-    allCompetitionCards.forEach(card => {
-      card.querySelector('[data-export-select]').addEventListener('change', updateSelectedCount);
-    });
-
-    updateSelectedCount();
-
-    // RANK_LABELS already defined above at line 1050
-    const RANK_STYLES = {
-      gold: { color: '#a3760e', bg: 'rgba(212,160,18,0.18)' },
-      silver: { color: '#4b5563', bg: 'rgba(107,114,128,0.18)' },
-      bronze: { color: '#8a5522', bg: 'rgba(176,107,42,0.18)' },
-      merit: { color: '#376775', bg: 'rgba(74,144,164,0.18)' }
-    };
-
     // 批量匯出：有勾選就匯出勾選項目，否則匯出目前篩選結果全部
-    async function exportSelectedCompetitions() {
+    document.getElementById('batchExportBtn').addEventListener('click', async function() {
+      if (typeof exportReportToPDF !== 'function') {
+        notify('PDF 匯出元件尚未載入，請稍後再試', 'warning');
+        return;
+      }
+
       const visible = visibleCompetitionCards();
       const checked = visible.filter(card => card.querySelector('[data-export-select]').checked);
       const target = checked.length > 0 ? checked : visible;
 
       if (target.length === 0) {
-        showMessage('沒有符合條件的競賽歷程可匯出', 'warning');
+        notify('沒有符合條件的競賽歷程可匯出', 'warning');
         return;
       }
 
-      showMessage('正在產生 PDF...', 'success');
+      notify('正在產生 PDF...', 'success');
 
-      const studentName = document.querySelector('.student-sidebar__name')?.textContent.trim() || '';
+      const studentName = document.getElementById('sidebarStudentName').textContent.trim();
 
       const rows = target.map((card, i) => {
         const rankKey = card.dataset.rank || '';
@@ -1326,7 +1268,7 @@
           index: i + 1,
           title: card.querySelector('.competition-card__title').textContent.trim(),
           subtitle: subtitleEl ? subtitleEl.textContent.trim() : '',
-          badge: RANK_LABELS[rankKey] || (card.querySelector('.competition-card__rank')?.textContent.trim() ?? ''),
+          badge: card.querySelector('.competition-card__rank').textContent.trim(),
           badgeColor: rankStyle.color,
           badgeBg: rankStyle.bg,
           metaFields: [
@@ -1335,7 +1277,7 @@
             scoreEl && scoreEl.textContent.trim() ? `成績：${scoreEl.textContent.trim().replace('成績: ', '')}` : null,
             teamEl ? `團隊：${teamEl.textContent.trim()}` : null
           ].filter(Boolean),
-          description: (card.querySelector('.competition-card__description')?.textContent?.trim() || '').replace(/^競賽說明：/, '')
+          description: card.querySelector('.competition-card__description')?.textContent?.trim() || ''
         };
       });
 
@@ -1354,20 +1296,13 @@
         filename: `競賽歷程_${formatDateForFilename()}.pdf`
       });
 
-      if (ok) {
-        showMessage(`已匯出 ${target.length} 筆競賽歷程`, 'success');
-      }
-    }
+      if (ok) notify(`已匯出 ${target.length} 筆競賽歷程`, 'success');
+    });
 
     function formatDateForFilename() {
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
       return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
-    }
-
-    // 匯出單筆競賽記錄 (跳轉到匯出頁面)
-    function exportSingleCompetition(competitionId) {
-      window.location.href = `competition-export.html?id=${competitionId}`;
     }
   </script>
 </body>
