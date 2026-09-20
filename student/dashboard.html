@@ -894,6 +894,62 @@
     .score-bar__fill--blue { background: #54a0ff; }
     .score-bar__fill--pink { background: #ff9ff3; }
 
+    .score-bar__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .score-bar__help {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border: 1px solid var(--color-border);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-xs);
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .score-bar__help:hover,
+    .score-bar__help--open {
+      border-color: var(--color-text-muted);
+      color: var(--color-text-primary);
+    }
+
+    .score-bar__tooltip {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: calc(100% + var(--spacing-sm));
+      transform: translateY(-50%);
+      width: 200px;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+      color: var(--color-text-muted);
+      text-align: left;
+      white-space: normal;
+      cursor: default;
+      z-index: 10;
+    }
+
+    .score-bar__help--open .score-bar__tooltip {
+      display: block;
+    }
+
     /* 右側推薦卡片 */
     .recommendation-cards {
       display: flex;
@@ -1158,7 +1214,13 @@
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">程式</span>
-                        <span class="score-bar__value" id="scoreValue-programming">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value" id="scoreValue-programming">0 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="程式指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">學生的抽象思維、流程圖概念與程式碼邏輯建構</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
                         <div class="score-bar__fill score-bar__fill--yellow" id="scoreFill-programming" style="width: 0%;"></div>
@@ -1167,7 +1229,13 @@
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">除錯</span>
-                        <span class="score-bar__value" id="scoreValue-debugging">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value" id="scoreValue-debugging">0 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="除錯指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">面對失敗、系統卡關時的應變策略、耐心與獨立解決能力</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
                         <div class="score-bar__fill score-bar__fill--green" id="scoreFill-debugging" style="width: 0%;"></div>
@@ -1176,7 +1244,13 @@
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">創意</span>
-                        <span class="score-bar__value" id="scoreValue-creativity">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value" id="scoreValue-creativity">0 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="創意指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">作品是否有獨創性、能否跳脫框架或在既有基礎上延伸出新功能</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
                         <div class="score-bar__fill score-bar__fill--red" id="scoreFill-creativity" style="width: 0%;"></div>
@@ -1185,7 +1259,13 @@
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">結構</span>
-                        <span class="score-bar__value" id="scoreValue-structure">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value" id="scoreValue-structure">0 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="結構指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">學生將科學理論轉化為實體結構的動手做能力</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
                         <div class="score-bar__fill score-bar__fill--blue" id="scoreFill-structure" style="width: 0%;"></div>
@@ -1194,7 +1274,13 @@
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">團隊合作</span>
-                        <span class="score-bar__value" id="scoreValue-teamwork">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value" id="scoreValue-teamwork">0 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="團隊合作指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">軟實力，與同儕的溝通協調、互助以及對外展現作品的論述能力</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
                         <div class="score-bar__fill score-bar__fill--pink" id="scoreFill-teamwork" style="width: 0%;"></div>
@@ -1313,9 +1399,6 @@
       </div>
     </main>
   </div>
-      </div>
-    </main>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -1369,6 +1452,27 @@
         if (pointsCard) {
           pointsCard.classList.remove('points-card--expanded');
         }
+      }
+    });
+
+    // 能力指標說明提示框
+    function toggleScoreTooltip(event, btn) {
+      event.stopPropagation();
+      const isOpen = btn.classList.contains('score-bar__help--open');
+      document.querySelectorAll('.score-bar__help--open').forEach(function(el) {
+        el.classList.remove('score-bar__help--open');
+      });
+      if (!isOpen) {
+        btn.classList.add('score-bar__help--open');
+      }
+    }
+
+    // 點擊外部關閉能力指標說明提示框
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.score-bar__help')) {
+        document.querySelectorAll('.score-bar__help--open').forEach(function(el) {
+          el.classList.remove('score-bar__help--open');
+        });
       }
     });
 
