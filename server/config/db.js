@@ -12,7 +12,9 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  charset: 'utf8mb4',
+  // 與資料庫實際的預設 collation (utf8mb4_unicode_ci) 對齊，
+  // 避免連線層 collation 跟資料表不一致
+  charset: 'utf8mb4_unicode_ci',
   // 防止日期時區轉換問題：保持日期為字串格式
   dateStrings: true
 });
@@ -31,8 +33,12 @@ async function testConnection() {
 }
 
 // 執行查詢的輔助函數
+// 注意: 用 pool.query()（文字協定）而非 pool.execute()（prepared statement）。
+// MySQL 8.0.29+ 搭配 mysql2 的 execute() 在字串參數比對數值欄位時，
+// 偶發 ER_IMPOSSIBLE_STRING_CONVERSION（collation 協商失敗），
+// 換成 query() 可完全避開這個問題。
 async function query(sql, params = []) {
-  const [results] = await pool.execute(sql, params);
+  const [results] = await pool.query(sql, params);
   return results;
 }
 
@@ -44,13 +50,13 @@ async function queryOne(sql, params = []) {
 
 // 插入資料並返回 insertId
 async function insert(sql, params = []) {
-  const [result] = await pool.execute(sql, params);
+  const [result] = await pool.query(sql, params);
   return result.insertId;
 }
 
 // 更新/刪除資料並返回影響的行數
 async function update(sql, params = []) {
-  const [result] = await pool.execute(sql, params);
+  const [result] = await pool.query(sql, params);
   return result.affectedRows;
 }
 

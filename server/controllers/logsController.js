@@ -1174,11 +1174,22 @@ exports.updateStudentRecord = async (req, res) => {
       photo_url
     } = req.body;
 
+    if (points_earned !== undefined && points_earned !== null && (points_earned < 0 || points_earned > 7)) {
+      return res.status(400).json({
+        success: false,
+        message: '給予點數需介於 0 至 7 之間'
+      });
+    }
+
     let recordId;
+    const newAttendance = attendance || 'present';
+    // 上課堂數計算規則：出席、遲到算有上到課；缺席、請假不算
+    const ATTENDED_STATUSES = ['present', 'late'];
+    const newAttended = ATTENDED_STATUSES.includes(newAttendance);
 
     // 檢查是否已有記錄
     const existingRecord = await db.queryOne(
-      'SELECT id FROM student_log_records WHERE log_id = ? AND student_id = ?',
+      'SELECT id, attendance FROM student_log_records WHERE log_id = ? AND student_id = ?',
       [id, student_id]
     );
 
@@ -1191,7 +1202,7 @@ exports.updateStudentRecord = async (req, res) => {
           skill_structure = ?, skill_teamwork = ?, points_earned = ?
         WHERE id = ?
       `, [
-        attendance || 'present', performance || null, notes || null,
+        newAttendance, performance || null, notes || null,
         skill_programming || 0, skill_debugging || 0, skill_creativity || 0,
         skill_structure || 0, skill_teamwork || 0, points_earned || 0,
         existingRecord.id
@@ -1206,10 +1217,19 @@ exports.updateStudentRecord = async (req, res) => {
           skill_structure, skill_teamwork, points_earned
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
-        id, student_id, attendance || 'present', performance || null, notes || null,
+        id, student_id, newAttendance, performance || null, notes || null,
         skill_programming || 0, skill_debugging || 0, skill_creativity || 0,
         skill_structure || 0, skill_teamwork || 0, points_earned || 0
       ]);
+    }
+
+    // 出缺席狀態變更時，同步更新學生的上課堂數
+    const oldAttended = existingRecord ? ATTENDED_STATUSES.includes(existingRecord.attendance) : false;
+    if (newAttended !== oldAttended) {
+      await db.update(
+        'UPDATE students SET lesson_count = GREATEST(0, COALESCE(lesson_count, 0) + ?) WHERE id = ?',
+        [newAttended ? 1 : -1, student_id]
+      );
     }
 
     // 如果有照片 URL，保存到 student_log_photos 表

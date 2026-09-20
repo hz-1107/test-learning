@@ -876,6 +876,62 @@
       color: var(--color-text-muted);
     }
 
+    .score-bar__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .score-bar__help {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border: 1px solid var(--color-border);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-xs);
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .score-bar__help:hover,
+    .score-bar__help--open {
+      border-color: var(--color-text-muted);
+      color: var(--color-text-primary);
+    }
+
+    .score-bar__tooltip {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: calc(100% + var(--spacing-sm));
+      transform: translateY(-50%);
+      width: 200px;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+      color: var(--color-text-muted);
+      text-align: left;
+      white-space: normal;
+      cursor: default;
+      z-index: 10;
+    }
+
+    .score-bar__help--open .score-bar__tooltip {
+      display: block;
+    }
+
     .score-bar__track {
       height: 8px;
       background: var(--color-surface-alt);
@@ -993,7 +1049,7 @@
           </svg>
         </div>
         <div class="student-sidebar__info">
-          <span class="student-sidebar__name" id="sidebarStudentName">載入中...</span>
+          <span class="student-sidebar__name">李美華</span>
           <span class="student-sidebar__subtitle">智慧學習門戶</span>
         </div>
       </div>
@@ -1045,7 +1101,7 @@
             </svg>
           </button>
           <div class="student-header__avatar">
-            <img id="headerAvatarImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=student" alt="頭像">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=student" alt="頭像">
           </div>
         </div>
       </header>
@@ -1057,15 +1113,15 @@
           <!-- 出缺勤卡片 -->
           <div class="stat-card">
           <div class="stat-card__label">
-            學習階段　<span style="color: var(--color-text-primary); font-weight: 700; font-size: 20px;" id="stageCourseTypeName">—</span></div>
+            學習階段　<span style="color: var(--color-text-primary); font-weight: 700; font-size: 20px;">動力機械</span></div>
             <div class="stat-card__value">
               <span style="font-size: 18px; font-weight: 400; color: var(--color-text-secondary);">第</span>
-              <span style="font-size: 40px; font-weight: 700;" id="stageLessonCount">0</span>
+              <span style="font-size: 40px; font-weight: 700;">24</span>
               <span class="stat-card__unit" style="font-size: 18px; font-weight: 400;">堂</span>
             </div>
             <div class="stat-card__badges">
-            <span class="attendance-badge attendance-badge--leave">請假 <span id="badgeLeaveCount">0</span></span>
-            <span class="attendance-badge attendance-badge--absent">待補課 <span id="badgeAbsentCount">0</span></span>
+            <span class="attendance-badge attendance-badge--leave">請假 1</span>
+            <span class="attendance-badge attendance-badge--absent">待補課 0</span>
             </div>
           </div>
 
@@ -1077,19 +1133,19 @@
                 <div class="class-card__header">
                   <span class="class-card__tag">所屬班級</span>
                 </div>
-                <div class="class-card__title" id="classCardTitle">尚未分班<span class="class-card__subtitle" style="margin-left: 8px; font-weight: 400;"></span></div>
-                <div class="class-card__meta" id="classCardSchedule"></div>
-                <div class="class-card__meta" id="classCardTeacher"></div>
+                <div class="class-card__title">動力機械<span class="class-card__subtitle" style="margin-left: 8px; font-weight: 400;">課程</span></div>
+                <div class="class-card__meta">星期二 17:00 西屯教室</div>
+                <div class="class-card__meta">王小明 老師</div>
                 <div class="flip-card__link" onclick="toggleFlipCard('classFlipCard')">翻閱近期表現</div>
               </div>
               <!-- 背面 -->
               <div class="flip-card__back class-card-back">
                 <div class="class-card-back__header">
                   <span class="class-card-back__tag">近期表現</span>
-                  <span class="class-card-back__date" id="classCardBackDate">—</span>
+                  <span class="class-card-back__date">2026 / 4 / 24(五)</span>
                 </div>
-                <div class="class-card-back__content" id="classCardBackContent">
-                  尚無課堂紀錄
+                <div class="class-card-back__content">
+                  上課時充滿活力，能將機械原理融入創作，發揮豐富想像力，是課堂中的活躍小創客！
                 </div>
                 <div class="flip-card__link" onclick="toggleFlipCard('classFlipCard')">返回班級資訊</div>
               </div>
@@ -1101,7 +1157,7 @@
             <div class="stat-card stat-card--dark points-card" id="pointsCard" onclick="togglePointsDetail()">
               <div>
                 <div class="stat-card__label">點數</div>
-                <div class="stat-card__value"><span id="pointsBalance">0</span><span class="stat-card__unit">點</span></div>
+                <div class="stat-card__value">90<span class="stat-card__unit">點</span></div>
               </div>
               <svg class="points-card__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="6 9 12 15 18 9"/>
@@ -1117,7 +1173,7 @@
                       <circle cx="11" cy="11" r="8"/>
                       <path d="M21 21l-4.35-4.35"/>
                     </svg>
-                    <input type="text" placeholder="搜尋..." id="pointsSearchInput">
+                    <input type="text" placeholder="搜尋...">
                   </div>
                   <div class="points-detail__close" onclick="event.stopPropagation(); togglePointsDetail()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1127,8 +1183,32 @@
                   </div>
                 </div>
               </div>
-              <div class="points-detail__list" id="pointsDetailList">
-                <div class="points-detail__item"><span class="points-detail__reason">載入中...</span></div>
+              <div class="points-detail__list">
+                <div class="points-detail__item">
+                  <span class="points-detail__date">2026/04/24</span>
+                  <span class="points-detail__reason">動力機械出席上課</span>
+                  <span class="points-detail__value points-detail__value--positive">+5</span>
+                </div>
+                <div class="points-detail__item">
+                  <span class="points-detail__date">2026/04/18</span>
+                  <span class="points-detail__reason">兌換獎品：偵查眼</span>
+                  <span class="points-detail__value points-detail__value--negative">-10</span>
+                </div>
+                <div class="points-detail__item">
+                  <span class="points-detail__date">2026/04/17</span>
+                  <span class="points-detail__reason">動力機械出席上課</span>
+                  <span class="points-detail__value points-detail__value--positive">+5</span>
+                </div>
+                <div class="points-detail__item">
+                  <span class="points-detail__date">2026/04/10</span>
+                  <span class="points-detail__reason">程式機械出席上課</span>
+                  <span class="points-detail__value points-detail__value--positive">+5</span>
+                </div>
+                <div class="points-detail__item">
+                  <span class="points-detail__date">2026/04/03</span>
+                  <span class="points-detail__reason">競賽優異表現獎勵</span>
+                  <span class="points-detail__value points-detail__value--positive">+20</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1158,46 +1238,76 @@
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">程式</span>
-                        <span class="score-bar__value" id="scoreValue-programming">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value">4 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="程式指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">學生的抽象思維、流程圖概念與程式碼邏輯建構</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
-                        <div class="score-bar__fill score-bar__fill--yellow" id="scoreFill-programming" style="width: 0%;"></div>
+                        <div class="score-bar__fill score-bar__fill--yellow" style="width: 80%;"></div>
                       </div>
                     </div>
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">除錯</span>
-                        <span class="score-bar__value" id="scoreValue-debugging">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value">4 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="除錯指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">面對失敗、系統卡關時的應變策略、耐心與獨立解決能力</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
-                        <div class="score-bar__fill score-bar__fill--green" id="scoreFill-debugging" style="width: 0%;"></div>
+                        <div class="score-bar__fill score-bar__fill--green" style="width: 80%;"></div>
                       </div>
                     </div>
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">創意</span>
-                        <span class="score-bar__value" id="scoreValue-creativity">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value">3 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="創意指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">作品是否有獨創性、能否跳脫框架或在既有基礎上延伸出新功能</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
-                        <div class="score-bar__fill score-bar__fill--red" id="scoreFill-creativity" style="width: 0%;"></div>
+                        <div class="score-bar__fill score-bar__fill--red" style="width: 60%;"></div>
                       </div>
                     </div>
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">結構</span>
-                        <span class="score-bar__value" id="scoreValue-structure">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value">3 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="結構指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">學生將科學理論轉化為實體結構的動手做能力</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
-                        <div class="score-bar__fill score-bar__fill--blue" id="scoreFill-structure" style="width: 0%;"></div>
+                        <div class="score-bar__fill score-bar__fill--blue" style="width: 60%;"></div>
                       </div>
                     </div>
                     <div class="score-bar">
                       <div class="score-bar__header">
                         <span class="score-bar__label">團隊合作</span>
-                        <span class="score-bar__value" id="scoreValue-teamwork">0 / 5</span>
+                        <div class="score-bar__meta">
+                          <span class="score-bar__value">2 / 5</span>
+                          <button type="button" class="score-bar__help" aria-label="團隊合作指標說明" onclick="toggleScoreTooltip(event, this)">
+                            ?
+                            <span class="score-bar__tooltip" role="tooltip">軟實力，與同儕的溝通協調、互助以及對外展現作品的論述能力</span>
+                          </button>
+                        </div>
                       </div>
                       <div class="score-bar__track">
-                        <div class="score-bar__fill score-bar__fill--pink" id="scoreFill-teamwork" style="width: 0%;"></div>
+                        <div class="score-bar__fill score-bar__fill--pink" style="width: 40%;"></div>
                       </div>
                     </div>
                   </div>
@@ -1210,13 +1320,16 @@
   <span>＊選擇指標查看學習趨勢變化</span>
   <div class="course-dropdown" id="courseDropdown">
   <div class="course-dropdown__trigger" onclick="toggleCourseDropdown()">
-    <span id="courseDropdownLabel">—</span>
+    <span id="courseDropdownLabel">動力機械</span>
     <svg class="course-dropdown__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <polyline points="6 9 12 15 18 9"/>
     </svg>
   </div>
   <div class="course-dropdown__list" id="courseDropdownList">
-    <!-- 依學生實際修課紀錄動態產生 -->
+    <div class="course-dropdown__item" onclick="selectCourse('幼兒簡易機械')">幼兒簡易機械</div>
+    <div class="course-dropdown__item" onclick="selectCourse('動力機械')">動力機械</div>
+    <div class="course-dropdown__item" onclick="selectCourse('程式機械')">程式機械</div>
+    <div class="course-dropdown__item" onclick="selectCourse('科創機器人')">科創機器人</div>
   </div>
 </div>
 </div>
@@ -1318,19 +1431,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>window.axios || document.write('<script src="../js/axios.min.js"><\/script>')</script>
-  <script src="../js/api.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/notifications.js"></script>
   <script>
-    // ========================================
-    // 登入檢查 (未登入或非學生角色一律導回登入頁)
-    // ========================================
-    if (!isLoggedIn() || getUserRole() !== 'student') {
-      window.location.href = '../login.html';
-    }
-
     // ========================================
     // 互動功能函數
     // ========================================
@@ -1354,6 +1457,12 @@
       document.getElementById('courseDropdown').classList.toggle('course-dropdown--open');
     }
 
+    function selectCourse(courseName) {
+      document.getElementById('courseDropdownLabel').textContent = courseName;
+      document.getElementById('courseDropdown').classList.remove('course-dropdown--open');
+      console.log('切換課程:', courseName);
+    }
+
     document.addEventListener('click', function(e) {
       const dropdown = document.getElementById('courseDropdown');
       if (dropdown && !dropdown.contains(e.target)) {
@@ -1372,7 +1481,30 @@
       }
     });
 
+    // 能力指標說明提示框
+    function toggleScoreTooltip(event, btn) {
+      event.stopPropagation();
+      const isOpen = btn.classList.contains('score-bar__help--open');
+      document.querySelectorAll('.score-bar__help--open').forEach(function(el) {
+        el.classList.remove('score-bar__help--open');
+      });
+      if (!isOpen) {
+        btn.classList.add('score-bar__help--open');
+      }
+    }
+
+    // 點擊外部關閉能力指標說明提示框
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.score-bar__help')) {
+        document.querySelectorAll('.score-bar__help--open').forEach(function(el) {
+          el.classList.remove('score-bar__help--open');
+        });
+      }
+    });
+
     // 分析模式切換 (雷達圖 / 學習趨勢)
+    let trendChart = null;
+
     function switchAnalysisMode(mode) {
       const radarSection = document.querySelector('.radar-section');
       const trendSection = document.querySelector('.trend-section');
@@ -1390,247 +1522,97 @@
         radarBtn.classList.remove('analysis-toggle__btn--active');
         trendBtn.classList.add('analysis-toggle__btn--active');
 
+        // 初始化趨勢圖表
         if (!trendChart) {
-          fetchAndRenderTrend({ weeks: currentTrendRange });
+          initTrendChart();
         }
       }
     }
 
-    // ========================================
-    // 真實資料串接 (取代原本寫死的模擬資料)
-    // ========================================
-    const SKILL_KEYS = ['程式', '除錯', '創意', '結構', '團隊合作'];
-    const SKILL_FIELD_MAP = { 程式: 'programming', 除錯: 'debugging', 創意: 'creativity', 結構: 'structure', 團隊合作: 'teamwork' };
-    const trendColors = {
-      程式: { border: '#ffdb58', bg: 'rgba(255, 219, 88, 0.1)' },
-      除錯: { border: '#41e654', bg: 'rgba(65, 230, 84, 0.1)' },
-      創意: { border: '#ff6b6b', bg: 'rgba(255, 107, 107, 0.1)' },
-      結構: { border: '#54a0ff', bg: 'rgba(84, 160, 255, 0.1)' },
-      團隊合作: { border: '#ff9ff3', bg: 'rgba(255, 159, 243, 0.1)' }
-    };
-    const WEEKDAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
-
-    let radarChart = null;
-    let trendChart = null;
-    let currentTrendRange = 6; // 週數
-
-    function formatMD(dateStr) {
-      // 'YYYY-MM-DD' -> 'M/D'
-      const parts = dateStr.split('-');
-      return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+    // 初始化趨勢圖表
+    // 兩組時間範圍的資料
+const trendDataSets = {
+  '6w': {
+    labels: ['3/20', '3/27', '4/3', '4/10', '4/17', '4/24'],
+    data: {
+      程式: [4, 3, 3, 3, 5, 5],
+      除錯: [3, 4, 3, 2, 2, 2],
+      創意: [5, 5, 2, 3, 5, 4],
+      結構: [4, 3, 3, 4, 4, 3],
+      團隊合作: [3, 3, 2, 3, 3, 2]
     }
-
-    function formatTimeHM(timeStr) {
-      if (!timeStr) return '';
-      return timeStr.slice(0, 5);
+  },
+  '12w': {
+    labels: ['2/6', '2/13', '2/20', '2/27', '3/6', '3/13', '3/20', '3/27', '4/3', '4/10', '4/17', '4/24'],
+    data: {
+      程式: [3, 3, 5, 4, 3, 5, 4, 3, 3, 3, 5, 5],
+      除錯: [4, 3, 4, 3, 4, 4, 3, 4, 3, 2, 2, 2],
+      創意: [3, 5, 3, 3, 5, 5, 5, 5, 2, 3, 5, 4],
+      結構: [3, 2, 4, 4, 4, 3, 4, 3, 3, 4, 4, 3],
+      團隊合作: [3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 2]
     }
+  }
+};
 
-    // 渲染側邊欄/頂部使用者資訊
-    function renderUserHeader(me) {
-      document.getElementById('sidebarStudentName').textContent = me.student.name || getUserName() || '學生';
-      if (me.student.avatar) {
-        document.getElementById('headerAvatarImg').src = me.student.avatar;
-      } else {
-        document.getElementById('headerAvatarImg').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(me.student.username)}`;
-      }
-    }
+const trendColors = {
+  程式: { border: '#ffdb58', bg: 'rgba(255, 219, 88, 0.1)' },
+  除錯: { border: '#41e654', bg: 'rgba(65, 230, 84, 0.1)' },
+  創意: { border: '#ff6b6b', bg: 'rgba(255, 107, 107, 0.1)' },
+  結構: { border: '#54a0ff', bg: 'rgba(84, 160, 255, 0.1)' },
+  團隊合作: { border: '#ff9ff3', bg: 'rgba(255, 159, 243, 0.1)' }
+};
 
-    // 渲染出缺勤 / 學習階段卡片
-    function renderStageCard(me) {
-      document.getElementById('stageCourseTypeName').textContent = me.enrollment ? me.enrollment.course_type_name : '尚未分班';
-      document.getElementById('stageLessonCount').textContent = me.attendance.totalLessons;
-      document.getElementById('badgeLeaveCount').textContent = me.attendance.stats.excused;
-      // 「待補課」以缺席堂數估算 (資料庫暫無獨立補課欄位)
-      document.getElementById('badgeAbsentCount').textContent = me.attendance.stats.absent;
-    }
+let currentTrendRange = '6w';
 
-    // 渲染班級資訊翻轉卡
-    function renderClassCard(me) {
-      const titleEl = document.getElementById('classCardTitle');
-      const scheduleEl = document.getElementById('classCardSchedule');
-      const teacherEl = document.getElementById('classCardTeacher');
-      const backDateEl = document.getElementById('classCardBackDate');
-      const backContentEl = document.getElementById('classCardBackContent');
+function buildTrendDatasets(range) {
+  const source = trendDataSets[range];
+  return Object.keys(source.data).map(label => ({
+    label: label,
+    data: source.data[label],
+    borderColor: trendColors[label].border,
+    backgroundColor: trendColors[label].bg,
+    tension: 0,
+    fill: false
+  }));
+}
 
-      if (me.enrollment) {
-        const e = me.enrollment;
-        titleEl.innerHTML = `${e.course_type_name}<span class="class-card__subtitle" style="margin-left: 8px; font-weight: 400;">課程</span>`;
-        if (e.day_of_week !== null && e.day_of_week !== undefined) {
-          scheduleEl.textContent = `星期${WEEKDAY_NAMES[e.day_of_week]} ${formatTimeHM(e.start_time)} ${e.classroom_name || ''}`;
-        } else {
-          scheduleEl.textContent = e.classroom_name || '';
-        }
-        teacherEl.textContent = e.teacher_name ? `${e.teacher_name} 老師` : '尚未指派老師';
-      } else {
-        titleEl.textContent = '尚未分班';
-        scheduleEl.textContent = '';
-        teacherEl.textContent = '';
-      }
-
-      if (me.recentRecord) {
-        backDateEl.textContent = me.recentRecord.log_date;
-        backContentEl.textContent = me.recentRecord.performance || '尚無課堂表現紀錄';
-      } else {
-        backDateEl.textContent = '—';
-        backContentEl.textContent = '尚無課堂紀錄';
-      }
-    }
-
-    // 渲染點數卡片
-    function renderPointsCard(me) {
-      document.getElementById('pointsBalance').textContent = me.points.balance;
-
-      const listEl = document.getElementById('pointsDetailList');
-      if (!me.points.transactions.length) {
-        listEl.innerHTML = '<div class="points-detail__item"><span class="points-detail__reason">尚無點數紀錄</span></div>';
-        return;
-      }
-
-      listEl.innerHTML = me.points.transactions.map(t => {
-        const amount = t.amount || 0;
-        const isPositive = amount >= 0;
-        const date = new Date(t.created_at);
-        const dateStr = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-        return `
-          <div class="points-detail__item">
-            <span class="points-detail__date">${dateStr}</span>
-            <span class="points-detail__reason">${t.reason || ''}</span>
-            <span class="points-detail__value points-detail__value--${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${amount}</span>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // 渲染能力雷達圖
-    function renderRadar(me) {
-      const skills = me.skills;
-      SKILL_KEYS.forEach(label => {
-        const value = skills[SKILL_FIELD_MAP[label]] || 0;
-        document.getElementById(`scoreValue-${SKILL_FIELD_MAP[label]}`).textContent = `${value} / 5`;
-        document.getElementById(`scoreFill-${SKILL_FIELD_MAP[label]}`).style.width = `${(value / 5) * 100}%`;
-      });
-
-      const radarCtx = document.getElementById('radarChart').getContext('2d');
-      const data = SKILL_KEYS.map(label => skills[SKILL_FIELD_MAP[label]] || 0);
-      if (radarChart) {
-        radarChart.data.datasets[0].data = data;
-        radarChart.update();
-        return;
-      }
-      radarChart = new Chart(radarCtx, {
-        type: 'radar',
-        data: {
-          labels: SKILL_KEYS,
-          datasets: [{
-            label: '能力值',
-            data,
-            backgroundColor: 'rgba(255, 219, 88, 0.4)',
-            borderColor: '#ffdb58',
-            borderWidth: 2,
-            pointBackgroundColor: '#ffdb58',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4
-          }]
+function initTrendChart() {
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: trendDataSets[currentTrendRange].labels,
+      datasets: buildTrendDatasets(currentTrendRange)
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 5,
+          ticks: { stepSize: 1 },
+          grid: { color: '#e5e7eb' }
         },
-        options: {
-          scales: {
-            r: {
-              beginAtZero: true,
-              max: 5,
-              min: 0,
-              ticks: { stepSize: 1, display: false },
-              grid: { color: '#e5e7eb' },
-              angleLines: { color: '#e5e7eb' },
-              pointLabels: { font: { size: 13, weight: '500' }, color: '#1a1c1c' }
-            }
-          },
-          plugins: { legend: { display: false } },
-          maintainAspectRatio: true
+        x: {
+          grid: { display: false }
         }
-      });
-    }
-
-    // 渲染課程下拉選單 (依學生實際修課紀錄)
-    function renderCourseDropdown(me) {
-      const listEl = document.getElementById('courseDropdownList');
-      const labelEl = document.getElementById('courseDropdownLabel');
-      const history = me.courseHistory && me.courseHistory.length
-        ? me.courseHistory
-        : (me.enrollment ? [{ course_id: me.enrollment.course_id, course_name: me.enrollment.course_type_name }] : []);
-
-      if (!history.length) {
-        labelEl.textContent = '尚無課程';
-        listEl.innerHTML = '';
-        return;
-      }
-
-      labelEl.textContent = history[0].course_name;
-      listEl.innerHTML = history.map(c =>
-        `<div class="course-dropdown__item" onclick="selectCourse('${c.course_name.replace(/'/g, "\\'")}')">${c.course_name}</div>`
-      ).join('');
-    }
-
-    function selectCourse(courseName) {
-      document.getElementById('courseDropdownLabel').textContent = courseName;
-      document.getElementById('courseDropdown').classList.remove('course-dropdown--open');
-    }
-
-    // 建立趨勢圖表資料集
-    function buildTrendDatasets(trendData) {
-      return SKILL_KEYS.map(label => ({
-        label,
-        data: trendData[label] || [],
-        borderColor: trendColors[label].border,
-        backgroundColor: trendColors[label].bg,
-        tension: 0,
-        fill: false
-      }));
-    }
-
-    async function fetchAndRenderTrend(params) {
-      try {
-        const result = await api.students.getMyTrend(params);
-        const trendData = result.data;
-        const labels = trendData.labels.map(formatMD);
-
-        if (!trendChart) {
-          initTrendChart(labels, trendData);
-        } else {
-          trendChart.data.labels = labels;
-          trendChart.data.datasets = buildTrendDatasets(trendData);
-          trendChart.update();
-        }
-      } catch (error) {
-        console.error('取得學習趨勢失敗', error);
+      },
+      plugins: {
+        legend: { display: false }
       }
     }
-
-    function initTrendChart(labels, trendData) {
-      const ctx = document.getElementById('trendChart').getContext('2d');
-      trendChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels || [],
-          datasets: buildTrendDatasets(trendData || {})
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 }, grid: { color: '#e5e7eb' } },
-            x: { grid: { display: false } }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
+  });
+}
 
     // 趨勢指標切換
     function toggleTrendIndicator(indicatorEl) {
       indicatorEl.classList.toggle('trend-indicator-tag--active');
+
+      // 更新圖表顯示
       const label = indicatorEl.textContent.trim();
-      const datasetIndex = SKILL_KEYS.indexOf(label);
+      const datasetIndex = ['程式', '除錯', '創意', '結構', '團隊合作'].indexOf(label);
+
       if (trendChart && datasetIndex >= 0) {
         const meta = trendChart.getDatasetMeta(datasetIndex);
         meta.hidden = !indicatorEl.classList.contains('trend-indicator-tag--active');
@@ -1638,54 +1620,100 @@
       }
     }
 
-    // 趨勢時間範圍切換 (向後端重新查詢真實資料)
+    // 趨勢時間範圍切換
     function setTrendTimeRange(btn, range) {
-      document.querySelectorAll('.trend-filter__btn').forEach(b => b.classList.remove('trend-filter__btn--active'));
+      document.querySelectorAll('.trend-filter__btn').forEach(b => {
+        b.classList.remove('trend-filter__btn--active');
+      });
       btn.classList.add('trend-filter__btn--active');
-      currentTrendRange = range === '12w' ? 12 : 6;
-      fetchAndRenderTrend({ weeks: currentTrendRange });
-    }
 
+      currentTrendRange = range;
+
+      if (trendChart) {
+        trendChart.data.labels = trendDataSets[range].labels;
+        trendChart.data.datasets = buildTrendDatasets(range);
+        trendChart.update();
+      }
+    }
     function applyCustomDateRange() {
-      const startDate = document.getElementById('trendDateStart').value;
-      const endDate = document.getElementById('trendDateEnd').value;
+          const startDate = document.getElementById('trendDateStart').value;
+          const endDate = document.getElementById('trendDateEnd').value;
 
-      if (!startDate || !endDate) {
-        alert('請選擇開始與結束日期');
-        return;
-      }
-      if (new Date(startDate) > new Date(endDate)) {
-        alert('開始日期不能晚於結束日期');
-        return;
-      }
+          if (!startDate || !endDate) {
+            alert('請選擇開始與結束日期');
+            return;
+          }
 
-      document.querySelectorAll('.trend-filter__btn').forEach(b => b.classList.remove('trend-filter__btn--active'));
-      fetchAndRenderTrend({ start_date: startDate, end_date: endDate });
+          if (new Date(startDate) > new Date(endDate)) {
+            alert('開始日期不能晚於結束日期');
+            return;
+          }
+
+          document.querySelectorAll('.trend-filter__btn').forEach(b => {
+            b.classList.remove('trend-filter__btn--active');
+          });
+
+          console.log('自訂日期區間:', startDate, '~', endDate);
+
+          if (trendChart) {
+            trendChart.data.labels = trendDataSets['12w'].labels;
+            trendChart.data.datasets = buildTrendDatasets('12w');
+            trendChart.update();
+          }
     }
-
     // ========================================
-    // 頁面初始化：向後端取得本人資料並渲染
+    // 初始化雷達圖
     // ========================================
-    async function initDashboard() {
-      try {
-        const result = await api.students.getMe();
-        const me = result.data;
-
-        renderUserHeader(me);
-        renderStageCard(me);
-        renderClassCard(me);
-        renderPointsCard(me);
-        renderRadar(me);
-        renderCourseDropdown(me);
-      } catch (error) {
-        console.error('載入學生儀表板資料失敗', error);
-        if (error.response && error.response.status === 404) {
-          showMessage('尚未建立學生檔案，請聯絡管理人員', 'error');
-        }
+    const radarCtx = document.getElementById('radarChart').getContext('2d');
+    new Chart(radarCtx, {
+      type: 'radar',
+      data: {
+        labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
+        datasets: [{
+          label: '能力值',
+          data: [4, 4, 3, 3, 2],
+          backgroundColor: 'rgba(255, 219, 88, 0.4)',
+          borderColor: '#ffdb58',
+          borderWidth: 2,
+          pointBackgroundColor: '#ffdb58',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 5,
+            min: 0,
+            ticks: {
+              stepSize: 1,
+              display: false
+            },
+            grid: {
+              color: '#e5e7eb'
+            },
+            angleLines: {
+              color: '#e5e7eb'
+            },
+            pointLabels: {
+              font: {
+                size: 13,
+                weight: '500'
+              },
+              color: '#1a1c1c'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        maintainAspectRatio: true
       }
-    }
-
-    initDashboard();
+    });
   </script>
 </body>
 </html>
