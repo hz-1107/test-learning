@@ -551,7 +551,7 @@ img {
 }
 
 .welcome-section {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
 }
 
 .welcome-section__title {
