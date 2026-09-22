@@ -286,7 +286,7 @@ async function ensureTablesExist() {
           teacher_id INT NOT NULL,
           topic VARCHAR(255),
           content TEXT,
-          outline JSON,
+          outline TEXT,
           status ENUM('pending', 'progress', 'completed') DEFAULT 'pending',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -295,6 +295,33 @@ async function ensureTablesExist() {
           FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
         )
       `);
+    } else {
+      // 資料表已存在，檢查是否缺少 topic 和 outline 欄位
+      const topicColumn = await db.queryOne(`
+        SELECT COUNT(*) as count
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+        AND table_name = 'course_logs'
+        AND column_name = 'topic'
+      `);
+
+      if (!topicColumn || topicColumn.count === 0) {
+        console.log('新增 course_logs.topic 欄位...');
+        await db.query(`ALTER TABLE course_logs ADD COLUMN topic VARCHAR(255) AFTER teacher_id`);
+      }
+
+      const outlineColumn = await db.queryOne(`
+        SELECT COUNT(*) as count
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+        AND table_name = 'course_logs'
+        AND column_name = 'outline'
+      `);
+
+      if (!outlineColumn || outlineColumn.count === 0) {
+        console.log('新增 course_logs.outline 欄位...');
+        await db.query(`ALTER TABLE course_logs ADD COLUMN outline TEXT AFTER content`);
+      }
     }
 
     // 檢查 student_log_records 表是否存在
@@ -413,10 +440,10 @@ async function ensureTablesExist() {
 exports.getMyLogsStatus = async (req, res) => {
   await ensureTablesExist();
   try {
-    const { start_date, end_date } = req.query;
+    const { start_date, end_date, all } = req.query;
     const userId = req.user.id;
 
-    // 取得教師ID
+    // 取得教師ID（用於驗證權限）
     const teacher = await db.queryOne(
       'SELECT id FROM teachers WHERE user_id = ?',
       [userId]
@@ -429,10 +456,11 @@ exports.getMyLogsStatus = async (req, res) => {
       });
     }
 
-    const teacherId = teacher.id;
+    // 根據 all 參數決定是否取得所有教師的排程
+    const fetchAll = all === 'true' || all === '1';
 
-    // 取得教師的課程排程
-    const schedules = await db.query(`
+    // 取得課程排程
+    let schedulesSql = `
       SELECT
         cs.id as schedule_id,
         cs.course_id,
@@ -441,13 +469,26 @@ exports.getMyLogsStatus = async (req, res) => {
         cr.name as classroom_name,
         cs.day_of_week,
         cs.start_time,
-        cs.end_time
+        cs.end_time,
+        cs.teacher_id,
+        u.name as teacher_name
       FROM course_schedules cs
       JOIN courses c ON cs.course_id = c.id
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
-      WHERE cs.teacher_id = ?
-      ORDER BY cs.day_of_week, cs.start_time
-    `, [teacherId]);
+      JOIN teachers t ON cs.teacher_id = t.id
+      JOIN users u ON t.user_id = u.id
+      WHERE cs.is_active = 1 AND cs.deleted_at IS NULL
+    `;
+    const scheduleParams = [];
+
+    if (!fetchAll) {
+      schedulesSql += ' AND cs.teacher_id = ?';
+      scheduleParams.push(teacher.id);
+    }
+
+    schedulesSql += ' ORDER BY u.name, cs.day_of_week, cs.start_time';
+
+    const schedules = await db.query(schedulesSql, scheduleParams);
 
     if (!start_date || !end_date) {
       return res.json({
@@ -1107,15 +1148,36 @@ exports.update = async (req, res) => {
       });
     }
 
-    await db.update(`
-      UPDATE course_logs SET
-        topic = ?, content = ?, outline = ?, status = ?
-      WHERE id = ?
-    `, [
-      topic || null, content || null,
-      outline || null,
-      status || 'pending', id
-    ]);
+    // 動態建立 UPDATE 語句，只更新有提供的欄位
+    const updates = [];
+    const params = [];
+
+    if (topic !== undefined) {
+      updates.push('topic = ?');
+      params.push(topic || null);
+    }
+    if (content !== undefined) {
+      updates.push('content = ?');
+      params.push(content || null);
+    }
+    if (outline !== undefined) {
+      updates.push('outline = ?');
+      params.push(outline || null);
+    }
+    if (status !== undefined) {
+      updates.push('status = ?');
+      params.push(status);
+    }
+
+    if (updates.length === 0) {
+      return res.json({
+        success: true,
+        message: '沒有需要更新的欄位'
+      });
+    }
+
+    params.push(id);
+    await db.update(`UPDATE course_logs SET ${updates.join(', ')} WHERE id = ?`, params);
 
     res.json({
       success: true,
