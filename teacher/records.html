@@ -532,7 +532,7 @@
             <option value="all">全部</option>
             <option value="completed">已完成</option>
             <option value="in-progress">進行中</option>
-            <option value="pending">未填答</option>
+            <option value="pending">未填寫</option>
           </select>
         </div>
         <div class="filter-group">
@@ -650,8 +650,8 @@
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
 
-        // 使用新的 API 端點取得課程日誌狀態
-        const url = `${API_BASE}/api/logs/my-status?start_date=${startDate}&end_date=${endDate}`;
+        // 使用 API 端點取得所有教師的課程日誌狀態
+        const url = `${API_BASE}/api/logs/my-status?start_date=${startDate}&end_date=${endDate}&all=true`;
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -694,10 +694,12 @@
     function updateFilterOptions() {
       const courseFilter = document.getElementById('courseFilter');
       const roomFilter = document.getElementById('roomFilter');
+      const teacherFilter = document.getElementById('teacherFilter');
 
-      // 收集唯一的課程和教室
+      // 收集唯一的課程、教室和教師
       const courses = [...new Set(allClasses.map(c => c.course_name))];
-      const rooms = [...new Set(allClasses.map(c => c.classroom_name))];
+      const rooms = [...new Set(allClasses.map(c => c.classroom_name).filter(r => r))];
+      const teachers = [...new Set(allClasses.map(c => c.teacher_name).filter(t => t))];
 
       // 更新課程選項
       courseFilter.innerHTML = '<option value="all">全部課程</option>';
@@ -709,6 +711,12 @@
       roomFilter.innerHTML = '<option value="all">全部教室</option>';
       rooms.forEach(room => {
         roomFilter.innerHTML += `<option value="${room}">${room}</option>`;
+      });
+
+      // 更新教師選項
+      teacherFilter.innerHTML = '<option value="all">全部老師</option>';
+      teachers.forEach(teacher => {
+        teacherFilter.innerHTML += `<option value="${teacher}">${teacher}</option>`;
       });
     }
 
@@ -736,7 +744,13 @@
 
           let status = 'pending';
           if (log) {
-            status = log.status === 'completed' ? 'completed' : 'in-progress';
+            if (log.status === 'completed') {
+              status = 'completed';
+            } else if (log.status === 'in_progress') {
+              status = 'in-progress';
+            } else {
+              status = 'pending';
+            }
           }
 
           allItems.push({
@@ -796,10 +810,12 @@
       const statusFilter = document.getElementById('statusFilter').value;
       const courseFilter = document.getElementById('courseFilter').value;
       const roomFilter = document.getElementById('roomFilter').value;
+      const teacherFilter = document.getElementById('teacherFilter').value;
 
       let filteredItems = allItems.filter(item => {
         if (courseFilter !== 'all' && item.course_name !== courseFilter) return false;
         if (roomFilter !== 'all' && item.classroom_name !== roomFilter) return false;
+        if (teacherFilter !== 'all' && item.teacher_name !== teacherFilter) return false;
         if (statusFilter !== 'all') {
           if (statusFilter === 'completed' && item.dateStatus !== 'completed') return false;
           if (statusFilter === 'in-progress' && item.dateStatus !== 'in-progress') return false;
@@ -841,7 +857,7 @@
 
         // 取得狀態顯示
         let statusClass = 'pending';
-        let statusText = '待填寫';
+        let statusText = '未填寫';
         if (!item.isPast) {
           statusClass = 'future';
           statusText = '尚未到課';
@@ -850,7 +866,7 @@
           statusText = '已完成';
         } else if (item.dateStatus === 'in-progress') {
           statusClass = 'in-progress';
-          statusText = '填寫中';
+          statusText = '進行中';
         }
 
         const futureClass = !item.isPast ? 'diary-card--future' : '';
@@ -941,6 +957,7 @@
     document.getElementById('statusFilter').addEventListener('change', applyFilters);
     document.getElementById('courseFilter').addEventListener('change', applyFilters);
     document.getElementById('roomFilter').addEventListener('change', applyFilters);
+    document.getElementById('teacherFilter').addEventListener('change', applyFilters);
   </script>
   <script src="js/notifications.js"></script>
 </body>

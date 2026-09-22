@@ -1123,7 +1123,8 @@
           <span class="filter-group__label">填答狀態</span>
           <select class="filter-select" id="filterStatus">
             <option value="">全部</option>
-            <option value="completed">已填寫</option>
+            <option value="completed">已完成</option>
+            <option value="in_progress">進行中</option>
             <option value="pending">未填寫</option>
           </select>
         </div>
@@ -2652,7 +2653,7 @@
               </span>
               <span class="date-list__stat">
                 <span class="date-list__stat-dot date-list__stat-dot--progress"></span>
-                填寫中 ${in_progress_count}
+                進行中 ${in_progress_count}
               </span>
               <span class="date-list__stat">
                 <span class="date-list__stat-dot date-list__stat-dot--pending"></span>
@@ -2677,9 +2678,13 @@
                 if (item.log_status === 'completed') {
                   statusClass = 'completed';
                   statusText = '已完成';
-                } else {
+                } else if (item.log_status === 'in_progress') {
                   statusClass = 'progress';
-                  statusText = '填寫中';
+                  statusText = '進行中';
+                } else {
+                  // pending 狀態
+                  statusClass = 'pending';
+                  statusText = '未填寫';
                 }
               }
 
@@ -3942,7 +3947,42 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         // 等待所有學生記錄儲存完成
         await Promise.all(studentPromises);
 
-        // 3. 更新日誌狀態為已完成
+        // 3. 計算完成度並更新日誌狀態
+        const totalStudents = studentCards.length;
+        let attendanceCompleted = 0;
+        let commentsCompleted = 0;
+        let photosCompleted = 0;
+        let pointsCompleted = 0;
+
+        studentCards.forEach(card => {
+          const activeBtn = card.querySelector('.attendance-btn--active');
+          if (activeBtn) attendanceCompleted++;
+
+          const details = card.querySelector('.student-card__details');
+          if (details) {
+            const commentField = details.querySelector('textarea[placeholder*="評語"]');
+            if (commentField && commentField.value.trim()) commentsCompleted++;
+
+            const photoUpload = details.querySelector('.photo-upload img');
+            if (photoUpload) photosCompleted++;
+
+            const pointsInput = details.querySelector('.points-input input');
+            if (pointsInput && parseInt(pointsInput.value) > 0) pointsCompleted++;
+          }
+        });
+
+        const totalItems = totalStudents * 4;
+        const completedItems = attendanceCompleted + commentsCompleted + photosCompleted + pointsCompleted;
+        const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+        // 根據完成度決定狀態：0% = pending, 1-99% = in_progress, 100% = completed
+        let finalStatus = 'pending';
+        if (percentage === 100) {
+          finalStatus = 'completed';
+        } else if (percentage > 0) {
+          finalStatus = 'in_progress';
+        }
+
         await fetch(`${API_BASE}/logs/${logId}`, {
           method: 'PUT',
           headers: {
@@ -3950,11 +3990,16 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            status: 'completed'
+            status: finalStatus
           })
         });
 
-        showMessage(isUpdate ? '日誌已成功更新！' : '日誌已成功提交！', 'success');
+        const statusMessages = {
+          'pending': '日誌已儲存（未填寫）',
+          'in_progress': '日誌已儲存（進行中）',
+          'completed': '日誌已成功完成！'
+        };
+        showMessage(statusMessages[finalStatus], 'success');
 
         setTimeout(() => {
           window.location.href = 'records.html';

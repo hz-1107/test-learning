@@ -14,154 +14,282 @@
     .dashboard {
       display: grid;
       grid-template-columns: 220px 1fr;
-      grid-template-rows: 68px 1fr;
+      grid-template-rows: 60px 1fr;
       grid-template-areas:
         "sidebar header"
         "sidebar main";
       height: 100vh;
+      background: #f8f9fa;
     }
 
+    /* 側邊欄 - 原本樣式 */
     .sidebar {
       grid-area: sidebar;
+      background: var(--color-surface-alt);
       padding: var(--spacing-lg) 0;
     }
 
-    .header {
-      grid-area: header;
-      background: var(--color-surface);
-      border-bottom: 1px solid var(--color-surface-alt);
-      padding: var(--spacing-md) var(--spacing-lg);
+    .sidebar__profile {
+      padding: 0 var(--spacing-lg) var(--spacing-xl);
     }
 
-    .main-content {
-      grid-area: main;
+    .sidebar__profile-inner {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
     }
 
-    .header__avatar {
+    .sidebar__profile-avatar {
       width: 40px;
       height: 40px;
-      border-radius: 50%;
-      border: 2px solid var(--color-primary);
-      overflow: hidden;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar__profile-avatar-icon {
+      width: 22px;
+      height: 18px;
+    }
+
+    .sidebar__profile-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar__profile-name {
+      font-size: var(--font-size-md);
+      color: var(--color-secondary);
+      letter-spacing: 0.35px;
+    }
+
+    .sidebar__profile-role {
+      font-size: var(--font-size-sm);
+      color: #64748b;
+    }
+
+    .sidebar__nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar__nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 12px var(--spacing-lg);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .sidebar__nav-item:hover {
+      background: rgba(255, 219, 88, 0.3);
+    }
+
+    .sidebar__nav-item--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    }
+
+    .sidebar__nav-item-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 頂部導覽列 */
+    .header {
+      grid-area: header;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header__logo {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .header__search {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 8px 16px;
+      background: #f5f5f5;
+      border: 1px solid #e8e8e8;
+      border-radius: var(--radius-md);
+      width: 280px;
+    }
+
+    .header__search input {
+      border: none;
+      background: transparent;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      width: 100%;
+    }
+
+    .header__search input::placeholder {
+      color: #999;
+    }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
     }
 
     .header__icon-btn {
-      position: relative;
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: var(--radius-md);
       color: var(--color-text-secondary);
       cursor: pointer;
-      transition: background 0.2s;
+      background: transparent;
+      border: none;
     }
 
     .header__icon-btn:hover {
-      background: var(--color-surface-alt);
+      background: #f5f5f5;
     }
 
-    /* 頁面標題區 */
-    .page-header {
+    .header__avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      overflow: hidden;
+    }
+
+    .header__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 主內容區 */
+    .main-content {
+      grid-area: main;
+      background: #f8f9fa;
+      overflow-y: auto;
       padding: var(--spacing-xl);
-      padding-bottom: var(--spacing-lg);
     }
 
-    .page-header__top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: var(--spacing-lg);
+    /* 頁面標題 */
+    .page-header {
+      margin-bottom: var(--spacing-lg);
     }
 
-    .page-header__info {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-xs);
-    }
-
-    .page-header__title {
+    .page-title {
       font-size: 28px;
       font-weight: 700;
       color: var(--color-text-primary);
+      margin-bottom: 4px;
     }
 
-    .page-header__subtitle {
+    .page-subtitle {
       font-size: var(--font-size-md);
       color: var(--color-text-muted);
     }
 
-    /* 控制區 */
+    /* 控制列 - 單行排列 */
     .schedule-controls {
       display: flex;
       align-items: center;
-      gap: var(--spacing-lg);
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
     }
 
-    .teacher-filter {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      padding: 10px 16px;
+    .filter-select {
+      padding: 10px 14px;
       background: var(--color-surface);
       border: 1px solid var(--color-surface-alt);
       border-radius: var(--radius-md);
       font-size: var(--font-size-md);
-      color: var(--color-text-primary);
-      cursor: pointer;
-      min-width: 120px;
-    }
-
-    .teacher-filter select {
-      border: none;
-      background: transparent;
-      font-size: var(--font-size-md);
-      color: var(--color-text-primary);
+      color: var(--color-text-secondary);
       cursor: pointer;
       appearance: none;
-      padding-right: 24px;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 0 center;
+      background-position: right 12px center;
+      padding-right: 40px;
+      min-width: 130px;
     }
 
-    .btn-secondary { padding: 10px 20px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-secondary); cursor: pointer; }
-    .btn-secondary:hover { background: var(--color-surface-alt); }
-
-    /* 日期導覽 (< 目前日期 >) 與日曆彈窗 */
-    .date-nav { position: relative; display: flex; align-items: center; gap: var(--spacing-sm); }
-    .date-nav__btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-secondary); }
-    .date-nav__btn:hover { background: var(--color-surface-alt); }
-    .date-nav__current { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 7px 14px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-sm); font-weight: 600; color: var(--color-primary-dark); min-width: 160px; cursor: pointer; font-family: inherit; }
-    .date-nav__current:hover { border-color: var(--color-primary); }
-    .date-nav__current svg { flex-shrink: 0; color: var(--color-primary-dark); }
-
-    .cal-popup { position: absolute; top: calc(100% + 8px); left: 36px; width: 236px; padding: 10px; background: #fff; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.28); z-index: 60; }
-    .cal-popup[hidden] { display: none; }
-    .cal-popup__head { display: flex; align-items: center; justify-content: space-between; background: var(--color-primary); border-radius: var(--radius-sm); padding: 4px 6px; margin-bottom: 6px; }
-    .cal-popup__title { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-primary-dark); }
-    .cal-popup__nav { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; cursor: pointer; font-size: 17px; line-height: 1; color: var(--color-primary-dark); border-radius: var(--radius-sm); }
-    .cal-popup__nav:hover { background: rgba(255, 255, 255, 0.55); }
-    .cal-popup__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); }
-    .cal-popup__weekdays span { text-align: center; font-size: var(--font-size-xs); color: #6e7781; padding: 4px 0; }
-    .cal-popup__grid { display: grid; grid-template-columns: repeat(7, 1fr); }
-    .cal-day { height: 30px; display: flex; align-items: center; justify-content: center; font-size: var(--font-size-sm); color: #262d33; cursor: pointer; user-select: none; }
-    .cal-day--empty { cursor: default; }
-    .cal-day--range { background: rgba(255, 219, 88, 0.5); }
-    .cal-day--range-start { border-top-left-radius: var(--radius-sm); border-bottom-left-radius: var(--radius-sm); }
-    .cal-day--range-end { border-top-right-radius: var(--radius-sm); border-bottom-right-radius: var(--radius-sm); }
-    .cal-day--anchor { box-shadow: inset 0 0 0 2px var(--color-primary); border-radius: var(--radius-sm); font-weight: 600; }
-    .cal-day:not(.cal-day--empty):hover { background: var(--color-primary-light); border-radius: var(--radius-sm); }
-
-    /* 星期選擇器 */
-    .day-tabs {
+    /* 日期導航群組 */
+    .date-nav-group {
       display: flex;
-      gap: var(--spacing-xs);
+      align-items: center;
+      gap: var(--spacing-sm);
     }
 
-    .day-tab {
-      padding: 8px 16px;
+    /* 日期導航按鈕 */
+    .date-nav-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      transition: all 0.2s;
+    }
+
+    .date-nav-btn:hover {
+      background: var(--color-surface-alt);
+      border-color: var(--color-primary);
+    }
+
+    .date-nav-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 日期選擇器 */
+    .date-picker {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .date-picker:hover {
+      border-color: var(--color-primary);
+    }
+
+    .date-picker svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-text-muted);
+    }
+
+    /* 今天按鈕 */
+    .today-btn {
+      padding: 10px 16px;
       background: var(--color-surface);
       border: 1px solid var(--color-surface-alt);
       border-radius: var(--radius-md);
@@ -171,8 +299,125 @@
       transition: all 0.2s;
     }
 
+    .today-btn:hover {
+      background: var(--color-surface-alt);
+      border-color: var(--color-primary);
+    }
+
+    /* 日曆彈窗 */
+    .cal-popup {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 260px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+    }
+
+    .cal-popup[hidden] {
+      display: none;
+    }
+
+    .cal-popup__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--color-primary);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      margin-bottom: 8px;
+    }
+
+    .cal-popup__title {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .cal-popup__nav {
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--color-primary-dark);
+      border-radius: var(--radius-sm);
+    }
+
+    .cal-popup__nav:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .cal-popup__weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      margin-bottom: 4px;
+    }
+
+    .cal-popup__weekdays span {
+      text-align: center;
+      font-size: var(--font-size-xs);
+      color: #888;
+      padding: 6px 0;
+    }
+
+    .cal-popup__grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-day {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-sm);
+      color: #333;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+    }
+
+    .cal-day--empty {
+      cursor: default;
+    }
+
+    .cal-day--selected {
+      background: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .cal-day:not(.cal-day--empty):hover {
+      background: #f5f5f5;
+    }
+
+    /* 星期按鈕組 */
+    .day-tabs {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .day-tab {
+      padding: 10px 16px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
     .day-tab:hover {
-      background: var(--color-background);
+      background: #f8f8f8;
     }
 
     .day-tab--active {
@@ -182,17 +427,13 @@
       font-weight: 500;
     }
 
-    /* 課表容器 */
-    .schedule-container {
-      padding: 0 var(--spacing-xl) var(--spacing-xl);
-      overflow-x: auto;
-    }
-
+    /* 課表容器 - 參照行政端 */
     .schedule-table {
       background: var(--color-surface);
       border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
       border: 1px solid var(--color-surface-alt);
-      min-width: 900px;
     }
 
     .schedule-grid {
@@ -205,57 +446,38 @@
     }
 
     .schedule-header-cell {
-      padding: var(--spacing-md) var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
       background: var(--color-surface);
       border-bottom: 1px solid var(--color-surface-alt);
       text-align: center;
-      font-size: var(--font-size-md);
-      font-weight: 500;
-      color: var(--color-text-primary);
     }
 
     .schedule-header-cell:first-child {
       background: transparent;
-      border-right: 1px solid var(--color-surface-alt);
     }
 
-    .schedule-header-cell:not(:last-child) {
-      border-right: 1px solid var(--color-surface-alt);
+    .schedule-day {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-text-primary);
     }
 
-    /* 週檢視表頭(星期 + 日期) */
-    .schedule-header-cell--week-day {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .schedule-header-cell__date {
-      font-size: var(--font-size-xs);
-      font-weight: 400;
+    .schedule-date {
+      font-size: var(--font-size-sm);
       color: var(--color-text-muted);
-    }
-
-    .schedule-header-cell.schedule-header-cell--active {
-      color: var(--color-primary-dark);
-      border-top: 2px solid var(--color-primary);
-      border-left: 2px solid var(--color-primary);
-      border-right: 2px solid var(--color-primary);
-      position: relative;
-      z-index: 1;
     }
 
     /* 時間欄 */
     .schedule-time-cell {
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-right: 1px solid var(--color-surface-alt);
-      border-bottom: 1px solid var(--color-surface-alt);
-      text-align: right;
+      padding: var(--spacing-sm) var(--spacing-md);
       font-size: var(--font-size-sm);
-      background: var(--color-surface);
+      color: var(--color-text-muted);
+      text-align: right;
+      border-right: 1px solid var(--color-surface-alt);
       position: relative;
-      min-height: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
     .schedule-time-main {
@@ -270,7 +492,7 @@
 
     /* 課程格子 */
     .schedule-cell {
-      min-height: 30px;
+      min-height: 50px;
       border-bottom: 1px solid var(--color-surface-alt);
       border-right: 1px solid var(--color-surface-alt);
       position: relative;
@@ -281,41 +503,28 @@
       border-right: none;
     }
 
-    /* 「今天」整欄外框 */
-    .schedule-cell.schedule-cell--today {
-      border-left: 2px solid var(--color-primary);
-      border-right: 2px solid var(--color-primary);
+    /* 休息時段 */
+    .schedule-break {
+      grid-column: 1 / -1;
+      background: var(--color-background);
+      padding: var(--spacing-sm) var(--spacing-md);
+      text-align: center;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-surface-alt);
     }
 
-    .schedule-cell.schedule-cell--today.schedule-cell--today-last {
-      border-bottom: 2px solid var(--color-primary);
-    }
-
-    /* 虛線標示 */
-    .schedule-cell::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      border-left: 1px dashed #e5e7eb;
-      pointer-events: none;
-    }
-
-    /* 課程區塊 */
+    /* 課程區塊 - 參照行政端 */
     .course-block {
       position: absolute;
-      left: 4px;
-      right: 4px;
+      left: 2px;
+      right: 2px;
       border-radius: var(--radius-sm);
       padding: var(--spacing-xs) var(--spacing-sm);
-      font-size: var(--font-size-xs);
+      font-size: var(--font-size-sm);
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      z-index: 1;
-      color: #000000;
     }
 
     .course-block:hover {
@@ -324,54 +533,203 @@
       z-index: 10;
     }
 
-    /* 課程顏色 */
-    .course-block--steam   { background: #F7E0FF; }
-    .course-block--power   { background: #ADDFF3; }
-    .course-block--program { background: #FFD99C; }
-    .course-block--kids    { background: #FF9EDB; }
-    .course-block--project { background: #FFDB58; }
-    .course-block--default { background: #E8F5E9; }
+    /* 課程顏色 - 原本樣式 */
+    .course-block--yellow {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .course-block--blue {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .course-block--orange {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+
+    .course-block--gray {
+      background: #e5e7eb;
+      color: #6b7280;
+    }
+
+    .course-block--purple {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+
+    .course-block--green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .course-block--pink {
+      background: #fce7f3;
+      color: #be185d;
+    }
 
     .course-block__title {
       font-weight: 600;
-      font-size: 11px;
-      margin-bottom: 2px;
+      font-size: var(--font-size-xs);
+      margin-bottom: 1px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .course-block__location {
+    .course-block__teacher {
       font-size: 10px;
       opacity: 0.8;
     }
 
-    .course-block__teacher {
-      font-size: 10px;
-      opacity: 0.7;
-    }
-
-    /* 載入中 */
-    .loading {
+    /* 查看 Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 450px;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal__header {
+      background: var(--color-primary);
+      padding: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-primary-dark);
+    }
+
+    .modal__close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-primary-dark);
+      padding: 4px;
+    }
+
+    .modal__close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .modal__body {
       padding: var(--spacing-xl);
+    }
+
+    .modal__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .modal__row:last-child {
+      margin-bottom: 0;
+    }
+
+    .modal__field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .modal__label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
       color: var(--color-text-muted);
+    }
+
+    .modal__value {
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+
+    .modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: var(--spacing-lg);
+      border-top: 1px solid #e8e8e8;
+    }
+
+    .modal__close-btn {
+      padding: 10px 24px;
+      background: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+    }
+
+    .modal__close-btn:hover {
+      background: var(--color-primary-dark);
+      color: #fff;
+    }
+
+    /* 無資料 */
+    .no-data {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-md);
       grid-column: 1 / -1;
-      min-height: 300px;
     }
 
     /* 響應式 */
-    @media (max-width: 1400px) {
-      .schedule-grid {
-        grid-template-columns: 70px repeat(7, 1fr);
+    @media (max-width: 1200px) {
+      .day-tabs {
+        flex-wrap: wrap;
       }
     }
 
     @media (max-width: 992px) {
-      .page-header__top {
-        flex-direction: column;
+      .dashboard {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "main";
+      }
+
+      .sidebar {
+        display: none;
       }
 
       .schedule-controls {
@@ -379,7 +737,8 @@
       }
 
       .day-tabs {
-        flex-wrap: wrap;
+        margin-left: 0;
+        width: 100%;
       }
     }
   </style>
@@ -389,16 +748,29 @@
     <!-- 頂部導覽列 -->
     <header class="header">
       <h1 class="header__logo">智慧學習歷程系統</h1>
-
+      <div class="header__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" placeholder="搜尋...">
+      </div>
       <div class="header__actions">
-        <button class="header__icon-btn" aria-label="通知">
+        <button class="header__icon-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+          </svg>
+        </button>
+        <button class="header__icon-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 01-3.46 0"/>
           </svg>
         </button>
         <div class="header__avatar">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=teacher" alt="使用者頭像">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=teacher" alt="頭像">
         </div>
       </div>
     </header>
@@ -448,79 +820,114 @@
     </aside>
 
     <!-- 主要內容區 -->
-    <main class="main-content" style="padding: 0; overflow-y: auto;">
-      <!-- 頁面標題區 -->
+    <main class="main-content">
+      <!-- 頁面標題 -->
       <div class="page-header">
-        <div class="page-header__top">
-          <div class="page-header__info">
-            <h2 class="page-header__title">課表</h2>
-          </div>
-          <div class="schedule-controls">
-            <div class="teacher-filter">
-              <select id="teacherFilter" onchange="handleTeacherChange()">
-                <option value="">全部老師</option>
-              </select>
-            </div>
-<<<<<<< HEAD
-            <div class="date-picker" id="datePicker" onclick="toggleCalendarPopup(event)">
-              <span id="currentDateDisplay">載入中...</span>
-              <svg class="date-picker__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-              <div class="cal-popup" id="calendarPopup" hidden onclick="event.stopPropagation()">
-=======
-            <div class="date-nav" id="dateNav">
-              <button type="button" class="date-nav__btn" onclick="navigate(-1)" aria-label="前一天">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
-              <button type="button" class="date-nav__current" id="dateField" onclick="toggleCalendarPopup(event)" title="選擇日期">
-                <span id="currentDateDisplay">載入中...</span>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </button>
-              <button type="button" class="date-nav__btn" onclick="navigate(1)" aria-label="後一天">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-              <div class="cal-popup" id="calendarPopup" hidden>
->>>>>>> style10716
-                <div class="cal-popup__head">
-                  <button type="button" class="cal-popup__nav" onclick="calShiftMonth(-1)" aria-label="上個月">&#8249;</button>
-                  <span class="cal-popup__title" id="calTitle"></span>
-                  <button type="button" class="cal-popup__nav" onclick="calShiftMonth(1)" aria-label="下個月">&#8250;</button>
-                </div>
-                <div class="cal-popup__weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
-                <div class="cal-popup__grid" id="calGrid"></div>
+        <h2 class="page-title">課表</h2>
+        <p class="page-subtitle">查看今日所有課程安排</p>
+      </div>
+
+      <!-- 控制列 - 單行 -->
+      <div class="schedule-controls">
+        <select class="filter-select" id="filterTeacher">
+          <option value="">全部老師</option>
+        </select>
+
+        <!-- 日期導航群組 -->
+        <div class="date-nav-group">
+          <button type="button" class="date-nav-btn" onclick="navigate(-1)" aria-label="前一天">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+
+          <div class="date-picker" id="datePicker" onclick="toggleCalendarPopup(event)">
+            <span id="currentDateDisplay">載入中...</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <div class="cal-popup" id="calendarPopup" hidden onclick="event.stopPropagation()">
+              <div class="cal-popup__head">
+                <button type="button" class="cal-popup__nav" onclick="calShiftMonth(-1)">&#8249;</button>
+                <span class="cal-popup__title" id="calTitle"></span>
+                <button type="button" class="cal-popup__nav" onclick="calShiftMonth(1)">&#8250;</button>
               </div>
-            </div>
-<<<<<<< HEAD
-=======
-            <button type="button" class="btn-secondary" id="todayBtn" onclick="goToToday()">今天</button>
->>>>>>> style10716
-            <div class="day-tabs" id="dayTabs">
-              <button class="day-tab" data-day="1">週一</button>
-              <button class="day-tab" data-day="2">週二</button>
-              <button class="day-tab" data-day="3">週三</button>
-              <button class="day-tab" data-day="4">週四</button>
-              <button class="day-tab" data-day="5">週五</button>
-              <button class="day-tab" data-day="6">週六</button>
-              <button class="day-tab" data-day="0">週日</button>
+              <div class="cal-popup__weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+              <div class="cal-popup__grid" id="calGrid"></div>
             </div>
           </div>
+
+          <button type="button" class="date-nav-btn" onclick="navigate(1)" aria-label="後一天">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+
+          <button type="button" class="today-btn" onclick="goToToday()">今天</button>
+        </div>
+
+        <div class="day-tabs" id="dayTabs">
+          <button class="day-tab" data-day="1">週一</button>
+          <button class="day-tab" data-day="2">週二</button>
+          <button class="day-tab" data-day="3">週三</button>
+          <button class="day-tab" data-day="4">週四</button>
+          <button class="day-tab" data-day="5">週五</button>
+          <button class="day-tab" data-day="6">週六</button>
+          <button class="day-tab" data-day="0">週日</button>
         </div>
       </div>
 
       <!-- 課表 -->
-      <div class="schedule-container">
-        <div class="schedule-table">
-          <div class="schedule-grid" id="scheduleGrid">
-            <div class="schedule-header" id="scheduleHeader"></div>
-            <div class="loading" id="loadingIndicator">載入中...</div>
-          </div>
+      <div class="schedule-table">
+        <div class="schedule-grid" id="scheduleGrid">
+          <div class="schedule-header" id="scheduleHeader"></div>
+          <div class="no-data" id="loadingIndicator">載入中...</div>
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- 查看課程詳情 Modal -->
+  <div class="modal-overlay" id="viewModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">課程詳情</h3>
+        <button class="modal__close" id="closeModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="modal__row">
+          <div class="modal__field">
+            <span class="modal__label">課程名稱</span>
+            <span class="modal__value" id="modalCourse">-</span>
+          </div>
+          <div class="modal__field">
+            <span class="modal__label">上課地點</span>
+            <span class="modal__value" id="modalLocation">-</span>
+          </div>
+        </div>
+        <div class="modal__row">
+          <div class="modal__field">
+            <span class="modal__label">授課教師</span>
+            <span class="modal__value" id="modalTeacher">-</span>
+          </div>
+          <div class="modal__field">
+            <span class="modal__label">上課時間</span>
+            <span class="modal__value" id="modalTime">-</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="modal__close-btn" id="closeModalBtn">關閉</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -532,23 +939,13 @@
     let currentDate = new Date();
     let currentDayOfWeek = currentDate.getDay();
     let teachers = [];
-    let currentUserId = null;
-    let currentView = 'day'; // 'day' = 單日 × 全部老師, 'week' = 一週 × 單一老師
+    let calMonth = new Date();
 
-    // 週日順序
-    const weekDayOrder = [1, 2, 3, 4, 5, 6, 0];
-    const weekDayLabels = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+    // 教師顏色映射
+    const teacherColors = ['orange', 'yellow', 'purple', 'blue', 'green', 'pink'];
+    const teacherColorMap = {};
 
-    // 課程顏色對照
-    const categoryColorMap = {
-      '科創': 'steam',
-      '動力': 'power',
-      '程式': 'program',
-      '幼兒': 'kids',
-      '專題': 'project'
-    };
-
-    // 時間段 (9:00 - 21:00)
+    // 時間段 (9:00-21:00, 每 30 分鐘一格)
     const timeSlots = [];
     for (let hour = 9; hour <= 21; hour++) {
       timeSlots.push({ hour, minute: 0 });
@@ -559,11 +956,9 @@
 
     // DOM 元素
     const scheduleGrid = document.getElementById('scheduleGrid');
-    const scheduleHeader = document.getElementById('scheduleHeader');
-    const dayTabsContainer = document.getElementById('dayTabs');
-    const teacherFilter = document.getElementById('teacherFilter');
-    const dateDisplay = document.getElementById('currentDateDisplay');
-    let calMonth = new Date();
+    const viewModal = document.getElementById('viewModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const closeModalBtn2 = document.getElementById('closeModalBtn');
 
     // 初始化
     document.addEventListener('DOMContentLoaded', async () => {
@@ -578,6 +973,9 @@
       setupDayTabs();
       updateDateDisplay();
       await loadSchedule();
+
+      // 篩選器事件
+      document.getElementById('filterTeacher').addEventListener('change', loadSchedule);
     });
 
     // 載入使用者資訊
@@ -587,7 +985,6 @@
         if (response.success && response.data) {
           const userName = response.data.name || response.data.username || '老師';
           document.getElementById('sidebarUserName').textContent = userName + ' 老師';
-          currentUserId = response.data.id;
         }
       } catch (error) {
         console.warn('載入使用者資訊失敗:', error);
@@ -599,11 +996,13 @@
       try {
         const result = await api.teachers.getAll();
         teachers = result.data || [];
-        teachers.forEach(t => {
-          teacherFilter.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+        const teacherSelect = document.getElementById('filterTeacher');
+        teachers.forEach((t, index) => {
+          teacherSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+          teacherColorMap[t.id] = teacherColors[index % teacherColors.length];
         });
       } catch (error) {
-        console.error('載入教師列表失敗:', error);
+        console.warn('載入教師列表失敗:', error);
       }
     }
 
@@ -612,13 +1011,10 @@
       const tabs = document.querySelectorAll('.day-tab');
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-          if (currentView === 'week') return; // 週檢視時不切換
-
           tabs.forEach(t => t.classList.remove('day-tab--active'));
           tab.classList.add('day-tab--active');
 
           const day = parseInt(tab.dataset.day);
-          // 計算目標日期
           const weekStart = getWeekStart(currentDate);
           const targetDate = new Date(weekStart);
           targetDate.setDate(weekStart.getDate() + (day === 0 ? 6 : day - 1));
@@ -636,34 +1032,39 @@
       const tabs = document.querySelectorAll('.day-tab');
       tabs.forEach(tab => {
         const day = parseInt(tab.dataset.day);
-        if (day === currentDayOfWeek) {
-          tab.classList.add('day-tab--active');
-        } else {
-          tab.classList.remove('day-tab--active');
-        }
+        tab.classList.toggle('day-tab--active', day === currentDayOfWeek);
       });
     }
 
-    // 處理教師篩選變更
-    function handleTeacherChange() {
-      const selectedTeacherId = teacherFilter.value;
+    // 取得週一日期
+    function getWeekStart(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff));
+    }
 
-      if (!selectedTeacherId) {
-        // 全部老師：單日 × 全部老師
-        currentView = 'day';
-        dayTabsContainer.style.visibility = '';
-        dayTabsContainer.style.pointerEvents = '';
-      } else {
-        // 特定老師：一週 × 該老師
-        currentView = 'week';
-        dayTabsContainer.style.visibility = 'hidden';
-        dayTabsContainer.style.pointerEvents = 'none';
-      }
+    // 更新日期顯示
+    function updateDateDisplay() {
+      const year = currentDate.getFullYear() - 1911;
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+      const dayName = dayNames[currentDate.getDay()];
 
+      document.getElementById('currentDateDisplay').textContent = `${year}/${month}/${day}(${dayName})`;
+    }
+
+    // 日期導航 - 前/後一天
+    function navigate(delta) {
+      currentDate.setDate(currentDate.getDate() + delta);
+      currentDayOfWeek = currentDate.getDay();
+      updateDateDisplay();
+      updateDayTabs();
       loadSchedule();
     }
 
-    // 跳到今天
+    // 跳轉至今天
     function goToToday() {
       currentDate = new Date();
       currentDayOfWeek = currentDate.getDay();
@@ -672,33 +1073,17 @@
       loadSchedule();
     }
 
-    // 上一頁/下一頁 (單日檢視移動 1 天，週檢視移動 7 天)
-    function navigate(delta) {
-      const step = currentView === 'week' ? 7 : 1;
-      currentDate.setDate(currentDate.getDate() + delta * step);
-      currentDayOfWeek = currentDate.getDay();
-      updateDateDisplay();
-      updateDayTabs();
-      loadSchedule();
-    }
-
-    // 日曆彈窗開關
+    // 日曆彈窗
     function toggleCalendarPopup(evt) {
       if (evt) evt.stopPropagation();
       const pop = document.getElementById('calendarPopup');
-      if (pop.hidden) openCalendarPopup(); else closeCalendarPopup();
-    }
-
-    function openCalendarPopup() {
-      const base = currentView === 'week' ? getWeekStart(currentDate) : currentDate;
-      calMonth = new Date(base.getFullYear(), base.getMonth(), 1);
-      renderCalendar();
-      document.getElementById('calendarPopup').hidden = false;
-    }
-
-    function closeCalendarPopup() {
-      const pop = document.getElementById('calendarPopup');
-      if (pop) pop.hidden = true;
+      if (pop.hidden) {
+        calMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        renderCalendar();
+        pop.hidden = false;
+      } else {
+        pop.hidden = true;
+      }
     }
 
     function calShiftMonth(delta) {
@@ -717,303 +1102,201 @@
       const month = calMonth.getMonth();
       const firstWeekday = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      // 週檢視：標示 7 天視窗；單日檢視：僅標示當前選定日
-      const weekly = currentView === 'week';
-      const start = weekly ? getWeekStart(currentDate) : currentDate;
-      const startT = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-      const endT = weekly ? startT + 6 * 86400000 : startT;
+      const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
 
       for (let i = 0; i < firstWeekday; i++) {
         const e = document.createElement('div');
         e.className = 'cal-day cal-day--empty';
         grid.appendChild(e);
       }
+
       for (let d = 1; d <= daysInMonth; d++) {
         const cellDate = new Date(year, month, d);
-        const t = cellDate.getTime();
         const cell = document.createElement('div');
         cell.className = 'cal-day';
         cell.textContent = d;
-        if (t >= startT && t <= endT) {
-          const col = cellDate.getDay();
-          cell.classList.add('cal-day--range');
-          if (t === startT || col === 0) cell.classList.add('cal-day--range-start');
-          if (t === endT || col === 6) cell.classList.add('cal-day--range-end');
-          if (t === startT) cell.classList.add('cal-day--anchor');
+        if (cellDate.getTime() === selectedDate) {
+          cell.classList.add('cal-day--selected');
         }
-        cell.addEventListener('click', () => pickCalendarDate(cellDate));
+        cell.addEventListener('click', () => {
+          document.getElementById('calendarPopup').hidden = true;
+          currentDate = new Date(year, month, d);
+          currentDayOfWeek = currentDate.getDay();
+          updateDateDisplay();
+          updateDayTabs();
+          loadSchedule();
+        });
         grid.appendChild(cell);
       }
     }
 
-    // 從日曆彈窗選定日期
-    function pickCalendarDate(date) {
-      closeCalendarPopup();
-      currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      currentDayOfWeek = currentDate.getDay();
-      updateDateDisplay();
-      updateDayTabs();
-      loadSchedule();
-    }
-
-    // 點彈窗以外處關閉
     document.addEventListener('click', (e) => {
       const pop = document.getElementById('calendarPopup');
       if (!pop || pop.hidden) return;
-      if (pop.contains(e.target) || e.target.closest('#dateField')) return;
-      closeCalendarPopup();
+      if (pop.contains(e.target) || e.target.closest('#datePicker')) return;
+      pop.hidden = true;
     });
-
-    // 更新日期顯示
-    function updateDateDisplay() {
-      const year = currentDate.getFullYear() - 1911; // 民國年
-      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-      const day = String(currentDate.getDate()).padStart(2, '0');
-      const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
-      const dayName = dayNames[currentDate.getDay()];
-
-      if (currentView === 'week') {
-        const weekStart = getWeekStart(currentDate);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        dateDisplay.textContent = `${weekStart.getFullYear() - 1911}/${String(weekStart.getMonth() + 1).padStart(2, '0')}/${String(weekStart.getDate()).padStart(2, '0')} ~ ${weekEnd.getFullYear() - 1911}/${String(weekEnd.getMonth() + 1).padStart(2, '0')}/${String(weekEnd.getDate()).padStart(2, '0')}`;
-      } else {
-        dateDisplay.textContent = `${year}/${month}/${day}(${dayName})`;
-      }
-    }
-
-    // 取得週一日期
-    function getWeekStart(date) {
-      const d = new Date(date);
-      const day = d.getDay();
-      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-      return new Date(d.setDate(diff));
-    }
 
     // 格式化日期 ISO
     function formatDateISO(date) {
       return date.toISOString().split('T')[0];
     }
 
-    // 取得課程顏色
-    function getCourseColor(courseName) {
-      for (const [keyword, color] of Object.entries(categoryColorMap)) {
-        if (courseName && courseName.includes(keyword)) {
-          return color;
-        }
-      }
-      return 'default';
-    }
-
     // 清除課表內容
     function clearGrid() {
-      scheduleGrid.querySelectorAll('.schedule-time-cell, .schedule-cell, .loading').forEach(el => el.remove());
+      scheduleGrid.querySelectorAll('.schedule-time-cell, .schedule-cell, .no-data').forEach(el => el.remove());
     }
 
-    // 建立時間格
-    function makeTimeCell(slot) {
-      const timeCell = document.createElement('div');
-      timeCell.className = 'schedule-time-cell';
-      if (slot.minute === 0) {
-        timeCell.innerHTML = `<div class="schedule-time-main">${String(slot.hour).padStart(2, '0')}:00</div>`;
-      } else {
-        timeCell.innerHTML = `<div class="schedule-time-sub">${String(slot.hour).padStart(2, '0')}:30</div>`;
+    // 載入課表 - 單日多教師視圖
+    async function loadSchedule() {
+      clearGrid();
+      scheduleGrid.innerHTML = '<div class="schedule-header" id="scheduleHeader"></div><div class="no-data">載入中...</div>';
+
+      const filterTeacher = document.getElementById('filterTeacher').value;
+
+      try {
+        const result = await api.scheduleCalendar.getDaily({
+          date: formatDateISO(currentDate),
+          teacher_id: filterTeacher || undefined
+        });
+
+        const data = result.data;
+        let teacherList = data.teachers || [];
+
+        // 過濾有課程的教師
+        teacherList = teacherList.filter(t => t.schedules && t.schedules.length > 0);
+
+        if (teacherList.length === 0) {
+          clearGrid();
+          const header = document.createElement('div');
+          header.id = 'scheduleHeader';
+          header.className = 'schedule-header';
+          scheduleGrid.appendChild(header);
+
+          const noData = document.createElement('div');
+          noData.className = 'no-data';
+          noData.textContent = '今日無排課';
+          scheduleGrid.appendChild(noData);
+          return;
+        }
+
+        // 最多顯示 7 位教師
+        const displayTeachers = teacherList.slice(0, 7);
+
+        // 設定 grid 欄位
+        scheduleGrid.style.gridTemplateColumns = `80px repeat(${displayTeachers.length}, 1fr)`;
+
+        // 清除並建立表頭 - 參照行政端格式
+        clearGrid();
+        const header = document.createElement('div');
+        header.id = 'scheduleHeader';
+        header.className = 'schedule-header';
+        header.innerHTML = `<div class="schedule-header-cell"></div>` +
+          displayTeachers.map(t => `
+            <div class="schedule-header-cell">
+              <div class="schedule-day">${t.teacher_name}</div>
+            </div>
+          `).join('');
+        scheduleGrid.appendChild(header);
+
+        // 建立時間格與課程格 - 參照行政端格式
+        timeSlots.forEach((slot, index) => {
+          // 時間欄
+          const timeCell = document.createElement('div');
+          timeCell.className = 'schedule-time-cell';
+          const timeStr = `${String(slot.hour).padStart(2, '0')}:${String(slot.minute).padStart(2, '0')}`;
+          if (slot.minute === 0) {
+            timeCell.innerHTML = `<div class="schedule-time-main">${timeStr}</div>`;
+          } else {
+            timeCell.innerHTML = `<div class="schedule-time-sub">${timeStr}</div>`;
+          }
+          scheduleGrid.appendChild(timeCell);
+
+          // 各教師的格子
+          displayTeachers.forEach((teacher, tIndex) => {
+            const cell = document.createElement('div');
+            cell.className = 'schedule-cell';
+            cell.dataset.teacher = tIndex;
+            cell.dataset.slot = index;
+            cell.dataset.hour = slot.hour;
+            cell.dataset.minute = slot.minute;
+
+            // 找這個老師在這個時間的課程
+            if (teacher.schedules) {
+              teacher.schedules.forEach(schedule => {
+                const startHour = parseInt(schedule.start_time.split(':')[0]);
+                const startMin = parseInt(schedule.start_time.split(':')[1]);
+                if (startHour === slot.hour && startMin === slot.minute) {
+                  placeCourseBlock(cell, schedule, teacher);
+                }
+              });
+            }
+
+            scheduleGrid.appendChild(cell);
+          });
+        });
+
+      } catch (error) {
+        console.error('載入課表失敗:', error);
+        clearGrid();
+        const noData = document.createElement('div');
+        noData.className = 'no-data';
+        noData.textContent = '載入失敗，請重試';
+        scheduleGrid.appendChild(noData);
       }
-      return timeCell;
     }
 
-    // 放置課程區塊
-    function placeCourseBlock(cell, schedule, showTeacher) {
+    // 放置課程區塊 - 參照行政端格式
+    function placeCourseBlock(cell, schedule, teacher) {
       const startHour = parseInt(schedule.start_time.split(':')[0]);
       const startMin = parseInt(schedule.start_time.split(':')[1]);
       const endHour = parseInt(schedule.end_time.split(':')[0]);
       const endMin = parseInt(schedule.end_time.split(':')[1]);
 
-      const durationSlots = ((endHour * 60 + endMin) - (startHour * 60 + startMin)) / 30;
-      const colorClass = getCourseColor(schedule.course_name || schedule.course_type_name);
+      const durationMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+      const durationSlots = durationMinutes / 30; // 每 30 分鐘一格
+      const colorClass = teacherColorMap[teacher.teacher_id] || 'yellow';
 
       const block = document.createElement('div');
       block.className = `course-block course-block--${colorClass}`;
-      block.style.top = `${startMin === 30 ? 30 : 2}px`;
-      block.style.height = `calc(${durationSlots * 30}px - 4px)`;
+      block.style.top = '2px';
+      block.style.height = `calc(${durationSlots * 50}px - 4px)`;
 
-      const locationName = schedule.classroom_name ? `[${schedule.classroom_name.replace('教室', '')}]` : '';
       block.innerHTML = `
         <div class="course-block__title">${schedule.course_name || '未命名課程'}</div>
-        <div class="course-block__location">${locationName}</div>
-        ${showTeacher ? `<div class="course-block__teacher">${schedule.teacher_name || ''}</div>` : ''}
+        <div class="course-block__teacher">${teacher.teacher_name}</div>
       `;
 
-      block.onclick = () => openScheduleDetail(schedule);
+      block.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openViewModal(schedule, teacher);
+      });
+
       cell.appendChild(block);
     }
 
-    // 載入課表
-    async function loadSchedule() {
-      clearGrid();
-      scheduleGrid.innerHTML = '<div class="schedule-header" id="scheduleHeader"></div><div class="loading">載入中...</div>';
+    // 開啟查看 Modal
+    function openViewModal(schedule, teacher) {
+      document.getElementById('modalCourse').textContent = schedule.course_name || '未命名課程';
+      document.getElementById('modalLocation').textContent = schedule.classroom_name || '-';
+      document.getElementById('modalTeacher').textContent = teacher.teacher_name || '-';
+      document.getElementById('modalTime').textContent = `${schedule.start_time} - ${schedule.end_time}`;
 
-      try {
-        const selectedTeacherId = teacherFilter.value;
-
-        if (currentView === 'week' && selectedTeacherId) {
-          await renderWeekSchedule(selectedTeacherId);
-        } else {
-          await renderDaySchedule();
-        }
-      } catch (error) {
-        console.error('載入課表失敗:', error);
-        scheduleGrid.innerHTML = '<div class="loading">載入失敗</div>';
-      }
+      viewModal.classList.add('active');
     }
 
-    // 渲染單日課表 (全部老師)
-    async function renderDaySchedule() {
-      const result = await api.scheduleCalendar.getDaily({
-        date: formatDateISO(currentDate)
-      });
-
-      const data = result.data;
-      const teacherList = data.teachers.filter(t => t.schedules.length > 0);
-
-      if (teacherList.length === 0) {
-        scheduleGrid.innerHTML = '<div class="loading">今日無排課</div>';
-        return;
-      }
-
-      const displayTeachers = teacherList.slice(0, 7);
-      const cols = displayTeachers.length + 1;
-
-      // 設定 grid 欄位
-      scheduleGrid.style.gridTemplateColumns = `80px repeat(${displayTeachers.length}, 1fr)`;
-
-      // 清除並建立表頭
-      clearGrid();
-      const header = document.getElementById('scheduleHeader') || document.createElement('div');
-      header.id = 'scheduleHeader';
-      header.className = 'schedule-header';
-      header.innerHTML = `<div class="schedule-header-cell"></div>` +
-        displayTeachers.map(t => `<div class="schedule-header-cell">${t.teacher_name}</div>`).join('');
-
-      if (!document.getElementById('scheduleHeader')) {
-        scheduleGrid.insertBefore(header, scheduleGrid.firstChild);
-      }
-
-      // 建立時間格與課程格
-      timeSlots.forEach((slot, index) => {
-        scheduleGrid.appendChild(makeTimeCell(slot));
-
-        displayTeachers.forEach((teacher, tIndex) => {
-          const cell = document.createElement('div');
-          cell.className = 'schedule-cell';
-          cell.dataset.teacher = tIndex;
-          cell.dataset.slot = index;
-          cell.dataset.hour = slot.hour;
-          cell.dataset.minute = slot.minute;
-
-          // 找這個老師在這個時間的課程
-          teacher.schedules.forEach(schedule => {
-            const startHour = parseInt(schedule.start_time.split(':')[0]);
-            const startMin = parseInt(schedule.start_time.split(':')[1]);
-
-            if (startHour === slot.hour && startMin === slot.minute) {
-              placeCourseBlock(cell, schedule, false);
-            }
-          });
-
-          scheduleGrid.appendChild(cell);
-        });
-      });
-
-      updateDateDisplay();
+    // 關閉 Modal
+    function closeModal() {
+      viewModal.classList.remove('active');
     }
 
-    // 渲染週課表 (單一老師)
-    async function renderWeekSchedule(teacherId) {
-      // 取得一週的資料
-      const weekStart = getWeekStart(currentDate);
-      const weekDates = [];
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(weekStart);
-        d.setDate(weekStart.getDate() + i);
-        weekDates.push(d);
+    closeModalBtn.addEventListener('click', closeModal);
+    closeModalBtn2.addEventListener('click', closeModal);
+    viewModal.addEventListener('click', function(e) {
+      if (e.target === viewModal) {
+        closeModal();
       }
-
-      // 設定 grid 欄位
-      scheduleGrid.style.gridTemplateColumns = `80px repeat(7, 1fr)`;
-
-      // 清除並建立表頭
-      clearGrid();
-      const header = document.getElementById('scheduleHeader') || document.createElement('div');
-      header.id = 'scheduleHeader';
-      header.className = 'schedule-header';
-      header.innerHTML = `<div class="schedule-header-cell"></div>` +
-        weekDates.map((d, i) => {
-          const isToday = d.toDateString() === new Date().toDateString();
-          const dayIndex = d.getDay();
-          return `<div class="schedule-header-cell schedule-header-cell--week-day${isToday ? ' schedule-header-cell--active' : ''}">
-            <div>${weekDayLabels[i]}</div>
-            <div class="schedule-header-cell__date">${d.getMonth() + 1}/${d.getDate()}</div>
-          </div>`;
-        }).join('');
-
-      if (!document.getElementById('scheduleHeader')) {
-        scheduleGrid.insertBefore(header, scheduleGrid.firstChild);
-      }
-
-      // 載入每天的課程
-      const weekSchedules = [];
-      for (const d of weekDates) {
-        try {
-          const result = await api.scheduleCalendar.getDaily({
-            date: formatDateISO(d),
-            teacher_id: teacherId
-          });
-          const teacherData = result.data.teachers.find(t => t.teacher_id == teacherId);
-          weekSchedules.push(teacherData ? teacherData.schedules : []);
-        } catch (e) {
-          weekSchedules.push([]);
-        }
-      }
-
-      // 建立時間格與課程格
-      timeSlots.forEach((slot, index) => {
-        scheduleGrid.appendChild(makeTimeCell(slot));
-
-        weekDates.forEach((d, dayIndex) => {
-          const cell = document.createElement('div');
-          const isToday = d.toDateString() === new Date().toDateString();
-          cell.className = 'schedule-cell' +
-            (isToday ? ' schedule-cell--today' : '') +
-            (isToday && index === timeSlots.length - 1 ? ' schedule-cell--today-last' : '');
-          cell.dataset.day = dayIndex;
-          cell.dataset.slot = index;
-          cell.dataset.hour = slot.hour;
-          cell.dataset.minute = slot.minute;
-
-          // 找這天在這個時間的課程
-          const daySchedules = weekSchedules[dayIndex] || [];
-          daySchedules.forEach(schedule => {
-            const startHour = parseInt(schedule.start_time.split(':')[0]);
-            const startMin = parseInt(schedule.start_time.split(':')[1]);
-
-            if (startHour === slot.hour && startMin === slot.minute) {
-              placeCourseBlock(cell, schedule, false);
-            }
-          });
-
-          scheduleGrid.appendChild(cell);
-        });
-      });
-
-      updateDateDisplay();
-    }
-
-    // 開啟課程詳情 - 跳轉到日誌填寫
-    function openScheduleDetail(schedule) {
-      window.location.href = `journal.html?schedule_id=${schedule.schedule_id}&date=${formatDateISO(currentDate)}`;
-    }
+    });
   </script>
   <script src="js/notifications.js"></script>
 </body>
