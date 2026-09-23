@@ -291,6 +291,7 @@
 
     .course-notes {
       display: flex;
+      flex-wrap: wrap;
       gap: var(--spacing-lg);
       font-size: var(--font-size-sm);
       color: var(--color-text-secondary);
@@ -300,6 +301,11 @@
       display: flex;
       align-items: center;
       gap: var(--spacing-xs);
+      cursor: default;
+    }
+
+    .course-notes input[type="checkbox"] {
+      cursor: default;
     }
 
     .course-outline {
@@ -646,8 +652,9 @@
       top: 50%;
       transform: translateY(-50%);
       z-index: 20;
-      white-space: nowrap;
-      padding: 4px 12px;
+      white-space: normal;
+      width: 260px;
+      padding: 8px 12px;
       border: 1px solid #000;
       border-radius: 2px;
       background: #fff;
@@ -863,7 +870,7 @@
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
           點數管理
-        </a>
+        </a>
       </nav>
 
       <div class="staff-sidebar__footer">
@@ -1021,6 +1028,29 @@
       renderStudentRecords(log.student_records || []);
     }
 
+    function renderCourseNotes(content) {
+      const options = [
+        { value: '正常上課', label: '正常上課', labelChecked: '正常上課' },
+        { value: '時段異動', label: '時段異動', labelChecked: '時段異動：＿＿＿＿＿＿＿＿＿＿' },
+        { value: '師資異動', label: '師資異動', labelChecked: '師資異動：＿＿＿＿＿＿＿＿＿' }
+      ];
+      const selected = (content || '').split(',').map(s => s.trim()).filter(Boolean);
+
+      return `
+        <div class="course-notes">
+          ${options.map(opt => {
+            const isChecked = selected.includes(opt.value);
+            return `
+              <label>
+                <input type="checkbox" value="${opt.value}" ${isChecked ? 'checked' : ''} disabled>
+                <span>${isChecked ? opt.labelChecked : opt.label}</span>
+              </label>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
     function renderCourseInfo(log) {
       const infoGrid = document.querySelector('.course-info-grid');
 
@@ -1055,7 +1085,7 @@
         </div>
         <div class="course-info-item">
           <span class="course-info-item__label">課程備註</span>
-          <span class="course-info-item__value">${log.content || '無'}</span>
+          ${renderCourseNotes(log.content)}
         </div>
       `;
 
@@ -1141,52 +1171,47 @@
                 </div>
               </div>
 
-              <div class="student-detail__section">
-                <div class="student-detail__label">能力評估</div>
-                <div class="ability-section">
-                  <div class="radar-chart-container">
-                    <canvas id="radarChart${index}"></canvas>
-                  </div>
-                  <div class="ability-list">
-                    <div class="ability-item">
-                      <span class="ability-item__name">程式</span>
-                      <span class="ability-item__score">${record.skill_programming || 0} / 5</span>
-                    </div>
-                    <div class="ability-item">
-                      <span class="ability-item__name">除錯</span>
-                      <span class="ability-item__score">${record.skill_debugging || 0} / 5</span>
-                    </div>
-                    <div class="ability-item">
-                      <span class="ability-item__name">創意</span>
-                      <span class="ability-item__score">${record.skill_creativity || 0} / 5</span>
-                    </div>
-                    <div class="ability-item">
-                      <span class="ability-item__name">結構</span>
-                      <span class="ability-item__score">${record.skill_structure || 0} / 5</span>
-                    </div>
-                    <div class="ability-item">
-                      <span class="ability-item__name">團隊合作</span>
-                      <span class="ability-item__score">${record.skill_teamwork || 0} / 5</span>
+              <div class="student-perf-grid">
+                <div class="student-perf-grid__main">
+                  <div class="student-detail__section">
+                    <div class="student-detail__label">能力評估</div>
+                    <div class="ability-section">
+                      <div class="radar-chart-container">
+                        <canvas id="radarChart${index}"></canvas>
+                      </div>
+                      <div class="ability-list">
+                        ${renderAbilityItem('程式', record.skill_programming, 'program', '學生的抽象思維、流程圖概念與程式碼邏輯建構')}
+                        ${renderAbilityItem('除錯', record.skill_debugging, 'debug', '面對失敗、系統卡關時的應變策略、耐心與獨立解決能力')}
+                        ${renderAbilityItem('創意', record.skill_creativity, 'creative', '作品是否有獨創性、能否跳脫框架，或在既有基礎上延伸出新功能')}
+                        ${renderAbilityItem('結構', record.skill_structure, 'structure', '學生將科學理論轉化為實體結構的動手做能力')}
+                        ${renderAbilityItem('團隊合作', record.skill_teamwork, 'teamwork', '軟實力，包含與同儕的溝通協調、互助，以及對外展現作品的論述能力')}
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                <div class="student-perf-grid__photo1">
+                  ${renderPhotoBlock((record.photos || [])[0])}
+                </div>
+
+                <div class="student-perf-grid__side">
+                  <div class="student-detail__section">
+                    <div class="student-detail__label">獲得點數</div>
+                    <div class="points-box">
+                      <span class="points-box__value">+${record.points_earned || 0}</span>
+                      <span class="points-box__unit">點</span>
+                    </div>
+                  </div>
+                  <div class="student-detail__section">
+                    <div class="student-detail__label">備註事項</div>
+                    <div class="student-detail__content">${record.notes || '無'}</div>
+                  </div>
+                </div>
+
+                <div class="student-perf-grid__photo2">
+                  ${renderPhotoBlock((record.photos || [])[1])}
                 </div>
               </div>
-
-              <div class="student-detail__row">
-                <div class="student-detail__section">
-                  <div class="student-detail__label">獲得點數</div>
-                  <div class="points-box">
-                    <span class="points-box__value">+${record.points_earned || 0}</span>
-                    <span class="points-box__unit">點</span>
-                  </div>
-                </div>
-                <div class="student-detail__section">
-                  <div class="student-detail__label">備註事項</div>
-                  <div class="student-detail__content">${record.notes || '無'}</div>
-                </div>
-              </div>
-
-              ${renderPhotos(record.photos || [])}
             </div>
           </div>
         `;
@@ -1206,8 +1231,47 @@
       });
     }
 
-    function renderPhotos(photos) {
-      if (!photos || photos.length === 0) {
+    function renderAbilityItem(name, rawScore, variant, description) {
+      const score = rawScore || 0;
+      const percent = Math.max(0, Math.min(100, (score / 5) * 100));
+      return `
+        <div class="ability-item">
+          <div class="ability-item__row">
+            <span class="ability-item__name">${name}</span>
+            <span class="ability-item__score">${score} / 5</span>
+            <span class="ability-item__help-wrap">
+              <button type="button" class="ability-item__help" onclick="toggleAbilityTip(this)" aria-label="${name}說明">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </button>
+              <span class="ability-item__tip">${description}</span>
+            </span>
+          </div>
+          <div class="ability-item__bar">
+            <span class="ability-item__bar-fill ability-item__bar-fill--${variant}" style="width: ${percent}%;"></span>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleAbilityTip(btn) {
+      const wrap = btn.closest('.ability-item__help-wrap');
+      if (!wrap) return;
+      const wasOpen = wrap.classList.contains('tip-open');
+      document.querySelectorAll('.ability-item__help-wrap.tip-open').forEach(el => el.classList.remove('tip-open'));
+      if (!wasOpen) wrap.classList.add('tip-open');
+    }
+
+    document.addEventListener('click', (event) => {
+      if (event.target.closest('.ability-item__help-wrap')) return;
+      document.querySelectorAll('.ability-item__help-wrap.tip-open').forEach(el => el.classList.remove('tip-open'));
+    });
+
+    function renderPhotoBlock(photo) {
+      if (!photo) {
         return `
           <div class="student-detail__section">
             <div class="student-detail__label">上課照片</div>
@@ -1229,10 +1293,8 @@
         <div class="student-detail__section">
           <div class="student-detail__label">上課照片</div>
           <div class="photos-grid">
-            ${photos.map((photo, i) => `
-              <img src="${photo.photo_url}" alt="照片 ${i + 1}"
-                   style="width: 120px; height: 90px; object-fit: cover; border-radius: var(--radius-md);">
-            `).join('')}
+            <img src="${photo.photo_url}" alt="上課照片"
+                 style="width: 100%; height: 280px; object-fit: cover; border-radius: var(--radius-md);">
           </div>
         </div>
       `;

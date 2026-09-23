@@ -727,7 +727,7 @@
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
           </svg>
           點數管理
-        </a>
+        </a>
       </nav>
 
       <div class="staff-sidebar__footer">
@@ -1120,16 +1120,12 @@
 
         const status = statusMap[log.status] || statusMap['not_filled'];
         const logDateTime = formatLogDateTime(log.log_date, log.start_time);
-        const permissions = log.additional_teachers
-          ? `原教師 + 代課：${log.additional_teachers}`
-          : '原教師';
 
         // 根據是否有日誌決定操作按鈕
         const hasLog = log.id !== null && log.has_log !== false;
         let actionButtons;
         if (hasLog) {
           actionButtons = `
-            <button class="action-btn action-btn--outline" onclick="openPermissionModal(${log.id}, '${log.log_date}', '${log.start_time || ''}', '${log.course_name || ''}', '${log.teacher_name || ''}', ${log.teacher_id})">權限</button>
             <button class="action-btn action-btn--primary" onclick="viewLog(${log.id})">查看</button>
           `;
         } else {
@@ -1146,7 +1142,6 @@
             <td>${log.classroom_name || '-'}</td>
             <td>${log.teacher_name || '-'}</td>
             <td><span class="status-badge ${status.class}"><span class="status-badge__dot"></span>${status.text}</span></td>
-            <td>${permissions}</td>
             <td>${actionButtons}</td>
           </tr>
         `;
