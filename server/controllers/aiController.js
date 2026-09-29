@@ -199,6 +199,192 @@ exports.generateComment = async (req, res) => {
 };
 
 /**
+ * 生成課程大綱
+ * POST /api/ai/generate-outline
+ */
+exports.generateOutline = async (req, res) => {
+  try {
+    const { principles, manualInput } = req.body;
+
+    // 驗證必要參數：原理或補充內容至少要有一項
+    if ((!principles || principles.length === 0) && (!manualInput || !manualInput.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: '請至少選擇一個原理或輸入補充內容'
+      });
+    }
+
+    // 檢查 API Key 是否已設定
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: 'Gemini API Key 尚未設定，請在 server/.env 中設定 GEMINI_API_KEY'
+      });
+    }
+
+    // 構建 prompt
+    const prompt = buildOutlinePrompt(principles || [], manualInput);
+
+    // 呼叫 Gemini API
+    const data = await callGeminiAPI(prompt);
+
+    // 解析回應
+    const outline = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+
+    if (!outline) {
+      return res.status(500).json({
+        success: false,
+        message: 'AI 生成失敗，請稍後再試'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { outline }
+    });
+
+  } catch (error) {
+    console.error('生成課程大綱錯誤:', error);
+
+    if (error.statusCode) {
+      return res.status(500).json({
+        success: false,
+        message: 'AI 生成失敗，請稍後再試',
+        error: error.error?.message || JSON.stringify(error.error)
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤',
+      error: error.message || error.error
+    });
+  }
+};
+
+/**
+ * 生成競賽說明（教師端「新增競賽」的「立即智能生成競賽說明」按鈕）
+ * POST /api/ai/generate-competition-description
+ */
+exports.generateCompetitionDescription = async (req, res) => {
+  try {
+    const { studentName, organizer, title, level, teamName, rankName, score, manualInput } = req.body;
+
+    if (!organizer && !title && !manualInput) {
+      return res.status(400).json({
+        success: false,
+        message: '請至少填寫主辦單位、競賽名稱或手動補充內容'
+      });
+    }
+
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: 'Gemini API Key 尚未設定，請在 server/.env 中設定 GEMINI_API_KEY'
+      });
+    }
+
+    const prompt = buildCompetitionDescriptionPrompt({ studentName, organizer, title, level, teamName, rankName, score, manualInput });
+
+    const data = await callGeminiAPI(prompt);
+    const content = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+
+    if (!content) {
+      return res.status(500).json({
+        success: false,
+        message: 'AI 生成失敗，請稍後再試'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { content }
+    });
+
+  } catch (error) {
+    console.error('生成競賽說明錯誤:', error);
+
+    if (error.statusCode) {
+      return res.status(500).json({
+        success: false,
+        message: 'AI 生成失敗，請稍後再試',
+        error: error.error?.message || JSON.stringify(error.error)
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤',
+      error: error.message || error.error
+    });
+  }
+};
+
+/**
+ * 構建競賽說明生成的 prompt
+ */
+function buildCompetitionDescriptionPrompt({ studentName, organizer, title, level, teamName, rankName, score, manualInput }) {
+  const levelLabels = { international: '國際賽', national: '全國賽', regional: '區域賽', county: '縣市賽' };
+
+  let prompt = `你是一位擁有豐富經驗的 STEAM 教育教師，請為學生撰寫一段競賽經歷說明（約100-150字）。
+
+【競賽資訊】
+學生姓名：${studentName || '該生'}
+主辦單位：${organizer || '未填'}
+競賽名稱：${title || '未填'}
+競賽等級：${levelLabels[level] || level || '未填'}
+隊伍名稱：${teamName || '未填'}
+名次：${rankName || '未填'}
+成績：${score || '未填'}
+`;
+
+  if (manualInput && manualInput.trim()) {
+    prompt += `\n【教師補充說明：競賽時做了什麼】\n${manualInput.trim()}\n`;
+  }
+
+  prompt += `
+【撰寫要求】
+1. 使用純文字撰寫，不要使用 Markdown 符號
+2. 語氣正面積極，具體描述學生的參賽經歷、表現與收穫
+3. 若有名次或成績，自然帶入說明中，不要用條列或數字編號
+4. 禁止捏造教師補充說明中沒有提到的具體事件、日期或對話
+5. 直接輸出說明內容，不要加上開場白或說明文字`;
+
+  return prompt;
+}
+
+/**
+ * 構建課程大綱生成的 prompt
+ */
+function buildOutlinePrompt(principles, manualInput) {
+  let prompt = `你是一位擁有豐富經驗的 STEAM 教育教師，專長於機構原理、感測器與程式邏輯的實作課程設計。
+請根據以下資訊，撰寫一份課程大綱。
+
+【課程使用原理】
+${principles.length > 0 ? principles.join('、') : '（教師未特別勾選原理標籤，請依補充內容合理推斷）'}
+`;
+
+  if (manualInput && manualInput.trim()) {
+    prompt += `\n【教師補充說明：課程上做了什麼】\n${manualInput.trim()}\n`;
+  }
+
+  prompt += `
+【撰寫要求】
+1. 使用純文字撰寫，不要使用 Markdown 符號（如 **、##、-）
+2. 依序包含以下四個段落，並以「一、」「二、」「三、」「四、」作為段落標題：
+   一、課程主題：簡述本堂課的核心主題與運用的原理
+   二、教學目標：條列 2-3 項具體、可觀察的學習目標
+   三、課程內容：依教師補充說明延伸描述實際教學活動與操作步驟；若教師未補充，則依所選原理合理設計活動
+   四、學習成果：描述學生完成課程後應能達成的具體成果
+3. 內容需符合國小/國中程式設計與機器人實作課程情境，語氣專業但易讀
+4. 禁止捏造教師補充說明中沒有提到的具體人名、日期或分數
+5. 總字數約 200-350 字
+6. 直接輸出大綱內容，不要加上開場白或說明文字`;
+
+  return prompt;
+}
+
+/**
  * 構建評語生成的 prompt（優化版）
  */
 function buildCommentPrompt(studentName, traits, improvements, manualInput) {

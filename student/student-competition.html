@@ -265,6 +265,7 @@
       grid-template-columns: 1fr auto;
       gap: var(--spacing-xl);
       transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
     }
 
     .competition-card:hover {
@@ -661,6 +662,213 @@
         border-top: 1px solid var(--color-surface-alt);
       }
     }
+
+    /* 競賽快速預覽 Modal（直接讀取卡片內容，不依賴 API） */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .competition-preview__desc {
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .competition-preview__textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: var(--spacing-md);
+      border: 1px solid var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      resize: vertical;
+    }
+
+    .competition-preview__textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .competition-preview__photo-slots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-md);
+    }
+
+    .competition-preview__photo-slot {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--color-surface-alt);
+    }
+
+    .competition-preview__photo-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .competition-preview__photo-slot--empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      border: 2px dashed var(--color-surface-alt);
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .competition-preview__photo-slot--empty:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+      background: #fffdf5;
+    }
+
+    .competition-preview__photo-slot--empty svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .competition-preview__photo-remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0, 0, 0, 0.55);
+      color: white;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .competition-preview__photo-remove:hover {
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    /* 以下樣式對應教師端「新增競賽」表單（teacher/students.html），
+       讓學生點擊競賽卡片彈出的視窗與教師端畫面一致：事實欄位唯讀，僅簡述與照片可編輯 */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group__label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #101828;
+      margin-bottom: 8px;
+    }
+
+    .form-group__input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #101828;
+      background: white;
+    }
+
+    .form-group__input--readonly {
+      background: #f9fafb;
+      color: #6a7282;
+      cursor: not-allowed;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .required-mark {
+      color: #dc2626;
+    }
+
+    .level-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .level-btn {
+      padding: 12px 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+      color: #364153;
+      pointer-events: none;
+    }
+
+    .level-btn--active {
+      background: var(--color-primary);
+      border-color: rgba(113, 92, 0, 0.2);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .upload-area {
+      border: 2px dashed rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .upload-area--certificate {
+      background: rgba(255, 219, 88, 0.15);
+      border-color: rgba(255, 219, 88, 0.5);
+    }
+
+    .upload-area--certificate img {
+      max-width: 100%;
+      max-height: 140px;
+      border-radius: 8px;
+    }
+
+    .upload-area__icon {
+      width: 28px;
+      height: 28px;
+      margin: 0 auto 8px;
+      color: #6a7282;
+    }
+
+    .upload-area__text {
+      font-size: 14px;
+      color: #364153;
+      margin-bottom: 4px;
+    }
+
+    .upload-area__hint {
+      font-size: 12px;
+      color: #9ca3af;
+    }
   </style>
 </head>
 <body>
@@ -819,190 +1027,32 @@
 
         <!-- 競賽歷程列表 -->
         <div class="competition-list">
-          <!-- 競賽卡片 1 - 第一名 -->
-          <div class="competition-card" data-level="national" data-rank="gold" data-date="2026-05-15">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--gold">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">2026 全國機器人創意競賽</h3>
-              </div>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-05-15
-                </span>
-                <span class="competition-card__badge competition-card__badge--national">全國賽</span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：設計自動避障機器人，完成複雜賽道挑戰，以最快速度抵達終點
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--gold">第一名</span>
-              <span class="competition-card__score"></span>
-            </div>
-          </div>
-
-          <!-- 競賽卡片 2 - 第二名 -->
-          <div class="competition-card" data-level="regional" data-rank="silver" data-date="2026-04-20">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--silver">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">青少年程式設計大賽</h3>
-              </div>
-              <p class="competition-card__subtitle">Scratch創意組</p>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-04-20
-                </span>
-                <span class="competition-card__badge competition-card__badge--regional">區域賽</span>
-                <span class="competition-card__team">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 010 7.75"/>
-                  </svg>
-                  創意編程隊 (2人)
-                </span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：運用Scratch製作互動式教育遊戲，主題為環境保護與永續發展
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--silver">第二名</span>
-              <span class="competition-card__score">成績: 92分</span>
-            </div>
-          </div>
-
-          <!-- 競賽卡片 3 - 第三名 -->
-          <div class="competition-card" data-level="county" data-rank="bronze" data-date="2026-03-10">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--bronze">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">STEAM創客馬拉松</h3>
-              </div>
-              <p class="competition-card__subtitle">機械結構組</p>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-03-10
-                </span>
-                <span class="competition-card__badge competition-card__badge--county">縣市賽</span>
-                <span class="competition-card__team">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 010 7.75"/>
-                  </svg>
-                  機械工匠 (4人)
-                </span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：24小時限時挑戰，設計並製作能搬運物品的機械手臂
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--bronze">第三名</span>
-              <span class="competition-card__score">成績: 88分</span>
-            </div>
-          </div>
-
-          <!-- 競賽卡片 4 - 優勝 -->
-          <div class="competition-card" data-level="national" data-rank="merit" data-date="2026-02-05">
-            <div class="competition-card__main">
-              <div class="competition-card__header">
-                <div class="competition-card__icon competition-card__icon--merit">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
-                  </svg>
-                </div>
-                <h3 class="competition-card__title">FLL樂高機器人競賽</h3>
-              </div>
-              <p class="competition-card__subtitle">任務挑戰組</p>
-              <div class="competition-card__meta">
-                <span class="competition-card__meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                  </svg>
-                  2026-02-05
-                </span>
-                <span class="competition-card__badge competition-card__badge--national">全國賽</span>
-                <span class="competition-card__team">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 010 7.75"/>
-                  </svg>
-                  樂高大師 (3人)
-                </span>
-              </div>
-              <div class="competition-card__description">
-                競賽說明：完成指定任務挑戰，展現機器人編程與操控技巧
-              </div>
-            </div>
-            <div class="competition-card__ranking">
-              <label class="card-select" title="選取以匯出">
-                <input type="checkbox" data-export-select>
-              </label>
-              <span class="competition-card__rank competition-card__rank--merit">優勝</span>
-              <span class="competition-card__score">成績: 85分</span>
-            </div>
+          <div style="text-align: center; padding: 40px; color: #6a7282;">
+            載入中...
           </div>
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- 競賽快速預覽 Modal -->
+  <div class="modal" id="competitionPreviewModal">
+    <div class="modal__content" style="max-width: 600px;">
+      <div class="modal__header">
+        <h3 class="modal__title" id="competitionPreviewTitle">競賽經歷</h3>
+        <button class="modal__close" onclick="closeCompetitionPreview()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body" id="competitionPreviewBody"></div>
+      <div class="modal__footer">
+        <button class="btn btn--outline" onclick="closeCompetitionPreview()">關閉</button>
+        <button class="btn btn--primary" id="competitionPreviewSaveBtn" onclick="saveCompetitionDescription()" style="display: none;">儲存簡述與照片</button>
+      </div>
+    </div>
   </div>
 
   <script src="../js/main.js"></script>
@@ -1019,6 +1069,14 @@
     const filterToggleBtn = document.getElementById('filterToggleBtn');
 
     const activeFilters = { level: '', rank: '', startDate: '', endDate: '' };
+
+    // 真實競賽資料（來自 API），供快速預覽 Modal 編輯簡述與照片使用
+    let allCompetitionsData = [];
+    let currentEditingCompetitionId = null;
+    let currentPhotoUrls = [null, null];
+    // 使用者剛選取、尚未實際上傳到伺服器的本機檔案（選檔案時只做本機預覽，
+    // 真正上傳延後到按下「儲存簡述與照片」才執行，避免選檔案當下就發送網路請求）
+    let pendingPhotoFiles = [null, null];
 
     // 頁面載入時執行
     document.addEventListener('DOMContentLoaded', async function() {
@@ -1062,13 +1120,27 @@
 
         const result = await response.json();
         const competitions = result.data || [];
+        allCompetitionsData = competitions;
 
         if (competitions.length > 0) {
           renderCompetitions(competitions);
+        } else {
+          // 沒有真實競賽記錄：顯示空狀態，而非容易誤導的示範卡片
+          // （示範卡片沒有真正的資料庫紀錄可以編輯，點擊後不會有簡述/照片欄位）
+          container.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: #6a7282;">
+              目前尚無競賽紀錄<br>
+              <small>請洽老師協助登錄你的競賽經歷，登錄後即可在此點擊填寫簡述、上傳照片</small>
+            </div>
+          `;
         }
-        // 如果沒有 API 資料，保留靜態 HTML 作為示範
       } catch (error) {
-        console.log('載入競賽記錄失敗，使用靜態資料:', error.message);
+        console.log('載入競賽記錄失敗:', error.message);
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #6a7282;">
+            載入競賽紀錄失敗，請稍後再試
+          </div>
+        `;
       }
     }
 
@@ -1110,7 +1182,7 @@
         const compDate = comp.competition_date ? comp.competition_date.split('T')[0] : '';
 
         return `
-          <div class="competition-card" data-level="${level}" data-rank="${rankType}" data-date="${compDate}" data-id="${comp.id}">
+          <div class="competition-card" data-level="${level}" data-rank="${rankType}" data-date="${compDate}" data-id="${comp.id}" onclick="openCompetitionCardPreview(event, this)" title="點擊查看完整資訊">
             <div class="competition-card__main">
               <div class="competition-card__header">
                 <div class="competition-card__icon competition-card__icon--${rankType}">
@@ -1154,7 +1226,7 @@
               ` : ''}
             </div>
             <div class="competition-card__ranking">
-              <button class="card-export-btn" onclick="exportSingleCompetition('${comp.id}')" title="匯出此筆記錄">
+              <button class="card-export-btn" onclick="event.stopPropagation(); exportSingleCompetition('${comp.id}')" title="匯出此筆記錄">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                   <polyline points="7 10 12 15 17 10"/>
@@ -1162,7 +1234,7 @@
                 </svg>
                 匯出
               </button>
-              <label class="card-select" title="選取以批量匯出">
+              <label class="card-select" title="選取以批量匯出" onclick="event.stopPropagation()">
                 <input type="checkbox" data-export-select>
               </label>
               <span class="competition-card__rank competition-card__rank--${rankType}">${comp.rank_name || RANK_LABELS[rankType] || '參賽'}</span>
@@ -1369,6 +1441,323 @@
     function exportSingleCompetition(competitionId) {
       window.location.href = `competition-export.html?id=${competitionId}`;
     }
+
+    // HTML escape，避免使用者輸入內容破壞 textarea/innerHTML 結構
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str == null ? '' : str;
+      return div.innerHTML;
+    }
+
+    const LEVEL_ORDER = ['international', 'national', 'regional', 'county'];
+
+    // 點擊卡片查看完整資訊：彈出與教師端「新增競賽」相同版面的視窗，
+    // 競賽事實欄位（主辦單位、名稱、日期、等級、隊伍、名次、成績、證明文件）唯讀，
+    // 僅「我的競賽簡述」與「參賽照片（最多 2 張）」可由學生自行編輯
+    function openCompetitionCardPreview(event, cardEl) {
+      // 點擊匯出按鈕、勾選框等互動元件時不觸發
+      if (event.target.closest('.card-export-btn, .card-select')) return;
+
+      const compId = cardEl.dataset.id || '';
+      const comp = compId ? allCompetitionsData.find(c => String(c.id) === String(compId)) : null;
+
+      const title = cardEl.querySelector('.competition-card__title')?.textContent.trim() || '未命名競賽';
+      const readonlyInput = (label, value, required) => `
+        <div class="form-group">
+          <label class="form-group__label">${label}${required ? ' <span class="required-mark">*</span>' : ''}</label>
+          <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(value || '—')}" readonly>
+        </div>
+      `;
+
+      let bodyHtml = '';
+
+      if (comp) {
+        // 真實競賽記錄：事實欄位取自資料庫，與教師端輸入的內容一致
+        const organizer = comp.organizer || '';
+        const dateStr = comp.competition_date ? comp.competition_date.split('T')[0] : '';
+        const level = comp.level || 'county';
+
+        bodyHtml += readonlyInput('主辦單位', organizer, true);
+        bodyHtml += `
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-group__label">競賽名稱</label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(title)}" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-group__label">競賽日期 <span class="required-mark">*</span></label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(dateStr || '—')}" readonly>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">競賽等級 <span class="required-mark">*</span></label>
+            <div class="level-buttons">
+              ${LEVEL_ORDER.map(l => `<button type="button" class="level-btn ${l === level ? 'level-btn--active' : ''}">${LEVEL_LABELS[l]}</button>`).join('')}
+            </div>
+          </div>
+        `;
+        bodyHtml += readonlyInput('隊伍/組別名稱', comp.team_name);
+        bodyHtml += `
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-group__label">名次</label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(comp.rank_name || '—')}" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-group__label">成績/分數</label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(comp.score || '—')}" readonly>
+            </div>
+          </div>
+        `;
+        bodyHtml += `
+          <div class="form-group">
+            <label class="form-group__label">參賽證明文件（獎狀/證書）</label>
+            <div class="upload-area upload-area--certificate">
+              ${comp.certificate_url ? `<img src="${comp.certificate_url}" alt="參賽證明">` : `<div class="upload-area__text">尚未上傳</div>`}
+            </div>
+          </div>
+        `;
+
+        // 學生可編輯：競賽簡述、參賽照片（最多 2 張）
+        currentEditingCompetitionId = comp.id;
+        currentPhotoUrls = [comp.photo_url || null, comp.photo_url_2 || null];
+        pendingPhotoFiles = [null, null];
+
+        bodyHtml += `
+          <div class="form-group">
+            <label class="form-group__label">我的競賽簡述</label>
+            <textarea id="competitionPreviewDescInput" class="competition-preview__textarea" placeholder="分享你在這場競賽中的準備過程、心得與收穫...">${escapeHtml(comp.description || '')}</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">參賽照片（最多 2 張，由你自行上傳）</label>
+            <div class="competition-preview__photo-slots" id="competitionPhotoSlots"></div>
+          </div>
+        `;
+
+        document.getElementById('competitionPreviewSaveBtn').style.display = '';
+      } else {
+        // 示範資料（尚未有真實競賽記錄，由教師登錄後才會出現），僅供瀏覽
+        const subtitleEl = cardEl.querySelector('.competition-card__subtitle');
+        const date = cardEl.dataset.date || '';
+        const levelText = cardEl.querySelector('.competition-card__badge')?.textContent.trim() || '';
+        const teamEl = cardEl.querySelector('.competition-card__team');
+        const rankText = cardEl.querySelector('.competition-card__rank')?.textContent.trim() || '';
+        const scoreText = (cardEl.querySelector('.competition-card__score')?.textContent.trim() || '').replace(/^成績[:：]\s*/, '');
+        const description = (cardEl.querySelector('.competition-card__description')?.textContent || '')
+          .replace(/^\s*競賽說明[:：]\s*/, '').trim();
+
+        bodyHtml += readonlyInput('組別／主辦單位', subtitleEl ? subtitleEl.textContent.trim() : '');
+        bodyHtml += `
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-group__label">競賽名稱</label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(title)}" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-group__label">競賽日期</label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(date || '—')}" readonly>
+            </div>
+          </div>
+        `;
+        if (levelText) bodyHtml += readonlyInput('競賽等級', levelText);
+        bodyHtml += `
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-group__label">名次</label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(rankText || '—')}" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-group__label">成績/分數</label>
+              <input type="text" class="form-group__input form-group__input--readonly" value="${escapeHtml(scoreText || '—')}" readonly>
+            </div>
+          </div>
+        `;
+        if (teamEl) bodyHtml += readonlyInput('隊伍/組別名稱', teamEl.textContent.trim());
+        bodyHtml += `
+          <div class="form-group">
+            <label class="form-group__label">競賽說明</label>
+            <p class="competition-preview__desc">${escapeHtml(description) || '無競賽說明'}</p>
+          </div>
+        `;
+
+        currentEditingCompetitionId = null;
+        document.getElementById('competitionPreviewSaveBtn').style.display = 'none';
+      }
+
+      document.getElementById('competitionPreviewTitle').textContent = `競賽經歷－${title}`;
+      document.getElementById('competitionPreviewBody').innerHTML = bodyHtml;
+
+      if (comp) {
+        renderCompetitionPhotoSlots();
+      }
+
+      document.getElementById('competitionPreviewModal').classList.add('active');
+    }
+
+    // 渲染 2 個照片上傳欄位（已有照片顯示縮圖＋移除按鈕，否則顯示上傳按鈕）
+    // containerId: 要渲染的容器、urls: 目前的照片網址陣列、selectFn/removeFn: 對應的全域處理函式名稱
+    function renderPhotoSlots(containerId, urls, selectFn, removeFn) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = urls.map((url, i) => {
+        if (url) {
+          return `
+            <div class="competition-preview__photo-slot">
+              <img src="${url}" alt="競賽照片 ${i + 1}">
+              <button type="button" class="competition-preview__photo-remove" onclick="${removeFn}(${i})" title="移除照片">×</button>
+            </div>
+          `;
+        }
+        return `
+          <label class="competition-preview__photo-slot competition-preview__photo-slot--empty">
+            <input type="file" accept="image/*" style="display:none" onchange="${selectFn}(event, ${i})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span>上傳照片</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    // 上傳單張照片到伺服器，回傳結果 { success, data:{url}, message }
+    async function uploadCompetitionPhoto(file) {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const res = await fetch(`${API_BASE}/api/upload/photo`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      return res.json();
+    }
+
+    function renderCompetitionPhotoSlots() {
+      renderPhotoSlots('competitionPhotoSlots', currentPhotoUrls, 'handleCompetitionPhotoSelect', 'removeCompetitionPhoto');
+    }
+
+    // 選取照片時只做「本機預覽」，不立刻發送任何網路請求，
+    // 真正上傳延後到使用者按下「儲存」才一次執行，
+    // 避免選檔案（原生檔案對話框關閉）當下觸發網路請求時機不穩的問題
+    function handleCompetitionPhotoSelect(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const oldUrl = currentPhotoUrls[index];
+      if (oldUrl && oldUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(oldUrl);
+      }
+
+      pendingPhotoFiles[index] = file;
+      currentPhotoUrls[index] = URL.createObjectURL(file);
+      renderCompetitionPhotoSlots();
+    }
+
+    function removeCompetitionPhoto(index) {
+      const oldUrl = currentPhotoUrls[index];
+      if (oldUrl && oldUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(oldUrl);
+      }
+      pendingPhotoFiles[index] = null;
+      currentPhotoUrls[index] = null;
+      renderCompetitionPhotoSlots();
+    }
+
+    // 儲存學生自行填寫的競賽簡述與照片
+    // 只有按下這裡時才會真正把尚未上傳的本機照片送到伺服器
+    async function saveCompetitionDescription() {
+      if (!currentEditingCompetitionId) return;
+
+      const descInput = document.getElementById('competitionPreviewDescInput');
+      const description = descInput ? descInput.value.trim() : '';
+      const token = localStorage.getItem('authToken');
+
+      const saveBtn = document.getElementById('competitionPreviewSaveBtn');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = '儲存中...';
+      }
+
+      try {
+        // 先把選取後尚未上傳的本機檔案實際上傳，取得伺服器網址取代本機 blob 網址
+        const finalPhotoUrls = [...currentPhotoUrls];
+        for (let i = 0; i < pendingPhotoFiles.length; i++) {
+          const file = pendingPhotoFiles[i];
+          if (!file) continue;
+          const uploadResult = await uploadCompetitionPhoto(file);
+          if (!uploadResult.success) {
+            throw new Error(uploadResult.message || '照片上傳失敗');
+          }
+          finalPhotoUrls[i] = uploadResult.data.url;
+        }
+
+        const res = await fetch(`${API_BASE}/api/competitions/${currentEditingCompetitionId}/student-update`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            description,
+            photo_url: finalPhotoUrls[0],
+            photo_url_2: finalPhotoUrls[1]
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          const comp = allCompetitionsData.find(c => String(c.id) === String(currentEditingCompetitionId));
+          if (comp) {
+            comp.description = description;
+            comp.photo_url = finalPhotoUrls[0];
+            comp.photo_url_2 = finalPhotoUrls[1];
+          }
+          currentPhotoUrls = finalPhotoUrls;
+          pendingPhotoFiles = [null, null];
+          renderCompetitions(allCompetitionsData);
+          closeCompetitionPreview();
+          if (typeof showMessage === 'function') {
+            showMessage('已儲存競賽簡述與照片', 'success');
+          }
+        } else if (typeof showMessage === 'function') {
+          showMessage(data.message || '儲存失敗', 'error');
+        }
+      } catch (error) {
+        console.error('儲存競賽簡述失敗:', error);
+        if (typeof showMessage === 'function') {
+          showMessage(error.message === '照片上傳失敗' ? error.message : '儲存失敗，請稍後再試', 'error');
+        }
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = '儲存簡述與照片';
+        }
+      }
+    }
+
+    function closeCompetitionPreview() {
+      document.getElementById('competitionPreviewModal').classList.remove('active');
+    }
+
+    // 點擊 Modal 外部關閉（僅在 mousedown 與 click 都確實發生在背景遮罩上才關閉，
+    // 避免原生選檔視窗關閉後瀏覽器有時會在最後滑鼠座標補發一個「幽靈點擊」事件，
+    // 若座標剛好落在置中表單以外的空白遮罩範圍，會被誤判成「點擊外部」而把整個
+    // 正在編輯中的表單意外關閉，造成「上傳完照片後 Modal 突然消失」的情況）
+    let previewBackdropMouseDown = false;
+    document.getElementById('competitionPreviewModal').addEventListener('mousedown', function(e) {
+      previewBackdropMouseDown = (e.target === this);
+    });
+    document.getElementById('competitionPreviewModal').addEventListener('click', function(e) {
+      if (e.target === this && previewBackdropMouseDown) {
+        this.classList.remove('active');
+      }
+      previewBackdropMouseDown = false;
+    });
   </script>
 </body>
 </html>

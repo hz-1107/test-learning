@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -938,3 +939,968 @@
   <script src="js/notifications.js"></script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教師日誌 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* 版面 Grid 佈局 */
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: 68px 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      grid-area: sidebar;
+      padding: var(--spacing-lg) 0;
+      overflow-y: auto;
+    }
+
+    .header {
+      grid-area: header;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-surface-alt);
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .main-content {
+      grid-area: main;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .header__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      overflow: hidden;
+    }
+
+    .header__icon-btn {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .header__icon-btn:hover {
+      background: var(--color-surface-alt);
+    }
+
+    .page-header {
+      padding: 32px;
+      padding-bottom: 24px;
+    }
+
+    .page-header__title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 8px;
+    }
+
+    .page-header__subtitle {
+      font-size: 16px;
+      color: #6a7282;
+    }
+
+    /* 篩選列 */
+    .filter-bar {
+      background: white;
+      border: 0.8px solid rgba(0, 0, 0, 0.08);
+      border-radius: 13px;
+      padding: 18px 20px;
+      margin: 0 32px 24px;
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group__label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #888;
+    }
+
+    .filter-group__input {
+      background: #f5f5f5;
+      border: none;
+      border-radius: 9px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #364153;
+      min-width: 130px;
+    }
+
+    .filter-group__input:focus {
+      outline: 2px solid var(--color-primary);
+    }
+
+    .filter-group__select {
+      background: white;
+      border: 0.8px solid rgba(0, 0, 0, 0.08);
+      border-radius: 9px;
+      padding: 8px 32px 8px 12px;
+      font-size: 14px;
+      color: #364153;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23364153' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .filter-group__select:focus {
+      outline: 2px solid var(--color-primary);
+    }
+
+    .filter-group--range {
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .filter-group--range .filter-group__label {
+      align-self: center;
+      color: #888;
+    }
+
+    .btn-apply {
+      background: var(--color-primary);
+      border: 1px solid rgba(113, 92, 0, 0.2);
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-apply:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    /* 日誌列表 */
+    .diary-list {
+      padding: 0 32px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .diary-card {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+
+    .diary-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .diary-card__icon {
+      width: 48px;
+      height: 48px;
+      background: var(--color-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .diary-card__icon svg {
+      width: 24px;
+      height: 24px;
+      color: var(--color-primary-dark);
+    }
+
+    .diary-card__content {
+      flex: 1;
+    }
+
+    .diary-card__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 6px;
+    }
+
+    .diary-card__meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .diary-card__meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #6a7282;
+    }
+
+    .diary-card__meta-item svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .diary-card__action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--color-primary);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .diary-card__action:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
+    .diary-card__action svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 狀態標籤 */
+    .diary-card__status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .diary-card__status--completed {
+      background: rgba(0, 201, 80, 0.15);
+      color: #00c950;
+    }
+
+    .diary-card__status--in-progress {
+      background: rgba(43, 127, 255, 0.15);
+      color: #2b7fff;
+    }
+
+    .diary-card__status--pending {
+      background: rgba(251, 44, 54, 0.15);
+      color: #fb2c36;
+    }
+
+    .diary-card__status--future {
+      background: rgba(156, 163, 175, 0.15);
+      color: #6b7280;
+    }
+
+    /* 日期標籤 */
+    .diary-card__date-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 80px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
+      border: 1px solid #c7deff;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .diary-card__date-num {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e40af;
+      line-height: 1.2;
+    }
+
+    .diary-card__date-day {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      background: #3b82f6;
+      padding: 2px 10px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    /* 未來課程淡化 */
+    .diary-card--future {
+      opacity: 0.6;
+    }
+
+    .diary-card--future .diary-card__date-badge {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-color: #d1d5db;
+    }
+
+    .diary-card--future .diary-card__date-num {
+      color: #6b7280;
+    }
+
+    .diary-card--future .diary-card__date-day {
+      background: #9ca3af;
+    }
+
+    .diary-card__action--disabled {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #9ca3af;
+      flex-shrink: 0;
+      cursor: not-allowed;
+    }
+
+    /* 分頁 */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding: 24px 32px;
+    }
+
+    .pagination__btn {
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+      color: #364153;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pagination__btn:hover {
+      border-color: var(--color-primary);
+      background: rgba(255, 219, 88, 0.1);
+    }
+
+    .pagination__btn--active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+      font-weight: 500;
+    }
+
+    .pagination__btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* 響應式 */
+    @media (max-width: 992px) {
+      .filter-bar {
+        padding: 16px;
+        margin: 0 16px 16px;
+      }
+
+      .diary-list {
+        padding: 0 16px 16px;
+      }
+
+      .diary-card {
+        flex-wrap: wrap;
+      }
+
+      .diary-card__action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        padding: 24px 16px;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group--range {
+        flex-wrap: wrap;
+      }
+
+      .diary-card__meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- 頂部導覽列 -->
+    <header class="header">
+      <h1 class="header__logo">智慧學習歷程系統</h1>
+
+      <div class="header__actions">
+        <button class="header__icon-btn" aria-label="通知">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+        </button>
+        <div class="header__avatar">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=teacher" alt="使用者頭像">
+        </div>
+      </div>
+    </header>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar">
+      <div class="sidebar__profile">
+        <div class="sidebar__profile-inner">
+          <div class="sidebar__profile-avatar">
+            <svg class="sidebar__profile-avatar-icon" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 0H2C0.9 0 0 0.9 0 2V16C0 17.1 0.9 18 2 18H20C21.1 18 22 17.1 22 16V2C22 0.9 21.1 0 20 0ZM20 16H2V2H20V16Z" fill="#755f00"/>
+            </svg>
+          </div>
+          <div class="sidebar__profile-info">
+            <span class="sidebar__profile-name" id="teacherName">老師</span>
+            <span class="sidebar__profile-role">教師系統</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 18V12H11V18H16V10H19L10 2L1 10H4V18H7Z" fill="currentColor"/>
+          </svg>
+          <span>首頁</span>
+        </a>
+        <a href="schedule.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2H15V0H13V2H5V0H3V2H2C0.89 2 0 2.9 0 4V18C0 19.1 0.89 20 2 20H16C17.1 20 18 19.1 18 18V4C18 2.9 17.1 2 16 2ZM16 18H2V7H16V18ZM4 9H9V14H4V9Z" fill="currentColor"/>
+          </svg>
+          <span>課表</span>
+        </a>
+        <a href="records.html" class="sidebar__nav-item sidebar__nav-item--active">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2H14V0H6V2H2C0.9 2 0 2.9 0 4V18C0 19.1 0.9 20 2 20H18C19.1 20 20 19.1 20 18V4C20 2.9 19.1 2 18 2ZM8 2H12V4H8V2ZM18 18H2V4H6V6H14V4H18V18ZM4 10H16V12H4V10ZM4 14H12V16H4V14Z" fill="currentColor"/>
+          </svg>
+          <span>教師日誌</span>
+        </a>
+        <a href="students.html" class="sidebar__nav-item">
+          <svg class="sidebar__nav-item-icon" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5 0C4.7 0 0 4.7 0 10.5C0 16.3 4.7 21 10.5 21C16.3 21 21 16.3 21 10.5C21 4.7 16.3 0 10.5 0ZM10.5 3.15C12.24 3.15 13.65 4.56 13.65 6.3C13.65 8.04 12.24 9.45 10.5 9.45C8.76 9.45 7.35 8.04 7.35 6.3C7.35 4.56 8.76 3.15 10.5 3.15ZM10.5 18.06C7.875 18.06 5.544 16.716 4.2 14.7C4.2 12.6 8.4 11.445 10.5 11.445C12.6 11.445 16.8 12.6 16.8 14.7C15.456 16.716 13.125 18.06 10.5 18.06Z" fill="currentColor"/>
+          </svg>
+          <span>學生管理</span>
+        </a>
+
+      </nav>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="main-content" style="padding: 0;">
+      <div class="page-header">
+        <h2 class="page-header__title">教師日誌</h2>
+        <p class="page-header__subtitle">選擇班級以填寫或查看教學日誌</p>
+      </div>
+
+      <!-- 篩選列 -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span class="filter-group__label">時間區間</span>
+          <div class="filter-group--range">
+            <input type="date" class="filter-group__input" id="startDate">
+            <span class="filter-group__label">至</span>
+            <input type="date" class="filter-group__input" id="endDate">
+          </div>
+        </div>
+        <button class="btn-apply" onclick="loadMyClasses()">套用</button>
+        <div class="filter-group">
+          <span class="filter-group__label">填答狀態</span>
+          <select class="filter-group__select" id="statusFilter">
+            <option value="all">全部</option>
+            <option value="completed">已完成</option>
+            <option value="in-progress">進行中</option>
+            <option value="pending">未填寫</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-group__label">課程</span>
+          <select class="filter-group__select" id="courseFilter">
+            <option value="all">全部課程</option>
+            <option value="科創機器人">科創機器人</option>
+            <option value="動力機械">動力機械</option>
+            <option value="程式機械">程式機械</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-group__label">教師</span>
+          <select class="filter-group__select" id="teacherFilter">
+            <option value="all">全部老師</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-group__label">教室</span>
+          <select class="filter-group__select" id="roomFilter">
+            <option value="all">全部教室</option>
+            <option value="西屯">西屯</option>
+            <option value="沙鹿">沙鹿</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 日誌列表 -->
+      <div class="diary-list" id="diaryList">
+        <!-- 班級卡片將由 JavaScript 動態載入 -->
+        <div class="loading-message" style="text-align: center; padding: 40px; color: #6a7282;">
+          載入中...
+        </div>
+      </div>
+
+      <!-- 分頁 -->
+      <div class="pagination">
+        <button class="pagination__btn" disabled>&lt;</button>
+        <button class="pagination__btn pagination__btn--active">1</button>
+        <button class="pagination__btn">2</button>
+        <button class="pagination__btn">&gt;</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // 全域變數
+    let allClasses = [];
+    let filteredClasses = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // 格式化本地日期為 YYYY-MM-DD（避免時區問題）
+    function formatLocalDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // 頁面載入時執行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 顯示教師名稱
+      const userName = localStorage.getItem('userName');
+      if (userName) {
+        document.getElementById('teacherName').textContent = userName + ' 老師';
+      }
+
+      // 設定日期篩選器為「本月月初至今日」
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      document.getElementById('startDate').value = formatLocalDate(firstDay);
+      document.getElementById('endDate').value = formatLocalDate(now);
+
+      // 自動建立已開始課程的日誌，然後載入列表
+      autoCreateAndLoadClasses();
+    });
+
+    // 自動建立日誌並載入課程列表
+    async function autoCreateAndLoadClasses() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      try {
+        // 先自動建立已開始課程的日誌（靜默執行）
+        await fetch(`${API_BASE}/api/logs/auto-create-my`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.log('自動建立日誌檢查:', error.message);
+      }
+
+      // 載入課程列表
+      loadMyClasses();
+    }
+
+    // API 基礎網址
+    const API_BASE = 'http://localhost:3000';
+
+    // 從 API 載入教師的課程與日誌狀態
+    async function loadMyClasses() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '../login.html';
+        return;
+      }
+
+      try {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        // 使用 API 端點取得所有教師的課程日誌狀態
+        const url = `${API_BASE}/api/logs/my-status?start_date=${startDate}&end_date=${endDate}&all=true`;
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('API 錯誤:', response.status, errorData);
+          if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            window.location.href = '../login.html';
+            return;
+          }
+          throw new Error(errorData.message || `載入班級失敗 (HTTP ${response.status})`);
+        }
+
+        const result = await response.json();
+        console.log('API 回應:', result);
+        allClasses = result.data?.schedules || [];
+
+        // 更新篩選下拉選單
+        updateFilterOptions();
+
+        // 套用篩選並渲染
+        applyFilters();
+
+      } catch (error) {
+        console.error('載入班級錯誤:', error);
+        document.getElementById('diaryList').innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #fb2c36;">
+            載入失敗：${error.message}<br>
+            <small style="color: #6a7282;">請確認伺服器已啟動且您已登入教師帳號</small>
+          </div>
+        `;
+      }
+    }
+
+    // 更新篩選下拉選單的選項
+    function updateFilterOptions() {
+      const courseFilter = document.getElementById('courseFilter');
+      const roomFilter = document.getElementById('roomFilter');
+      const teacherFilter = document.getElementById('teacherFilter');
+
+      // 收集唯一的課程、教室和教師
+      const courses = [...new Set(allClasses.map(c => c.course_name))];
+      const rooms = [...new Set(allClasses.map(c => c.classroom_name).filter(r => r))];
+      const teachers = [...new Set(allClasses.map(c => c.teacher_name).filter(t => t))];
+
+      // 更新課程選項
+      courseFilter.innerHTML = '<option value="all">全部課程</option>';
+      courses.forEach(course => {
+        courseFilter.innerHTML += `<option value="${course}">${course}</option>`;
+      });
+
+      // 更新教室選項
+      roomFilter.innerHTML = '<option value="all">全部教室</option>';
+      rooms.forEach(room => {
+        roomFilter.innerHTML += `<option value="${room}">${room}</option>`;
+      });
+
+      // 更新教師選項
+      teacherFilter.innerHTML = '<option value="all">全部老師</option>';
+      teachers.forEach(teacher => {
+        teacherFilter.innerHTML += `<option value="${teacher}">${teacher}</option>`;
+      });
+    }
+
+    // 篩選功能
+    function applyFilters() {
+      currentPage = 1;
+      renderClassList();
+    }
+
+    // 展開所有課程的日期列表
+    function expandAllDates() {
+      const allItems = [];
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const today = formatLocalDate(new Date());
+
+      allClasses.forEach(cls => {
+        // 計算該排程在日期範圍內的所有日期
+        const expectedDates = getExpectedDatesInRange(startDate, endDate, cls.day_of_week);
+
+        expectedDates.forEach(dateStr => {
+          // 查找該日期是否有日誌
+          const log = cls.logs ? cls.logs.find(l => l.log_date.split('T')[0] === dateStr) : null;
+          const isPast = dateStr <= today;
+
+          let status = 'pending';
+          if (log) {
+            if (log.status === 'completed') {
+              status = 'completed';
+            } else if (log.status === 'in_progress') {
+              status = 'in-progress';
+            } else {
+              status = 'pending';
+            }
+          }
+
+          allItems.push({
+            ...cls,
+            date: dateStr,
+            dateStatus: status,
+            isPast: isPast,
+            hasLog: !!log
+          });
+        });
+      });
+
+      // 按日期排序（最新的在前）
+      allItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      return allItems;
+    }
+
+    // 計算日期範圍內的特定星期幾
+    function getExpectedDatesInRange(startDate, endDate, dayOfWeek) {
+      const dates = [];
+      const start = new Date(startDate + 'T00:00:00');
+      const end = new Date(endDate + 'T00:00:00');
+      const current = new Date(start);
+
+      while (current <= end) {
+        if (current.getDay() === dayOfWeek) {
+          // 使用本地日期格式，避免時區轉換問題
+          const year = current.getFullYear();
+          const month = String(current.getMonth() + 1).padStart(2, '0');
+          const day = String(current.getDate()).padStart(2, '0');
+          dates.push(`${year}-${month}-${day}`);
+        }
+        current.setDate(current.getDate() + 1);
+      }
+
+      return dates;
+    }
+
+    // 渲染班級列表
+    function renderClassList() {
+      const container = document.getElementById('diaryList');
+
+      // 展開所有日期
+      const allItems = expandAllDates();
+
+      if (allItems.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #6a7282;">
+            目前沒有任何班級
+          </div>
+        `;
+        return;
+      }
+
+      // 套用狀態篩選
+      const statusFilter = document.getElementById('statusFilter').value;
+      const courseFilter = document.getElementById('courseFilter').value;
+      const roomFilter = document.getElementById('roomFilter').value;
+      const teacherFilter = document.getElementById('teacherFilter').value;
+
+      let filteredItems = allItems.filter(item => {
+        if (courseFilter !== 'all' && item.course_name !== courseFilter) return false;
+        if (roomFilter !== 'all' && item.classroom_name !== roomFilter) return false;
+        if (teacherFilter !== 'all' && item.teacher_name !== teacherFilter) return false;
+        if (statusFilter !== 'all') {
+          if (statusFilter === 'completed' && item.dateStatus !== 'completed') return false;
+          if (statusFilter === 'in-progress' && item.dateStatus !== 'in-progress') return false;
+          if (statusFilter === 'pending' && item.dateStatus !== 'pending') return false;
+        }
+        return true;
+      });
+
+      filteredClasses = filteredItems;
+
+      if (filteredItems.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #6a7282;">
+            沒有符合篩選條件的日誌
+          </div>
+        `;
+        document.querySelector('.pagination').innerHTML = '';
+        return;
+      }
+
+      // 計算分頁
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = filteredItems.slice(startIndex, endIndex);
+
+      container.innerHTML = pageItems.map(item => {
+        // 格式化時間
+        const startTime = item.start_time ? item.start_time.substring(0, 5) : '';
+        const endTime = item.end_time ? item.end_time.substring(0, 5) : '';
+        const timeDisplay = startTime && endTime ? `${startTime} - ${endTime}` : '未設定';
+
+        // 格式化日期
+        const dateObj = new Date(item.date + 'T00:00:00');
+        const month = dateObj.getMonth() + 1;
+        const day = dateObj.getDate();
+        const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+        const dayName = `週${weekDays[dateObj.getDay()]}`;
+        const dateDisplay = `${month}月${day}日`;
+
+        // 取得狀態顯示
+        let statusClass = 'pending';
+        let statusText = '未填寫';
+        if (!item.isPast) {
+          statusClass = 'future';
+          statusText = '尚未到課';
+        } else if (item.dateStatus === 'completed') {
+          statusClass = 'completed';
+          statusText = '已完成';
+        } else if (item.dateStatus === 'in-progress') {
+          statusClass = 'in-progress';
+          statusText = '進行中';
+        }
+
+        const futureClass = !item.isPast ? 'diary-card--future' : '';
+
+        return `
+          <div class="diary-card ${futureClass}" data-schedule-id="${item.schedule_id}" data-date="${item.date}">
+            <div class="diary-card__date-badge">
+              <span class="diary-card__date-num">${dateDisplay}</span>
+              <span class="diary-card__date-day">${dayName}</span>
+            </div>
+            <div class="diary-card__content">
+              <h3 class="diary-card__title">
+                ${item.course_name}
+                <span class="diary-card__status diary-card__status--${statusClass}">${statusText}</span>
+              </h3>
+              <div class="diary-card__meta">
+                <span class="diary-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  ${timeDisplay}
+                </span>
+                <span class="diary-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  ${item.classroom_name}
+                </span>
+              </div>
+            </div>
+            ${item.isPast ? `
+            <a href="journal.html?schedule_id=${item.schedule_id}&date=${item.date}" class="diary-card__action">
+              填寫日誌
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </a>
+            ` : `
+            <span class="diary-card__action diary-card__action--disabled">
+              尚未到課
+            </span>
+            `}
+          </div>
+        `;
+      }).join('');
+
+      renderPagination();
+    }
+
+    // 渲染分頁
+    function renderPagination() {
+      const container = document.querySelector('.pagination');
+      const totalPages = Math.ceil(filteredClasses.length / itemsPerPage);
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = `
+        <button class="pagination__btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&lt;</button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        html += `
+          <button class="pagination__btn ${i === currentPage ? 'pagination__btn--active' : ''}" onclick="goToPage(${i})">${i}</button>
+        `;
+      }
+
+      html += `
+        <button class="pagination__btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&gt;</button>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // 跳轉到指定頁面
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredClasses.length / itemsPerPage);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderClassList();
+    }
+
+    // 監聽篩選變更
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('courseFilter').addEventListener('change', applyFilters);
+    document.getElementById('roomFilter').addEventListener('change', applyFilters);
+    document.getElementById('teacherFilter').addEventListener('change', applyFilters);
+  </script>
+  <script src="js/notifications.js"></script>
+</body>
+</html>
+>>>>>>> Stashed changes
