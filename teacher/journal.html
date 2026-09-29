@@ -2442,6 +2442,7 @@
     }
   </style>
 
+  <script src="../js/file-url.js"></script>
   <script src="../js/main.js"></script>
   <script>
     // API 基礎網址（用絕對網址，避免此頁若非從後端伺服器開啟時，相對路徑打錯位置）
@@ -3182,7 +3183,7 @@
             if (photoUpload) {
               const photoUrl = record.photos[0].photo_url;
               photoUpload.innerHTML = `
-                <img src="${photoUrl}" style="max-width: 100%; max-height: 80px; border-radius: 4px; object-fit: cover;">
+                <img src="${fileUrl(photoUrl)}" style="max-width: 100%; max-height: 80px; border-radius: 4px; object-fit: cover;">
                 <span class="photo-upload__text">點擊更換照片</span>
               `;
               photoUpload.dataset.photoUrl = photoUrl;
@@ -3799,7 +3800,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             if (result.success) {
               // 上傳成功，顯示照片並儲存 URL
               uploadArea.innerHTML = `
-                <img src="${result.data.url}" style="max-width: 100%; max-height: 80px; border-radius: 4px; object-fit: cover;">
+                <img src="${fileUrl(result.data.url)}" style="max-width: 100%; max-height: 80px; border-radius: 4px; object-fit: cover;">
                 <span class="photo-upload__text">點擊更換照片</span>
               `;
               uploadArea.dataset.photoUrl = result.data.url;

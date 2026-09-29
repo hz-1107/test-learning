@@ -1280,6 +1280,192 @@
       height: 60px;
       border-radius: 6px;
       object-fit: cover;
+      cursor: zoom-in;
+    }
+
+    .achievement-item__file {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      background: #f3f4f6;
+      color: #364153;
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .achievement-item--clickable {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .achievement-item--clickable:hover {
+      background: #f0f1f3;
+    }
+
+    .achievement-item__more {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6a7282;
+    }
+
+    /* 競賽詳情 Modal（疊在「查看完整檔案」之上） */
+    .comp-detail-modal {
+      z-index: 1100;
+    }
+
+    .comp-detail-modal .modal__content {
+      max-width: 640px;
+    }
+
+    .comp-detail__title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .comp-detail__subtitle {
+      font-size: 14px;
+      color: #6a7282;
+      margin-bottom: 16px;
+    }
+
+    .comp-detail__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .comp-detail__field {
+      padding: 12px;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+
+    .comp-detail__label {
+      font-size: 12px;
+      color: #6a7282;
+      margin-bottom: 4px;
+    }
+
+    .comp-detail__value {
+      font-size: 15px;
+      color: #101828;
+      overflow-wrap: anywhere;
+    }
+
+    .comp-detail__section {
+      margin-bottom: 20px;
+    }
+
+    .comp-detail__section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #364153;
+      margin-bottom: 8px;
+    }
+
+    .comp-detail__description {
+      padding: 12px;
+      background: #fafafa;
+      border-radius: 8px;
+      line-height: 1.7;
+      color: #101828;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .comp-detail__images {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .comp-detail__image {
+      margin: 0;
+    }
+
+    .comp-detail__image img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #f3f4f6;
+      border-radius: 8px;
+      cursor: zoom-in;
+    }
+
+    .comp-detail__image figcaption {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #6a7282;
+      text-align: center;
+    }
+
+    .comp-detail__file {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      color: #364153;
+      text-decoration: none;
+    }
+
+    .comp-detail__empty {
+      color: #6a7282;
+      font-size: 14px;
+    }
+
+    .comp-detail__meta {
+      font-size: 12px;
+      color: #99a1af;
+    }
+
+    @media (max-width: 480px) {
+      .comp-detail__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .image-viewer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.85);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      cursor: zoom-out;
+    }
+
+    .image-viewer--open {
+      display: flex;
+    }
+
+    .image-viewer__img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .image-viewer__close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 32px;
+      line-height: 1;
+      cursor: pointer;
     }
 
     .achievements-more-btn {
@@ -1973,9 +2159,59 @@
     </div>
   </div>
 
+  <!-- 競賽詳情 Modal（查看完整檔案 → 點競賽經歷） -->
+  <div class="modal comp-detail-modal" id="compDetailModal" onclick="if (event.target === this) closeModal('compDetailModal')">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 class="modal__title">競賽詳情</h3>
+        <button class="modal__close" onclick="closeModal('compDetailModal')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body" id="compDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- 圖片檢視器（點縮圖看完整圖片） -->
+  <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
+    <button type="button" class="image-viewer__close" aria-label="關閉">&times;</button>
+    <img class="image-viewer__img" id="imageViewerImg" alt="完整圖片" onclick="event.stopPropagation()">
+  </div>
+
+  <script src="../js/file-url.js"></script>
   <script src="../js/main.js"></script>
   <script>
     const API_BASE = 'http://localhost:3000/api';
+    function isImageFile(url) {
+      return /\.(jpe?g|png|gif|webp|bmp|heic|heif)$/i.test(url || '');
+    }
+
+    // 縮圖：圖片可點開看完整大圖；PDF / Word 以新分頁開啟
+    function attachmentThumb(url, alt) {
+      if (!url) return '';
+      const src = fileUrl(url);
+      if (isImageFile(url)) {
+        return `<img src="${src}" alt="${alt}" class="achievement-item__photo" onclick="event.stopPropagation(); openImageViewer('${src}')">`;
+      }
+      return `<a href="${src}" target="_blank" rel="noopener" class="achievement-item__file" title="${alt}" onclick="event.stopPropagation()">開啟檔案</a>`;
+    }
+
+    function openImageViewer(src) {
+      document.getElementById('imageViewerImg').src = src;
+      document.getElementById('imageViewer').classList.add('image-viewer--open');
+    }
+
+    function closeImageViewer() {
+      document.getElementById('imageViewer').classList.remove('image-viewer--open');
+      document.getElementById('imageViewerImg').src = '';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeImageViewer();
+    });
 
     // 從 localStorage 取得 token
     function getAuthToken() {
@@ -2997,40 +3233,120 @@
           </div>
           ${record.photo_url ? `
             <div class="achievement-item__photos">
-              <img src="${record.photo_url}" alt="課堂照片" class="achievement-item__photo">
+              ${attachmentThumb(record.photo_url, '課堂照片')}
             </div>
           ` : ''}
         </div>
       `;
     }
 
-    // 渲染競賽經歷項目
-    function renderCompetitionItem(comp) {
-      const date = comp.competition_date ? new Date(comp.competition_date) : new Date();
-      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const COMPETITION_LEVELS = { international: '國際賽', national: '全國賽', regional: '區域賽', county: '縣市賽' };
 
-      const levelMap = { international: '國際賽', national: '全國賽', regional: '區域賽', county: '縣市賽' };
+    // 已載入的競賽資料（供點擊開啟詳情時查找）
+    const loadedCompetitions = {};
+
+    // 競賽內容由學生自行輸入，顯示前需跳脫避免被當成 HTML 執行
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatDateOnly(value) {
+      if (!value) return '—';
+      const date = new Date(value);
+      if (isNaN(date)) return '—';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // 渲染競賽經歷項目（點擊開啟完整詳情）
+    function renderCompetitionItem(comp) {
+      loadedCompetitions[comp.id] = comp;
 
       return `
-        <div class="achievement-item">
+        <div class="achievement-item achievement-item--clickable" onclick="openCompetitionDetail(${Number(comp.id)})">
           <div class="achievement-item__header">
-            <span class="achievement-item__date">${dateStr}</span>
-            <span class="achievement-item__course">${comp.title || comp.organizer || '競賽'}</span>
-            <span class="achievement-item__status achievement-item__status--present">${levelMap[comp.level] || comp.level || ''}</span>
+            <span class="achievement-item__date">${formatDateOnly(comp.competition_date)}</span>
+            <span class="achievement-item__course">${escapeHtml(comp.title || comp.organizer || '競賽')}</span>
+            <span class="achievement-item__status achievement-item__status--present">${escapeHtml(COMPETITION_LEVELS[comp.level] || comp.level || '')}</span>
           </div>
           <div class="achievement-item__content">
-            ${comp.description || `主辦單位：${comp.organizer || '—'}`}
-            ${comp.rank_name ? `<br>獲得名次：${comp.rank_name}` : ''}
-            ${comp.score ? ` | 成績：${comp.score}` : ''}
+            ${escapeHtml(comp.description || `主辦單位：${comp.organizer || '—'}`)}
+            ${comp.rank_name ? `<br>獲得名次：${escapeHtml(comp.rank_name)}` : ''}
+            ${comp.score ? ` | 成績：${escapeHtml(comp.score)}` : ''}
           </div>
-          ${comp.photo_url || comp.certificate_url ? `
+          ${comp.photo_url || comp.photo_url_2 || comp.certificate_url ? `
             <div class="achievement-item__photos">
-              ${comp.certificate_url ? `<img src="${comp.certificate_url}" alt="證明文件" class="achievement-item__photo">` : ''}
-              ${comp.photo_url ? `<img src="${comp.photo_url}" alt="競賽照片" class="achievement-item__photo">` : ''}
+              ${attachmentThumb(comp.certificate_url, '證明文件')}
+              ${attachmentThumb(comp.photo_url, '競賽照片')}
+              ${attachmentThumb(comp.photo_url_2, '競賽照片')}
             </div>
           ` : ''}
+          <div class="achievement-item__more">點擊查看完整內容 ›</div>
         </div>
       `;
+    }
+
+    // 詳情中的單張圖片 / 檔案
+    function detailAttachment(url, caption) {
+      const src = fileUrl(url);
+      const body = isImageFile(url)
+        ? `<img src="${src}" alt="${caption}" onclick="openImageViewer('${src}')">`
+        : `<a class="comp-detail__file" href="${src}" target="_blank" rel="noopener">開啟檔案</a>`;
+      return `<figure class="comp-detail__image">${body}<figcaption>${caption}</figcaption></figure>`;
+    }
+
+    // 開啟競賽詳情
+    function openCompetitionDetail(id) {
+      const comp = loadedCompetitions[id];
+      if (!comp) return;
+
+      const field = (label, value) => `
+        <div class="comp-detail__field">
+          <div class="comp-detail__label">${label}</div>
+          <div class="comp-detail__value">${value ? escapeHtml(value) : '—'}</div>
+        </div>`;
+
+      const attachments = [
+        comp.certificate_url && detailAttachment(comp.certificate_url, '參賽證明'),
+        comp.photo_url && detailAttachment(comp.photo_url, '競賽照片 1'),
+        comp.photo_url_2 && detailAttachment(comp.photo_url_2, '競賽照片 2')
+      ].filter(Boolean);
+
+      document.getElementById('compDetailBody').innerHTML = `
+        <div class="comp-detail__title">${escapeHtml(comp.title || '未命名競賽')}</div>
+        ${comp.subtitle ? `<div class="comp-detail__subtitle">${escapeHtml(comp.subtitle)}</div>` : '<div class="comp-detail__subtitle"></div>'}
+
+        <div class="comp-detail__grid">
+          ${field('主辦單位', comp.organizer)}
+          ${field('競賽日期', formatDateOnly(comp.competition_date))}
+          ${field('競賽等級', COMPETITION_LEVELS[comp.level] || comp.level)}
+          ${field('隊伍名稱', comp.team_name)}
+          ${field('獲得名次', comp.rank_name)}
+          ${field('成績/分數', comp.score)}
+        </div>
+
+        <div class="comp-detail__section">
+          <div class="comp-detail__section-title">競賽說明 / 心得</div>
+          <div class="comp-detail__description">${comp.description ? escapeHtml(comp.description) : '<span class="comp-detail__empty">學生未填寫</span>'}</div>
+        </div>
+
+        <div class="comp-detail__section">
+          <div class="comp-detail__section-title">證明文件與照片</div>
+          ${attachments.length
+            ? `<div class="comp-detail__images">${attachments.join('')}</div>`
+            : '<div class="comp-detail__empty">尚未上傳任何檔案</div>'}
+        </div>
+
+        <div class="comp-detail__meta">
+          建立：${formatDateOnly(comp.created_at)}　最後更新：${formatDateOnly(comp.updated_at)}
+        </div>
+      `;
+
+      document.getElementById('compDetailModal').classList.add('active');
     }
 
     // 載入更多成就
