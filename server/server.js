@@ -26,7 +26,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // 靜態檔案服務 (上傳的檔案)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const { UPLOAD_ROOT, LEGACY_UPLOAD_ROOT } = require('./config/uploads');
+app.use('/uploads', express.static(UPLOAD_ROOT));
+app.use('/uploads', express.static(LEGACY_UPLOAD_ROOT));
 
 // 靜態檔案服務 (前端網頁)
 app.use(express.static(path.join(__dirname, '..')));

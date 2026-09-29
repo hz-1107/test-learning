@@ -1055,6 +1055,7 @@
     </div>
   </div>
 
+  <script src="../js/file-url.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/notifications.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -1218,7 +1219,7 @@
                 </span>
                 ` : ''}
               </div>
-              ${comp.photo_url ? `<img class="competition-card__photo" src="${comp.photo_url}" alt="競賽照片">` : ''}
+              ${comp.photo_url ? `<img class="competition-card__photo" src="${fileUrl(comp.photo_url)}" alt="競賽照片">` : ''}
               ${comp.description ? `
               <div class="competition-card__description">
                 競賽說明：${comp.description}
@@ -1513,7 +1514,7 @@
           <div class="form-group">
             <label class="form-group__label">參賽證明文件（獎狀/證書）</label>
             <div class="upload-area upload-area--certificate">
-              ${comp.certificate_url ? `<img src="${comp.certificate_url}" alt="參賽證明">` : `<div class="upload-area__text">尚未上傳</div>`}
+              ${comp.certificate_url ? `<img src="${fileUrl(comp.certificate_url)}" alt="參賽證明">` : `<div class="upload-area__text">尚未上傳</div>`}
             </div>
           </div>
         `;
@@ -1604,7 +1605,7 @@
         if (url) {
           return `
             <div class="competition-preview__photo-slot">
-              <img src="${url}" alt="競賽照片 ${i + 1}">
+              <img src="${fileUrl(url)}" alt="競賽照片 ${i + 1}">
               <button type="button" class="competition-preview__photo-remove" onclick="${removeFn}(${i})" title="移除照片">×</button>
             </div>
           `;
