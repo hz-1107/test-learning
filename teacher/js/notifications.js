@@ -3,6 +3,13 @@
  * 用於顯示系統公告
  */
 
+// 通知 API 的基礎路徑：優先沿用頁面已定義的 API_BASE（教師端頁面的 API_BASE 通常已包含 /api），
+// 否則預設連到本機後端。過去這裡直接寫死相對路徑 fetch('/api/...')，只要這個 HTML
+// 不是從 http://localhost:3000 這個來源開啟（例如用編輯器內建的靜態伺服器預覽），
+// 相對路徑就會抓到錯誤的來源，伺服器回傳的 404 HTML 頁面會讓 response.json() 直接拋出
+// 「Unexpected token '<'」的錯誤。統一改成絕對路徑可避免這個問題。
+const NOTIFICATION_API_BASE = (window.API_BASE || 'http://localhost:3000/api').replace(/\/api\/?$/, '');
+
 // 通知面板 HTML 模板
 const notificationPanelTemplate = `
 <div class="notification-panel" id="notificationPanel">
@@ -457,7 +464,7 @@ async function loadAnnouncements() {
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
-    const response = await fetch('/api/announcements/my', {
+    const response = await fetch(`${NOTIFICATION_API_BASE}/api/announcements/my`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -581,7 +588,7 @@ function closeNotificationModal() {
 async function markAsRead(id) {
   try {
     const token = localStorage.getItem('authToken');
-    await fetch(`/api/announcements/${id}/read`, {
+    await fetch(`${NOTIFICATION_API_BASE}/api/announcements/${id}/read`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -605,7 +612,7 @@ async function markAsRead(id) {
 async function markAllAsRead() {
   try {
     const token = localStorage.getItem('authToken');
-    await fetch('/api/announcements/read-all', {
+    await fetch(`${NOTIFICATION_API_BASE}/api/announcements/read-all`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`

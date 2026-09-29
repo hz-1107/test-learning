@@ -25,6 +25,9 @@ router.delete('/:id', authorize('admin', 'staff'), studentsController.delete);
 // 學生點數
 router.get('/:id/points', studentsController.getPoints);
 
+// 學生課程紀錄 (教職員查看指定學生的學習成就用)
+router.get('/:id/records', studentsController.getStudentRecords);
+
 // 學生技能平均分數
 router.get('/:id/skill-averages', studentsController.getSkillAverages);
 

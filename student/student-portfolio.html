@@ -261,6 +261,7 @@
       padding: var(--spacing-lg) var(--spacing-xl);
       box-shadow: var(--shadow-sm);
       transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
     }
 
     .history-card:hover {
@@ -792,11 +793,11 @@
         const logId = record.log_id || '';
 
         return `
-          <div class="history-card" data-category="${courseName}" data-date="${logDate}" data-record-id="${recordId}" data-log-id="${logId}">
+          <div class="history-card" data-category="${courseName}" data-date="${logDate}" data-record-id="${recordId}" data-log-id="${logId}" onclick="openRecordDetail(event, '${recordId}', '${logId}')" title="點擊查看完整資訊">
             <div class="history-card__top">
               <h3 class="history-card__title">${courseName}</h3>
               <div class="history-card__actions">
-                <button class="card-export-btn" onclick="exportSingleRecord('${recordId}', '${logId}')" title="匯出此筆記錄">
+                <button class="card-export-btn" onclick="event.stopPropagation(); exportSingleRecord('${recordId}', '${logId}')" title="匯出此筆記錄">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                     <polyline points="7 10 12 15 17 10"/>
@@ -804,7 +805,7 @@
                   </svg>
                   匯出
                 </button>
-                <label class="card-select" title="選取以批量匯出">
+                <label class="card-select" title="選取以批量匯出" onclick="event.stopPropagation()">
                   <input type="checkbox" data-export-select>
                 </label>
               </div>
@@ -1031,6 +1032,13 @@
       if (recordId) params.set('id', recordId);
       if (logId) params.set('log_id', logId);
       window.location.href = `learning-export.html?${params.toString()}`;
+    }
+
+    // 點擊卡片查看完整資訊
+    function openRecordDetail(event, recordId, logId) {
+      // 點擊匯出按鈕、勾選框等互動元件時不觸發
+      if (event.target.closest('.card-export-btn, .card-select')) return;
+      exportSingleRecord(recordId, logId);
     }
   </script>
 </body>

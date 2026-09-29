@@ -9,6 +9,9 @@ router.use(authenticate);
 // 學生取得自己的競賽記錄
 router.get('/me', competitionsController.getMyCompetitions);
 
+// 學生自行填寫競賽簡述與上傳照片
+router.put('/:id/student-update', competitionsController.studentUpdate);
+
 // 取得指定學生的競賽記錄 (管理員/職員)
 router.get('/student/:studentId', authorize('admin', 'staff', 'teacher'), competitionsController.getStudentCompetitions);
 

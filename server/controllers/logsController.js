@@ -1,5 +1,15 @@
 const db = require('../config/db');
 
+// 以「當地時區」格式化日期字串（YYYY-MM-DD）。
+// 不可用 date.toISOString().split('T')[0]：toISOString() 會先轉成 UTC，
+// 在台灣時區（UTC+8）的凌晨 00:00-07:59 執行時會誤算成前一天。
+function formatLocalDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 // =====================
 // 自動建立日誌記錄
 // =====================
@@ -8,7 +18,7 @@ const db = require('../config/db');
 exports.autoCreatePendingLogs = async () => {
   try {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = formatLocalDate(now);
     const currentTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
     const currentDayOfWeek = now.getDay(); // 0-6 (Sunday-Saturday)
 
@@ -77,7 +87,7 @@ exports.autoCreatePendingLogs = async () => {
       for (let daysAgo = 1; daysAgo <= 7; daysAgo++) {
         const pastDate = new Date(now);
         pastDate.setDate(pastDate.getDate() - daysAgo);
-        const pastDateStr = pastDate.toISOString().split('T')[0];
+        const pastDateStr = formatLocalDate(pastDate);
         const pastDayOfWeek = pastDate.getDay();
 
         if (schedule.day_of_week === pastDayOfWeek) {
@@ -159,7 +169,7 @@ exports.autoCreateMyLogs = async (req, res) => {
 
     const teacherId = teacher.id;
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = formatLocalDate(now);
     const currentTime = now.toTimeString().split(' ')[0];
     const currentDayOfWeek = now.getDay();
 
@@ -214,7 +224,7 @@ exports.autoCreateMyLogs = async (req, res) => {
       for (let daysAgo = 1; daysAgo <= 7; daysAgo++) {
         const pastDate = new Date(now);
         pastDate.setDate(pastDate.getDate() - daysAgo);
-        const pastDateStr = pastDate.toISOString().split('T')[0];
+        const pastDateStr = formatLocalDate(pastDate);
         const pastDayOfWeek = pastDate.getDay();
 
         if (schedule.day_of_week === pastDayOfWeek) {
@@ -568,7 +578,7 @@ function getExpectedDates(startDate, endDate, dayOfWeek) {
 
   while (current <= end) {
     if (current.getDay() === dayOfWeek) {
-      dates.push(current.toISOString().split('T')[0]);
+      dates.push(formatLocalDate(current));
     }
     current.setDate(current.getDate() + 1);
   }
@@ -621,8 +631,8 @@ exports.getScheduleDates = async (req, res) => {
     const defaultEnd = new Date(today);
     defaultEnd.setDate(defaultEnd.getDate() + 7);
 
-    const startDateStr = start_date || defaultStart.toISOString().split('T')[0];
-    const endDateStr = end_date || defaultEnd.toISOString().split('T')[0];
+    const startDateStr = start_date || formatLocalDate(defaultStart);
+    const endDateStr = end_date || formatLocalDate(defaultEnd);
 
     // 計算該日期範圍內的上課日期
     const expectedDates = getExpectedDates(startDateStr, endDateStr, schedule.day_of_week);
@@ -687,10 +697,10 @@ exports.getAll = async (req, res) => {
 
     // 設定日期範圍
     const today = new Date();
-    const defaultEnd = today.toISOString().split('T')[0];
+    const defaultEnd = formatLocalDate(today);
     const defaultStart = new Date(today);
     defaultStart.setDate(defaultStart.getDate() - 30);
-    const startDateStr = start_date || defaultStart.toISOString().split('T')[0];
+    const startDateStr = start_date || formatLocalDate(defaultStart);
     const endDateStr = end_date || defaultEnd;
 
     // 步驟1: 取得日期範圍內所有的排程
@@ -736,12 +746,13 @@ exports.getAll = async (req, res) => {
     const allExpectedLogs = [];
     const startD = new Date(startDateStr);
     const endD = new Date(endDateStr);
+    const todayStr = formatLocalDate(today);
 
     for (const schedule of schedules) {
       const current = new Date(startD);
       while (current <= endD) {
-        if (current.getDay() === schedule.day_of_week && current <= today) {
-          const dateStr = current.toISOString().split('T')[0];
+        const dateStr = formatLocalDate(current);
+        if (current.getDay() === schedule.day_of_week && dateStr <= todayStr) {
           allExpectedLogs.push({
             schedule_id: schedule.schedule_id,
             course_id: schedule.course_id,
@@ -814,7 +825,7 @@ exports.getAll = async (req, res) => {
     // 計算7天前的日期（自動建立的範圍）
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+    const sevenDaysAgoStr = formatLocalDate(sevenDaysAgo);
 
     for (const expected of allExpectedLogs) {
       const key = `${expected.schedule_id}_${expected.log_date}`;

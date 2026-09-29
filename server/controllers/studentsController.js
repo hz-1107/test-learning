@@ -407,6 +407,73 @@ exports.getPoints = async (req, res) => {
   }
 };
 
+// 取得指定學生的課程紀錄 (教職員用，例如教師端學生檔案彈窗的學習成就分頁)
+exports.getStudentRecords = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const offset = (page - 1) * limit;
+
+    const student = await db.queryOne('SELECT id FROM students WHERE id = ?', [id]);
+    if (!student) {
+      return res.status(404).json({ success: false, message: '找不到學生' });
+    }
+
+    // 註: LIMIT/OFFSET 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
+    // (mysql2 prepared statement 對 LIMIT/OFFSET 使用佔位符在部分版本會出錯)
+    const records = await db.query(`
+      SELECT
+        slr.id, slr.log_id, slr.attendance, slr.performance, slr.notes, slr.points_earned,
+        slr.skill_programming, slr.skill_debugging, slr.skill_creativity,
+        slr.skill_structure, slr.skill_teamwork,
+        DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, cl.topic, cl.content,
+        c.name as course_name, ct.name as course_type_name,
+        u.name as teacher_name
+      FROM student_log_records slr
+      JOIN course_logs cl ON slr.log_id = cl.id
+      JOIN courses c ON cl.course_id = c.id
+      LEFT JOIN course_types ct ON c.course_type_id = ct.id
+      LEFT JOIN teachers t ON cl.teacher_id = t.id
+      LEFT JOIN users u ON t.user_id = u.id
+      WHERE slr.student_id = ?
+      ORDER BY cl.log_date DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `, [id]);
+
+    for (const record of records) {
+      record.photos = await db.query(
+        'SELECT id, photo_url, caption FROM student_log_photos WHERE record_id = ?',
+        [record.id]
+      );
+    }
+
+    const countResult = await db.queryOne(`
+      SELECT COUNT(*) as total
+      FROM student_log_records slr
+      JOIN course_logs cl ON slr.log_id = cl.id
+      JOIN courses c ON cl.course_id = c.id
+      WHERE slr.student_id = ?
+    `, [id]);
+
+    res.json({
+      success: true,
+      data: {
+        records,
+        pagination: {
+          page,
+          limit,
+          total: countResult.total,
+          totalPages: Math.ceil(countResult.total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('取得學生課程紀錄錯誤:', error);
+    res.status(500).json({ success: false, message: '伺服器錯誤' });
+  }
+};
+
 // =====================
 // 學生本人自助功能
 // =====================

@@ -24,13 +24,22 @@ const storage = multer.diskStorage({
   }
 });
 
-// 檔案過濾器 - 只允許圖片
+// 檔案過濾器 - 允許圖片，以及部分頁面（如競賽證明文件）UI 上已承諾支援的 PDF / Word 文件
+// 注意：圖片格式需涵蓋手機相機常見輸出（如 iPhone 的 HEIC/HEIF），否則會出現
+// 「選完照片後上傳被靜默拒絕、畫面立刻恢復成未選檔狀態」的情況，使用者體感像是閃退
+const allowedTypes = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+  'image/heic', 'image/heif', 'image/bmp', 'image/x-ms-bmp',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('只允許上傳圖片檔案 (JPEG, PNG, GIF, WebP)'), false);
+    cb(new Error('不支援此檔案格式，請上傳 JPG、PNG、HEIC、PDF 或 Word 文件'), false);
   }
 };
 

@@ -602,12 +602,11 @@
         document.getElementById('teacherName').textContent = userName + ' 老師';
       }
 
-      // 設定日期篩選器為當月
+      // 設定日期篩選器為「本月月初至今日」
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       document.getElementById('startDate').value = formatLocalDate(firstDay);
-      document.getElementById('endDate').value = formatLocalDate(lastDay);
+      document.getElementById('endDate').value = formatLocalDate(now);
 
       // 自動建立已開始課程的日誌，然後載入列表
       autoCreateAndLoadClasses();

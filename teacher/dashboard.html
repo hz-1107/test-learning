@@ -125,6 +125,36 @@
       margin-bottom: var(--spacing-md);
     }
 
+    .journal-section__badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .journal-section__badges:empty {
+      display: none;
+    }
+
+    .journal-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .journal-badge--in-progress {
+      background: rgba(59, 130, 246, 0.12);
+      color: #2563eb;
+    }
+
+    .journal-badge--not-started {
+      background: rgba(245, 158, 11, 0.14);
+      color: #b45309;
+    }
+
     .journal-section__link {
       font-size: var(--font-size-sm);
       color: var(--color-primary-dark);
@@ -298,6 +328,7 @@
     <main class="main-content">
       <!-- 歡迎區塊 -->
       <section class="welcome-section">
+        <h2 class="welcome-section__title" id="welcomeTitle">您好，老師</h2>
         <p class="welcome-section__date" id="currentDate">載入中...</p>
       </section>
 
@@ -345,6 +376,8 @@
             <h3 class="journal-section__title">待填寫日誌</h3>
             <a href="records.html" class="journal-section__link">查看全部</a>
           </div>
+
+          <div class="journal-section__badges" id="journalBadges"></div>
 
           <div class="journal-section__content" id="journalContent">
             <div style="text-align: center; padding: 20px; color: #6a7282;">載入中...</div>
@@ -397,6 +430,14 @@
     let userName = '老師';
     const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
 
+    // 以「當地時區」格式化日期字串（YYYY-MM-DD），避免 toISOString() 轉為 UTC 導致凌晨時段日期少算一天
+    function formatLocalDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
     // 更新日期顯示和歡迎訊息
     function updateWelcome() {
       const now = new Date();
@@ -404,7 +445,15 @@
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
       const dayOfWeek = dayNames[now.getDay()];
+      const hour = now.getHours();
 
+      // 問候語
+      let greeting = '您好';
+      if (hour >= 5 && hour < 12) greeting = '早安';
+      else if (hour >= 12 && hour < 18) greeting = '午安';
+      else greeting = '晚安';
+
+      document.getElementById('welcomeTitle').textContent = `${greeting}，${userName} 老師`;
       document.getElementById('currentDate').textContent = `${year} / ${month} / ${day} (${dayOfWeek})`;
     }
 
@@ -494,8 +543,7 @@
       }
 
       // 取得今天日期字串
-      const todayDate = new Date();
-      const todayDateStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
+      const todayDateStr = formatLocalDate(new Date());
 
       let html = '';
 
@@ -582,8 +630,9 @@
         startDate.setDate(now.getDate() - 14);
         const endDate = new Date(now);
 
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
+        const startDateStr = formatLocalDate(startDate);
+        const endDateStr = formatLocalDate(endDate);
+        const todayStr = formatLocalDate(now);
 
         const logResponse = await apiRequest(`/logs/my-status?start_date=${startDateStr}&end_date=${endDateStr}`);
         const schedules = logResponse.data?.schedules || [];
@@ -605,8 +654,8 @@
 
             // 如果沒有日誌或日誌未完成
             if (!existingLog || existingLog.status !== 'completed') {
-              // 只顯示今天及之前的（不顯示未來的）
-              if (new Date(dateStr) <= now) {
+              // 只顯示今天及之前的（不顯示未來的）；以本地日期字串比較，避免時區轉換造成當日凌晨被誤判為未來
+              if (dateStr <= todayStr) {
                 incompleteJournals.push({
                   schedule_id: schedule.schedule_id,
                   course_name: schedule.course_name,
@@ -624,6 +673,18 @@
         incompleteJournals.sort((a, b) => {
           return new Date(b.log_date) - new Date(a.log_date);
         });
+
+        // 統計進行中／未完成數量並更新標題旁的徽章
+        // 「未完成」為累積總數（與下方「還有 N 筆未完成」的口徑一致），「進行中」為其中已開始填寫的子集
+        const inProgressCount = incompleteJournals.filter(j => j.status === 'progress' || j.status === 'in_progress').length;
+        const incompleteTotal = incompleteJournals.length;
+        const journalBadges = document.getElementById('journalBadges');
+        if (journalBadges) {
+          journalBadges.innerHTML = incompleteTotal > 0 ? `
+            <span class="journal-badge journal-badge--in-progress">進行中 ${inProgressCount}</span>
+            <span class="journal-badge journal-badge--not-started">未完成 ${incompleteTotal}</span>
+          ` : '';
+        }
 
         // 清空內容
         journalContent.innerHTML = '';
@@ -645,7 +706,7 @@
         // 顯示未完成的日誌（最多顯示 5 筆）
         incompleteJournals.slice(0, 5).forEach(journal => {
           const logDate = new Date(journal.log_date);
-          const daysDiff = Math.floor((now - logDate) / (1000 * 60 * 60 * 24));
+          const daysDiff = Math.round((new Date(todayStr) - new Date(journal.log_date)) / (1000 * 60 * 60 * 24));
 
           let dateLabel = '';
           if (daysDiff === 0) dateLabel = '今天';
@@ -681,6 +742,8 @@
 
       } catch (error) {
         console.warn('取得日誌狀態失敗:', error);
+        const journalBadges = document.getElementById('journalBadges');
+        if (journalBadges) journalBadges.innerHTML = '';
         journalContent.innerHTML = `
           <div style="text-align: center; padding: 20px; color: #dc2626;">
             載入失敗: ${error.message}
@@ -698,7 +761,7 @@
 
       while (current <= end) {
         if (current.getDay() === dayOfWeek) {
-          dates.push(current.toISOString().split('T')[0]);
+          dates.push(formatLocalDate(current));
         }
         current.setDate(current.getDate() + 1);
       }
