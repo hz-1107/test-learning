@@ -7,7 +7,11 @@ exports.getAll = async (req, res) => {
     const { status, search } = req.query;
 
     let sql = `
-      SELECT t.*, t.hire_date, u.username, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active
+      SELECT t.*, t.hire_date, u.username, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active,
+        (SELECT COUNT(*) FROM course_logs cl
+         WHERE cl.teacher_id = t.id
+           AND cl.log_date <= CURDATE()
+           AND (cl.status IS NULL OR cl.status <> 'completed')) AS incomplete_logs_count
       FROM teachers t
       JOIN users u ON t.user_id = u.id
       WHERE 1=1

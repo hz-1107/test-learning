@@ -341,6 +341,27 @@
       color: var(--color-text-secondary);
     }
 
+    .teacher-card__log-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .teacher-card__log-status--ok {
+      background: #f0fdf4;
+      color: #15803d;
+    }
+
+    .teacher-card__log-status strong {
+      font-weight: 700;
+    }
+
     @media (max-width: 1200px) {
       .teacher-grid {
         grid-template-columns: 1fr;
@@ -534,7 +555,7 @@
         <a href="points.html" class="staff-sidebar__nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           點數管理
-        </a>
+        </a>
       </nav>
       <div class="staff-sidebar__footer">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -957,6 +978,7 @@
           const firstChar = teacher.name ? teacher.name.charAt(0) : '?';
           const birthday = teacher.birthday ? teacher.birthday.split('T')[0] : '未設定';
           const hireDate = teacher.hire_date ? teacher.hire_date.split('T')[0] : '未設定';
+          const incompleteLogs = Number(teacher.incomplete_logs_count) || 0;
           return `
           <div class="teacher-card">
             <div class="teacher-card__header">
@@ -991,6 +1013,15 @@
             <div class="teacher-card__bio">
               ${teacher.notes || '無備註'}
             </div>
+            ${incompleteLogs > 0 ? `
+            <div class="teacher-card__log-status">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="19" x2="12.01" y2="19"/></svg>
+              至今尚有 <strong>${incompleteLogs}</strong> 則上課日誌未完成
+            </div>` : `
+            <div class="teacher-card__log-status teacher-card__log-status--ok">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              上課日誌皆已完成
+            </div>`}
           </div>
         `}).join('');
       } catch (error) {
