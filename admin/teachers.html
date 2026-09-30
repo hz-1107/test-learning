@@ -3087,7 +3087,7 @@
     // 課堂出缺席與表現紀錄：比照現有 LOGS 假資料模式，僅作示範資料
     function getLogDetail(log) {
       return {
-        classroom: log.id % 2 === 0 ? '沙鹿' : '西屯',
+        classroom: log.id % 2 === 0 ? '沙鹿708' : '西屯263',
         topic: LOG_TOPICS[log.course] || '課程主題示範內容',
         outline: LOG_OUTLINES[log.course] || LOG_OUTLINES['動力機械'],
         notesType: 'normal', // 'normal' | 'time' | 'teacher'

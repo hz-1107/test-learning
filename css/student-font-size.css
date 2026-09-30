@@ -1,0 +1,20 @@
+/* ========================================
+   學生端 - 字體放大覆寫
+   僅套用於 student/ 頁面，放大共用變數字級，
+   提升可讀性；不影響 admin / teacher / staff 端。
+   ======================================== */
+
+:root {
+  --font-size-xs: 13px;   /* 原 10px */
+  --font-size-sm: 15px;   /* 原 12px */
+  --font-size-md: 17px;   /* 原 14px */
+  --font-size-lg: 19px;   /* 原 16px */
+  --font-size-xl: 21px;   /* 原 18px */
+  --font-size-2xl: 28px;  /* 原 24px */
+  --font-size-3xl: 34px;  /* 原 30px */
+  --font-size-4xl: 52px;  /* 原 48px */
+}
+
+body {
+  font-size: var(--font-size-md);
+}

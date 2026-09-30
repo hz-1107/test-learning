@@ -71,6 +71,7 @@ CREATE TABLE students (
 CREATE TABLE classrooms (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
+    location VARCHAR(50) COMMENT '地點（如 西屯、沙鹿）',
     address TEXT,
     capacity INT DEFAULT 20,
     is_active BOOLEAN DEFAULT TRUE,
@@ -284,9 +285,9 @@ CREATE TABLE notification_settings (
 -- ============================================
 
 -- 插入預設教室
-INSERT INTO classrooms (name, address) VALUES
-('西屯教室', '台中市西屯區西屯路二段123號'),
-('沙鹿教室', '台中市沙鹿區中山路456號');
+INSERT INTO classrooms (name, location, address) VALUES
+('西屯263', '西屯', '台中市西屯區西屯路二段123號'),
+('沙鹿708', '沙鹿', '台中市沙鹿區中山路456號');
 
 -- 插入預設課程類型
 INSERT INTO course_types (name, color) VALUES

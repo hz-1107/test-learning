@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學習概況 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/student-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -339,7 +340,7 @@
       padding: 4px 15px;          
       background: var(--color-primary);
       border-radius: 18px;        
-      font-size: 15px;            
+      font-size: 17px;            
       font-weight: 600;          
       color: var(--color-primary-dark);
     }
@@ -351,12 +352,12 @@
     }
 
     .class-card__subtitle {
-      font-size: 16px;
+      font-size: 18px;
       color: var(--color-text-secondary);
     }
 
     .class-card__meta {
-      font-size: 17px;
+      font-size: 19px;
       color: var(--color-text-muted);
       color: var(--color-text-primary);
     }
@@ -377,23 +378,31 @@
     .class-card-back {
       display: flex;
       flex-direction: column;
-      padding: var(--spacing-lg);
+      padding: 0 var(--spacing-sm); /* 外層 stat-card 已有上下內距，避免重複扣掉文字區高度 */
       height: 100%;
+      box-sizing: border-box;
     }
 
     .class-card-back__header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: var(--spacing-md);
-      margin-top: -32px;
+      margin-bottom: var(--spacing-sm);
+      margin-top: -8px;
+    }
+
+    /* 「返回班級資訊」放到卡片底部內距區，讓出空間給近期表現文字 */
+    .class-card-back > .flip-card__link {
+      position: absolute;
+      right: var(--spacing-sm);
+      bottom: -12px;
     }
 
     .class-card-back__tag {
       padding: 4px 15px;
       background: var(--color-primary);
       border-radius: 18px;
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 600;
       color: var(--color-primary-dark);
     }
@@ -405,10 +414,15 @@
 
     .class-card-back__content {
       flex: 1;
-      font-size: 17px;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-wrap: anywhere;
+      font-size: 16px;
       color: var(--color-text-primary);
-      line-height: 1.7;
-      margin-left: 12px;
+      line-height: 1.55;
+      margin: 0 0 12px 12px;
+      padding-right: 6px;
+      scrollbar-width: thin;
     }
 
     /* 點數卡片 */
@@ -1279,7 +1293,7 @@
                   </div>
                   <div class="flip-card__back recommendation-card" style="position: absolute; width: 100%; height: 100%;">
                     <span class="recommendation-card__tag">完整分析</span>
-                    <p class="recommendation-card__description" style="font-size: 13px;">
+                    <p class="recommendation-card__description" style="font-size: 15px;">
                       依據您的程式設計與除錯能力表現，電機工程系是最適合的選擇。建議加強結構設計與團隊合作能力。
                     </p>
                     <div class="flip-card__link" onclick="toggleFlipCard('careerFlipCard')">返回推薦</div>
@@ -1299,7 +1313,7 @@
                   </div>
                   <div class="flip-card__back recommendation-card" style="position: absolute; width: 100%; height: 100%;">
                     <span class="recommendation-card__tag">出路分析</span>
-                    <p class="recommendation-card__description" style="font-size: 13px;">
+                    <p class="recommendation-card__description" style="font-size: 15px;">
                       <strong>就業方向：</strong>半導體工程師、軟體工程師、系統整合工程師、AI研究員、通訊工程師等。<br><br>
                       <strong>薪資範圍：</strong>新鮮人起薪約 45,000-60,000 元
                     </p>
@@ -1318,6 +1332,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../js/student-chart-fonts.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>window.axios || document.write('<script src="../js/axios.min.js"><\/script>')</script>
   <script src="../js/api.js"></script>
@@ -1437,7 +1452,7 @@
 
     // 渲染出缺勤 / 學習階段卡片
     function renderStageCard(me) {
-      document.getElementById('stageCourseTypeName').textContent = me.enrollment ? me.enrollment.course_type_name : '尚未分班';
+      document.getElementById('stageCourseTypeName').textContent = me.enrollment ? (me.enrollment.course_type_name || me.enrollment.course_name) : '尚未分班';
       document.getElementById('stageLessonCount').textContent = me.attendance.totalLessons;
       document.getElementById('badgeLeaveCount').textContent = me.attendance.stats.excused;
       // 「待補課」以缺席堂數估算 (資料庫暫無獨立補課欄位)
@@ -1454,7 +1469,7 @@
 
       if (me.enrollment) {
         const e = me.enrollment;
-        titleEl.innerHTML = `${e.course_type_name}<span class="class-card__subtitle" style="margin-left: 8px; font-weight: 400;">課程</span>`;
+        titleEl.innerHTML = `${e.course_type_name || e.course_name}<span class="class-card__subtitle" style="margin-left: 8px; font-weight: 400;">課程</span>`;
         if (e.day_of_week !== null && e.day_of_week !== undefined) {
           scheduleEl.textContent = `星期${WEEKDAY_NAMES[e.day_of_week]} ${formatTimeHM(e.start_time)} ${e.classroom_name || ''}`;
         } else {
@@ -1542,7 +1557,7 @@
               ticks: { stepSize: 1, display: false },
               grid: { color: '#e5e7eb' },
               angleLines: { color: '#e5e7eb' },
-              pointLabels: { font: { size: 13, weight: '500' }, color: '#1a1c1c' }
+              pointLabels: { font: { size: 16, weight: '500' }, color: '#1a1c1c' }
             }
           },
           plugins: { legend: { display: false } },
@@ -1557,7 +1572,7 @@
       const labelEl = document.getElementById('courseDropdownLabel');
       const history = me.courseHistory && me.courseHistory.length
         ? me.courseHistory
-        : (me.enrollment ? [{ course_id: me.enrollment.course_id, course_name: me.enrollment.course_type_name }] : []);
+        : (me.enrollment ? [{ course_id: me.enrollment.course_id, course_name: me.enrollment.course_type_name || me.enrollment.course_name }] : []);
 
       if (!history.length) {
         labelEl.textContent = '尚無課程';

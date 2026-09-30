@@ -1,5 +1,14 @@
 const db = require('../config/db');
 
+// 課程僅為開課資訊，不綁定教室；教室由班級（course_schedules）決定。
+// 課程層級顯示的教室 = 其啟用中班級所使用的教室（去重複，以「、」串接）。
+const CLASS_CLASSROOMS_SQL = `(
+  SELECT GROUP_CONCAT(DISTINCT cr.name ORDER BY cr.name SEPARATOR '、')
+  FROM course_schedules cs
+  JOIN classrooms cr ON cs.classroom_id = cr.id
+  WHERE cs.course_id = c.id AND cs.is_active = TRUE
+)`;
+
 // 取得所有課程
 exports.getAll = async (req, res) => {
   try {
@@ -11,7 +20,7 @@ exports.getAll = async (req, res) => {
         ct.name as course_type,
         ct.color as course_color,
         u.name as teacher_name,
-        cr.name as classroom_name,
+        ${CLASS_CLASSROOMS_SQL} as classroom_names,
         (SELECT COUNT(*) FROM course_enrollments ce
          JOIN course_schedules cs ON ce.schedule_id = cs.id
          WHERE cs.course_id = c.id AND ce.status = 'enrolled') as enrolled_count
@@ -19,7 +28,6 @@ exports.getAll = async (req, res) => {
       LEFT JOIN course_types ct ON c.course_type_id = ct.id
       LEFT JOIN teachers t ON c.teacher_id = t.id
       LEFT JOIN users u ON t.user_id = u.id
-      LEFT JOIN classrooms cr ON c.classroom_id = cr.id
       WHERE 1=1
     `;
     const params = [];
@@ -34,8 +42,9 @@ exports.getAll = async (req, res) => {
       params.push(teacher_id);
     }
 
+    // 教室篩選：課程底下有任一啟用中的班級在此教室上課
     if (classroom_id) {
-      sql += ' AND c.classroom_id = ?';
+      sql += ' AND EXISTS (SELECT 1 FROM course_schedules cs WHERE cs.course_id = c.id AND cs.is_active = TRUE AND cs.classroom_id = ?)';
       params.push(classroom_id);
     }
 
@@ -72,12 +81,11 @@ exports.getOne = async (req, res) => {
         ct.name as course_type,
         ct.color as course_color,
         u.name as teacher_name,
-        cr.name as classroom_name
+        ${CLASS_CLASSROOMS_SQL} as classroom_names
       FROM courses c
       LEFT JOIN course_types ct ON c.course_type_id = ct.id
       LEFT JOIN teachers t ON c.teacher_id = t.id
       LEFT JOIN users u ON t.user_id = u.id
-      LEFT JOIN classrooms cr ON c.classroom_id = cr.id
       WHERE c.id = ?
     `, [id]);
 
@@ -131,7 +139,7 @@ exports.create = async (req, res) => {
     console.log('收到的資料:', req.body); // 除錯用
     const {
       name, description, age_range, course_type_id, teacher_id,
-      classroom_id, max_students, fee, status, schedules
+      max_students, fee, status, schedules
     } = req.body;
 
     if (!name) {
@@ -141,18 +149,19 @@ exports.create = async (req, res) => {
       });
     }
 
+    // 課程不綁定教室（courses.classroom_id 保留為 NULL），教室設定於班級
     const courseId = await db.insert(`
       INSERT INTO courses (
         name, description, age_range, course_type_id, teacher_id,
-        classroom_id, max_students, fee, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        max_students, fee, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       name, description || null, age_range || null, course_type_id || null,
-      teacher_id || null, classroom_id || null,
+      teacher_id || null,
       max_students || 10, fee || 0, status || 'active'
     ]);
 
-    // 新增課程時段
+    // 新增課程時段（班級），教室以班級各自設定為準
     if (schedules && schedules.length > 0) {
       for (const schedule of schedules) {
         await db.insert(`
@@ -161,7 +170,7 @@ exports.create = async (req, res) => {
           ) VALUES (?, ?, ?, ?, ?)
         `, [
           courseId, schedule.day_of_week, schedule.start_time,
-          schedule.end_time, schedule.classroom_id || classroom_id || null
+          schedule.end_time, schedule.classroom_id || null
         ]);
       }
     }
@@ -202,7 +211,6 @@ exports.update = async (req, res) => {
     const age_range = updates.age_range !== undefined ? updates.age_range : course.age_range;
     const course_type_id = updates.course_type_id !== undefined ? updates.course_type_id : course.course_type_id;
     const teacher_id = updates.teacher_id !== undefined ? updates.teacher_id : course.teacher_id;
-    const classroom_id = updates.classroom_id !== undefined ? updates.classroom_id : course.classroom_id;
     const max_students = updates.max_students !== undefined ? updates.max_students : course.max_students;
     const fee = updates.fee !== undefined ? updates.fee : course.fee;
     const status = updates.status !== undefined ? updates.status : course.status;
@@ -210,11 +218,11 @@ exports.update = async (req, res) => {
     await db.update(`
       UPDATE courses SET
         name = ?, description = ?, age_range = ?, course_type_id = ?, teacher_id = ?,
-        classroom_id = ?, max_students = ?, fee = ?, status = ?
+        max_students = ?, fee = ?, status = ?
       WHERE id = ?
     `, [
       name, description || null, age_range || null, course_type_id || null,
-      teacher_id || null, classroom_id || null,
+      teacher_id || null,
       max_students || 10, fee || 0, status || 'active', id
     ]);
 

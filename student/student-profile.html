@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查看完整檔案 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/student-font-size.css">
 </head>
 <body>
   <div class="student-page">
@@ -106,7 +107,7 @@
                   <span class="profile-info-title">歷史課程</span>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 8px;" id="courseHistoryList">
-                  <span style="font-size: 13px; color: var(--color-text-muted);">載入中...</span>
+                  <span style="font-size: 15px; color: var(--color-text-muted);">載入中...</span>
                 </div>
               </div>
             </aside>
@@ -158,8 +159,8 @@
                     <span class="trend-filter-label">日期區間</span>
                     <button class="trend-btn" onclick="setTrendRange(this, 6)">近 6 週</button>
                     <button class="trend-btn trend-btn--active" onclick="setTrendRange(this, 12)">近 12 週</button>
-                    <input type="date" class="trend-date-input" id="profileTrendStart" style="padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-surface-alt); font-size: 12px;">
-                    <input type="date" class="trend-date-input" id="profileTrendEnd" style="padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-surface-alt); font-size: 12px;">
+                    <input type="date" class="trend-date-input" id="profileTrendStart" style="padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-surface-alt); font-size: 14px;">
+                    <input type="date" class="trend-date-input" id="profileTrendEnd" style="padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-surface-alt); font-size: 14px;">
                     <button class="trend-btn" onclick="applyProfileCustomRange()">套用</button>
                   </div>
                   <div class="trend-filter-group">
@@ -187,7 +188,7 @@
 
                 <!-- 課程紀錄列表 (由後端 /api/students/me/records 動態載入) -->
                 <div class="achievement-list" id="recordsTab">
-                  <p style="font-size: 13px; color: var(--color-text-muted);">載入中...</p>
+                  <p style="font-size: 15px; color: var(--color-text-muted);">載入中...</p>
                 </div>
 
                 <!-- 競賽經歷列表 -->
@@ -241,6 +242,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../js/student-chart-fonts.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>window.axios || document.write('<script src="../js/axios.min.js"><\/script>')</script>
   <script src="../js/file-url.js"></script>
@@ -319,7 +321,7 @@
       document.getElementById('infoGender').textContent = s.gender === 'male' ? '男' : s.gender === 'female' ? '女' : '—';
       document.getElementById('infoBirthDate').textContent = s.birth_date ? s.birth_date.replace(/-/g, ' / ') : '—';
       document.getElementById('infoPoints').textContent = me.points.balance;
-      document.getElementById('infoCourseStage').textContent = me.enrollment ? me.enrollment.course_type_name : '尚未分班';
+      document.getElementById('infoCourseStage').textContent = me.enrollment ? (me.enrollment.course_type_name || me.enrollment.course_name) : '尚未分班';
 
       // 註: 資料庫 students 表是父母分開存 (parent_name_father/mother 等)，
       // 沒有通用的 parent_name/parent_phone/parent_email 欄位，
@@ -334,15 +336,15 @@
     function renderCourseHistory(me) {
       const listEl = document.getElementById('courseHistoryList');
       if (!me.courseHistory || !me.courseHistory.length) {
-        listEl.innerHTML = '<span style="font-size: 13px; color: var(--color-text-muted);">尚無修課紀錄</span>';
+        listEl.innerHTML = '<span style="font-size: 15px; color: var(--color-text-muted);">尚無修課紀錄</span>';
         return;
       }
       listEl.innerHTML = me.courseHistory.map(c => {
         const isCurrent = me.enrollment && c.course_id === me.enrollment.course_id;
         return `
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 13px;">${c.course_name}</span>
-            <span class="btn ${isCurrent ? 'btn--primary' : 'btn--outline'}" style="padding: 4px 12px; font-size: 12px;">
+            <span style="font-size: 15px;">${c.course_name}</span>
+            <span class="btn ${isCurrent ? 'btn--primary' : 'btn--outline'}" style="padding: 4px 12px; font-size: 14px;">
               ${isCurrent ? '目前課程' : c.status === 'completed' ? '已結業' : '已退選'}
             </span>
           </div>
@@ -389,7 +391,7 @@
               ticks: { stepSize: 1 },
               grid: { color: '#e5e7eb' },
               angleLines: { color: '#e5e7eb' },
-              pointLabels: { font: { size: 12 } }
+              pointLabels: { font: { size: 16 } }
             }
           },
           plugins: { legend: { display: false } },
@@ -509,7 +511,7 @@
         const listEl = document.getElementById('recordsTab');
 
         if (!records.length && page === 1) {
-          listEl.innerHTML = '<p style="font-size: 13px; color: var(--color-text-muted);">尚無課程紀錄</p>';
+          listEl.innerHTML = '<p style="font-size: 15px; color: var(--color-text-muted);">尚無課程紀錄</p>';
         } else {
           const html = records.map(renderRecordItem).join('');
           listEl.innerHTML = append ? listEl.innerHTML + html : html;
