@@ -1461,8 +1461,6 @@
                       <label class="filter-popover__label">教室</label>
                       <select class="filter-popover__select" id="classroomFilterSelect">
                         <option value="">全部</option>
-                        <option value="西屯">西屯</option>
-                        <option value="沙鹿">沙鹿</option>
                       </select>
                     </div>
                     <div class="filter-popover__group">
@@ -1527,7 +1525,7 @@
                     </div>
                   </td>
                   <td class="course-cell"><span class="course-tag">程式機械</span></td>
-                  <td class="classroom-cell">西屯教室</td>
+                  <td class="classroom-cell">西屯263</td>
                   <td class="teacher-cell">陳老師</td>
                   <td>95%</td>
                   <td>88</td>
@@ -1555,7 +1553,7 @@
                     </div>
                   </td>
                   <td class="course-cell"><span class="course-tag">程式機械</span></td>
-                  <td class="classroom-cell">西屯教室</td>
+                  <td class="classroom-cell">西屯263</td>
                   <td class="teacher-cell">陳老師</td>
                   <td>92%</td>
                   <td>91</td>
@@ -1583,7 +1581,7 @@
                     </div>
                   </td>
                   <td class="course-cell"><span class="course-tag">科創機器人</span></td>
-                  <td class="classroom-cell">沙鹿教室</td>
+                  <td class="classroom-cell">沙鹿708</td>
                   <td class="teacher-cell">顏老師</td>
                   <td>78%</td>
                   <td>75</td>
@@ -1642,7 +1640,7 @@
                     <span class="course-tag">科創機器人</span>
                     <span class="course-tag" style="margin-left: 4px;">幼兒簡易機械</span>
                   </td>
-                  <td class="classroom-cell">沙鹿教室</td>
+                  <td class="classroom-cell">沙鹿708</td>
                   <td class="teacher-cell">顏老師</td>
                   <td>89%</td>
                   <td>82</td>
@@ -1927,8 +1925,6 @@
               <label class="edit-form-group__label">教室</label>
               <select class="edit-form-group__select" id="editStudentClassroom">
                 <option value="">請選擇教室</option>
-                <option value="西屯教室">西屯教室</option>
-                <option value="沙鹿教室">沙鹿教室</option>
               </select>
             </div>
             <div class="edit-form-group">
@@ -2115,8 +2111,6 @@
               <label class="edit-form-group__label edit-form-group__label--required">教室</label>
               <select class="edit-form-group__select" id="newStudentClassroom">
                 <option value="">請選擇教室</option>
-                <option value="西屯教室">西屯教室</option>
-                <option value="沙鹿教室">沙鹿教室</option>
               </select>
             </div>
             <div class="edit-form-group">
@@ -2268,13 +2262,39 @@
   <script src="../js/main.js"></script>
   <script src="../js/admin-notifications.js"></script>
   <script>
+    // 教室選單：由系統設定的教室資料載入，與其它頁面名稱一致
+    (async function loadClassroomOptions() {
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      try {
+        const res = await fetch(`${window.API_BASE || 'http://localhost:3000'}/api/settings/classrooms`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const result = await res.json();
+        const names = (result.data || []).map(c => c.name);
+        ['classroomFilterSelect', 'editStudentClassroom', 'newStudentClassroom'].forEach(id => {
+          const select = document.getElementById(id);
+          if (!select) return;
+          names.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+          });
+        });
+      } catch (error) {
+        console.error('載入教室選單失敗:', error);
+      }
+    })();
+
     // 學生完整資料（示範用假資料）
     const STUDENTS = {
-      S001: { name: '張小明', email: 'xiaoming@example.com', gender: '男', phone: '0912-345-678', school: '新光國小', grade: '小一', birthday: '2019 / 05 / 12', enrollDate: '2024 / 09 / 01', courses: ['程式機械'], emergencyContact: '', classroom: '西屯教室', teacher: '陳老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 4, 除錯: 4, 創意: 3, 結構: 3, 團隊合作: 3.5 } },
-      S002: { name: '李美華', email: 'meihua@example.com', gender: '女', phone: '0923-456-789', school: '新光國小', grade: '幼兒園', birthday: '2020 / 01 / 30', enrollDate: '2024 / 09 / 01', courses: ['程式機械', '科創機器人'], emergencyContact: '', classroom: '西屯教室', teacher: '陳老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '該生因家庭因素，繳費發票需開立統編...', history: [{ date: '2026/04/15', text: '帳號建立（由 嚴大明 建立）' }, { date: '2026/05/01', text: '權限變更：新增 [科創機器人] 課程' }], abilities: { 程式: 4.5, 除錯: 4, 創意: 3.5, 結構: 3, 團隊合作: 4 } },
-      S003: { name: '王大明', email: 'daming@example.com', gender: '男', phone: '0934-567-890', school: '新光國小', grade: '小一', birthday: '2019 / 11 / 03', enrollDate: '2024 / 09 / 01', courses: ['科創機器人'], emergencyContact: '', classroom: '沙鹿教室', teacher: '顏老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 3, 除錯: 2.5, 創意: 3.5, 結構: 2.5, 團隊合作: 2 } },
+      S001: { name: '張小明', email: 'xiaoming@example.com', gender: '男', phone: '0912-345-678', school: '新光國小', grade: '小一', birthday: '2019 / 05 / 12', enrollDate: '2024 / 09 / 01', courses: ['程式機械'], emergencyContact: '', classroom: '西屯263', teacher: '陳老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 4, 除錯: 4, 創意: 3, 結構: 3, 團隊合作: 3.5 } },
+      S002: { name: '李美華', email: 'meihua@example.com', gender: '女', phone: '0923-456-789', school: '新光國小', grade: '幼兒園', birthday: '2020 / 01 / 30', enrollDate: '2024 / 09 / 01', courses: ['程式機械', '科創機器人'], emergencyContact: '', classroom: '西屯263', teacher: '陳老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '該生因家庭因素，繳費發票需開立統編...', history: [{ date: '2026/04/15', text: '帳號建立（由 嚴大明 建立）' }, { date: '2026/05/01', text: '權限變更：新增 [科創機器人] 課程' }], abilities: { 程式: 4.5, 除錯: 4, 創意: 3.5, 結構: 3, 團隊合作: 4 } },
+      S003: { name: '王大明', email: 'daming@example.com', gender: '男', phone: '0934-567-890', school: '新光國小', grade: '小一', birthday: '2019 / 11 / 03', enrollDate: '2024 / 09 / 01', courses: ['科創機器人'], emergencyContact: '', classroom: '沙鹿708', teacher: '顏老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 3, 除錯: 2.5, 創意: 3.5, 結構: 2.5, 團隊合作: 2 } },
       S004: { name: '陳小芳', email: 'xiaofang@example.com', gender: '女', phone: '0945-678-901', school: '新光國小', grade: '幼兒園', birthday: '2020 / 03 / 22', enrollDate: '2024 / 09 / 01', courses: [], emergencyContact: '', classroom: '', teacher: '', classType: '', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 4.5, 除錯: 4.5, 創意: 4, 結構: 4, 團隊合作: 4.5 } },
-      S005: { name: '林志豪', email: 'zhihao@example.com', gender: '男', phone: '0956-789-012', school: '新光國小', grade: '小一', birthday: '2019 / 08 / 17', enrollDate: '2024 / 09 / 01', courses: ['科創機器人', '幼兒簡易機械'], emergencyContact: '', classroom: '沙鹿教室', teacher: '顏老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 3.5, 除錯: 3.5, 創意: 4, 結構: 3, 團隊合作: 3.5 } }
+      S005: { name: '林志豪', email: 'zhihao@example.com', gender: '男', phone: '0956-789-012', school: '新光國小', grade: '小一', birthday: '2019 / 08 / 17', enrollDate: '2024 / 09 / 01', courses: ['科創機器人', '幼兒簡易機械'], emergencyContact: '', classroom: '沙鹿708', teacher: '顏老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 3.5, 除錯: 3.5, 創意: 4, 結構: 3, 團隊合作: 3.5 } }
     };
 
     const ALL_COURSES = ['程式機械', '科創機器人', '動力機械', '幼兒簡易機械'];

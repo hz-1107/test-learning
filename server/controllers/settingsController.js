@@ -67,7 +67,8 @@ exports.getHolidays = async (req, res) => {
     const params = [];
 
     if (year) {
-      sql += ' AND YEAR(holiday_date) = ?';
+      // 每年重複的假日不受年份限制
+      sql += ' AND (YEAR(holiday_date) = ? OR is_recurring = 1)';
       params.push(year);
     }
 
@@ -96,7 +97,7 @@ exports.getHolidays = async (req, res) => {
 // 新增假日
 exports.createHoliday = async (req, res) => {
   try {
-    const { holiday_date, name, type } = req.body;
+    const { holiday_date, name, type, is_recurring } = req.body;
 
     if (!holiday_date || !name) {
       return res.status(400).json({
@@ -119,8 +120,8 @@ exports.createHoliday = async (req, res) => {
     }
 
     const id = await db.insert(
-      'INSERT INTO holidays (holiday_date, name, type) VALUES (?, ?, ?)',
-      [holiday_date, name, type || 'custom']
+      'INSERT INTO holidays (holiday_date, name, type, is_recurring) VALUES (?, ?, ?, ?)',
+      [holiday_date, name, type || 'custom', is_recurring ? 1 : 0]
     );
 
     res.status(201).json({
@@ -155,8 +156,8 @@ exports.importHolidays = async (req, res) => {
     for (const holiday of holidays) {
       try {
         await db.insert(
-          'INSERT INTO holidays (holiday_date, name, type) VALUES (?, ?, ?)',
-          [holiday.holiday_date, holiday.name, holiday.type || 'national']
+          'INSERT INTO holidays (holiday_date, name, type, is_recurring) VALUES (?, ?, ?, ?)',
+          [holiday.holiday_date, holiday.name, holiday.type || 'national', holiday.is_recurring ? 1 : 0]
         );
         imported++;
       } catch (err) {
@@ -187,11 +188,11 @@ exports.importHolidays = async (req, res) => {
 exports.updateHoliday = async (req, res) => {
   try {
     const { id } = req.params;
-    const { holiday_date, name, type } = req.body;
+    const { holiday_date, name, type, is_recurring } = req.body;
 
     await db.update(
-      'UPDATE holidays SET holiday_date = ?, name = ?, type = ? WHERE id = ?',
-      [holiday_date, name, type || 'custom', id]
+      'UPDATE holidays SET holiday_date = ?, name = ?, type = ?, is_recurring = ? WHERE id = ?',
+      [holiday_date, name, type || 'custom', is_recurring ? 1 : 0, id]
     );
 
     res.json({
@@ -281,12 +282,16 @@ exports.updateNotificationSetting = async (req, res) => {
 // 教室管理
 // =====================
 
-// 取得所有教室
+// 取得所有教室（含使用中班級數，供刪除前判斷；教室由班級決定，課程不綁定教室）
 exports.getClassrooms = async (req, res) => {
   try {
-    const classrooms = await db.query(
-      'SELECT * FROM classrooms WHERE is_active = TRUE ORDER BY name'
-    );
+    const classrooms = await db.query(`
+      SELECT cr.*,
+        (SELECT COUNT(*) FROM course_schedules cs WHERE cs.classroom_id = cr.id AND cs.is_active = TRUE) AS active_classes_count
+      FROM classrooms cr
+      WHERE cr.is_active = TRUE
+      ORDER BY cr.location, cr.name
+    `);
 
     res.json({
       success: true,
@@ -301,21 +306,40 @@ exports.getClassrooms = async (req, res) => {
   }
 };
 
+// 檢查同名教室（僅比對啟用中的教室）
+async function findDuplicateClassroom(name, excludeId = null) {
+  let sql = 'SELECT id FROM classrooms WHERE name = ? AND is_active = TRUE';
+  const params = [name];
+  if (excludeId) {
+    sql += ' AND id <> ?';
+    params.push(excludeId);
+  }
+  return db.queryOne(sql, params);
+}
+
 // 新增教室
 exports.createClassroom = async (req, res) => {
   try {
-    const { name, address, capacity } = req.body;
+    const name = (req.body.name || '').trim();
+    const location = (req.body.location || '').trim();
 
-    if (!name) {
+    if (!name || !location) {
       return res.status(400).json({
         success: false,
-        message: '請提供教室名稱'
+        message: '請提供教室名稱和地點'
+      });
+    }
+
+    if (await findDuplicateClassroom(name)) {
+      return res.status(400).json({
+        success: false,
+        message: '已有相同名稱的教室'
       });
     }
 
     const id = await db.insert(
-      'INSERT INTO classrooms (name, address, capacity) VALUES (?, ?, ?)',
-      [name, address || null, capacity || 20]
+      'INSERT INTO classrooms (name, location) VALUES (?, ?)',
+      [name, location]
     );
 
     res.status(201).json({
@@ -336,12 +360,34 @@ exports.createClassroom = async (req, res) => {
 exports.updateClassroom = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, capacity, is_active } = req.body;
+    const name = (req.body.name || '').trim();
+    const location = (req.body.location || '').trim();
 
-    await db.update(
-      'UPDATE classrooms SET name = ?, address = ?, capacity = ?, is_active = ? WHERE id = ?',
-      [name, address || null, capacity || 20, is_active !== false, id]
+    if (!name || !location) {
+      return res.status(400).json({
+        success: false,
+        message: '請提供教室名稱和地點'
+      });
+    }
+
+    if (await findDuplicateClassroom(name, id)) {
+      return res.status(400).json({
+        success: false,
+        message: '已有相同名稱的教室'
+      });
+    }
+
+    const affected = await db.update(
+      'UPDATE classrooms SET name = ?, location = ? WHERE id = ? AND is_active = TRUE',
+      [name, location, id]
     );
+
+    if (!affected) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到教室'
+      });
+    }
 
     res.json({
       success: true,
@@ -361,7 +407,20 @@ exports.deleteClassroom = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 軟刪除
+    // 仍有啟用中的班級使用此教室時不可刪除，避免班級與課表失去教室
+    const inUse = await db.queryOne(
+      'SELECT COUNT(*) AS count FROM course_schedules WHERE classroom_id = ? AND is_active = TRUE',
+      [id]
+    );
+
+    if (inUse && inUse.count > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `此教室仍有 ${inUse.count} 個班級使用中，請先調整班級教室後再刪除`
+      });
+    }
+
+    // 軟刪除：保留歷史日誌、課表對應的教室資料
     await db.update('UPDATE classrooms SET is_active = FALSE WHERE id = ?', [id]);
 
     res.json({

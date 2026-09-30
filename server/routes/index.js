@@ -5,6 +5,7 @@ const router = express.Router();
 const authRoutes = require('./auth');
 const studentsRoutes = require('./students');
 const teachersRoutes = require('./teachers');
+const staffRoutes = require('./staff');
 const coursesRoutes = require('./courses');
 const logsRoutes = require('./logs');
 const settingsRoutes = require('./settings');
@@ -20,6 +21,7 @@ const aiRoutes = require('./ai');
 router.use('/auth', authRoutes);
 router.use('/students', studentsRoutes);
 router.use('/teachers', teachersRoutes);
+router.use('/staff', staffRoutes);
 router.use('/courses', coursesRoutes);
 router.use('/logs', logsRoutes);
 router.use('/settings', settingsRoutes);
@@ -41,6 +43,7 @@ router.get('/', (req, res) => {
       auth: '/api/auth',
       students: '/api/students',
       teachers: '/api/teachers',
+      staff: '/api/staff',
       courses: '/api/courses',
       logs: '/api/logs',
       settings: '/api/settings',

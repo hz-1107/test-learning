@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系統設定 - 智慧學習歷程系統</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/staff-font-size.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .staff-layout { display: grid; grid-template-columns: 224px 1fr; min-height: 100vh; background: var(--color-background); }
+    .staff-sidebar { background: var(--color-surface-alt); padding: var(--spacing-lg) var(--spacing-md); display: flex; flex-direction: column; }
+    .staff-sidebar__header { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__profile { display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+    .staff-sidebar__avatar { width: 36px; height: 36px; background: var(--color-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-md); font-weight: 600; color: var(--color-primary-dark); }
+    .staff-sidebar__info { display: flex; flex-direction: column; }
+    .staff-sidebar__name { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
+    .staff-sidebar__role { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .staff-sidebar__nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .staff-sidebar__nav-item { display: flex; align-items: center; gap: var(--spacing-md); padding: 10px 12px; font-size: var(--font-size-md); color: var(--color-text-secondary); text-decoration: none; border-radius: var(--radius-md); transition: all 0.2s; }
+    .staff-sidebar__nav-item:hover { background: rgba(117, 95, 0, 0.08); color: var(--color-text-primary); }
+    .staff-sidebar__nav-item--active { background: var(--color-primary); color: var(--color-primary-dark); }
+    .staff-sidebar__nav-item svg { width: 18px; height: 18px; }
+    .staff-sidebar__footer { padding-top: var(--spacing-lg); border-top: 1px solid var(--color-surface); font-size: var(--font-size-xs); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-sm); }
+    .staff-main { display: flex; flex-direction: column; overflow: hidden; }
+    .staff-header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) var(--spacing-xl); background: var(--color-surface); border-bottom: 1px solid var(--color-surface-alt); }
+    .staff-header__title { font-size: 24px; font-weight: 700; color: var(--color-primary-dark); }
+    .staff-header__actions { display: flex; align-items: center; gap: var(--spacing-md); }
+    .staff-header__search { display: flex; align-items: center; gap: var(--spacing-sm); padding: 8px 16px; background: var(--color-background); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); width: 240px; }
+    .staff-header__search input { border: none; background: transparent; font-size: var(--font-size-sm); color: var(--color-text-primary); width: 100%; }
+    .staff-header__icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-secondary); cursor: pointer; }
+    .staff-header__avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); overflow: hidden; }
+    .staff-header__avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .staff-content { padding: var(--spacing-xl); flex: 1; overflow-y: auto; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+    .page-title { font-size: 26px; font-weight: 700; color: var(--color-text-primary); }
+    .page-subtitle { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: 4px; }
+    .footer { padding: var(--spacing-lg) var(--spacing-xl); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+
+    /* ===== 設定卡片 ===== */
+    .settings-stack { display: flex; flex-direction: column; gap: 22px; }
+    .settings-card { background: var(--color-surface); border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 13px; overflow: hidden; }
+    .settings-card__head { display: flex; align-items: center; gap: 10px; padding: 15px 22px; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+    .settings-card__icon { width: 16px; height: 16px; color: var(--color-primary-dark); flex-shrink: 0; }
+    .settings-card__title { font-size: var(--font-size-md); font-weight: 600; color: var(--color-text-primary); }
+    .settings-card__desc { font-size: var(--font-size-xs); color: #888; margin-top: 1px; }
+    .settings-card__body { display: flex; flex-direction: column; gap: 22px; padding: 19px 22px 22px; }
+
+    .settings-label { display: block; font-size: var(--font-size-xs); font-weight: 600; color: #888; letter-spacing: 0.28px; margin-bottom: 10px; }
+    .settings-label__count { font-weight: 400; margin-left: 4px; }
+
+    .holiday-toolbar { display: flex; align-items: flex-start; gap: 23px; flex-wrap: wrap; }
+    .holiday-toolbar__custom { flex: 1; min-width: 320px; }
+    .holiday-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .field-input, .field-select { height: 34px; padding: 0 12px; background: #f5f5f5; border: 1px solid transparent; border-radius: 9px; font-size: var(--font-size-md); font-family: inherit; color: var(--color-text-primary); transition: border-color 0.15s, background 0.15s; }
+    .field-input:focus, .field-select:focus { outline: none; border-color: var(--color-primary); background: #fff; }
+    .field-input::placeholder { color: rgba(26, 26, 26, 0.45); }
+    .field-input--date { width: 150px; }
+    .field-input--name { flex: 1; min-width: 160px; }
+    .field-select { cursor: pointer; appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; }
+    .field-input--invalid { border-color: #fb2c36; background: #fff5f5; }
+
+    .btn-yellow { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 15px; background: var(--color-primary); border: none; border-radius: 9px; font-size: var(--font-size-md); font-weight: 500; font-family: inherit; color: #1a1a1a; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); white-space: nowrap; transition: filter 0.15s, opacity 0.15s; }
+    .btn-yellow:hover { filter: brightness(0.96); }
+    .btn-yellow:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+    .btn-yellow svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .btn-cancel { padding: 10px 20px; background: none; border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); font-size: var(--font-size-md); font-weight: 500; font-family: inherit; color: var(--color-text-primary); cursor: pointer; transition: all 0.2s; }
+    .btn-cancel:hover { background: var(--color-surface-alt); }
+
+    /* 假期列表 */
+    .holiday-list__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .holiday-list__head .settings-label { margin-bottom: 0; }
+    .year-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .year-tab { padding: 4px 12px; background: none; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 999px; font-size: var(--font-size-xs); font-family: inherit; color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; }
+    .year-tab:hover { background: #fafafa; }
+    .year-tab--active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-dark); font-weight: 600; }
+
+    .holiday-table-wrap { border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 13px; overflow: hidden; }
+    .holiday-table-scroll { max-height: 360px; overflow-y: auto; }
+    .holiday-table { width: 100%; border-collapse: collapse; }
+    .holiday-table th { position: sticky; top: 0; z-index: 1; padding: 10px 18px; text-align: left; font-size: var(--font-size-xs); font-weight: 600; letter-spacing: 0.28px; color: #888; background: #fafafa; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+    .holiday-table th.col-action, .holiday-table td.col-action { text-align: right; width: 80px; }
+    .holiday-table td { padding: 12px 18px; font-size: var(--font-size-md); color: #888; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+    .holiday-table tr:last-child td { border-bottom: none; }
+    .holiday-table tbody tr:hover td { background: rgba(255, 219, 88, 0.06); }
+    .holiday-table td.col-name { font-weight: 500; color: #1a1a1a; }
+    .holiday-table tr.is-past td { opacity: 0.55; }
+    .holiday-table th.col-action--wide, .holiday-table td.col-action--wide { width: 150px; white-space: nowrap; }
+
+    /* 教室管理 */
+    .field-input--room { width: 220px; }
+    .field-input--location { width: 160px; }
+    .field-input--inline { height: 30px; width: 100%; max-width: 220px; }
+    .location-tag { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #fffbea; border: 1px solid rgba(255, 219, 88, 0.6); font-size: var(--font-size-xs); font-weight: 500; color: var(--color-primary-dark); }
+    .course-count { color: #1a1a1a; }
+    .course-count--zero { color: #aaa; }
+    .icon-btn--edit:hover { background: #fffbea; color: var(--color-primary-dark); }
+    .icon-btn--save:hover { background: #ecfdf5; color: #007a55; }
+    .icon-btn--cancel:hover { background: #f3f4f6; color: #1a1a1a; }
+    .holiday-weekday { margin-left: 6px; font-size: var(--font-size-xs); color: #aaa; }
+    .holiday-empty { padding: 32px 18px !important; text-align: center; color: var(--color-text-muted) !important; }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: var(--font-size-xs); font-weight: 500; line-height: 15px; }
+    .badge--yearly { background: #dbeafe; color: #1447e6; }
+    .badge--once { background: #f3f4f6; color: #4a5565; }
+    .badge--national { background: #fee2e2; color: #c10007; margin-left: 6px; }
+
+    .icon-btn { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; background: none; border: none; border-radius: 7px; color: #888; cursor: pointer; transition: all 0.15s; }
+    .icon-btn:hover { background: #fee2e2; color: #c10007; }
+    .icon-btn svg { width: 14px; height: 14px; }
+
+    /* 通知規則 */
+    .rule-card { display: flex; align-items: flex-start; gap: 15px; padding: 16px 20px; background: #fffbea; border: 1px solid rgba(255, 219, 88, 0.4); border-radius: 13px; transition: background 0.2s, border-color 0.2s; }
+    .rule-card--off { background: #fafafa; border-color: rgba(0, 0, 0, 0.06); }
+    .rule-card__body { flex: 1; min-width: 0; }
+    .rule-card__title { font-size: var(--font-size-md); font-weight: 500; color: #1a1a1a; }
+    .rule-card__sentence { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; font-size: var(--font-size-md); color: #364153; }
+    .rule-card--off .rule-card__sentence { opacity: 0.55; }
+    .rule-card__hint { margin-top: 8px; font-size: var(--font-size-xs); color: #888; }
+    .field-input--num { width: 56px; height: 30px; padding: 0 6px; text-align: center; font-weight: 600; color: #364153; }
+    .field-input--time { width: auto; min-width: 150px; height: 30px; padding: 0 10px; font-weight: 600; color: #364153; font-variant-numeric: tabular-nums; }
+
+    .toggle { position: relative; flex-shrink: 0; width: 41px; height: 22px; margin-top: 1px; background: #d1d5dc; border: none; border-radius: 999px; cursor: pointer; transition: background 0.2s; }
+    .toggle::after { content: ''; position: absolute; top: 3.5px; left: 4px; width: 15px; height: 15px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.1); transition: transform 0.2s; }
+    .toggle[aria-checked="true"] { background: #00bc7d; }
+    .toggle[aria-checked="true"]::after { transform: translateX(18px); }
+    .toggle:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+    .settings-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+    .settings-actions__status { font-size: var(--font-size-xs); color: #888; }
+    .settings-actions__status--dirty { color: var(--color-primary-dark); }
+    .btn-save { height: 38px; padding: 0 22px; }
+
+    /* 匯入假期彈窗 */
+    .settings-modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--spacing-lg); }
+    .settings-modal[hidden] { display: none; }
+    .settings-modal__card { width: 520px; max-width: 100%; max-height: 90vh; display: flex; flex-direction: column; background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .settings-modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-md) 22px; border-bottom: 1px solid var(--color-surface-alt); }
+    .settings-modal__title { font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
+    .settings-modal__close { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); background: none; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+    .settings-modal__close:hover { background: var(--color-surface-alt); color: var(--color-text-primary); }
+    .settings-modal__body { display: flex; flex-direction: column; gap: 14px; padding: 18px 22px; overflow-y: auto; }
+    .settings-modal__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .settings-modal__note { font-size: var(--font-size-xs); color: #888; }
+    .settings-modal__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-sm); padding: 14px 22px 20px; border-top: 1px solid var(--color-surface-alt); }
+    .settings-modal__footer-actions { display: flex; gap: var(--spacing-sm); }
+    .check-all { display: inline-flex; align-items: center; gap: 6px; font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+
+    .preset-list { display: flex; flex-direction: column; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 10px; overflow: hidden; }
+    .preset-item { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 10px; padding: 9px 14px; font-size: var(--font-size-md); color: var(--color-text-primary); cursor: pointer; border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+    .preset-item:last-child { border-bottom: none; }
+    .preset-item:hover { background: #fffbea; }
+    .preset-item input { width: 15px; height: 15px; accent-color: #00bc7d; cursor: pointer; }
+    .preset-item__date { font-size: var(--font-size-sm); color: #888; }
+    .preset-item--exists { cursor: default; color: #aaa; }
+    .preset-item--exists:hover { background: none; }
+    .preset-item__tag { font-size: var(--font-size-xs); color: #00a36c; margin-left: 6px; }
+
+    /* 提示訊息 */
+    .toast { position: fixed; left: 50%; bottom: 32px; transform: translate(-50%, 16px); padding: 10px 18px; background: #1a1a1a; color: #fff; border-radius: 10px; font-size: var(--font-size-sm); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); opacity: 0; pointer-events: none; transition: all 0.25s; z-index: 1100; }
+    .toast--show { opacity: 1; transform: translate(-50%, 0); }
+    .toast--error { background: #c10007; }
+
+    @media (max-width: 992px) { .staff-layout { grid-template-columns: 1fr; } .staff-sidebar { display: none; } }
+  </style>
+  <link rel="stylesheet" href="../css/admin-notifications.css">
+</head>
+<body>
+  <div class="staff-layout">
+    <aside class="staff-sidebar">
+      <div class="staff-sidebar__header">智慧學習歷程系統</div>
+      <div class="staff-sidebar__profile">
+        <div class="staff-sidebar__avatar">管</div>
+        <div class="staff-sidebar__info">
+          <span class="staff-sidebar__name">系統管理員</span>
+          <span class="staff-sidebar__role">行政人員</span>
+        </div>
+      </div>
+      <nav class="staff-sidebar__nav">
+        <a href="students.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>學生管理</a>
+        <a href="teachers.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>老師與行政人員</a>
+        <a href="logs.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>日誌管理</a>
+        <a href="courses.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>課程資訊</a>
+        <a href="schedule.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>課表排程</a>
+        <a href="points.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>點數管理</a>
+        <a href="settings.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系統設定</a>
+      </nav>
+      <div class="staff-sidebar__footer">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="currentDate"></span>
+      </div>
+    </aside>
+
+    <main class="staff-main">
+      <header class="staff-header">
+        <h1 class="staff-header__title">智慧學習歷程系統</h1>
+        <div class="staff-header__actions">
+          <div class="staff-header__search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="搜尋歷程或資源...">
+          </div>
+          <button class="staff-header__icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></button>
+          <button class="staff-header__icon-btn" data-notification-btn><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+          <div class="staff-header__avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=staff" alt="頭像"></div>
+        </div>
+      </header>
+
+      <div class="staff-content">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">系統設定</h2>
+            <p class="page-subtitle">管理教室、假日排程與自動通知規則</p>
+          </div>
+        </div>
+
+        <div class="settings-stack">
+          <!-- 教室管理 -->
+          <section class="settings-card">
+            <div class="settings-card__head">
+              <svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/></svg>
+              <div>
+                <div class="settings-card__title">教室管理</div>
+                <div class="settings-card__desc">班級上課教室；將出現在課程資訊（班級）、課表排程與學生資料的教室選單中</div>
+              </div>
+            </div>
+            <div class="settings-card__body">
+              <div>
+                <span class="settings-label">新增教室</span>
+                <form class="holiday-form" id="classroomForm" novalidate>
+                  <input type="text" class="field-input field-input--room" id="classroomName" placeholder="教室名稱（如 西屯201）" maxlength="100" aria-label="教室名稱" required>
+                  <input type="text" class="field-input field-input--location" id="classroomLocation" placeholder="地點（如 西屯）" maxlength="50" list="locationOptions" aria-label="地點" required>
+                  <button type="submit" class="btn-yellow" id="addClassroomBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    新增
+                  </button>
+                </form>
+                <datalist id="locationOptions"></datalist>
+              </div>
+
+              <div>
+                <span class="settings-label">教室列表<span class="settings-label__count" id="classroomCount">（0 間）</span></span>
+                <div class="holiday-table-wrap">
+                  <div class="holiday-table-scroll">
+                    <table class="holiday-table">
+                      <thead>
+                        <tr>
+                          <th>教室名稱</th>
+                          <th>地點</th>
+                          <th>使用中班級</th>
+                          <th class="col-action col-action--wide">操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="classroomTableBody">
+                        <tr><td colspan="4" class="holiday-empty">載入中...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 國定假日與休假日設定 -->
+          <section class="settings-card">
+            <div class="settings-card__head">
+              <svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="8" y1="18" x2="8" y2="18.01"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+              <div>
+                <div class="settings-card__title">國定假日與休假日設定</div>
+                <div class="settings-card__desc">設定之假日將於課表排程中以紅色標記</div>
+              </div>
+            </div>
+            <div class="settings-card__body">
+              <div class="holiday-toolbar">
+                <div>
+                  <span class="settings-label">快速匯入假期</span>
+                  <button type="button" class="btn-yellow" id="openImportBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    假期選擇
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </button>
+                </div>
+                <div class="holiday-toolbar__custom">
+                  <span class="settings-label">自訂新增假日</span>
+                  <form class="holiday-form" id="holidayForm" novalidate>
+                    <input type="date" class="field-input field-input--date" id="holidayDate" aria-label="假日日期" required>
+                    <select class="field-select" id="holidayRecurring" aria-label="規律">
+                      <option value="0">單次</option>
+                      <option value="1">每年</option>
+                    </select>
+                    <input type="text" class="field-input field-input--name" id="holidayName" placeholder="輸入假日名稱" maxlength="100" aria-label="假日名稱" required>
+                    <button type="submit" class="btn-yellow" id="addHolidayBtn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      新增
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div>
+                <div class="holiday-list__head">
+                  <span class="settings-label">已設定假期列表<span class="settings-label__count" id="holidayCount">（0 筆）</span></span>
+                  <div class="year-tabs" id="yearTabs"></div>
+                </div>
+                <div class="holiday-table-wrap">
+                  <div class="holiday-table-scroll">
+                    <table class="holiday-table">
+                      <thead>
+                        <tr>
+                          <th>名稱</th>
+                          <th>日期</th>
+                          <th>規律</th>
+                          <th class="col-action">操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="holidayTableBody">
+                        <tr><td colspan="4" class="holiday-empty">載入中...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 自動通知與提醒機制 -->
+          <section class="settings-card">
+            <div class="settings-card__head">
+              <svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <div>
+                <div class="settings-card__title">自動通知與提醒機制</div>
+                <div class="settings-card__desc">系統定時發送公告，提醒教師與學生相關待辦事項</div>
+              </div>
+            </div>
+            <div class="settings-card__body" id="ruleList">
+              <div class="rule-card" data-rule="teacher_log_reminder">
+                <button type="button" class="toggle" role="switch" aria-checked="true" aria-label="啟用教師未填日誌提醒"></button>
+                <div class="rule-card__body">
+                  <div class="rule-card__title">教師未填日誌提醒</div>
+                  <div class="rule-card__sentence">
+                    課程結束後達
+                    <input type="number" class="field-input field-input--num" data-field="days" min="1" max="30" value="3" aria-label="天數">
+                    天未填寫，於每日
+                    <input type="time" class="field-input field-input--time" data-field="time" value="09:00" aria-label="發送時間">
+                    發送系統公告提醒授課教師。
+                  </div>
+                </div>
+              </div>
+
+              <div class="rule-card" data-rule="student_makeup_reminder">
+                <button type="button" class="toggle" role="switch" aria-checked="true" aria-label="啟用學生待補課提醒"></button>
+                <div class="rule-card__body">
+                  <div class="rule-card__title">學生待補課提醒</div>
+                  <div class="rule-card__sentence">
+                    缺席後達
+                    <input type="number" class="field-input field-input--num" data-field="days" min="1" max="60" value="14" aria-label="天數">
+                    天未安排補課，於每日
+                    <input type="time" class="field-input field-input--time" data-field="time" value="10:00" aria-label="發送時間">
+                    發送提醒公告。
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="settings-actions">
+            <span class="settings-actions__status" id="saveStatus">假日新增／刪除會立即生效；通知規則需按「儲存設定」</span>
+            <button type="button" class="btn-yellow btn-save" id="saveSettingsBtn" disabled>儲存設定</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">© 2026 教育中心管理系統</div>
+    </main>
+  </div>
+
+  <!-- 快速匯入假期彈窗 -->
+  <div class="settings-modal" id="importModal" hidden>
+    <div class="settings-modal__card" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+      <div class="settings-modal__header">
+        <h3 class="settings-modal__title" id="importModalTitle">快速匯入假期</h3>
+        <button type="button" class="settings-modal__close" data-close-import aria-label="關閉">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="settings-modal__body">
+        <div class="settings-modal__row">
+          <select class="field-select" id="presetYear" aria-label="年度"></select>
+          <label class="check-all"><input type="checkbox" id="presetCheckAll"> 全選</label>
+        </div>
+        <div class="preset-list" id="presetList"></div>
+        <p class="settings-modal__note">農曆節日日期依曆法推算，補假與彈性放假請以行政院人事行政總處公告為準，可再以「自訂新增假日」補充。</p>
+      </div>
+      <div class="settings-modal__footer">
+        <span class="settings-modal__note" id="presetSelectedCount">已選 0 筆</span>
+        <div class="settings-modal__footer-actions">
+          <button type="button" class="btn-cancel" data-close-import>取消</button>
+          <button type="button" class="btn-yellow" id="confirmImportBtn" disabled>匯入</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>window.axios || document.write('<script src="../js/axios.min.js"><\/script>')</script>
+  <script src="../js/api.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    const now = new Date();
+    document.getElementById('currentDate').textContent = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+
+    const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+
+    // 國定假日預設清單（紀念日為固定日期；農曆節日依曆法換算）
+    const FIXED_NATIONAL = [
+      ['01-01', '元旦'],
+      ['02-28', '和平紀念日'],
+      ['04-04', '兒童節'],
+      ['05-01', '勞動節'],
+      ['09-28', '教師節'],
+      ['10-10', '國慶日'],
+      ['10-25', '臺灣光復暨金門古寧頭大捷紀念日'],
+      ['12-25', '行憲紀念日']
+    ];
+    const LUNAR_NATIONAL = {
+      2026: [['02-16', '除夕'], ['02-17', '春節'], ['02-18', '春節'], ['02-19', '春節'], ['04-05', '清明節'], ['06-19', '端午節'], ['09-25', '中秋節']],
+      2027: [['02-05', '除夕'], ['02-06', '春節'], ['02-07', '春節'], ['02-08', '春節'], ['04-05', '清明節'], ['06-09', '端午節'], ['09-15', '中秋節']]
+    };
+
+    function getPresetHolidays(year) {
+      const list = [...FIXED_NATIONAL, ...(LUNAR_NATIONAL[year] || [])]
+        .map(([md, name]) => ({ holiday_date: `${year}-${md}`, name, type: 'national' }));
+      return list.sort((a, b) => a.holiday_date.localeCompare(b.holiday_date));
+    }
+
+    let holidays = [];
+    let selectedYear = String(now.getFullYear());
+
+    // ============ 共用 ============
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(message, isError = false) {
+      toastEl.textContent = message;
+      toastEl.classList.toggle('toast--error', isError);
+      toastEl.classList.add('toast--show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('toast--show'), 2600);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function todayISO() {
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    // 每年重複的假日：以選定年份換算實際日期
+    function effectiveDate(h, year) {
+      return h.is_recurring && year !== 'all' ? `${year}${h.holiday_date.slice(4)}` : h.holiday_date;
+    }
+
+    // ============ 假日列表 ============
+    async function loadHolidays() {
+      try {
+        const result = await api.settings.holidays.getAll();
+        holidays = (result.data || []).map(h => ({ ...h, holiday_date: String(h.holiday_date).slice(0, 10), is_recurring: !!Number(h.is_recurring) }));
+        renderYearTabs();
+        renderHolidays();
+      } catch (error) {
+        console.error('載入假日失敗:', error);
+        document.getElementById('holidayTableBody').innerHTML = '<tr><td colspan="4" class="holiday-empty" style="color:#fb2c36 !important;">載入失敗，請重新整理頁面</td></tr>';
+      }
+    }
+
+    function renderYearTabs() {
+      const years = new Set(holidays.filter(h => !h.is_recurring).map(h => h.holiday_date.slice(0, 4)));
+      years.add(String(now.getFullYear()));
+      const sorted = [...years].sort();
+      if (selectedYear !== 'all' && !years.has(selectedYear)) selectedYear = String(now.getFullYear());
+
+      document.getElementById('yearTabs').innerHTML = sorted.map(y =>
+        `<button type="button" class="year-tab${y === selectedYear ? ' year-tab--active' : ''}" data-year="${y}">${y}</button>`
+      ).join('') + `<button type="button" class="year-tab${selectedYear === 'all' ? ' year-tab--active' : ''}" data-year="all">全部</button>`;
+    }
+
+    function renderHolidays() {
+      const tbody = document.getElementById('holidayTableBody');
+      const today = todayISO();
+
+      const rows = holidays
+        .filter(h => selectedYear === 'all' || h.is_recurring || h.holiday_date.startsWith(selectedYear))
+        .map(h => ({ ...h, shown: effectiveDate(h, selectedYear) }))
+        .sort((a, b) => a.shown.localeCompare(b.shown));
+
+      document.getElementById('holidayCount').textContent = `（${rows.length} 筆）`;
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="holiday-empty">此年度尚未設定假日，可使用「假期選擇」快速匯入</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(h => {
+        const d = new Date(h.shown + 'T00:00:00');
+        const dateText = h.is_recurring && selectedYear === 'all' ? `每年 ${h.shown.slice(5)}` : h.shown;
+        const past = selectedYear !== 'all' && h.shown < today;
+        return `
+          <tr class="${past ? 'is-past' : ''}">
+            <td class="col-name">${escapeHtml(h.name)}${h.type === 'national' ? '<span class="badge badge--national">國定</span>' : ''}</td>
+            <td>${dateText}${selectedYear !== 'all' || !h.is_recurring ? `<span class="holiday-weekday">(${WEEKDAYS[d.getDay()]})</span>` : ''}</td>
+            <td><span class="badge ${h.is_recurring ? 'badge--yearly' : 'badge--once'}">${h.is_recurring ? '每年' : '單次'}</span></td>
+            <td class="col-action">
+              <button type="button" class="icon-btn" data-delete-id="${h.id}" title="刪除" aria-label="刪除 ${escapeHtml(h.name)}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('yearTabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-year]');
+      if (!btn) return;
+      selectedYear = btn.dataset.year;
+      renderYearTabs();
+      renderHolidays();
+    });
+
+    document.getElementById('holidayTableBody').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-delete-id]');
+      if (!btn) return;
+      const target = holidays.find(h => String(h.id) === btn.dataset.deleteId);
+      if (!target || !confirm(`確定要刪除「${target.name}」（${target.holiday_date}）嗎？`)) return;
+
+      btn.disabled = true;
+      try {
+        await api.settings.holidays.delete(target.id);
+        holidays = holidays.filter(h => h.id !== target.id);
+        renderYearTabs();
+        renderHolidays();
+        showToast(`已刪除「${target.name}」`);
+      } catch (error) {
+        console.error('刪除假日失敗:', error);
+        btn.disabled = false;
+      }
+    });
+
+    // ============ 自訂新增假日 ============
+    const holidayForm = document.getElementById('holidayForm');
+    const holidayDateInput = document.getElementById('holidayDate');
+    const holidayNameInput = document.getElementById('holidayName');
+    const holidayRecurringSelect = document.getElementById('holidayRecurring');
+
+    [holidayDateInput, holidayNameInput].forEach(el =>
+      el.addEventListener('input', () => el.classList.remove('field-input--invalid')));
+
+    holidayForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const holiday_date = holidayDateInput.value;
+      const name = holidayNameInput.value.trim();
+      const is_recurring = holidayRecurringSelect.value === '1';
+
+      holidayDateInput.classList.toggle('field-input--invalid', !holiday_date);
+      holidayNameInput.classList.toggle('field-input--invalid', !name);
+      if (!holiday_date || !name) {
+        showToast('請選擇日期並輸入假日名稱', true);
+        return;
+      }
+
+      const dup = holidays.find(h => h.holiday_date === holiday_date);
+      if (dup) {
+        holidayDateInput.classList.add('field-input--invalid');
+        showToast(`${holiday_date} 已設定為「${dup.name}」`, true);
+        return;
+      }
+
+      const btn = document.getElementById('addHolidayBtn');
+      btn.disabled = true;
+      try {
+        const result = await api.settings.holidays.create({ holiday_date, name, type: 'custom', is_recurring });
+        holidays.push({ id: result.data.id, holiday_date, name, type: 'custom', is_recurring });
+        selectedYear = holiday_date.slice(0, 4);
+        holidayForm.reset();
+        renderYearTabs();
+        renderHolidays();
+        showToast(`已新增「${name}」`);
+      } catch (error) {
+        console.error('新增假日失敗:', error);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ============ 快速匯入假期 ============
+    const importModal = document.getElementById('importModal');
+    const presetYearSelect = document.getElementById('presetYear');
+    const presetList = document.getElementById('presetList');
+    const presetCheckAll = document.getElementById('presetCheckAll');
+    const confirmImportBtn = document.getElementById('confirmImportBtn');
+
+    Object.keys(LUNAR_NATIONAL).forEach(y => {
+      presetYearSelect.innerHTML += `<option value="${y}">${y} 年國定假日</option>`;
+    });
+
+    function renderPresetList() {
+      const existingDates = new Set(holidays.map(h => h.holiday_date));
+      const items = getPresetHolidays(presetYearSelect.value);
+      presetList.innerHTML = items.map((h, i) => {
+        const exists = existingDates.has(h.holiday_date);
+        const d = new Date(h.holiday_date + 'T00:00:00');
+        return `
+          <label class="preset-item${exists ? ' preset-item--exists' : ''}">
+            <input type="checkbox" data-index="${i}" ${exists ? 'disabled' : 'checked'}>
+            <span>${h.name}${exists ? '<span class="preset-item__tag">已設定</span>' : ''}</span>
+            <span class="preset-item__date">${h.holiday_date.slice(5).replace('-', '/')}（${WEEKDAYS[d.getDay()]}）</span>
+          </label>`;
+      }).join('');
+      updatePresetSelection();
+    }
+
+    function updatePresetSelection() {
+      const boxes = [...presetList.querySelectorAll('input:not(:disabled)')];
+      const checked = boxes.filter(b => b.checked).length;
+      presetCheckAll.checked = boxes.length > 0 && checked === boxes.length;
+      presetCheckAll.disabled = boxes.length === 0;
+      document.getElementById('presetSelectedCount').textContent = boxes.length ? `已選 ${checked} 筆` : '此年度假日皆已設定';
+      confirmImportBtn.disabled = checked === 0;
+    }
+
+    function openImportModal() {
+      const y = String(now.getFullYear());
+      presetYearSelect.value = LUNAR_NATIONAL[y] ? y : Object.keys(LUNAR_NATIONAL)[0];
+      renderPresetList();
+      importModal.hidden = false;
+    }
+
+    function closeImportModal() {
+      importModal.hidden = true;
+    }
+
+    document.getElementById('openImportBtn').addEventListener('click', openImportModal);
+    importModal.querySelectorAll('[data-close-import]').forEach(el => el.addEventListener('click', closeImportModal));
+    importModal.addEventListener('click', (e) => { if (e.target === importModal) closeImportModal(); });
+    presetYearSelect.addEventListener('change', renderPresetList);
+    presetList.addEventListener('change', updatePresetSelection);
+    presetCheckAll.addEventListener('change', () => {
+      presetList.querySelectorAll('input:not(:disabled)').forEach(b => { b.checked = presetCheckAll.checked; });
+      updatePresetSelection();
+    });
+
+    confirmImportBtn.addEventListener('click', async () => {
+      const items = getPresetHolidays(presetYearSelect.value);
+      const selected = [...presetList.querySelectorAll('input:checked:not(:disabled)')].map(b => items[b.dataset.index]);
+      if (!selected.length) return;
+
+      confirmImportBtn.disabled = true;
+      confirmImportBtn.textContent = '匯入中...';
+      try {
+        const result = await api.settings.holidays.import(selected);
+        selectedYear = presetYearSelect.value;
+        closeImportModal();
+        await loadHolidays();
+        showToast(result.message || `已匯入 ${selected.length} 筆假日`);
+      } catch (error) {
+        console.error('匯入假日失敗:', error);
+        confirmImportBtn.disabled = false;
+      } finally {
+        confirmImportBtn.textContent = '匯入';
+      }
+    });
+
+    // ============ 教室管理 ============
+    let classrooms = [];
+    let editingClassroomId = null;
+    const classroomTableBody = document.getElementById('classroomTableBody');
+
+    const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+    const ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>';
+    const ICON_SAVE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    const ICON_CANCEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+    async function loadClassrooms() {
+      try {
+        const result = await api.settings.classrooms.getAll();
+        classrooms = result.data || [];
+        renderClassrooms();
+      } catch (error) {
+        console.error('載入教室失敗:', error);
+        classroomTableBody.innerHTML = '<tr><td colspan="4" class="holiday-empty" style="color:#fb2c36 !important;">載入失敗，請重新整理頁面</td></tr>';
+      }
+    }
+
+    function renderClassrooms() {
+      document.getElementById('classroomCount').textContent = `（${classrooms.length} 間）`;
+
+      // 地點下拉建議：沿用既有地點，避免同地點寫法不一致
+      const locations = [...new Set(classrooms.map(c => c.location).filter(Boolean))];
+      document.getElementById('locationOptions').innerHTML = locations.map(l => `<option value="${escapeHtml(l)}">`).join('');
+
+      if (!classrooms.length) {
+        classroomTableBody.innerHTML = '<tr><td colspan="4" class="holiday-empty">尚未建立教室，請於上方新增</td></tr>';
+        return;
+      }
+
+      classroomTableBody.innerHTML = classrooms.map(c => {
+        const count = Number(c.active_classes_count) || 0;
+        if (c.id === editingClassroomId) {
+          return `
+            <tr data-id="${c.id}">
+              <td><input type="text" class="field-input field-input--inline" data-edit="name" value="${escapeHtml(c.name)}" maxlength="100" aria-label="教室名稱"></td>
+              <td><input type="text" class="field-input field-input--inline" data-edit="location" value="${escapeHtml(c.location || '')}" maxlength="50" list="locationOptions" aria-label="地點"></td>
+              <td><span class="course-count${count ? '' : ' course-count--zero'}">${count} 班</span></td>
+              <td class="col-action col-action--wide">
+                <button type="button" class="icon-btn icon-btn--save" data-action="save" title="儲存" aria-label="儲存">${ICON_SAVE}</button>
+                <button type="button" class="icon-btn icon-btn--cancel" data-action="cancel" title="取消" aria-label="取消">${ICON_CANCEL}</button>
+              </td>
+            </tr>`;
+        }
+        return `
+          <tr data-id="${c.id}">
+            <td class="col-name">${escapeHtml(c.name)}</td>
+            <td>${c.location ? `<span class="location-tag">${escapeHtml(c.location)}</span>` : '<span class="course-count--zero">未設定</span>'}</td>
+            <td><span class="course-count${count ? '' : ' course-count--zero'}">${count} 班</span></td>
+            <td class="col-action col-action--wide">
+              <button type="button" class="icon-btn icon-btn--edit" data-action="edit" title="編輯" aria-label="編輯 ${escapeHtml(c.name)}">${ICON_EDIT}</button>
+              <button type="button" class="icon-btn" data-action="delete" title="${count ? '仍有班級使用中，無法刪除' : '刪除'}" aria-label="刪除 ${escapeHtml(c.name)}">${ICON_DELETE}</button>
+            </td>
+          </tr>`;
+      }).join('');
+
+      const firstInput = classroomTableBody.querySelector('[data-edit="name"]');
+      if (firstInput) firstInput.focus();
+    }
+
+    // 新增教室
+    const classroomNameInput = document.getElementById('classroomName');
+    const classroomLocationInput = document.getElementById('classroomLocation');
+    [classroomNameInput, classroomLocationInput].forEach(el =>
+      el.addEventListener('input', () => el.classList.remove('field-input--invalid')));
+
+    document.getElementById('classroomForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = classroomNameInput.value.trim();
+      const location = classroomLocationInput.value.trim();
+
+      classroomNameInput.classList.toggle('field-input--invalid', !name);
+      classroomLocationInput.classList.toggle('field-input--invalid', !location);
+      if (!name || !location) {
+        showToast('請輸入教室名稱與地點', true);
+        return;
+      }
+      if (classrooms.some(c => c.name === name)) {
+        classroomNameInput.classList.add('field-input--invalid');
+        showToast(`已有名為「${name}」的教室`, true);
+        return;
+      }
+
+      const btn = document.getElementById('addClassroomBtn');
+      btn.disabled = true;
+      try {
+        await api.settings.classrooms.create({ name, location });
+        classroomNameInput.value = '';
+        // 保留地點，方便連續新增同一地點的教室
+        await loadClassrooms();
+        classroomNameInput.focus();
+        showToast(`已新增「${name}」`);
+      } catch (error) {
+        console.error('新增教室失敗:', error);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function saveClassroomEdit(row) {
+      const id = Number(row.dataset.id);
+      const nameInput = row.querySelector('[data-edit="name"]');
+      const locationInput = row.querySelector('[data-edit="location"]');
+      const name = nameInput.value.trim();
+      const location = locationInput.value.trim();
+
+      nameInput.classList.toggle('field-input--invalid', !name);
+      locationInput.classList.toggle('field-input--invalid', !location);
+      if (!name || !location) {
+        showToast('請輸入教室名稱與地點', true);
+        return;
+      }
+      if (classrooms.some(c => c.id !== id && c.name === name)) {
+        nameInput.classList.add('field-input--invalid');
+        showToast(`已有名為「${name}」的教室`, true);
+        return;
+      }
+
+      try {
+        await api.settings.classrooms.update(id, { name, location });
+        editingClassroomId = null;
+        await loadClassrooms();
+        showToast('教室已更新');
+      } catch (error) {
+        console.error('更新教室失敗:', error);
+      }
+    }
+
+    classroomTableBody.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const row = btn.closest('tr');
+      const id = Number(row.dataset.id);
+      const target = classrooms.find(c => c.id === id);
+
+      if (btn.dataset.action === 'edit') {
+        editingClassroomId = id;
+        renderClassrooms();
+      } else if (btn.dataset.action === 'cancel') {
+        editingClassroomId = null;
+        renderClassrooms();
+      } else if (btn.dataset.action === 'save') {
+        saveClassroomEdit(row);
+      } else if (btn.dataset.action === 'delete') {
+        const count = Number(target.active_classes_count) || 0;
+        if (count > 0) {
+          showToast(`「${target.name}」仍有 ${count} 個班級使用中，請先至課程資訊調整班級教室`, true);
+          return;
+        }
+        if (!confirm(`確定要刪除「${target.name}」嗎？\n刪除後將不再出現於教室選單，歷史日誌仍會保留。`)) return;
+        btn.disabled = true;
+        try {
+          await api.settings.classrooms.delete(id);
+          if (editingClassroomId === id) editingClassroomId = null;
+          await loadClassrooms();
+          showToast(`已刪除「${target.name}」`);
+        } catch (error) {
+          console.error('刪除教室失敗:', error);
+          btn.disabled = false;
+        }
+      }
+    });
+
+    // 行內編輯：Enter 儲存、Esc 取消
+    classroomTableBody.addEventListener('keydown', (e) => {
+      if (!e.target.matches('[data-edit]')) return;
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveClassroomEdit(e.target.closest('tr'));
+      } else if (e.key === 'Escape') {
+        e.stopPropagation();
+        editingClassroomId = null;
+        renderClassrooms();
+      }
+    });
+
+    // ============ 自動通知規則 ============
+    const RULE_DEFAULTS = {
+      teacher_log_reminder: { days: 3, time: '09:00' },
+      student_makeup_reminder: { days: 14, time: '10:00' }
+    };
+    const saveBtn = document.getElementById('saveSettingsBtn');
+    const saveStatus = document.getElementById('saveStatus');
+    let savedSnapshot = '';
+
+    function collectRules() {
+      return [...document.querySelectorAll('.rule-card')].map(card => {
+        const days = parseInt(card.querySelector('[data-field="days"]').value, 10);
+        const time = card.querySelector('[data-field="time"]').value;
+        return {
+          type: card.dataset.rule,
+          is_enabled: card.querySelector('.toggle').getAttribute('aria-checked') === 'true',
+          config: { days, time }
+        };
+      });
+    }
+
+    function applyRule(card, enabled, config) {
+      const toggle = card.querySelector('.toggle');
+      toggle.setAttribute('aria-checked', String(enabled));
+      card.classList.toggle('rule-card--off', !enabled);
+      card.querySelectorAll('.field-input').forEach(el => { el.disabled = !enabled; });
+      if (config) {
+        card.querySelector('[data-field="days"]').value = config.days;
+        card.querySelector('[data-field="time"]').value = config.time;
+      }
+    }
+
+    function refreshDirtyState() {
+      const dirty = JSON.stringify(collectRules()) !== savedSnapshot;
+      saveBtn.disabled = !dirty;
+      saveStatus.textContent = dirty ? '通知規則有未儲存的變更' : '假日新增／刪除會立即生效；通知規則需按「儲存設定」';
+      saveStatus.classList.toggle('settings-actions__status--dirty', dirty);
+    }
+
+    async function loadNotificationSettings() {
+      try {
+        const result = await api.settings.notifications.getAll();
+        const byType = {};
+        (result.data || []).forEach(s => { byType[s.type] = s; });
+
+        document.querySelectorAll('.rule-card').forEach(card => {
+          const type = card.dataset.rule;
+          const row = byType[type];
+          let cfg = row?.config;
+          if (typeof cfg === 'string') { try { cfg = JSON.parse(cfg); } catch { cfg = null; } }
+          const defaults = RULE_DEFAULTS[type];
+          applyRule(card, row ? !!Number(row.is_enabled) : true, {
+            days: cfg?.days ?? defaults.days,
+            time: cfg?.time ?? defaults.time
+          });
+        });
+      } catch (error) {
+        console.error('載入通知設定失敗:', error);
+        showToast('通知設定載入失敗，顯示為預設值', true);
+      }
+      savedSnapshot = JSON.stringify(collectRules());
+      refreshDirtyState();
+    }
+
+    document.getElementById('ruleList').addEventListener('click', (e) => {
+      const toggle = e.target.closest('.toggle');
+      if (!toggle) return;
+      const card = toggle.closest('.rule-card');
+      applyRule(card, toggle.getAttribute('aria-checked') !== 'true');
+      refreshDirtyState();
+    });
+    document.getElementById('ruleList').addEventListener('input', (e) => {
+      e.target.classList.remove('field-input--invalid');
+      refreshDirtyState();
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      const rules = collectRules();
+
+      // 驗證：啟用中的規則需填寫有效天數與時間
+      let valid = true;
+      document.querySelectorAll('.rule-card').forEach((card, i) => {
+        const { days, time } = rules[i].config;
+        const daysInput = card.querySelector('[data-field="days"]');
+        const max = parseInt(daysInput.max, 10);
+        const badDays = !Number.isInteger(days) || days < 1 || days > max;
+        daysInput.classList.toggle('field-input--invalid', badDays);
+        card.querySelector('[data-field="time"]').classList.toggle('field-input--invalid', !time);
+        if (badDays || !time) valid = false;
+      });
+      if (!valid) {
+        showToast('請確認天數與發送時間填寫正確', true);
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = '儲存中...';
+      try {
+        await Promise.all(rules.map(r => api.settings.notifications.update(r.type, { is_enabled: r.is_enabled, config: r.config })));
+        savedSnapshot = JSON.stringify(rules);
+        showToast('設定已儲存');
+      } catch (error) {
+        console.error('儲存通知設定失敗:', error);
+      } finally {
+        saveBtn.textContent = '儲存設定';
+        refreshDirtyState();
+      }
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+      if (!saveBtn.disabled) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !importModal.hidden) closeImportModal();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!localStorage.getItem('authToken')) {
+        window.location.href = '../login.html';
+        return;
+      }
+      loadClassrooms();
+      loadHolidays();
+      loadNotificationSettings();
+    });
+  </script>
+  <script src="../js/admin-notifications.js"></script>
+</body>
+</html>

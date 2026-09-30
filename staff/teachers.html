@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>老師管理 - 智慧學習歷程系統</title>
+  <title>老師與行政人員 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="../css/staff-font-size.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -222,8 +222,17 @@
     }
 
     .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
       margin-bottom: var(--spacing-lg);
     }
+
+    /* 老師管理／行政人員 切換鈕（同課表排程） */
+    .view-toggle { display: inline-flex; gap: 2px; padding: 3px; background: var(--color-surface); border: 1px solid var(--color-surface-alt); border-radius: var(--radius-md); }
+    .view-toggle__btn { padding: 6px 14px; background: transparent; border: none; border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .view-toggle__btn:hover { color: var(--color-text-primary); }
+    .view-toggle__btn--active { background: var(--color-primary); color: var(--color-primary-dark); font-weight: 600; }
 
     .filter-input {
       display: flex;
@@ -233,7 +242,8 @@
       background: var(--color-surface);
       border: 1px solid var(--color-surface-alt);
       border-radius: var(--radius-md);
-      max-width: 280px;
+      width: 280px;
+      max-width: 100%;
     }
 
     .filter-input input {
@@ -362,6 +372,26 @@
       font-weight: 700;
     }
 
+    .teacher-grid[hidden] { display: none; }
+
+    /* 行政人員卡片 */
+    .staff-card--inactive { opacity: 0.65; }
+    .staff-card--inactive .teacher-card__avatar { background: var(--color-surface-alt); color: var(--color-text-muted); }
+    .staff-status { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: var(--font-size-xs); font-weight: 500; vertical-align: middle; }
+    .staff-status--active { background: #f0fdf4; color: #15803d; }
+    .staff-status--inactive { background: #f3f4f6; color: #4a5565; }
+    .staff-self-tag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: var(--font-size-xs); background: var(--color-primary-light); color: var(--color-primary-dark); vertical-align: middle; }
+
+    .form-hint { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+    .form-check { display: flex; align-items: center; gap: 8px; font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: pointer; }
+    .form-check input { width: 16px; height: 16px; accent-color: var(--color-primary-dark); cursor: pointer; }
+    .form-check input:disabled + span { color: var(--color-text-muted); }
+    .modal__footer.modal__footer--split { justify-content: space-between; }
+    .modal__footer-actions { display: flex; gap: 12px; }
+    .btn-danger { padding: 10px 18px; background: none; border: 1px solid #fecaca; border-radius: var(--radius-lg); font-size: var(--font-size-md); font-weight: 500; color: #c10007; cursor: pointer; transition: all 0.15s; }
+    .btn-danger:hover { background: #fef2f2; }
+    .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; background: none; }
+
     @media (max-width: 1200px) {
       .teacher-grid {
         grid-template-columns: 1fr;
@@ -407,6 +437,7 @@
       max-height: calc(100vh - 40px);
       display: flex;
       flex-direction: column;
+      align-items: stretch;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       margin: auto;
     }
@@ -538,7 +569,7 @@
         </a>
         <a href="teachers.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          老師管理
+          老師與行政人員
         </a>
         <a href="logs.html" class="staff-sidebar__nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -555,6 +586,10 @@
         <a href="points.html" class="staff-sidebar__nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           點數管理
+        </a>
+        <a href="settings.html" class="staff-sidebar__nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          系統設定
         </a>
       </nav>
       <div class="staff-sidebar__footer">
@@ -587,23 +622,29 @@
       <div class="staff-content">
         <div class="page-header">
           <div>
-            <h2 class="page-title">老師管理</h2>
-            <p class="page-subtitle">共 4 位老師</p>
+            <h2 class="page-title" id="pageTitle">老師管理</h2>
+            <p class="page-subtitle" id="pageSubtitle">載入中...</p>
           </div>
-          <button class="btn-primary" onclick="openAddTeacherModal()">
+          <button class="btn-primary" id="addPersonBtn" onclick="openAddModal()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            新增老師
+            <span id="addPersonLabel">新增老師</span>
           </button>
         </div>
 
         <div class="filter-bar">
+          <div class="view-toggle" id="personViewToggle">
+            <button type="button" class="view-toggle__btn view-toggle__btn--active" data-view="teachers" onclick="setPersonView('teachers')">老師管理</button>
+            <button type="button" class="view-toggle__btn" data-view="staff" onclick="setPersonView('staff')">行政人員</button>
+          </div>
           <div class="filter-input">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" placeholder="搜尋老師姓名">
+            <input type="text" id="personSearchInput" placeholder="搜尋老師姓名">
           </div>
         </div>
 
-        <div class="teacher-grid">
+        <div class="teacher-grid" id="staffGrid" hidden></div>
+
+        <div class="teacher-grid" id="teacherGrid">
           <!-- 王老師 -->
           <div class="teacher-card">
             <div class="teacher-card__header">
@@ -853,6 +894,143 @@
     </div>
   </div>
 
+  <datalist id="staffTitleOptions">
+    <option value="行政主任">
+    <option value="櫃台行政">
+    <option value="教務專員">
+    <option value="招生專員">
+    <option value="會計">
+  </datalist>
+
+  <!-- 新增行政人員 Modal -->
+  <div class="modal-overlay" id="addStaffModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">新增行政人員</h3>
+        <button class="modal__close" onclick="closeModal('addStaffModal')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form id="addStaffForm">
+        <div class="modal__body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffName">姓名＊</label>
+              <input type="text" id="staffName" required maxlength="100" placeholder="行政人員姓名">
+            </div>
+            <div class="form-group">
+              <label for="staffTitle">職稱</label>
+              <input type="text" id="staffTitle" maxlength="50" placeholder="例：櫃台行政、教務專員" list="staffTitleOptions">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffLineId">LINE ID＊</label>
+              <input type="text" id="staffLineId" required maxlength="50" placeholder="LINE ID">
+            </div>
+            <div class="form-group">
+              <label for="staffPhone">電話</label>
+              <input type="tel" id="staffPhone" maxlength="20" placeholder="聯絡電話">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="staffBirthday">生日＊</label>
+              <input type="date" id="staffBirthday" required>
+            </div>
+            <div class="form-group">
+              <label for="staffHireDate">到職日</label>
+              <input type="date" id="staffHireDate">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="staffEmail">Email</label>
+            <input type="email" id="staffEmail" maxlength="100" placeholder="選填">
+          </div>
+          <div class="form-group">
+            <label for="staffNotes">備註</label>
+            <textarea id="staffNotes" placeholder="負責業務、班別等說明"></textarea>
+          </div>
+          <p class="form-hint">建立後以 LINE ID 登入，預設密碼為生日（格式：YYYYMMDD）。</p>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('addStaffModal')">取消</button>
+          <button type="submit" class="btn-primary">新增</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 編輯行政人員 Modal -->
+  <div class="modal-overlay" id="editStaffModal">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 class="modal__title">編輯行政人員資訊</h3>
+        <button class="modal__close" onclick="closeModal('editStaffModal')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form id="editStaffForm">
+        <input type="hidden" id="editStaffId">
+        <div class="modal__body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editStaffName">姓名＊</label>
+              <input type="text" id="editStaffName" required maxlength="100" placeholder="行政人員姓名">
+            </div>
+            <div class="form-group">
+              <label for="editStaffTitle">職稱</label>
+              <input type="text" id="editStaffTitle" maxlength="50" placeholder="例：櫃台行政、教務專員" list="staffTitleOptions">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editStaffLineId">LINE ID＊</label>
+              <input type="text" id="editStaffLineId" readonly>
+            </div>
+            <div class="form-group">
+              <label for="editStaffPhone">電話</label>
+              <input type="tel" id="editStaffPhone" maxlength="20" placeholder="聯絡電話">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editStaffBirthday">生日＊</label>
+              <input type="date" id="editStaffBirthday" required>
+            </div>
+            <div class="form-group">
+              <label for="editStaffHireDate">到職日</label>
+              <input type="date" id="editStaffHireDate">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editStaffEmail">Email</label>
+            <input type="email" id="editStaffEmail" maxlength="100" placeholder="選填">
+          </div>
+          <div class="form-group">
+            <label for="editStaffNotes">備註</label>
+            <textarea id="editStaffNotes" placeholder="負責業務、班別等說明"></textarea>
+          </div>
+          <label class="form-check">
+            <input type="checkbox" id="editStaffActive">
+            <span>帳號啟用（停用後將無法登入系統）</span>
+          </label>
+        </div>
+        <div class="modal__footer modal__footer--split">
+          <button type="button" class="btn-danger" id="deleteStaffBtn">刪除</button>
+          <div class="modal__footer-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('editStaffModal')">取消</button>
+            <button type="submit" class="btn-primary">儲存</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>window.axios || document.write('<script src="../js/axios.min.js"><\/script>')</script>
   <script src="../js/api.js"></script>
@@ -875,6 +1053,10 @@
         document.getElementById('addTeacherForm').reset();
       } else if (modalId === 'editTeacherModal') {
         document.getElementById('editTeacherForm').reset();
+      } else if (modalId === 'addStaffModal') {
+        document.getElementById('addStaffForm').reset();
+      } else if (modalId === 'editStaffModal') {
+        document.getElementById('editStaffForm').reset();
       }
     }
 
@@ -885,6 +1067,63 @@
     document.getElementById('editTeacherModal').addEventListener('click', function(e) {
       if (e.target === this) closeModal('editTeacherModal');
     });
+    document.getElementById('addStaffModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('addStaffModal');
+    });
+    document.getElementById('editStaffModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal('editStaffModal');
+    });
+
+    // ==================
+    // 老師管理／行政人員 切換
+    // ==================
+    const VIEW_META = {
+      teachers: { title: '老師管理', add: '新增老師', search: '搜尋老師姓名' },
+      staff: { title: '行政人員管理', add: '新增行政人員', search: '搜尋姓名、電話或 LINE ID' }
+    };
+    let personView = location.hash === '#staff' ? 'staff' : 'teachers';
+    let teachersList = [];
+    let staffList = [];
+    const personSearchInput = document.getElementById('personSearchInput');
+
+    function setPersonView(view) {
+      personView = view;
+      document.querySelectorAll('#personViewToggle .view-toggle__btn').forEach(b => {
+        b.classList.toggle('view-toggle__btn--active', b.dataset.view === view);
+      });
+      const meta = VIEW_META[view];
+      document.getElementById('pageTitle').textContent = meta.title;
+      document.getElementById('addPersonLabel').textContent = meta.add;
+      personSearchInput.placeholder = meta.search;
+      personSearchInput.value = '';
+      document.getElementById('teacherGrid').hidden = view !== 'teachers';
+      document.getElementById('staffGrid').hidden = view !== 'staff';
+      history.replaceState(null, '', view === 'staff' ? '#staff' : location.pathname);
+
+      if (view === 'staff') loadStaff(); else renderTeachers();
+    }
+
+    function openAddModal() {
+      if (personView === 'staff') {
+        document.getElementById('addStaffModal').classList.add('active');
+      } else {
+        openAddTeacherModal();
+      }
+    }
+
+    personSearchInput.addEventListener('input', () => {
+      if (personView === 'staff') renderStaff(); else renderTeachers();
+    });
+
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function matchesSearch(person) {
+      const keyword = personSearchInput.value.trim().toLowerCase();
+      if (!keyword) return true;
+      return [person.name, person.phone, person.username].some(v => v && String(v).toLowerCase().includes(keyword));
+    }
 
     // ==================
     // 新增老師
@@ -960,21 +1199,36 @@
     async function loadTeachers() {
       try {
         const result = await api.teachers.getAll();
-        const teacherGrid = document.querySelector('.teacher-grid');
-        const subtitle = document.querySelector('.page-subtitle');
+        teachersList = result.data || [];
 
-        subtitle.textContent = `共 ${result.data.length} 位老師`;
+        // 儲存老師資料供編輯使用
+        window.teachersData = {};
+        teachersList.forEach(t => { window.teachersData[t.id] = t; });
 
-        if (result.data.length === 0) {
+        if (personView === 'teachers') renderTeachers();
+      } catch (error) {
+        console.error('載入老師列表失敗:', error);
+      }
+    }
+
+    function renderTeachers() {
+        const teacherGrid = document.getElementById('teacherGrid');
+        const subtitle = document.getElementById('pageSubtitle');
+
+        subtitle.textContent = `共 ${teachersList.length} 位老師`;
+
+        if (teachersList.length === 0) {
           teacherGrid.innerHTML = '<p style="color: var(--color-text-muted); grid-column: 1/-1; text-align: center; padding: 40px;">目前沒有老師，請點擊「新增老師」按鈕建立老師資料。</p>';
           return;
         }
 
-        // 儲存老師資料供編輯使用
-        window.teachersData = {};
-        result.data.forEach(t => { window.teachersData[t.id] = t; });
+        const filtered = teachersList.filter(matchesSearch);
+        if (filtered.length === 0) {
+          teacherGrid.innerHTML = '<p style="color: var(--color-text-muted); grid-column: 1/-1; text-align: center; padding: 40px;">查無符合條件的老師</p>';
+          return;
+        }
 
-        teacherGrid.innerHTML = result.data.map(teacher => {
+        teacherGrid.innerHTML = filtered.map(teacher => {
           const firstChar = teacher.name ? teacher.name.charAt(0) : '?';
           const birthday = teacher.birthday ? teacher.birthday.split('T')[0] : '未設定';
           const hireDate = teacher.hire_date ? teacher.hire_date.split('T')[0] : '未設定';
@@ -1024,13 +1278,198 @@
             </div>`}
           </div>
         `}).join('');
-      } catch (error) {
-        console.error('載入老師列表失敗:', error);
+    }
+
+    // ==================
+    // 行政人員
+    // ==================
+    function currentUserId() {
+      try {
+        const payload = JSON.parse(atob(localStorage.getItem('authToken').split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.id;
+      } catch {
+        return null;
       }
     }
 
-    // 頁面載入時載入老師列表
-    document.addEventListener('DOMContentLoaded', loadTeachers);
+    async function loadStaff() {
+      const staffGrid = document.getElementById('staffGrid');
+      if (!staffList.length) staffGrid.innerHTML = '<p style="color: var(--color-text-muted); grid-column: 1/-1; text-align: center; padding: 40px;">載入中...</p>';
+      try {
+        const result = await api.staff.getAll();
+        staffList = result.data || [];
+        window.staffData = {};
+        staffList.forEach(s => { window.staffData[s.id] = s; });
+        if (personView === 'staff') renderStaff();
+      } catch (error) {
+        console.error('載入行政人員列表失敗:', error);
+        staffGrid.innerHTML = '<p style="color: #fb2c36; grid-column: 1/-1; text-align: center; padding: 40px;">載入失敗，請重新整理頁面</p>';
+      }
+    }
+
+    function renderStaff() {
+      const staffGrid = document.getElementById('staffGrid');
+      const activeCount = staffList.filter(s => Number(s.is_active)).length;
+      document.getElementById('pageSubtitle').textContent =
+        `共 ${staffList.length} 位行政人員` + (activeCount < staffList.length ? `（${staffList.length - activeCount} 位已停用）` : '');
+
+      if (staffList.length === 0) {
+        staffGrid.innerHTML = '<p style="color: var(--color-text-muted); grid-column: 1/-1; text-align: center; padding: 40px;">目前沒有行政人員，請點擊「新增行政人員」按鈕建立資料。</p>';
+        return;
+      }
+
+      const filtered = staffList.filter(matchesSearch);
+      if (filtered.length === 0) {
+        staffGrid.innerHTML = '<p style="color: var(--color-text-muted); grid-column: 1/-1; text-align: center; padding: 40px;">查無符合條件的行政人員</p>';
+        return;
+      }
+
+      const selfId = currentUserId();
+      staffGrid.innerHTML = filtered.map(s => {
+        const active = !!Number(s.is_active);
+        const birthday = s.birthday ? s.birthday.split('T')[0] : '未設定';
+        const hireDate = s.hire_date ? s.hire_date.split('T')[0] : '未設定';
+        return `
+          <div class="teacher-card${active ? '' : ' staff-card--inactive'}">
+            <div class="teacher-card__header">
+              <div class="teacher-card__info">
+                <div class="teacher-card__avatar">${escapeHtml(s.name ? s.name.charAt(0) : '?')}</div>
+                <div class="teacher-card__details">
+                  <span class="teacher-card__name">${escapeHtml(s.name)}<span class="staff-status ${active ? 'staff-status--active' : 'staff-status--inactive'}">${active ? '啟用中' : '已停用'}</span>${s.id === selfId ? '<span class="staff-self-tag">目前登入</span>' : ''}</span>
+                  <span class="teacher-card__school">${escapeHtml(s.title || '未設定職稱')}</span>
+                </div>
+              </div>
+              <button class="teacher-card__edit" title="編輯" onclick="openEditStaffModal(window.staffData[${s.id}])">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="teacher-card__contacts">
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                LINE: ${escapeHtml(s.username || '未設定')}
+              </span>
+              <span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                ${escapeHtml(s.phone || '未設定')}
+              </span>
+              ${s.email ? `<span class="teacher-card__contact">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                ${escapeHtml(s.email)}
+              </span>` : ''}
+            </div>
+            <div class="teacher-card__birthday">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              生日：${birthday} ｜ 到職日：${hireDate}
+            </div>
+            <div class="teacher-card__bio">
+              ${escapeHtml(s.notes || '無備註')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function staffFormData(prefix) {
+      return {
+        name: document.getElementById(`${prefix}Name`).value.trim(),
+        title: document.getElementById(`${prefix}Title`).value.trim() || null,
+        phone: document.getElementById(`${prefix}Phone`).value.trim() || null,
+        email: document.getElementById(`${prefix}Email`).value.trim() || null,
+        birthday: document.getElementById(`${prefix}Birthday`).value,
+        hire_date: document.getElementById(`${prefix}HireDate`).value || null,
+        notes: document.getElementById(`${prefix}Notes`).value.trim() || null
+      };
+    }
+
+    document.getElementById('addStaffForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = { ...staffFormData('staff'), line_id: document.getElementById('staffLineId').value.trim() };
+      const submitBtn = this.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      try {
+        const result = await api.staff.create(formData);
+        if (result.success) {
+          showMessage('行政人員新增成功！帳號為 LINE ID，密碼為生日（格式：YYYYMMDD）', 'success');
+          closeModal('addStaffModal');
+          loadStaff();
+        }
+      } catch (error) {
+        showMessage('新增行政人員失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    function openEditStaffModal(s) {
+      const isSelf = s.id === currentUserId();
+      document.getElementById('editStaffId').value = s.id;
+      document.getElementById('editStaffName').value = s.name || '';
+      document.getElementById('editStaffTitle').value = s.title || '';
+      document.getElementById('editStaffLineId').value = s.username || '';
+      document.getElementById('editStaffPhone').value = s.phone || '';
+      document.getElementById('editStaffEmail').value = s.email || '';
+      document.getElementById('editStaffBirthday').value = s.birthday ? s.birthday.split('T')[0] : '';
+      document.getElementById('editStaffHireDate').value = s.hire_date ? s.hire_date.split('T')[0] : '';
+      document.getElementById('editStaffNotes').value = s.notes || '';
+      const activeBox = document.getElementById('editStaffActive');
+      activeBox.checked = !!Number(s.is_active);
+      activeBox.disabled = isSelf;
+      const deleteBtn = document.getElementById('deleteStaffBtn');
+      deleteBtn.disabled = isSelf;
+      deleteBtn.title = isSelf ? '無法刪除目前登入的帳號' : '';
+      document.getElementById('editStaffModal').classList.add('active');
+    }
+
+    document.getElementById('editStaffForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const staffId = document.getElementById('editStaffId').value;
+      const formData = {
+        ...staffFormData('editStaff'),
+        is_active: document.getElementById('editStaffActive').checked
+      };
+      const submitBtn = this.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      try {
+        const result = await api.staff.update(staffId, formData);
+        if (result.success) {
+          showMessage('行政人員資料更新成功！', 'success');
+          closeModal('editStaffModal');
+          loadStaff();
+        }
+      } catch (error) {
+        showMessage('更新行政人員失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('deleteStaffBtn').addEventListener('click', async function() {
+      const staffId = document.getElementById('editStaffId').value;
+      const target = window.staffData[staffId];
+      if (!target || !confirm(`確定要刪除「${target.name}」嗎？刪除後帳號將無法復原。\n若只是暫時不使用，建議改為取消「帳號啟用」。`)) return;
+      this.disabled = true;
+      try {
+        const result = await api.staff.delete(staffId);
+        if (result.success) {
+          showMessage(`已刪除「${target.name}」`, 'success');
+          closeModal('editStaffModal');
+          loadStaff();
+        }
+      } catch (error) {
+        showMessage('刪除行政人員失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+      } finally {
+        this.disabled = false;
+      }
+    });
+
+    // 頁面載入時載入老師列表，並依網址還原檢視（#staff）
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTeachers();
+      if (personView === 'staff') setPersonView('staff');
+    });
   </script>
   <script src="../js/admin-notifications.js"></script>
 </body>

@@ -64,12 +64,15 @@ exports.getOne = async (req, res) => {
       });
     }
 
-    // 取得教師的課程
+    // 取得教師的課程；教室取自該課程啟用中的班級（課程本身不綁定教室）
     const courses = await db.query(`
-      SELECT c.*, ct.name as course_type, cr.name as classroom_name
+      SELECT c.*, ct.name as course_type,
+        (SELECT GROUP_CONCAT(DISTINCT cr.name ORDER BY cr.name SEPARATOR '、')
+         FROM course_schedules cs
+         JOIN classrooms cr ON cs.classroom_id = cr.id
+         WHERE cs.course_id = c.id AND cs.is_active = TRUE) as classroom_names
       FROM courses c
       LEFT JOIN course_types ct ON c.course_type_id = ct.id
-      LEFT JOIN classrooms cr ON c.classroom_id = cr.id
       WHERE c.teacher_id = ? AND c.status = 'active'
     `, [id]);
 

@@ -200,6 +200,20 @@ const api = {
   // =====================
   // 教師管理
   // =====================
+  staff: {
+    // 取得所有行政人員
+    getAll: (params = {}) => apiClient.get('/staff', { params }),
+
+    // 新增行政人員
+    create: (data) => apiClient.post('/staff', data),
+
+    // 更新行政人員
+    update: (id, data) => apiClient.put(`/staff/${id}`, data),
+
+    // 刪除行政人員
+    delete: (id) => apiClient.delete(`/staff/${id}`)
+  },
+
   teachers: {
     // 取得所有教師
     getAll: (params = {}) => apiClient.get('/teachers', { params }),
