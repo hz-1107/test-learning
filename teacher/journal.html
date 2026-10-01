@@ -142,25 +142,44 @@
     .course-notes {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 8px 24px;
       flex-wrap: wrap;
     }
 
     .course-note-option {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       cursor: pointer;
     }
 
-    .course-note-option input[type="checkbox"] {
+    .course-note-option input[type="radio"] {
+      -webkit-appearance: none;
+      appearance: none;
       width: 19px;
       height: 19px;
-      accent-color: var(--color-primary-dark);
+      margin: 0;
+      border: 2px solid #cbd5e1;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    /* 選取後：黃色外框 + 黃色圓點（中間留白圈） */
+    .course-note-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+      background: var(--color-primary);
+      box-shadow: inset 0 0 0 3px white;
+    }
+
+    .course-note-option input[type="radio"]:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
     }
 
     .course-note-option span {
-      font-size: 11.25px;
+      font-size: 14px;
       font-weight: 500;
       color: #475569;
     }
@@ -375,6 +394,12 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+    .attendance-btn--active.attendance-btn--none {
+      background: #FE8028;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
     .student-card__expand {
       margin-left: auto;
       width: 36px;
@@ -532,6 +557,69 @@
       color: #6a7282;
     }
 
+    /* 已有照片：縮圖 + 新增格橫向排列（每位學生最多 2 張） */
+    .photo-upload--has-photos {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      padding: 12px;
+      gap: 12px;
+    }
+
+    .photo-upload--full {
+      cursor: default;
+    }
+
+    .photo-upload__thumb {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .photo-upload__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-upload__remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      color: white;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .photo-upload__remove:hover {
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    .photo-upload__add {
+      width: 80px;
+      height: 80px;
+      border: 1px dashed #d1d5dc;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
     .points-input {
       display: flex;
       align-items: center;
@@ -539,12 +627,22 @@
     }
 
     .points-input input {
-      width: 60px;
-      padding: 8px 12px;
+      width: 44px;
+      height: 32px;
+      padding: 0 8px;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       font-size: 16px;
       text-align: center;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    /* 隱藏數字輸入框內建的上下調整鈕（改用右側箭頭調整） */
+    .points-input input::-webkit-outer-spin-button,
+    .points-input input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     .points-input__arrows {
@@ -1246,15 +1344,15 @@
               <label class="form-label form-label--required">課程備註</label>
               <div class="course-notes" id="journalNotes">
                 <label class="course-note-option">
-                  <input type="checkbox" name="courseNote" value="正常上課" checked>
+                  <input type="radio" name="courseNote" value="正常上課" checked>
                   <span>正常上課</span>
                 </label>
                 <label class="course-note-option">
-                  <input type="checkbox" name="courseNote" value="時段異動">
+                  <input type="radio" name="courseNote" value="時段異動">
                   <span>時段異動：＿＿＿＿＿＿＿＿＿＿</span>
                 </label>
                 <label class="course-note-option">
-                  <input type="checkbox" name="courseNote" value="師資異動">
+                  <input type="radio" name="courseNote" value="師資異動">
                   <span>師資異動：＿＿＿＿＿＿＿＿＿</span>
                 </label>
               </div>
@@ -1361,7 +1459,7 @@
                   <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
                   <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
                   <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
-                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                  <button class="attendance-btn attendance-btn--none" onclick="setAttendance(this, 'none')">未約課</button>
                 </div>
                 <div class="student-card__expand" onclick="toggleStudentDetails(this)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1426,13 +1524,13 @@
                       </svg>
                       上傳照片
                     </label>
-                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                    <div class="photo-upload" onclick="uploadPhoto(this, event)">
                       <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      <span class="photo-upload__text">點擊上傳照片</span>
+                      <span class="photo-upload__text">點擊上傳照片（最多 2 張）</span>
                     </div>
                   </div>
                   <div class="detail-group">
@@ -1461,7 +1559,7 @@
                   <button class="attendance-btn attendance-btn--present attendance-btn--active" onclick="setAttendance(this, 'present')">出席</button>
                   <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
                   <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
-                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                  <button class="attendance-btn attendance-btn--none" onclick="setAttendance(this, 'none')">未約課</button>
                 </div>
                 <div class="student-card__expand" onclick="toggleStudentDetails(this)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1526,13 +1624,13 @@
                       </svg>
                       上傳照片
                     </label>
-                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                    <div class="photo-upload" onclick="uploadPhoto(this, event)">
                       <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      <span class="photo-upload__text">點擊上傳照片</span>
+                      <span class="photo-upload__text">點擊上傳照片（最多 2 張）</span>
                     </div>
                   </div>
                   <div class="detail-group">
@@ -1561,7 +1659,7 @@
                   <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
                   <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
                   <button class="attendance-btn attendance-btn--makeup attendance-btn--active" onclick="setAttendance(this, 'makeup')">補課</button>
-                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                  <button class="attendance-btn attendance-btn--none" onclick="setAttendance(this, 'none')">未約課</button>
                 </div>
                 <div class="student-card__expand" onclick="toggleStudentDetails(this)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1626,13 +1724,13 @@
                       </svg>
                       上傳照片
                     </label>
-                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                    <div class="photo-upload" onclick="uploadPhoto(this, event)">
                       <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      <span class="photo-upload__text">點擊上傳照片</span>
+                      <span class="photo-upload__text">點擊上傳照片（最多 2 張）</span>
                     </div>
                   </div>
                   <div class="detail-group">
@@ -1661,7 +1759,7 @@
                   <button class="attendance-btn attendance-btn--present attendance-btn--active" onclick="setAttendance(this, 'present')">出席</button>
                   <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
                   <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
-                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                  <button class="attendance-btn attendance-btn--none" onclick="setAttendance(this, 'none')">未約課</button>
                 </div>
                 <div class="student-card__expand" onclick="toggleStudentDetails(this)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1726,13 +1824,13 @@
                       </svg>
                       上傳照片
                     </label>
-                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                    <div class="photo-upload" onclick="uploadPhoto(this, event)">
                       <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      <span class="photo-upload__text">點擊上傳照片</span>
+                      <span class="photo-upload__text">點擊上傳照片（最多 2 張）</span>
                     </div>
                   </div>
                   <div class="detail-group">
@@ -1761,7 +1859,7 @@
                   <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
                   <button class="attendance-btn attendance-btn--absent attendance-btn--active" onclick="setAttendance(this, 'absent')">請假</button>
                   <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
-                  <button class="attendance-btn" onclick="setAttendance(this, 'none')">未約課</button>
+                  <button class="attendance-btn attendance-btn--none" onclick="setAttendance(this, 'none')">未約課</button>
                 </div>
                 <div class="student-card__expand" onclick="toggleStudentDetails(this)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1826,13 +1924,13 @@
                       </svg>
                       上傳照片
                     </label>
-                    <div class="photo-upload" onclick="uploadPhoto(this)">
+                    <div class="photo-upload" onclick="uploadPhoto(this, event)">
                       <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      <span class="photo-upload__text">點擊上傳照片</span>
+                      <span class="photo-upload__text">點擊上傳照片（最多 2 張）</span>
                     </div>
                   </div>
                   <div class="detail-group">
@@ -3080,11 +3178,14 @@
       // 解析儲存的備註（以逗號分隔）
       const savedNotes = content.split(', ').map(s => s.trim());
 
-      // 取消所有勾選
+      // 課程備註為單選：選取第一個符合的選項，沒有符合則回到預設值
       const checkboxes = document.querySelectorAll('input[name="courseNote"]');
-      checkboxes.forEach(cb => {
-        cb.checked = savedNotes.includes(cb.value);
-      });
+      const match = Array.from(checkboxes).find(cb => savedNotes.includes(cb.value));
+      if (match) {
+        match.checked = true;
+      } else {
+        resetCourseNotes();
+      }
     }
 
     // 重設課程備註為預設值
@@ -3108,6 +3209,9 @@
         attendanceBtns.forEach(btn => btn.classList.remove('attendance-btn--active'));
         const presentBtn = card.querySelector('.attendance-btn--present');
         if (presentBtn) presentBtn.classList.add('attendance-btn--active');
+        delete card.dataset.attendanceTouched;
+        const resetPointsInput = card.querySelector('.points-input input');
+        if (resetPointsInput) delete resetPointsInput.dataset.touched;
 
         // 清空評語和備註
         const performanceText = card.querySelector('.student-card__performance-text');
@@ -3154,6 +3258,7 @@
         }
         if (targetBtn) {
           targetBtn.classList.add('attendance-btn--active');
+          card.dataset.attendanceTouched = '1';
         }
 
         // 填充詳細資料
@@ -3175,18 +3280,14 @@
           const pointsInput = details.querySelector('.points-input input');
           if (pointsInput) {
             pointsInput.value = record.points_earned || 1;
+            if (record.points_earned > 0) pointsInput.dataset.touched = '1';
           }
 
           // 照片
           if (record.photos && record.photos.length > 0) {
             const photoUpload = details.querySelector('.photo-upload');
             if (photoUpload) {
-              const photoUrl = record.photos[0].photo_url;
-              photoUpload.innerHTML = `
-                <img src="${fileUrl(photoUrl)}" style="max-width: 100%; max-height: 80px; border-radius: 4px; object-fit: cover;">
-                <span class="photo-upload__text">點擊更換照片</span>
-              `;
-              photoUpload.dataset.photoUrl = photoUrl;
+              renderPhotoUpload(photoUpload, record.photos.map(p => p.photo_url));
             }
           }
         }
@@ -3230,7 +3331,7 @@
               <button class="attendance-btn attendance-btn--present" onclick="setAttendance(this, 'present')">出席</button>
               <button class="attendance-btn attendance-btn--absent" onclick="setAttendance(this, 'absent')">請假</button>
               <button class="attendance-btn attendance-btn--makeup" onclick="setAttendance(this, 'makeup')">補課</button>
-              <button class="attendance-btn" onclick="setAttendance(this, 'no_class')">未約課</button>
+              <button class="attendance-btn attendance-btn--none" onclick="setAttendance(this, 'no_class')">未約課</button>
             </div>
             <div class="student-card__expand" onclick="toggleStudentDetails(this)">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3295,13 +3396,13 @@
                   </svg>
                   上傳照片
                 </label>
-                <div class="photo-upload" onclick="uploadPhoto(this)">
+                <div class="photo-upload" onclick="uploadPhoto(this, event)">
                   <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                     <polyline points="17 8 12 3 7 8"/>
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
-                  <span class="photo-upload__text">點擊上傳照片</span>
+                  <span class="photo-upload__text">點擊上傳照片（最多 2 張）</span>
                 </div>
               </div>
               <div class="detail-group">
@@ -3730,6 +3831,8 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
     // 設定出缺席狀態
     function setAttendance(btn, status) {
+      const card = btn.closest('.student-card');
+      if (card) card.dataset.attendanceTouched = '1';
       const buttons = btn.closest('.attendance-buttons').querySelectorAll('.attendance-btn');
       buttons.forEach(b => b.classList.remove('attendance-btn--active'));
       btn.classList.add('attendance-btn--active');
@@ -3766,24 +3869,113 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
       let value = parseInt(input.value) || 0;
       value = Math.max(0, Math.min(7, value + delta));
       input.value = value;
+      input.dataset.touched = '1';
+      updateProgressStats();
+    }
+
+    // 手動輸入點數
+    function onPointsInput(e) {
+      e.target.dataset.touched = '1';
+      updateProgressStats();
+    }
+
+    // 完成度判斷：預設值（預選出席、預設點數）不算完成，需教師實際設定或載入已儲存的紀錄
+    function isAttendanceDone(card) {
+      return card.dataset.attendanceTouched === '1' && !!card.querySelector('.attendance-btn--active');
+    }
+
+    function isPointsDone(pointsInput) {
+      return !!pointsInput && pointsInput.dataset.touched === '1' && parseInt(pointsInput.value) > 0;
+    }
+
+    // 每位學生最多可上傳的照片數
+    const MAX_STUDENT_PHOTOS = 2;
+
+    // 取得上傳區目前的照片 URL 列表
+    function getPhotoUrls(uploadArea) {
+      try {
+        return JSON.parse(uploadArea.dataset.photoUrls || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // 依照片列表重繪上傳區（縮圖 + 刪除鈕，未滿時顯示新增格）
+    function renderPhotoUpload(uploadArea, urls) {
+      urls = urls.filter(Boolean).slice(0, MAX_STUDENT_PHOTOS);
+      uploadArea.dataset.photoUrls = JSON.stringify(urls);
+      uploadArea.classList.toggle('photo-upload--has-photos', urls.length > 0);
+      uploadArea.classList.toggle('photo-upload--full', urls.length >= MAX_STUDENT_PHOTOS);
+
+      const uploadIcon = `
+        <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>`;
+
+      if (urls.length === 0) {
+        uploadArea.innerHTML = `${uploadIcon}
+          <span class="photo-upload__text">點擊上傳照片（最多 ${MAX_STUDENT_PHOTOS} 張）</span>`;
+        return;
+      }
+
+      uploadArea.innerHTML = urls.map((url, i) => `
+        <div class="photo-upload__thumb">
+          <img src="${fileUrl(url)}" alt="學生照片 ${i + 1}">
+          <button type="button" class="photo-upload__remove" onclick="removePhoto(event, this, ${i})" aria-label="刪除照片">×</button>
+        </div>`).join('') +
+        (urls.length < MAX_STUDENT_PHOTOS ? `
+        <div class="photo-upload__add">${uploadIcon}
+          <span class="photo-upload__text">${urls.length}/${MAX_STUDENT_PHOTOS}</span>
+        </div>` : '');
+    }
+
+    // 刪除單張照片
+    function removePhoto(event, btn, index) {
+      event.stopPropagation();
+      const uploadArea = btn.closest('.photo-upload');
+      const urls = getPhotoUrls(uploadArea);
+      urls.splice(index, 1);
+      renderPhotoUpload(uploadArea, urls);
+      updateProgressStats();
     }
 
     // 上傳照片
-    async function uploadPhoto(uploadArea) {
+    async function uploadPhoto(uploadArea, event) {
+      // 點到既有縮圖不觸發上傳
+      if (event && event.target.closest('.photo-upload__thumb')) return;
+
+      const currentUrls = getPhotoUrls(uploadArea);
+      const remaining = MAX_STUDENT_PHOTOS - currentUrls.length;
+      if (remaining <= 0) {
+        showMessage(`每位學生最多上傳 ${MAX_STUDENT_PHOTOS} 張照片`, 'warning');
+        return;
+      }
+
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
+      input.multiple = remaining > 1;
       input.onchange = async function(e) {
-        if (e.target.files[0]) {
-          const file = e.target.files[0];
+        let files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
 
-          // 顯示上傳中狀態
-          uploadArea.innerHTML = `
-            <div style="color: #666; font-size: 12px;">上傳中...</div>
-          `;
+        if (files.length > remaining) {
+          showMessage(`每位學生最多 ${MAX_STUDENT_PHOTOS} 張照片，只會上傳前 ${remaining} 張`, 'warning');
+          files = files.slice(0, remaining);
+        }
 
-          try {
-            const token = localStorage.getItem('authToken');
+        // 顯示上傳中狀態
+        uploadArea.innerHTML = `
+          <div style="color: #666; font-size: 12px;">上傳中...</div>
+        `;
+
+        const uploadedUrls = [];
+        try {
+          const token = localStorage.getItem('authToken');
+
+          for (const file of files) {
             const formData = new FormData();
             formData.append('photo', file);
 
@@ -3796,37 +3988,21 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             });
 
             const result = await response.json();
-
-            if (result.success) {
-              // 上傳成功，顯示照片並儲存 URL
-              uploadArea.innerHTML = `
-                <img src="${fileUrl(result.data.url)}" style="max-width: 100%; max-height: 80px; border-radius: 4px; object-fit: cover;">
-                <span class="photo-upload__text">點擊更換照片</span>
-              `;
-              uploadArea.dataset.photoUrl = result.data.url;
-              uploadArea.dataset.photoFilename = result.data.filename;
-
-              // 更新進度統計
-              updateProgressStats();
-
-              showMessage('照片上傳成功', 'success');
-            } else {
+            if (!result.success) {
               throw new Error(result.message || '上傳失敗');
             }
-          } catch (error) {
-            console.error('上傳照片錯誤:', error);
-            // 上傳失敗，恢復原狀
-            uploadArea.innerHTML = `
-              <svg class="photo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
-              <span class="photo-upload__text">點擊上傳照片</span>
-            `;
-            showMessage('照片上傳失敗: ' + error.message, 'error');
+            uploadedUrls.push(result.data.url);
           }
+
+          showMessage('照片上傳成功', 'success');
+        } catch (error) {
+          console.error('上傳照片錯誤:', error);
+          showMessage('照片上傳失敗: ' + error.message, 'error');
         }
+
+        // 顯示原有照片 + 成功上傳的照片
+        renderPhotoUpload(uploadArea, currentUrls.concat(uploadedUrls));
+        updateProgressStats();
       };
       input.click();
     }
@@ -3852,6 +4028,10 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
           });
           studentList.querySelectorAll('.points-input input').forEach(input => {
             input.value = '1';
+            delete input.dataset.touched;
+          });
+          studentList.querySelectorAll('.student-card').forEach(card => {
+            delete card.dataset.attendanceTouched;
           });
         }
         updateAttendanceStats();
@@ -3997,7 +4177,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
           let performance = '';
           let studentNotes = '';
           let pointsEarned = 1;
-          let photoUrl = '';
+          let photoUrls = [];
 
           if (details) {
             const commentField = details.querySelector('textarea[placeholder*="評語"]');
@@ -4009,10 +4189,10 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             const pointsInput = details.querySelector('.points-input input');
             if (pointsInput) pointsEarned = Math.max(0, Math.min(7, parseInt(pointsInput.value) || 0));
 
-            // 取得照片 URL
+            // 取得照片 URL（最多 2 張）
             const photoUpload = details.querySelector('.photo-upload');
-            if (photoUpload && photoUpload.dataset.photoUrl) {
-              photoUrl = photoUpload.dataset.photoUrl;
+            if (photoUpload) {
+              photoUrls = getPhotoUrls(photoUpload);
             }
           }
 
@@ -4035,7 +4215,8 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
               performance: performance,
               notes: studentNotes,
               points_earned: pointsEarned,
-              photo_url: photoUrl,
+              photo_url: photoUrls[0] || '',
+              photo_urls: photoUrls,
               skill_programming: skillProgramming,
               skill_debugging: skillDebugging,
               skill_creativity: skillCreativity,
@@ -4058,8 +4239,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         let pointsCompleted = 0;
 
         studentCards.forEach(card => {
-          const activeBtn = card.querySelector('.attendance-btn--active');
-          if (activeBtn) attendanceCompleted++;
+          if (isAttendanceDone(card)) attendanceCompleted++;
 
           const details = card.querySelector('.student-card__details');
           if (details) {
@@ -4070,7 +4250,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
             if (photoUpload) photosCompleted++;
 
             const pointsInput = details.querySelector('.points-input input');
-            if (pointsInput && parseInt(pointsInput.value) > 0) pointsCompleted++;
+            if (isPointsDone(pointsInput)) pointsCompleted++;
           }
         });
 
@@ -4141,8 +4321,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
       studentCards.forEach(card => {
         // 檢查出缺席是否已選擇
-        const activeBtn = card.querySelector('.attendance-btn--active');
-        if (activeBtn) {
+        if (isAttendanceDone(card)) {
           attendanceCompleted++;
         }
 
@@ -4162,7 +4341,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
           // 檢查點數是否有設定
           const pointsInput = details.querySelector('.points-input input');
-          if (pointsInput && parseInt(pointsInput.value) > 0) {
+          if (isPointsDone(pointsInput)) {
             pointsCompleted++;
           }
         }
@@ -4222,7 +4401,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
           // 檢查點數
           const pointsInput = details.querySelector('.points-input input');
-          if (pointsInput && parseInt(pointsInput.value) > 0) {
+          if (isPointsDone(pointsInput)) {
             completed++;
             if (indicators[5]) indicators[5].classList.add('student-indicator__icon--completed');
           } else {
@@ -4250,8 +4429,8 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
       // 監聯點數輸入
       studentList.querySelectorAll('.points-input input').forEach(input => {
-        input.removeEventListener('input', updateProgressStats);
-        input.addEventListener('input', updateProgressStats);
+        input.removeEventListener('input', onPointsInput);
+        input.addEventListener('input', onPointsInput);
       });
     }
 

@@ -151,17 +151,19 @@
     }
 
     .filter-select {
-      padding: 10px 36px 10px 16px;
+      padding: 10px 40px 10px 14px;
       background: white;
       border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-      font-size: 14px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
       color: #364153;
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23364153' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
+      background-size: 16px 16px;
       cursor: pointer;
+      min-width: 130px;
     }
 
     /* 學生表格 */
@@ -1552,7 +1554,6 @@
     <main class="main-content">
       <div class="page-header">
         <h2>學生管理</h2>
-        <p>管理和查看所有學生資訊</p>
       </div>
 
       <div class="students-layout">
@@ -1815,7 +1816,7 @@
 
         <div class="modal-actions">
           <button class="modal-btn modal-btn--cancel" onclick="closeModal('pointsModal')">取消</button>
-          <button class="modal-btn modal-btn--confirm" onclick="confirmPoints()">確認增加</button>
+          <button class="modal-btn modal-btn--confirm" onclick="confirmPoints()">確認變更</button>
         </div>
       </div>
     </div>

@@ -128,17 +128,18 @@
 
     .filter-group__select {
       background: white;
-      border: 0.8px solid rgba(0, 0, 0, 0.08);
-      border-radius: 9px;
-      padding: 8px 32px 8px 12px;
-      font-size: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-md);
+      padding: 10px 40px 10px 14px;
+      font-size: var(--font-size-md);
       color: #364153;
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23364153' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 10px center;
+      background-position: right 12px center;
+      background-size: 16px 16px;
       cursor: pointer;
-      min-width: 120px;
+      min-width: 130px;
     }
 
     .filter-group__select:focus {
@@ -512,7 +513,6 @@
     <main class="main-content" style="padding: 0;">
       <div class="page-header">
         <h2 class="page-header__title">教師日誌</h2>
-        <p class="page-header__subtitle">選擇班級以填寫或查看教學日誌</p>
       </div>
 
       <!-- 篩選列 -->

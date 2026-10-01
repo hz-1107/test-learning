@@ -72,18 +72,19 @@
 
     /* 下拉式選單樣式 */
     .filter-select {
-      padding: 8px 32px 8px 12px;
-      font-size: var(--font-size-sm);
-      font-weight: 500;
-      color: var(--color-text-primary);
+      padding: 10px 40px 10px 14px;
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
       background: var(--color-surface);
       border: 1px solid var(--color-surface-alt);
       border-radius: var(--radius-md);
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a7282' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 10px center;
+      background-position: right 12px center;
+      background-size: 16px 16px;
+      min-width: 130px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
@@ -115,6 +116,12 @@
       font-size: 11px;
       font-weight: 500;
       color: var(--color-text-muted);
+    }
+
+    /* 區塊標題字重（與其他頁面標題統一） */
+    .courses-list__title,
+    .journal-section__title {
+      font-weight: 600;
     }
 
     /* 日誌區塊標題列 */
@@ -328,7 +335,6 @@
     <main class="main-content">
       <!-- 歡迎區塊 -->
       <section class="welcome-section">
-        <h2 class="welcome-section__title" id="welcomeTitle">您好，老師</h2>
         <p class="welcome-section__date" id="currentDate">載入中...</p>
       </section>
 
@@ -438,22 +444,14 @@
       return `${y}-${m}-${d}`;
     }
 
-    // 更新日期顯示和歡迎訊息
+    // 更新日期顯示
     function updateWelcome() {
       const now = new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
       const dayOfWeek = dayNames[now.getDay()];
-      const hour = now.getHours();
 
-      // 問候語
-      let greeting = '您好';
-      if (hour >= 5 && hour < 12) greeting = '早安';
-      else if (hour >= 12 && hour < 18) greeting = '午安';
-      else greeting = '晚安';
-
-      document.getElementById('welcomeTitle').textContent = `${greeting}，${userName} 老師`;
       document.getElementById('currentDate').textContent = `${year} / ${month} / ${day} (${dayOfWeek})`;
     }
 
@@ -465,7 +463,6 @@
           userName = response.data.name || response.data.username || '老師';
           currentTeacherId = response.data.teacher_id || null;
           document.getElementById('sidebarUserName').textContent = userName + ' 老師';
-          updateWelcome();
         }
       } catch (error) {
         console.warn('載入使用者資訊失敗:', error);
