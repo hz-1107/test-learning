@@ -561,30 +561,48 @@ exports.getMe = async (req, res) => {
     attendanceRows.forEach(row => { if (attendanceStats.hasOwnProperty(row.attendance)) attendanceStats[row.attendance] = row.count; });
     const totalLessons = Object.values(attendanceStats).reduce((sum, n) => sum + n, 0);
 
-    // 最新一筆課堂紀錄 (能力雷達與首頁翻轉卡皆取自同一筆最新紀錄)
-    const latestRecord = await db.queryOne(`
-      SELECT DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, slr.performance,
+    // 最新一筆有能力數據的課堂紀錄 (用於能力雷達圖)
+    // 過濾掉所有能力值都是 0 或 NULL 的紀錄
+    const latestSkillRecord = await db.queryOne(`
+      SELECT DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date,
         slr.skill_programming, slr.skill_debugging, slr.skill_creativity,
         slr.skill_structure, slr.skill_teamwork
       FROM student_log_records slr
       JOIN course_logs cl ON slr.log_id = cl.id
       WHERE slr.student_id = ?
+        AND (COALESCE(slr.skill_programming, 0) > 0
+          OR COALESCE(slr.skill_debugging, 0) > 0
+          OR COALESCE(slr.skill_creativity, 0) > 0
+          OR COALESCE(slr.skill_structure, 0) > 0
+          OR COALESCE(slr.skill_teamwork, 0) > 0)
       ORDER BY cl.log_date DESC
       LIMIT 1
     `, [student.id]);
 
-    // 能力雷達 (取最新一筆課堂紀錄的五項能力值，沒有紀錄則全部為 0)
+    // 最新一筆課堂表現紀錄 (用於首頁翻轉卡，不論能力值是否為 0)
+    const latestPerformanceRecord = await db.queryOne(`
+      SELECT DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, slr.performance
+      FROM student_log_records slr
+      JOIN course_logs cl ON slr.log_id = cl.id
+      WHERE slr.student_id = ?
+        AND slr.performance IS NOT NULL
+        AND slr.performance != ''
+      ORDER BY cl.log_date DESC
+      LIMIT 1
+    `, [student.id]);
+
+    // 能力雷達 (取最新一筆有數據的課堂紀錄，沒有紀錄則全部為 0)
     const skills = {
-      programming: Number(latestRecord?.skill_programming) || 0,
-      debugging: Number(latestRecord?.skill_debugging) || 0,
-      creativity: Number(latestRecord?.skill_creativity) || 0,
-      structure: Number(latestRecord?.skill_structure) || 0,
-      teamwork: Number(latestRecord?.skill_teamwork) || 0
+      programming: Number(latestSkillRecord?.skill_programming) || 0,
+      debugging: Number(latestSkillRecord?.skill_debugging) || 0,
+      creativity: Number(latestSkillRecord?.skill_creativity) || 0,
+      structure: Number(latestSkillRecord?.skill_structure) || 0,
+      teamwork: Number(latestSkillRecord?.skill_teamwork) || 0
     };
 
     // 最近一筆課堂表現 (用於首頁翻轉卡)
-    const recentRecord = latestRecord
-      ? { log_date: latestRecord.log_date, performance: latestRecord.performance }
+    const recentRecord = latestPerformanceRecord
+      ? { log_date: latestPerformanceRecord.log_date, performance: latestPerformanceRecord.performance }
       : null;
 
     res.json({

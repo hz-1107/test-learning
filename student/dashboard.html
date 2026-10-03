@@ -956,6 +956,107 @@
       line-height: 1.7;
     }
 
+    /* AI 重新生成按鈕 */
+    .ai-regenerate-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      padding: 8px 16px;
+      background: var(--color-surface-alt);
+      color: var(--color-text-secondary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .ai-regenerate-btn:hover {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+    }
+
+    .ai-regenerate-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .ai-regenerate-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* 推薦卡片彈性高度 */
+    .recommendation-flip {
+      min-height: auto !important;
+      height: auto !important;
+    }
+
+    .recommendation-flip .flip-card__inner {
+      position: relative !important;
+      min-height: 180px;
+    }
+
+    .recommendation-flip .flip-card__front,
+    .recommendation-flip .flip-card__back {
+      position: relative !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 180px;
+    }
+
+    .recommendation-flip .flip-card__back {
+      display: none;
+      position: absolute !important;
+      top: 0;
+      left: 0;
+    }
+
+    .recommendation-flip.flip-card--flipped .flip-card__front {
+      display: none;
+    }
+
+    .recommendation-flip.flip-card--flipped .flip-card__back {
+      display: block;
+      position: relative !important;
+    }
+
+    .recommendation-card {
+      height: auto !important;
+      min-height: 180px;
+    }
+
+    .recommendation-card__description {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    /* AI 載入狀態 */
+    .ai-loading-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-xl);
+      color: var(--color-text-muted);
+    }
+
+    .ai-loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--color-surface-alt);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: var(--spacing-md);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     /* 響應式 */
     @media (max-width: 1200px) {
       .analysis-grid {
@@ -1283,43 +1384,56 @@
 
             <!-- 右側：推薦卡片，固定顯示不受切換影響 -->
             <div class="recommendation-cards">
+              <!-- 重新生成按鈕 -->
+              <button class="ai-regenerate-btn" id="aiRegenerateBtn" onclick="regenerateDepartmentRecommendation()" title="重新分析">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 4v6h-6"/>
+                  <path d="M1 20v-6h6"/>
+                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                重新分析
+              </button>
+
               <!-- 適性科系推薦翻轉卡 -->
-              <div class="flip-card recommendation-flip" id="careerFlipCard" style="min-height: 180px;">
+              <div class="flip-card recommendation-flip" id="careerFlipCard">
                 <div class="flip-card__inner">
-                  <div class="flip-card__front recommendation-card" style="position: absolute; width: 100%; height: 100%;">
+                  <div class="flip-card__front recommendation-card">
                     <span class="recommendation-card__tag">適性科系推薦</span>
-                    <h3 class="recommendation-card__title">電機工程學系</h3>
-                    <div class="flip-card__link" onclick="toggleFlipCard('careerFlipCard')">翻閱完整分析</div>
+                    <div id="recommendLoading" class="ai-loading-placeholder">
+                      <div class="ai-loading-spinner"></div>
+                      <span>AI 分析中...</span>
+                    </div>
+                    <h3 class="recommendation-card__title" id="recommendDepartment" style="display: none;"></h3>
+                    <div class="flip-card__link" onclick="toggleFlipCard('careerFlipCard')" id="careerFlipLink" style="display: none;">翻閱推薦理由</div>
                   </div>
-                  <div class="flip-card__back recommendation-card" style="position: absolute; width: 100%; height: 100%;">
-                    <span class="recommendation-card__tag">完整分析</span>
-                    <p class="recommendation-card__description" style="font-size: 15px;">
-                      依據您的程式設計與除錯能力表現，電機工程系是最適合的選擇。建議加強結構設計與團隊合作能力。
-                    </p>
+                  <div class="flip-card__back recommendation-card">
+                    <span class="recommendation-card__tag">推薦理由</span>
+                    <p class="recommendation-card__description" id="recommendReason"></p>
                     <div class="flip-card__link" onclick="toggleFlipCard('careerFlipCard')">返回推薦</div>
                   </div>
                 </div>
               </div>
 
               <!-- 學類介紹翻轉卡 -->
-              <div class="flip-card recommendation-flip" id="introFlipCard" style="min-height: 200px;">
+              <div class="flip-card recommendation-flip" id="introFlipCard">
                 <div class="flip-card__inner">
-                  <div class="flip-card__front recommendation-card" style="position: absolute; width: 100%; height: 100%;">
+                  <div class="flip-card__front recommendation-card">
                     <span class="recommendation-card__tag">學類介紹</span>
-                    <p class="recommendation-card__description">
-                      電機工程是現代科技的基石，涵蓋從微觀的晶片設計到巨觀的通訊網路與人工智慧。課程橫跨軟硬體，以電路、電子、電磁為基礎，延伸至訊號處理、自動控制與計算機科學，著重培養強大的邏輯運算與系統整合能力。
-                    </p>
+                    <p class="recommendation-card__description" id="recommendIntro"></p>
                     <div class="flip-card__link" onclick="toggleFlipCard('introFlipCard')">翻閱出路分析</div>
                   </div>
-                  <div class="flip-card__back recommendation-card" style="position: absolute; width: 100%; height: 100%;">
+                  <div class="flip-card__back recommendation-card">
                     <span class="recommendation-card__tag">出路分析</span>
-                    <p class="recommendation-card__description" style="font-size: 15px;">
-                      <strong>就業方向：</strong>半導體工程師、軟體工程師、系統整合工程師、AI研究員、通訊工程師等。<br><br>
-                      <strong>薪資範圍：</strong>新鮮人起薪約 45,000-60,000 元
-                    </p>
+                    <p class="recommendation-card__description" id="recommendCareer"></p>
                     <div class="flip-card__link" onclick="toggleFlipCard('introFlipCard')">返回介紹</div>
                   </div>
                 </div>
+              </div>
+
+              <!-- 學習建議卡片 -->
+              <div class="recommendation-card" id="suggestionCard" style="display: none;">
+                <span class="recommendation-card__tag">學習建議</span>
+                <p class="recommendation-card__description" id="recommendSuggestion"></p>
               </div>
             </div>
           </div>
@@ -1701,6 +1815,122 @@
     }
 
     initDashboard();
+
+    // ========================================
+    // AI 科系推薦功能（登入時自動載入）
+    // ========================================
+    async function loadDepartmentRecommendation() {
+      const loadingEl = document.getElementById('recommendLoading');
+      const departmentEl = document.getElementById('recommendDepartment');
+      const flipLinkEl = document.getElementById('careerFlipLink');
+      const regenerateBtn = document.getElementById('aiRegenerateBtn');
+
+      // 顯示載入狀態
+      loadingEl.style.display = 'flex';
+      departmentEl.style.display = 'none';
+      flipLinkEl.style.display = 'none';
+      regenerateBtn.disabled = true;
+
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await axios.post('http://localhost:3000/api/ai/generate-department-recommendation', {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          renderRecommendation(response.data.data);
+        } else {
+          showRecommendationError(response.data.message || '生成失敗');
+        }
+      } catch (error) {
+        console.error('載入科系推薦錯誤:', error);
+        showRecommendationError(error.response?.data?.message || '載入失敗，請稍後再試');
+      } finally {
+        regenerateBtn.disabled = false;
+      }
+    }
+
+    function renderRecommendation(data) {
+      const loadingEl = document.getElementById('recommendLoading');
+      const departmentEl = document.getElementById('recommendDepartment');
+      const flipLinkEl = document.getElementById('careerFlipLink');
+
+      // 隱藏載入，顯示內容
+      loadingEl.style.display = 'none';
+      departmentEl.style.display = 'block';
+      flipLinkEl.style.display = 'block';
+
+      // 更新推薦科系
+      departmentEl.textContent = data.department;
+
+      // 更新推薦理由
+      document.getElementById('recommendReason').textContent = data.reason;
+
+      // 更新學類介紹
+      document.getElementById('recommendIntro').textContent = data.introduction;
+
+      // 更新出路分析
+      document.getElementById('recommendCareer').innerHTML = `
+        <strong>就業方向：</strong>${data.career.directions || '—'}<br><br>
+        <strong>薪資範圍：</strong>${data.career.salary || '—'}
+      `;
+
+      // 顯示學習建議卡片
+      if (data.suggestion) {
+        document.getElementById('recommendSuggestion').textContent = data.suggestion;
+        document.getElementById('suggestionCard').style.display = 'block';
+      }
+    }
+
+    function showRecommendationError(message) {
+      const loadingEl = document.getElementById('recommendLoading');
+      const departmentEl = document.getElementById('recommendDepartment');
+      const flipLinkEl = document.getElementById('careerFlipLink');
+
+      loadingEl.style.display = 'none';
+      departmentEl.style.display = 'block';
+      departmentEl.textContent = '暫無推薦';
+      flipLinkEl.style.display = 'none';
+
+      document.getElementById('recommendIntro').textContent = message;
+    }
+
+    async function regenerateDepartmentRecommendation() {
+      const btn = document.getElementById('aiRegenerateBtn');
+      btn.disabled = true;
+
+      // 顯示載入狀態
+      document.getElementById('recommendLoading').style.display = 'flex';
+      document.getElementById('recommendDepartment').style.display = 'none';
+      document.getElementById('careerFlipLink').style.display = 'none';
+      document.getElementById('suggestionCard').style.display = 'none';
+
+      // 重置翻轉卡片狀態
+      document.getElementById('careerFlipCard').classList.remove('flip-card--flipped');
+      document.getElementById('introFlipCard').classList.remove('flip-card--flipped');
+
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await axios.post('http://localhost:3000/api/ai/regenerate-department-recommendation', {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          renderRecommendation(response.data.data);
+          showMessage('已重新分析科系推薦！', 'success');
+        } else {
+          showRecommendationError(response.data.message || '重新生成失敗');
+        }
+      } catch (error) {
+        console.error('重新生成科系推薦錯誤:', error);
+        showRecommendationError(error.response?.data?.message || '重新生成失敗');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // 頁面載入後自動載入科系推薦
+    loadDepartmentRecommendation();
   </script>
 </body>
 </html>
