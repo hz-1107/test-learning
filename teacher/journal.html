@@ -153,27 +153,24 @@
       cursor: pointer;
     }
 
-    .course-note-option input[type="radio"] {
+    .course-note-option input[type="checkbox"] {
       -webkit-appearance: none;
       appearance: none;
       width: 19px;
       height: 19px;
       margin: 0;
-      border: 2px solid #cbd5e1;
+      border: 2px solid #9ca3af;
       border-radius: 50%;
       background: white;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
     }
 
-    /* 選取後：黃色外框 + 黃色圓點（中間留白圈） */
-    .course-note-option input[type="radio"]:checked {
-      border-color: var(--color-primary);
-      background: var(--color-primary);
-      box-shadow: inset 0 0 0 3px white;
+    /* 選取後：外圈維持灰色，中央灰色實心圓點（與學生進度圓圈一致） */
+    .course-note-option input[type="checkbox"]:checked {
+      background: radial-gradient(circle closest-side, #99a1af 60%, white 66%);
     }
 
-    .course-note-option input[type="radio"]:focus-visible {
+    .course-note-option input[type="checkbox"]:focus-visible {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
@@ -182,6 +179,50 @@
       font-size: 14px;
       font-weight: 500;
       color: #475569;
+    }
+
+    .course-note-select {
+      padding: 4px 12px;
+      min-height: 34px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* 時段異動欄位（選取「時段異動」時才顯示） */
+    .time-change-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+      padding: 12px 16px;
+      background: #f9fafb;
+      border: 0.8px solid #d1d5dc;
+      border-radius: 10px;
+    }
+
+    .time-change-fields[hidden] {
+      display: none;
+    }
+
+    .time-change-fields__full {
+      grid-column: 1 / -1;
+    }
+
+    .time-change-date {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .time-change-date .form-input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .time-change-weekday {
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      white-space: nowrap;
     }
 
     /* 日誌完成進度統計 */
@@ -433,6 +474,8 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      cursor: default;
+      pointer-events: none;
     }
 
     .student-indicator__icon {
@@ -441,8 +484,9 @@
       color: #9ca3af;
     }
 
+    /* 已完成：外圈維持灰色，中央灰色實心圓點（直徑約為外圈的一半） */
     .student-indicator__icon--completed {
-      color: #00c950;
+      background: radial-gradient(circle closest-side, #99a1af 40%, transparent 44%);
     }
 
     .student-progress {
@@ -485,6 +529,13 @@
 
     .student-card--expanded .student-card__details {
       display: block;
+    }
+
+    /* 未約課：不需填寫評語、照片、點數、備註 */
+    .student-card--no-class .student-card__expand,
+    .student-card--no-class .student-card__footer,
+    .student-card--no-class .student-card__details {
+      display: none;
     }
 
     .detail-grid {
@@ -1344,17 +1395,44 @@
               <label class="form-label form-label--required">課程備註</label>
               <div class="course-notes" id="journalNotes">
                 <label class="course-note-option">
-                  <input type="radio" name="courseNote" value="正常上課" checked>
+                  <input type="checkbox" name="courseNote" value="正常上課" checked>
                   <span>正常上課</span>
                 </label>
                 <label class="course-note-option">
-                  <input type="radio" name="courseNote" value="時段異動">
-                  <span>時段異動：＿＿＿＿＿＿＿＿＿＿</span>
+                  <input type="checkbox" name="courseNote" value="時段異動">
+                  <span>時段異動</span>
                 </label>
-                <label class="course-note-option">
-                  <input type="radio" name="courseNote" value="師資異動">
-                  <span>師資異動：＿＿＿＿＿＿＿＿＿</span>
-                </label>
+                <div class="course-note-option">
+                  <label class="course-note-option">
+                    <input type="checkbox" name="courseNote" value="師資異動">
+                    <span>師資異動：</span>
+                  </label>
+                  <select id="courseNoteTeacher" class="form-input course-note-select" aria-label="異動後的授課教師" onchange="onCourseNoteTeacherChange()">
+                    <option value="">-- 請選擇教師 --</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="time-change-fields" id="timeChangeFields" hidden>
+                <div class="form-group time-change-fields__full">
+                  <label class="form-label form-label--required" for="timeChangeDate">異動日期</label>
+                  <div class="time-change-date">
+                    <input type="date" id="timeChangeDate" class="form-input" onchange="updateTimeChangeWeekday()">
+                    <span class="time-change-weekday" id="timeChangeWeekday"></span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label form-label--required" for="timeChangeStart">實際開始時間</label>
+                  <input type="time" id="timeChangeStart" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label class="form-label form-label--required" for="timeChangeEnd">實際結束時間</label>
+                  <input type="time" id="timeChangeEnd" class="form-input">
+                </div>
+                <div class="form-group time-change-fields__full">
+                  <label class="form-label" for="timeChangeRemark">備註（選填）</label>
+                  <input type="text" id="timeChangeRemark" class="form-input" placeholder="請輸入備註">
+                </div>
               </div>
             </div>
           </div>
@@ -1412,8 +1490,9 @@
                 <div class="progress-detail-item">
                   <div class="progress-detail-item__left">
                     <svg class="progress-detail-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 6v6l4 2"/>
+                      <path d="M9.5 7 8 3.5c1.3.6 2.7.6 4 0 1.3.6 2.7.6 4 0L14.5 7"/>
+                      <path d="M9 7h6"/>
+                      <path d="M9.5 7c-3 2.5-5 5.5-5 9 0 3 2 5 4.5 5h6c2.5 0 4.5-2 4.5-5 0-3.5-2-6.5-5-9"/>
                     </svg>
                     <span class="progress-detail-item__label">給予點數</span>
                   </div>
@@ -1492,8 +1571,9 @@
                       <circle cx="12" cy="12" r="10"/>
                     </svg>
                     <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 6v6l4 2"/>
+                      <path d="M9.5 7 8 3.5c1.3.6 2.7.6 4 0 1.3.6 2.7.6 4 0L14.5 7"/>
+                      <path d="M9 7h6"/>
+                      <path d="M9.5 7c-3 2.5-5 5.5-5 9 0 3 2 5 4.5 5h6c2.5 0 4.5-2 4.5-5 0-3.5-2-6.5-5-9"/>
                     </svg>
                   </div>
                 </div>
@@ -1534,7 +1614,7 @@
                     </div>
                   </div>
                   <div class="detail-group">
-                    <label class="detail-group__label">給予點數</label>
+                    <label class="detail-group__label">給予點數 <span style="font-weight: normal; color: #6a7282;">*上限七點</span></label>
                     <div class="points-input">
                       <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
@@ -1592,8 +1672,9 @@
                       <circle cx="12" cy="12" r="10"/>
                     </svg>
                     <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 6v6l4 2"/>
+                      <path d="M9.5 7 8 3.5c1.3.6 2.7.6 4 0 1.3.6 2.7.6 4 0L14.5 7"/>
+                      <path d="M9 7h6"/>
+                      <path d="M9.5 7c-3 2.5-5 5.5-5 9 0 3 2 5 4.5 5h6c2.5 0 4.5-2 4.5-5 0-3.5-2-6.5-5-9"/>
                     </svg>
                   </div>
                 </div>
@@ -1634,7 +1715,7 @@
                     </div>
                   </div>
                   <div class="detail-group">
-                    <label class="detail-group__label">給予點數</label>
+                    <label class="detail-group__label">給予點數 <span style="font-weight: normal; color: #6a7282;">*上限七點</span></label>
                     <div class="points-input">
                       <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
@@ -1692,8 +1773,9 @@
                       <circle cx="12" cy="12" r="10"/>
                     </svg>
                     <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 6v6l4 2"/>
+                      <path d="M9.5 7 8 3.5c1.3.6 2.7.6 4 0 1.3.6 2.7.6 4 0L14.5 7"/>
+                      <path d="M9 7h6"/>
+                      <path d="M9.5 7c-3 2.5-5 5.5-5 9 0 3 2 5 4.5 5h6c2.5 0 4.5-2 4.5-5 0-3.5-2-6.5-5-9"/>
                     </svg>
                   </div>
                 </div>
@@ -1734,7 +1816,7 @@
                     </div>
                   </div>
                   <div class="detail-group">
-                    <label class="detail-group__label">給予點數</label>
+                    <label class="detail-group__label">給予點數 <span style="font-weight: normal; color: #6a7282;">*上限七點</span></label>
                     <div class="points-input">
                       <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
@@ -1792,8 +1874,9 @@
                       <circle cx="12" cy="12" r="10"/>
                     </svg>
                     <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 6v6l4 2"/>
+                      <path d="M9.5 7 8 3.5c1.3.6 2.7.6 4 0 1.3.6 2.7.6 4 0L14.5 7"/>
+                      <path d="M9 7h6"/>
+                      <path d="M9.5 7c-3 2.5-5 5.5-5 9 0 3 2 5 4.5 5h6c2.5 0 4.5-2 4.5-5 0-3.5-2-6.5-5-9"/>
                     </svg>
                   </div>
                 </div>
@@ -1834,7 +1917,7 @@
                     </div>
                   </div>
                   <div class="detail-group">
-                    <label class="detail-group__label">給予點數</label>
+                    <label class="detail-group__label">給予點數 <span style="font-weight: normal; color: #6a7282;">*上限七點</span></label>
                     <div class="points-input">
                       <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
@@ -1892,8 +1975,9 @@
                       <circle cx="12" cy="12" r="10"/>
                     </svg>
                     <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 6v6l4 2"/>
+                      <path d="M9.5 7 8 3.5c1.3.6 2.7.6 4 0 1.3.6 2.7.6 4 0L14.5 7"/>
+                      <path d="M9 7h6"/>
+                      <path d="M9.5 7c-3 2.5-5 5.5-5 9 0 3 2 5 4.5 5h6c2.5 0 4.5-2 4.5-5 0-3.5-2-6.5-5-9"/>
                     </svg>
                   </div>
                 </div>
@@ -1934,7 +2018,7 @@
                     </div>
                   </div>
                   <div class="detail-group">
-                    <label class="detail-group__label">給予點數</label>
+                    <label class="detail-group__label">給予點數 <span style="font-weight: normal; color: #6a7282;">*上限七點</span></label>
                     <div class="points-input">
                       <input type="number" value="1" min="0" max="7">
                       <div class="points-input__arrows">
@@ -3006,6 +3090,7 @@
 
         // 儲存教師 ID
         document.getElementById('journalTeacherId').value = teacherId;
+        loadCourseNoteTeachers(teacherId);
 
         // 填充班級下拉選單
         const select = document.getElementById('journalScheduleSelect');
@@ -3178,14 +3263,45 @@
       // 解析儲存的備註（以逗號分隔）
       const savedNotes = content.split(', ').map(s => s.trim());
 
-      // 課程備註為單選：選取第一個符合的選項，沒有符合則回到預設值
-      const checkboxes = document.querySelectorAll('input[name="courseNote"]');
-      const match = Array.from(checkboxes).find(cb => savedNotes.includes(cb.value));
-      if (match) {
-        match.checked = true;
-      } else {
-        resetCourseNotes();
+      // 「時段異動」與「師資異動」可同時勾選，「正常上課」則與兩者互斥
+      // 沒有符合的異動選項時回到預設值（正常上課）
+      // 師資異動會存成「師資異動：教師姓名」
+      resetCourseNotes();
+      const findNote = value => savedNotes.find(note => note === value || note.startsWith(value + '：'));
+      const timeNote = findNote('時段異動');
+      const teacherNote = findNote('師資異動');
+      if (timeNote === undefined && teacherNote === undefined) return;
+
+      const setChecked = (value, checked) => {
+        document.querySelector(`input[name="courseNote"][value="${value}"]`).checked = checked;
+      };
+      setChecked('正常上課', false);
+      setChecked('時段異動', timeNote !== undefined);
+      setChecked('師資異動', teacherNote !== undefined);
+
+      if (teacherNote !== undefined) {
+        const teacherName = teacherNote.slice('師資異動：'.length);
+        const select = document.getElementById('courseNoteTeacher');
+        if (select && teacherName) {
+          // 教師列表尚未載入或該教師已不在列表中時，補上選項以保留原紀錄
+          if (!Array.from(select.options).some(opt => opt.value === teacherName)) {
+            select.appendChild(new Option(teacherName, teacherName));
+          }
+          select.value = teacherName;
+        }
       }
+
+      if (timeNote !== undefined) {
+        // 時段異動會存成「時段異動：2026/10/06（週二） 14:00-15:30；備註：內容」
+        const saved = timeNote.match(/^時段異動：(\d{4})\/(\d{2})\/(\d{2})（週.） (\d{2}:\d{2})-(\d{2}:\d{2})(?:；備註：(.*))?$/);
+        if (saved) {
+          document.getElementById('timeChangeDate').value = `${saved[1]}-${saved[2]}-${saved[3]}`;
+          document.getElementById('timeChangeStart').value = saved[4];
+          document.getElementById('timeChangeEnd').value = saved[5];
+          document.getElementById('timeChangeRemark').value = saved[6] || '';
+        }
+      }
+      updateTimeChangeFields();
     }
 
     // 重設課程備註為預設值
@@ -3195,6 +3311,110 @@
         // 預設只勾選「正常上課」
         cb.checked = (cb.value === '正常上課');
       });
+      const teacherSelect = document.getElementById('courseNoteTeacher');
+      if (teacherSelect) teacherSelect.value = '';
+
+      ['timeChangeDate', 'timeChangeStart', 'timeChangeEnd', 'timeChangeRemark'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      updateTimeChangeFields();
+    }
+
+    // 選了異動教師時，自動選取「師資異動」
+    function onCourseNoteTeacherChange() {
+      const select = document.getElementById('courseNoteTeacher');
+      const checkbox = document.querySelector('input[name="courseNote"][value="師資異動"]');
+      if (select.value && checkbox) {
+        checkbox.checked = true;
+        onCourseNoteChange(checkbox);
+      }
+    }
+
+    // 「正常上課」與異動選項互斥；「時段異動」與「師資異動」可同時勾選
+    function onCourseNoteChange(changed) {
+      const checkboxes = Array.from(document.querySelectorAll('input[name="courseNote"]'));
+      const normal = checkboxes.find(cb => cb.value === '正常上課');
+      const changes = checkboxes.filter(cb => cb !== normal);
+
+      if (changed === normal && normal.checked) {
+        changes.forEach(cb => { cb.checked = false; });
+      } else {
+        // 至少要有一個選項：異動都取消時回到「正常上課」
+        normal.checked = !changes.some(cb => cb.checked);
+      }
+
+      // 取消「師資異動」時一併清空已選的教師
+      const teacherChecked = changes.some(cb => cb.value === '師資異動' && cb.checked);
+      if (!teacherChecked) document.getElementById('courseNoteTeacher').value = '';
+
+      updateTimeChangeFields();
+    }
+
+    // 依日期字串（YYYY-MM-DD）計算星期，回傳「2026/10/06（週二）」
+    function formatDateWithWeekday(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr + 'T00:00:00');
+      if (isNaN(date)) return '';
+      const weekday = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()];
+      return `${dateStr.replace(/-/g, '/')}（週${weekday}）`;
+    }
+
+    // 更新異動日期旁的星期顯示
+    function updateTimeChangeWeekday() {
+      const dateStr = document.getElementById('timeChangeDate').value;
+      document.getElementById('timeChangeWeekday').textContent = formatDateWithWeekday(dateStr);
+    }
+
+    // 只有選取「時段異動」時才顯示時段異動欄位
+    function updateTimeChangeFields() {
+      const checkbox = document.querySelector('input[name="courseNote"][value="時段異動"]');
+      const fields = document.getElementById('timeChangeFields');
+      fields.hidden = !checkbox.checked;
+
+      if (checkbox.checked) {
+        // 異動日期預設帶入上課日期
+        const dateInput = document.getElementById('timeChangeDate');
+        if (!dateInput.value) {
+          dateInput.value = document.getElementById('journalDateInput').value;
+        }
+        updateTimeChangeWeekday();
+      }
+    }
+
+    document.getElementById('journalNotes')?.addEventListener('change', function(e) {
+      if (e.target.name === 'courseNote') onCourseNoteChange(e.target);
+    });
+
+    // 載入師資異動的教師下拉選單（不含自己）
+    async function loadCourseNoteTeachers(myTeacherId) {
+      const select = document.getElementById('courseNoteTeacher');
+      if (!select) return;
+
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/teachers`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const result = await response.json();
+        if (!result.success) return;
+
+        const current = select.value;
+        select.innerHTML = '<option value="">-- 請選擇教師 --</option>';
+        result.data
+          .filter(teacher => teacher.id != myTeacherId && teacher.is_active !== 0 && teacher.name)
+          .forEach(teacher => select.appendChild(new Option(teacher.name, teacher.name)));
+
+        if (current) {
+          if (!Array.from(select.options).some(opt => opt.value === current)) {
+            select.appendChild(new Option(current, current));
+          }
+          select.value = current;
+        }
+      } catch (error) {
+        console.error('載入教師列表錯誤:', error);
+      }
     }
 
     // 重設所有學生卡片為預設狀態
@@ -3364,8 +3584,9 @@
                   <circle cx="12" cy="12" r="10"/>
                 </svg>
                 <svg class="student-indicator__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
+                  <path d="M9.5 7 8 3.5c1.3.6 2.7.6 4 0 1.3.6 2.7.6 4 0L14.5 7"/>
+                  <path d="M9 7h6"/>
+                  <path d="M9.5 7c-3 2.5-5 5.5-5 9 0 3 2 5 4.5 5h6c2.5 0 4.5-2 4.5-5 0-3.5-2-6.5-5-9"/>
                 </svg>
               </div>
             </div>
@@ -3406,7 +3627,7 @@
                 </div>
               </div>
               <div class="detail-group">
-                <label class="detail-group__label">給予點數</label>
+                <label class="detail-group__label">給予點數 <span style="font-weight: normal; color: #6a7282;">*上限七點</span></label>
                 <div class="points-input">
                   <input type="number" value="1" min="0" max="7">
                   <div class="points-input__arrows">
@@ -3888,6 +4109,37 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
       return !!pointsInput && pointsInput.dataset.touched === '1' && parseInt(pointsInput.value) > 0;
     }
 
+    // 未約課的學生不需填寫評語、照片、點數
+    function isNoClass(card) {
+      return !!card.querySelector('.attendance-btn--active.attendance-btn--none');
+    }
+
+    // 計算日誌完成度：出缺席以全部學生計，評語/照片/點數只計有約課的學生
+    function calcJournalProgress(studentCards) {
+      const progress = { totalStudents: studentCards.length, bookedStudents: 0, attendance: 0, comments: 0, photos: 0, points: 0 };
+
+      studentCards.forEach(card => {
+        if (isAttendanceDone(card)) progress.attendance++;
+        if (isNoClass(card)) return;
+        progress.bookedStudents++;
+
+        const details = card.querySelector('.student-card__details');
+        if (!details) return;
+
+        const commentField = details.querySelector('textarea[placeholder*="評語"]');
+        if (commentField && commentField.value.trim()) progress.comments++;
+
+        if (details.querySelector('.photo-upload img')) progress.photos++;
+
+        if (isPointsDone(details.querySelector('.points-input input'))) progress.points++;
+      });
+
+      progress.totalItems = progress.totalStudents + progress.bookedStudents * 3;
+      progress.completedItems = progress.attendance + progress.comments + progress.photos + progress.points;
+      progress.percentage = progress.totalItems > 0 ? Math.round((progress.completedItems / progress.totalItems) * 100) : 0;
+      return progress;
+    }
+
     // 每位學生最多可上傳的照片數
     const MAX_STUDENT_PHOTOS = 2;
 
@@ -4063,8 +4315,42 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         }
 
         // 收集課程備註
-        const noteCheckboxes = document.querySelectorAll('input[name="courseNote"]:checked');
-        const notes = Array.from(noteCheckboxes).map(cb => cb.value).join(', ');
+        // 「時段異動」與「師資異動」可同時勾選，以逗號分隔儲存
+        const checkedNotes = Array.from(document.querySelectorAll('input[name="courseNote"]:checked')).map(cb => cb.value);
+        const noteParts = [];
+        if (checkedNotes.includes('時段異動')) {
+          const changeDate = document.getElementById('timeChangeDate').value;
+          const changeStart = document.getElementById('timeChangeStart').value;
+          const changeEnd = document.getElementById('timeChangeEnd').value;
+          // 備註以逗號分隔儲存，備註內的半形逗號改為全形避免被切開
+          const changeRemark = document.getElementById('timeChangeRemark').value.trim().replace(/,/g, '，');
+
+          if (!changeDate) {
+            showMessage('請選擇時段異動的異動日期', 'warning');
+            return;
+          }
+          if (!changeStart || !changeEnd) {
+            showMessage('請選擇時段異動的實際開始與結束時間', 'warning');
+            return;
+          }
+          if (changeEnd <= changeStart) {
+            showMessage('實際結束時間必須晚於實際開始時間', 'warning');
+            return;
+          }
+
+          let timeNote = `時段異動：${formatDateWithWeekday(changeDate)} ${changeStart}-${changeEnd}`;
+          if (changeRemark) timeNote += `；備註：${changeRemark}`;
+          noteParts.push(timeNote);
+        }
+        if (checkedNotes.includes('師資異動')) {
+          const changedTeacher = document.getElementById('courseNoteTeacher').value;
+          if (!changedTeacher) {
+            showMessage('請選擇師資異動的教師', 'warning');
+            return;
+          }
+          noteParts.push(`師資異動：${changedTeacher}`);
+        }
+        const notes = noteParts.length ? noteParts.join(', ') : '正常上課';
 
         // 取得課程資訊
         const courseId = document.getElementById('journalCourseId').value || 3;
@@ -4188,6 +4474,8 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
             const pointsInput = details.querySelector('.points-input input');
             if (pointsInput) pointsEarned = Math.max(0, Math.min(7, parseInt(pointsInput.value) || 0));
+            // 未約課不給點數
+            if (attendance === 'no_class') pointsEarned = 0;
 
             // 取得照片 URL（最多 2 張）
             const photoUpload = details.querySelector('.photo-upload');
@@ -4232,31 +4520,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         await Promise.all(studentPromises);
 
         // 3. 計算完成度並更新日誌狀態
-        const totalStudents = studentCards.length;
-        let attendanceCompleted = 0;
-        let commentsCompleted = 0;
-        let photosCompleted = 0;
-        let pointsCompleted = 0;
-
-        studentCards.forEach(card => {
-          if (isAttendanceDone(card)) attendanceCompleted++;
-
-          const details = card.querySelector('.student-card__details');
-          if (details) {
-            const commentField = details.querySelector('textarea[placeholder*="評語"]');
-            if (commentField && commentField.value.trim()) commentsCompleted++;
-
-            const photoUpload = details.querySelector('.photo-upload img');
-            if (photoUpload) photosCompleted++;
-
-            const pointsInput = details.querySelector('.points-input input');
-            if (isPointsDone(pointsInput)) pointsCompleted++;
-          }
-        });
-
-        const totalItems = totalStudents * 4;
-        const completedItems = attendanceCompleted + commentsCompleted + photosCompleted + pointsCompleted;
-        const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+        const { percentage } = calcJournalProgress(studentCards);
 
         // 根據完成度決定狀態：0% = pending, 1-99% = in_progress, 100% = completed
         let finalStatus = 'pending';
@@ -4314,53 +4578,25 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         return;
       }
 
-      let commentsCompleted = 0;
-      let photosCompleted = 0;
-      let pointsCompleted = 0;
-      let attendanceCompleted = 0;
-
+      // 未約課的學生隱藏填寫區塊
       studentCards.forEach(card => {
-        // 檢查出缺席是否已選擇
-        if (isAttendanceDone(card)) {
-          attendanceCompleted++;
-        }
-
-        const details = card.querySelector('.student-card__details');
-        if (details) {
-          // 檢查評語
-          const commentField = details.querySelector('textarea[placeholder*="評語"]');
-          if (commentField && commentField.value.trim()) {
-            commentsCompleted++;
-          }
-
-          // 檢查照片
-          const photoUpload = details.querySelector('.photo-upload img');
-          if (photoUpload) {
-            photosCompleted++;
-          }
-
-          // 檢查點數是否有設定
-          const pointsInput = details.querySelector('.points-input input');
-          if (isPointsDone(pointsInput)) {
-            pointsCompleted++;
-          }
-        }
+        const noClass = isNoClass(card);
+        card.classList.toggle('student-card--no-class', noClass);
+        if (noClass) card.classList.remove('student-card--expanded');
       });
 
-      // 更新顯示
-      document.getElementById('attendanceCount').textContent = `${attendanceCompleted}/${totalStudents}`;
-      document.getElementById('commentCount').textContent = `${commentsCompleted}/${totalStudents}`;
-      document.getElementById('photoCount').textContent = `${photosCompleted}/${totalStudents}`;
-      document.getElementById('pointsCount').textContent = `${pointsCompleted}/${totalStudents}`;
-
       // 計算整體完成度（出缺席 + 評語 + 照片 + 點數）
-      const totalItems = totalStudents * 4;
-      const completedItems = attendanceCompleted + commentsCompleted + photosCompleted + pointsCompleted;
-      const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+      const progress = calcJournalProgress(studentCards);
 
-      document.getElementById('overallPercentage').textContent = `${percentage}%`;
-      document.getElementById('overallCount').textContent = `${completedItems}/${totalItems} 項目`;
-      document.getElementById('overallProgressBar').style.width = `${percentage}%`;
+      // 更新顯示
+      document.getElementById('attendanceCount').textContent = `${progress.attendance}/${progress.totalStudents}`;
+      document.getElementById('commentCount').textContent = `${progress.comments}/${progress.bookedStudents}`;
+      document.getElementById('photoCount').textContent = `${progress.photos}/${progress.bookedStudents}`;
+      document.getElementById('pointsCount').textContent = `${progress.points}/${progress.bookedStudents}`;
+
+      document.getElementById('overallPercentage').textContent = `${progress.percentage}%`;
+      document.getElementById('overallCount').textContent = `${progress.completedItems}/${progress.totalItems} 項目`;
+      document.getElementById('overallProgressBar').style.width = `${progress.percentage}%`;
 
       // 更新學生卡片的個人進度
       updateStudentProgress();
@@ -4385,27 +4621,27 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
           const commentField = details.querySelector('textarea[placeholder*="評語"]');
           if (commentField && commentField.value.trim()) {
             completed++;
-            if (indicators[1]) indicators[1].classList.add('student-indicator__icon--completed');
+            if (indicators[0]) indicators[0].classList.add('student-indicator__icon--completed');
           } else {
-            if (indicators[1]) indicators[1].classList.remove('student-indicator__icon--completed');
+            if (indicators[0]) indicators[0].classList.remove('student-indicator__icon--completed');
           }
 
           // 檢查照片
           const photoUpload = details.querySelector('.photo-upload img');
           if (photoUpload) {
             completed++;
-            if (indicators[3]) indicators[3].classList.add('student-indicator__icon--completed');
+            if (indicators[2]) indicators[2].classList.add('student-indicator__icon--completed');
           } else {
-            if (indicators[3]) indicators[3].classList.remove('student-indicator__icon--completed');
+            if (indicators[2]) indicators[2].classList.remove('student-indicator__icon--completed');
           }
 
           // 檢查點數
           const pointsInput = details.querySelector('.points-input input');
           if (isPointsDone(pointsInput)) {
             completed++;
-            if (indicators[5]) indicators[5].classList.add('student-indicator__icon--completed');
+            if (indicators[4]) indicators[4].classList.add('student-indicator__icon--completed');
           } else {
-            if (indicators[5]) indicators[5].classList.remove('student-indicator__icon--completed');
+            if (indicators[4]) indicators[4].classList.remove('student-indicator__icon--completed');
           }
         }
 

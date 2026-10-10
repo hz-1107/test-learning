@@ -1044,11 +1044,15 @@
       return `
         <div class="course-notes">
           ${options.map(opt => {
-            const isChecked = selected.includes(opt.value);
+            // 教師端會存成「師資異動：教師姓名」，有填內容時直接顯示
+            // 時段異動的備註為教師自行輸入的文字，顯示前先跳脫 HTML
+            const withDetail = selected.find(s => s.startsWith(opt.value + '：'))
+              ?.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const isChecked = !!withDetail || selected.includes(opt.value);
             return `
               <label>
                 <input type="checkbox" value="${opt.value}" ${isChecked ? 'checked' : ''} disabled>
-                <span>${isChecked ? opt.labelChecked : opt.label}</span>
+                <span>${withDetail || (isChecked ? opt.labelChecked : opt.label)}</span>
               </label>
             `;
           }).join('')}
