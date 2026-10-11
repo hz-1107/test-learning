@@ -6,6 +6,7 @@
   <title>課程日誌詳情 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="../css/staff-font-size.css">
+  <link rel="stylesheet" href="../css/ability-chart.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -499,7 +500,7 @@
     /* 能力評估 / 獲得點數+備註 在左，照片 1、2 在右 */
     .student-perf-grid {
       /* 雷達圖寬 + 間距，用來讓下方欄位切齊評分進度條 */
-      --radar-offset: calc(340px + var(--spacing-xl));
+      --radar-offset: calc(var(--ability-radar-size) + var(--spacing-xl));
       display: grid;
       /* 第1欄：雷達圖+進度條；第2、4欄為等寬留白，讓照片左右間距相同；第3欄為照片 */
       grid-template-columns:
@@ -534,191 +535,6 @@
 
     .student-perf-grid__side .student-detail__section:last-child {
       margin-bottom: 0;
-    }
-
-    /* 雷達圖區域 */
-    .ability-section {
-      display: flex;
-      gap: var(--spacing-xl);
-      align-items: flex-start;
-    }
-
-    .radar-chart-container {
-      width: 340px;
-      height: 340px;
-      flex-shrink: 0;
-    }
-
-    .ability-list {
-      flex: 1;
-      max-width: 560px;
-      align-self: center;
-    }
-
-    .ability-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 7px 0;
-      font-size: var(--font-size-md);
-    }
-
-    .ability-item__row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .ability-item__name {
-      color: var(--color-text-primary);
-      min-width: 72px;
-    }
-
-    .ability-item__score {
-      color: var(--color-text-secondary);
-    }
-
-    /* 較上次變化 */
-    .ability-item__delta {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      padding: 1px 8px;
-      border-radius: 999px;
-      font-size: var(--font-size-sm);
-      font-weight: 600;
-      line-height: 1.6;
-      white-space: nowrap;
-    }
-
-    .ability-item__delta--up {
-      color: #15803d;
-      background: rgba(90, 218, 70, 0.18);
-    }
-
-    .ability-item__delta--down {
-      color: #b91c1c;
-      background: rgba(255, 113, 88, 0.18);
-    }
-
-    .ability-item__delta--flat {
-      color: var(--color-text-muted);
-      background: rgba(148, 163, 184, 0.2);
-    }
-
-    /* 橫向進度條 */
-    .ability-item__bar {
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.25);
-      overflow: hidden;
-    }
-
-    .ability-item__bar-fill {
-      display: block;
-      height: 100%;
-      border-radius: 999px;
-    }
-
-    .ability-item__bar-fill--program   { background: #ffdb58; }
-    .ability-item__bar-fill--debug     { background: #5ada46; }
-    .ability-item__bar-fill--creative  { background: #ff7158; }
-    .ability-item__bar-fill--structure { background: #58bcff; }
-    .ability-item__bar-fill--teamwork  { background: #ff58bc; }
-
-    .ability-item__help-wrap {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .ability-item__help {
-      display: inline-flex;
-      padding: 0;
-      border: none;
-      background: none;
-      color: #1a1a1a;
-      line-height: 0;
-      cursor: pointer;
-    }
-
-    .ability-item__help svg {
-      display: block;
-    }
-
-    .ability-item__tip {
-      position: absolute;
-      left: calc(100% + 10px);
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 20;
-      white-space: normal;
-      width: 260px;
-      padding: 8px 12px;
-      border: 1px solid #000;
-      border-radius: 2px;
-      background: #fff;
-      color: #000;
-      font-family: 'Inter', var(--font-family, sans-serif);
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 20px;
-      display: none;
-    }
-
-    /* 指向問號的左側箭頭 */
-    .ability-item__tip::before,
-    .ability-item__tip::after {
-      content: "";
-      position: absolute;
-      right: 100%;
-      top: 50%;
-      transform: translateY(-50%);
-      border-style: solid;
-    }
-
-    .ability-item__tip::before {
-      border-width: 6px;
-      border-color: transparent #000 transparent transparent;
-    }
-
-    .ability-item__tip::after {
-      border-width: 5px;
-      border-color: transparent #fff transparent transparent;
-      margin-right: -1px;
-    }
-
-    .ability-item__help-wrap.tip-open .ability-item__tip {
-      display: block;
-    }
-
-    @media (max-width: 640px) {
-      .ability-item__tip {
-        left: auto;
-        right: 0;
-        top: calc(100% + 8px);
-        transform: none;
-        white-space: normal;
-        max-width: 240px;
-      }
-      .ability-item__tip::before,
-      .ability-item__tip::after {
-        right: auto;
-        left: 12px;
-        top: auto;
-        bottom: 100%;
-        transform: none;
-      }
-      .ability-item__tip::before {
-        border-width: 0 6px 6px 6px;
-        border-color: transparent transparent #000 transparent;
-      }
-      .ability-item__tip::after {
-        border-width: 0 5px 5px 5px;
-        border-color: transparent transparent #fff transparent;
-        margin-right: 0;
-        margin-bottom: -1px;
-      }
     }
 
     /* 點數區塊 */
@@ -965,6 +781,7 @@
 
   <script src="../js/file-url.js"></script>
   <script src="../js/main.js"></script>
+  <script src="../js/ability-chart.js"></script>
   <script>
     const API_BASE = window.API_BASE || 'http://localhost:3000';
     let currentLogData = null;
@@ -1030,7 +847,7 @@
       renderCourseInfo(log);
 
       // 渲染學生記錄
-      renderStudentRecords(log.student_records || []);
+      renderStudentRecords(log.student_records || [], log.log_date);
     }
 
     function renderCourseNotes(content) {
@@ -1124,7 +941,7 @@
       }
     }
 
-    function renderStudentRecords(records) {
+    function renderStudentRecords(records, logDate) {
       const section = document.querySelector('.students-section');
       const countSpan = section.querySelector('.students-section__count');
       countSpan.textContent = `${records.length} 名學生`;
@@ -1155,6 +972,13 @@
         };
         const attendance = attendanceMap[record.attendance] || attendanceMap['present'];
         const points = record.points_earned > 0 ? `+${record.points_earned}點` : '';
+        const scores = {
+          programming: record.skill_programming,
+          debugging: record.skill_debugging,
+          creativity: record.skill_creativity,
+          structure: record.skill_structure,
+          teamwork: record.skill_teamwork
+        };
 
         const html = `
           <div class="student-item ${index === 0 ? 'expanded' : ''}" id="${studentId}">
@@ -1183,19 +1007,8 @@
               <div class="student-perf-grid">
                 <div class="student-perf-grid__main">
                   <div class="student-detail__section">
-                    <div class="student-detail__label">能力評估</div>
-                    <div class="ability-section">
-                      <div class="radar-chart-container">
-                        <canvas id="radarChart${index}"></canvas>
-                      </div>
-                      <div class="ability-list">
-                        ${renderAbilityItem('程式', record.skill_programming, 'program', '學生的抽象思維、流程圖概念與程式碼邏輯建構')}
-                        ${renderAbilityItem('除錯', record.skill_debugging, 'debug', '面對失敗、系統卡關時的應變策略、耐心與獨立解決能力')}
-                        ${renderAbilityItem('創意', record.skill_creativity, 'creative', '作品是否有獨創性、能否跳脫框架，或在既有基礎上延伸出新功能')}
-                        ${renderAbilityItem('結構', record.skill_structure, 'structure', '學生將科學理論轉化為實體結構的動手做能力')}
-                        ${renderAbilityItem('團隊合作', record.skill_teamwork, 'teamwork', '軟實力，包含與同儕的溝通協調、互助，以及對外展現作品的論述能力')}
-                      </div>
-                    </div>
+                    <div class="student-detail__label">能力評估<span class="ability-update-date">${formatAbilityUpdateDate(logDate)}</span></div>
+                    ${renderAbilitySection(`radarChart${index}`, scores)}
                   </div>
                 </div>
 
@@ -1229,55 +1042,10 @@
 
         // 在下一個事件循環中創建雷達圖
         setTimeout(() => {
-          createRadarChart(`radarChart${index}`, [
-            record.skill_programming || 0,
-            record.skill_debugging || 0,
-            record.skill_creativity || 0,
-            record.skill_structure || 0,
-            record.skill_teamwork || 0
-          ]);
+          createRadarChart(`radarChart${index}`, scores);
         }, 100);
       });
     }
-
-    function renderAbilityItem(name, rawScore, variant, description) {
-      const score = rawScore || 0;
-      const percent = Math.max(0, Math.min(100, (score / 5) * 100));
-      return `
-        <div class="ability-item">
-          <div class="ability-item__row">
-            <span class="ability-item__name">${name}</span>
-            <span class="ability-item__score">${score} / 5</span>
-            <span class="ability-item__help-wrap">
-              <button type="button" class="ability-item__help" onclick="toggleAbilityTip(this)" aria-label="${name}說明">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-              </button>
-              <span class="ability-item__tip">${description}</span>
-            </span>
-          </div>
-          <div class="ability-item__bar">
-            <span class="ability-item__bar-fill ability-item__bar-fill--${variant}" style="width: ${percent}%;"></span>
-          </div>
-        </div>
-      `;
-    }
-
-    function toggleAbilityTip(btn) {
-      const wrap = btn.closest('.ability-item__help-wrap');
-      if (!wrap) return;
-      const wasOpen = wrap.classList.contains('tip-open');
-      document.querySelectorAll('.ability-item__help-wrap.tip-open').forEach(el => el.classList.remove('tip-open'));
-      if (!wasOpen) wrap.classList.add('tip-open');
-    }
-
-    document.addEventListener('click', (event) => {
-      if (event.target.closest('.ability-item__help-wrap')) return;
-      document.querySelectorAll('.ability-item__help-wrap.tip-open').forEach(el => el.classList.remove('tip-open'));
-    });
 
     function renderPhotoBlock(photo) {
       if (!photo) {
@@ -1309,62 +1077,13 @@
       `;
     }
 
-    function createRadarChart(canvasId, data) {
-      const ctx = document.getElementById(canvasId);
-      if (!ctx) return;
-
+    function createRadarChart(canvasId, scores) {
       // 銷毀舊圖表（如果存在）
       if (radarCharts[canvasId]) {
         radarCharts[canvasId].destroy();
       }
 
-      radarCharts[canvasId] = new Chart(ctx, {
-        type: 'radar',
-        data: {
-          labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
-          datasets: [{
-            data: data,
-            backgroundColor: 'rgba(255, 219, 88, 0.3)',
-            borderColor: '#ffdb58',
-            borderWidth: 2,
-            pointBackgroundColor: '#ffdb58',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: '#ffdb58'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          scales: {
-            r: {
-              beginAtZero: true,
-              max: 5,
-              ticks: {
-                stepSize: 1,
-                display: false
-              },
-              grid: {
-                color: '#e5e7eb'
-              },
-              angleLines: {
-                color: '#e5e7eb'
-              },
-              pointLabels: {
-                font: {
-                  size: 14
-                },
-                color: '#6b7280'
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              display: false
-            }
-          }
-        }
-      });
+      radarCharts[canvasId] = createAbilityRadarChart(canvasId, scores);
     }
 
     // 學生項目展開/收合

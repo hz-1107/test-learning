@@ -81,6 +81,7 @@
     .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(26, 26, 26, 0.45); }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; background: #fff; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(255, 219, 88, 0.35); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
+    .form-row__split { display: grid; grid-template-columns: 1fr 96px; gap: 12px; }
     .btn-secondary { padding: 9px 20px; background: #fff; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; font-size: 16px; font-weight: 500; color: #1a1a1a; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
     .btn-secondary:hover { background: #f5f5f5; border-color: rgba(0, 0, 0, 0.22); }
 
@@ -153,7 +154,7 @@
         <a href="settings.html" class="staff-sidebar__nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           系統設定
-        </a>
+        </a>
       </nav>
       <div class="staff-sidebar__footer">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -245,9 +246,12 @@
       <form id="addStudentForm">
         <div class="modal__body">
           <div class="form-row">
-            <div class="form-group">
-              <label>姓名＊</label>
-              <input type="text" name="name" placeholder="學生姓名" required>
+            <div class="form-row__split">
+              <div class="form-group">
+                <label>姓名＊</label>
+                <input type="text" name="name" placeholder="學生姓名" required>
+              </div>
+              <div class="form-group" data-student-field="gender"></div>
             </div>
             <div class="form-group">
               <label>生日＊</label>
@@ -350,9 +354,12 @@
         <input type="hidden" name="id" id="editStudentId">
         <div class="modal__body">
           <div class="form-row">
-            <div class="form-group">
-              <label>姓名＊</label>
-              <input type="text" name="name" id="editName" placeholder="學生姓名" required>
+            <div class="form-row__split">
+              <div class="form-group">
+                <label>姓名＊</label>
+                <input type="text" name="name" id="editName" placeholder="學生姓名" required>
+              </div>
+              <div class="form-group" data-student-field="gender"></div>
             </div>
             <div class="form-group">
               <label>生日＊</label>
@@ -693,6 +700,20 @@
       }
     }
 
+    // 新增／編輯學生表單共用的欄位定義（性別，選填）
+    const STUDENT_SHARED_FIELDS = {
+      gender: `
+        <label>性別</label>
+        <select name="gender">
+          <option value=""></option>
+          <option value="male">男</option>
+          <option value="female">女</option>
+        </select>`
+    };
+    document.querySelectorAll('[data-student-field]').forEach(el => {
+      el.innerHTML = STUDENT_SHARED_FIELDS[el.dataset.studentField];
+    });
+
     // Modal 功能
     function openAddStudentModal() {
       document.getElementById('addStudentForm').reset();
@@ -708,6 +729,7 @@
 
         document.getElementById('editStudentId').value = student.id;
         document.getElementById('editName').value = student.name || '';
+        document.getElementById('editStudentForm').elements.gender.value = student.gender || '';
         document.getElementById('editBirthday').value = student.birthday ? student.birthday.substring(0, 10) : '';
         document.getElementById('editSchool').value = student.school || '';
         document.getElementById('editGrade').value = student.grade || '';
@@ -737,6 +759,7 @@
       e.preventDefault();
       const formData = new FormData(this);
       const data = Object.fromEntries(formData.entries());
+      data.gender = data.gender || null;
 
       try {
         const result = await api.students.create(data);
@@ -757,6 +780,7 @@
       const data = Object.fromEntries(formData.entries());
       const studentId = data.id;
       delete data.id;
+      data.gender = data.gender || null;
 
       try {
         const result = await api.students.update(studentId, data);
