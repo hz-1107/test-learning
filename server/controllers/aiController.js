@@ -68,10 +68,30 @@ function getTraitScenarios(traits) {
   return scenarios;
 }
 
+// Gemini 暫時性錯誤（流量過高、限流）時的重試設定
+const GEMINI_RETRY_STATUS = [429, 500, 503];
+const GEMINI_MAX_RETRIES = 2;
+
 /**
- * 呼叫 Gemini API（使用 https 模組）
+ * 呼叫 Gemini API，遇到暫時性錯誤時自動重試
  */
-function callGeminiAPI(prompt) {
+async function callGeminiAPI(prompt) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await requestGemini(prompt);
+    } catch (error) {
+      if (attempt >= GEMINI_MAX_RETRIES || !GEMINI_RETRY_STATUS.includes(error.statusCode)) {
+        throw error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+    }
+  }
+}
+
+/**
+ * 送出單次 Gemini API 請求（使用 https 模組）
+ */
+function requestGemini(prompt) {
   return new Promise((resolve, reject) => {
     const requestBody = JSON.stringify({
       contents: [{
@@ -83,7 +103,9 @@ function callGeminiAPI(prompt) {
         temperature: 0.75,       // 平衡創意與穩定
         topP: 0.9,
         topK: 40,
-        maxOutputTokens: 2048    // 增加上限，避免截斷
+        maxOutputTokens: 2048,   // 增加上限，避免截斷
+        // 關閉思考：思考 token 會佔用 maxOutputTokens，導致回覆被截斷或變成空白
+        thinkingConfig: { thinkingBudget: 0 }
       }
     });
 
