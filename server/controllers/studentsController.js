@@ -682,6 +682,9 @@ exports.getMe = async (req, res) => {
       teamwork: Number(latestSkillRecord?.skill_teamwork) || 0
     };
 
+    // 能力評估更新時間：老師最新一次評分的課堂日期（尚未評分則為 null）
+    const skillsUpdatedAt = latestSkillRecord?.log_date || null;
+
     // 最近一筆課堂表現 (用於首頁翻轉卡)
     const recentRecord = latestPerformanceRecord
       ? { log_date: latestPerformanceRecord.log_date, performance: latestPerformanceRecord.performance }
@@ -696,6 +699,7 @@ exports.getMe = async (req, res) => {
           transactions: recentTransactions
         },
         skills,
+        skillsUpdatedAt,
         enrollment,
         courseHistory,
         attendance: {
