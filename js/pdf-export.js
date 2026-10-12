@@ -103,8 +103,20 @@ function buildPdfReportContainer({ docTitle, studentName, generatedAt, totalCoun
  * @param {string} [row.badgeBg] - 徽章背景色
  * @param {string[]} row.metaFields - 例如 ['日期：2026-05-15', '等級：全國賽']
  * @param {string} [row.description]
+ * @param {{url:string, caption?:string}[]} [row.images] - 佐證圖片（例如獎狀、參賽照片），url 需為完整網址
  */
 function buildPdfEntryHtml(row) {
+  // 相同說明文字的圖片排在同一橫列（例如「獎狀/證書」一列、「參賽照片」一列）
+  const imageCaptions = [...new Set((row.images || []).map(image => image.caption || ''))];
+  const imagesHtml = imageCaptions.map(caption => `
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;">
+      ${row.images.filter(image => (image.caption || '') === caption).map(image => `
+        <div style="text-align:center;">
+          <img src="${image.url}" alt="${caption}" style="display:block;max-width:210px;max-height:150px;border-radius:6px;border:1px solid ${PDF_BRAND.border};">
+          ${caption ? `<div style="font-size:10.5px;color:${PDF_BRAND.textMuted};margin-top:4px;">${caption}</div>` : ''}
+        </div>`).join('')}
+    </div>`).join('');
+
   const badgeHtml = row.badge ? `
     <span style="flex-shrink:0;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;
       background:${row.badgeBg || PDF_BRAND.primaryLight};color:${row.badgeColor || PDF_BRAND.primaryDark};">
@@ -140,6 +152,7 @@ function buildPdfEntryHtml(row) {
       </div>
       ${metaHtml}
       ${descHtml}
+      ${imagesHtml}
     </div>
   `;
 }
@@ -175,6 +188,15 @@ async function exportReportToPDF({ docTitle, studentName, summaryStats, rows, fi
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
+
+    // 等待佐證圖片載入完成，避免截圖時圖片還是空白
+    await Promise.all(Array.from(container.querySelectorAll('img')).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    }));
 
     const canvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
     // 用 JPEG（搭配 compress）而非 PNG：jsPDF 內嵌 PNG 時會把圖片解碼成未壓縮點陣資料再寫入，

@@ -237,11 +237,17 @@ exports.update = async (req, res) => {
         rank_name = ?,
         score = ?,
         team_name = ?,
-        certificate_url = COALESCE(?, certificate_url),
-        photo_url = COALESCE(?, photo_url),
+        certificate_url = CASE WHEN ? THEN ? ELSE certificate_url END,
+        photo_url = CASE WHEN ? THEN ? ELSE photo_url END,
         description = ?
       WHERE id = ?
-    `, [title, subtitle, organizer, competition_date, level, rank_name, score, team_name, certificate_url, photo_url, description, id]);
+    `, [
+      title, subtitle, organizer, competition_date, level, rank_name, score, team_name,
+      // 檔案欄位：未提供時保留原檔；有提供則以新值取代（傳 null 代表移除）
+      certificate_url !== undefined, certificate_url || null,
+      photo_url !== undefined, photo_url || null,
+      description, id
+    ]);
 
     res.json({
       success: true,

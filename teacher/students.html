@@ -663,6 +663,11 @@
     }
 
     /* 新增競賽 Modal */
+    /* 編輯競賽時會從「查看完整檔案」開啟，需疊在其上 */
+    .competition-modal {
+      z-index: 1100;
+    }
+
     .competition-modal .modal__content {
       max-width: 900px;
     }
@@ -1376,9 +1381,26 @@
     }
 
     .achievement-item__more {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-top: 8px;
       font-size: 12px;
       color: #6a7282;
+    }
+
+    .achievement-item__edit {
+      padding: 4px 12px;
+      border: 1px solid #d1d5dc;
+      border-radius: 6px;
+      background: white;
+      font-size: 12px;
+      color: #364153;
+      cursor: pointer;
+    }
+
+    .achievement-item__edit:hover {
+      background: #f3f4f6;
     }
 
     /* 編輯個人／家長資訊 Modal（疊在「查看完整檔案」之上） */
@@ -2712,12 +2734,22 @@
       document.getElementById('pointsModal').classList.add('active');
     }
 
+    // 編輯中的競賽 ID（null 代表新增）
+    let editingCompetitionId = null;
+
+    function competitionSubmitLabel() {
+      return editingCompetitionId ? '儲存變更' : '新增競賽歷程';
+    }
+
     // 開啟新增競賽 Modal
     function openCompetitionModal() {
       if (!currentStudentId) {
         showMessage('請先選擇學生', 'error');
         return;
       }
+      editingCompetitionId = null;
+      document.getElementById('submitCompBtn').textContent = competitionSubmitLabel();
+
       // 重設表單
       document.getElementById('compOrganizer').value = '';
       document.getElementById('compTitle').value = '';
@@ -2746,6 +2778,50 @@
       // 否則使用者在互動過程中若不小心按下 Enter（例如原生檔案選取視窗關閉後
       // 焦點行為異常），會意外重新觸發該按鈕，導致整個表單被重設，看起來像「閃退」
       setTimeout(() => document.getElementById('compOrganizer')?.focus(), 0);
+    }
+
+    // 開啟編輯競賽 Modal（沿用新增競賽表單，帶入既有資料；可補上傳或更換獎狀）
+    function openCompetitionEdit(id) {
+      const comp = loadedCompetitions[id];
+      if (!comp || !currentStudentId) return;
+
+      closeModal('compDetailModal');
+      openCompetitionModal();
+
+      editingCompetitionId = comp.id;
+      document.getElementById('submitCompBtn').textContent = competitionSubmitLabel();
+
+      document.getElementById('compOrganizer').value = comp.organizer || '';
+      document.getElementById('compTitle').value = comp.title || '';
+      document.getElementById('compDate').value = comp.competition_date ? formatDateOnly(comp.competition_date) : '';
+      document.getElementById('compTeamName').value = comp.team_name || '';
+      document.getElementById('compRankName').value = comp.rank_name || '';
+      document.getElementById('compScore').value = comp.score || '';
+      // 既有說明放在可直接編輯的欄位
+      document.getElementById('compAIDescription').value = comp.description || '';
+
+      selectedLevel = comp.level || 'county';
+      document.querySelectorAll('.level-btn').forEach(b => {
+        b.classList.toggle('level-btn--active', b.dataset.level === selectedLevel);
+      });
+
+      // 帶入已上傳的獎狀與照片
+      if (comp.certificate_url) {
+        uploadedCertificateUrl = comp.certificate_url;
+        const isImage = isImageFile(comp.certificate_url);
+        const img = document.getElementById('certificatePreviewImage');
+        img.src = isImage ? fileUrl(comp.certificate_url) : '';
+        img.style.display = isImage ? 'block' : 'none';
+        document.getElementById('certificateFileName').textContent = isImage ? '' : '已上傳檔案';
+        document.getElementById('certificatePreview').style.display = 'block';
+        document.getElementById('certificateUploadArea').style.display = 'none';
+      }
+      if (comp.photo_url) {
+        uploadedPhotoUrl = comp.photo_url;
+        document.getElementById('photoPreviewImage').src = fileUrl(comp.photo_url);
+        document.getElementById('photoPreview').style.display = 'block';
+        document.getElementById('photoUploadArea').style.display = 'none';
+      }
     }
 
     // 關閉 Modal
@@ -3439,7 +3515,10 @@
               ${attachmentThumb(comp.photo_url_2, '競賽照片')}
             </div>
           ` : ''}
-          <div class="achievement-item__more">點擊查看完整內容 ›</div>
+          <div class="achievement-item__more">
+            <span>點擊查看完整內容 ›</span>
+            <button type="button" class="achievement-item__edit" onclick="event.stopPropagation(); openCompetitionEdit(${Number(comp.id)})">編輯 / 上傳獎狀</button>
+          </div>
         </div>
       `;
     }
@@ -3497,6 +3576,10 @@
 
         <div class="comp-detail__meta">
           建立：${formatDateOnly(comp.created_at)}　最後更新：${formatDateOnly(comp.updated_at)}
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="modal-btn modal-btn--confirm" onclick="openCompetitionEdit(${Number(comp.id)})">編輯 / 上傳獎狀</button>
         </div>
       `;
 
@@ -3595,50 +3678,61 @@
         return;
       }
 
-      if (!uploadedCertificateUrl) {
+      // 編輯既有競賽時獎狀可稍後再補，不強制
+      const isEdit = !!editingCompetitionId;
+
+      if (!isEdit && !uploadedCertificateUrl) {
         showMessage('請上傳參賽證明文件', 'warning');
         return;
       }
 
       const submitBtn = document.getElementById('submitCompBtn');
       submitBtn.disabled = true;
-      submitBtn.textContent = '提交中...';
+      submitBtn.textContent = isEdit ? '儲存中...' : '提交中...';
+
+      const actionText = isEdit ? '更新' : '新增';
 
       try {
-        const response = await apiRequest('/competitions', {
-          method: 'POST',
-          body: JSON.stringify({
-            student_id: currentStudentId,
-            organizer,
-            title,
-            competition_date: competitionDate,
-            level: selectedLevel,
-            rank_name: rankName,
-            score,
-            team_name: teamName,
-            certificate_url: uploadedCertificateUrl,
-            photo_url: uploadedPhotoUrl,
-            description
-          })
-        });
+        const payload = {
+          organizer,
+          title,
+          competition_date: competitionDate,
+          level: selectedLevel,
+          rank_name: rankName,
+          score,
+          team_name: teamName,
+          certificate_url: uploadedCertificateUrl,
+          photo_url: uploadedPhotoUrl,
+          description
+        };
+
+        const response = isEdit
+          ? await apiRequest(`/competitions/${editingCompetitionId}`, {
+              method: 'PUT',
+              body: JSON.stringify({ ...payload, subtitle: loadedCompetitions[editingCompetitionId]?.subtitle || null })
+            })
+          : await apiRequest('/competitions', {
+              method: 'POST',
+              body: JSON.stringify({ ...payload, student_id: currentStudentId })
+            });
 
         if (response.success) {
-          showMessage('競賽紀錄已新增！', 'success');
+          showMessage(isEdit ? '競賽紀錄已更新！' : '競賽紀錄已新增！', 'success');
           closeModal('competitionModal');
-          // 若目前正顯示競賽經歷分頁，立即刷新讓新紀錄馬上出現
+          // 若目前正顯示競賽經歷分頁，立即刷新讓變更馬上出現
           if (currentAchievementTab === 'competitions') {
-            achievementPage = 1;
+            if (!isEdit) achievementPage = 1;
             loadAchievements(currentStudentId, currentAchievementTab);
           }
         } else {
-          showMessage('新增失敗: ' + response.message, 'error');
+          showMessage(`${actionText}失敗: ` + response.message, 'error');
         }
       } catch (error) {
         console.error('提交競賽錯誤:', error);
-        showMessage('新增失敗: ' + error.message, 'error');
+        showMessage(`${actionText}失敗: ` + error.message, 'error');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = '新增競賽歷程';
+        submitBtn.textContent = competitionSubmitLabel();
       }
     }
 
