@@ -1264,7 +1264,7 @@
             <div class="analysis-main">
               <!-- 雷達圖卡片 -->
               <div class="radar-card radar-section">
-                <div class="radar-card__header">＊更新時間：2026 / 4 / 24(五)</div>
+                <div class="radar-card__header" id="radarUpdatedAt">＊更新時間：—</div>
                 <div class="radar-card__content">
                   <div class="radar-chart-container">
                     <canvas id="radarChart"></canvas>
@@ -1633,6 +1633,15 @@
     // 渲染能力雷達圖
     function renderRadar(me) {
       const skills = me.skills;
+
+      // 更新時間：老師最新一次評分的課堂日期，格式如 2026 / 4 / 24(五)
+      let updatedText = '尚未評分';
+      if (me.skillsUpdatedAt) {
+        const [year, month, day] = me.skillsUpdatedAt.split('-').map(Number);
+        const weekday = '日一二三四五六'[new Date(year, month - 1, day).getDay()];
+        updatedText = `${year} / ${month} / ${day}(${weekday})`;
+      }
+      document.getElementById('radarUpdatedAt').textContent = `＊更新時間：${updatedText}`;
       SKILL_KEYS.forEach(label => {
         const value = skills[SKILL_FIELD_MAP[label]] || 0;
         document.getElementById(`scoreValue-${SKILL_FIELD_MAP[label]}`).textContent = `${value} / 5`;
