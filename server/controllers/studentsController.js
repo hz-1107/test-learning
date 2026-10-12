@@ -795,7 +795,7 @@ exports.getMyRecords = async (req, res) => {
         slr.id, slr.log_id, slr.attendance, slr.performance, slr.notes, slr.points_earned,
         slr.skill_programming, slr.skill_debugging, slr.skill_creativity,
         slr.skill_structure, slr.skill_teamwork,
-        DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, cl.topic, cl.content,
+        DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, cl.topic, cl.content, cl.outline,
         c.name as course_name, ct.name as course_type_name,
         u.name as teacher_name
       FROM student_log_records slr

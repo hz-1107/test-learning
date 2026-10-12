@@ -3682,6 +3682,8 @@
 
     // 開啟課程大綱 Modal
     function openOutlineModal() {
+      // 帶入主表單目前的課程大綱（含已儲存的日誌內容），讓老師可接續編輯
+      document.getElementById('outlineResult').value = document.getElementById('journalOutline').value;
       document.getElementById('outlineModal').classList.add('active');
     }
 

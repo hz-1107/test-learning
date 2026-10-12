@@ -9,7 +9,8 @@ const https = require('https');
 // API Key 從環境變數讀取（設定於 server/.env）
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_HOST = 'generativelanguage.googleapis.com';
-const GEMINI_API_PATH = '/v1beta/models/gemini-3.6-flash:generateContent';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const GEMINI_API_PATH = `/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // =====================
 // 隨機元素設定（增加生成靈活性）

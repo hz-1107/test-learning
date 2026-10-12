@@ -206,9 +206,11 @@
       color: #444;
       text-align: justify;
       padding-left: 8px;
+      /* 保留課程大綱的換行（一、二、三… 分段） */
+      white-space: pre-line;
     }
 
-    /* 學習照片區 */
+    /* 上課照片區 */
     .photo-section {
       margin-bottom: 32px;
     }
@@ -219,8 +221,10 @@
 
     .photo-section__grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      /* 固定兩欄：只有一張照片時不會撐滿整頁，避免匯出 PDF 時被分頁切斷 */
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
+      align-items: start;
     }
 
     .photo-section__item {
@@ -477,10 +481,10 @@
         </p>
       </div>
 
-      <!-- 學習照片 -->
+      <!-- 上課照片 -->
       <div class="photo-section" id="photoSection" style="display: none;">
         <div class="photo-section__tag">
-          <span class="info-tag">學習照片</span>
+          <span class="info-tag">上課照片</span>
         </div>
         <div class="photo-section__grid" id="photoGrid">
           <!-- 動態插入照片 -->
@@ -562,6 +566,33 @@
       return `${year}.${month}.${day}`;
     }
 
+    // 顯示上課照片（沒有照片時整個區塊維持隱藏）
+    function renderPhotos(photos) {
+      const urls = [...new Set(
+        (photos || []).map(photo => photo.photo_url || photo.url || photo).filter(url => typeof url === 'string' && url)
+      )];
+      if (urls.length === 0) return;
+
+      document.getElementById('photoSection').style.display = 'block';
+      document.getElementById('photoGrid').innerHTML = urls.map((url, i) => `
+        <div class="photo-section__item">
+          <img src="${fileUrl(url)}" alt="上課照片 ${i + 1}">
+        </div>
+      `).join('');
+    }
+
+    // 取得本人在指定課堂的學習紀錄（含老師為該學生上傳的照片）
+    async function fetchMyRecord(token, params) {
+      const recordRes = await fetch(`${API_BASE}/api/students/me/records?limit=100`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!recordRes.ok) return null;
+
+      const recordData = await recordRes.json();
+      const records = recordData.data?.records || [];
+      return records.find(r => params.recordId ? r.id == params.recordId : r.log_id == params.logId) || null;
+    }
+
     // 載入學習紀錄資料
     async function loadLearningRecord() {
       const token = localStorage.getItem('authToken');
@@ -606,47 +637,42 @@
             document.getElementById('courseName').textContent = courseName;
 
             // 組合課程說明內容
-            let description = '';
-            if (log.topic) description += log.topic + '\n\n';
-            if (log.content) description += log.content;
+            // 顯示老師在教師日誌儲存的課程大綱；尚未填寫大綱的舊日誌沿用主題＋內容
+            let description = (log.outline || '').trim();
+            if (!description) {
+              if (log.topic) description += log.topic + '\n\n';
+              if (log.content) description += log.content;
+            }
             document.getElementById('courseDescription').textContent = description.trim() || '無課程說明';
 
-            // 嘗試取得日誌照片
+            // 上課照片：老師為該學生上傳的照片（教師日誌）＋ 課堂活動照片
+            const photos = [];
+            try {
+              const record = await fetchMyRecord(token, params);
+              if (record?.photos) photos.push(...record.photos);
+            } catch (e) {
+              console.log('無法取得學生照片:', e);
+            }
             try {
               const photosRes = await fetch(`${API_BASE}/api/logs/${params.logId}/photos`, {
                 headers: { 'Authorization': `Bearer ${token}` }
               });
               if (photosRes.ok) {
                 const photosData = await photosRes.json();
-                const photos = photosData.data || [];
-                if (photos.length > 0) {
-                  const photoSection = document.getElementById('photoSection');
-                  const photoGrid = document.getElementById('photoGrid');
-                  photoSection.style.display = 'block';
-                  photoGrid.innerHTML = photos.map(photo => `
-                    <div class="photo-section__item">
-                      <img src="${fileUrl(photo.photo_url || photo.url || photo)}" alt="學習照片">
-                    </div>
-                  `).join('');
-                }
+                photos.push(...(photosData.data || []));
               }
             } catch (e) {
               console.log('無法取得照片:', e);
             }
+            renderPhotos(photos);
 
             // 更新頁面標題
             document.title = `學習歷程－${courseName}`;
           }
         } else if (params.recordId) {
           // 從學習紀錄取得
-          const recordRes = await fetch(`${API_BASE}/api/students/me/records?limit=100`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-
-          if (recordRes.ok) {
-            const recordData = await recordRes.json();
-            const records = recordData.data?.records || [];
-            const record = records.find(r => r.id == params.recordId);
+          {
+            const record = await fetchMyRecord(token, params);
 
             if (record) {
               const courseName = record.course_type_name || record.course_name || '課程';
@@ -655,23 +681,16 @@
               document.getElementById('courseName').textContent = courseName;
 
               // 組合課程說明內容
-              let description = '';
-              if (record.topic) description += record.topic + '\n\n';
-              if (record.content) description += record.content + '\n\n';
-              if (record.performance) description += '課堂表現：' + record.performance;
+              // 顯示老師在教師日誌儲存的課程大綱；尚未填寫大綱的舊日誌沿用主題＋內容
+              let description = (record.outline || '').trim();
+              if (!description) {
+                if (record.topic) description += record.topic + '\n\n';
+                if (record.content) description += record.content + '\n\n';
+                if (record.performance) description += '課堂表現：' + record.performance;
+              }
               document.getElementById('courseDescription').textContent = description.trim() || '無課程說明';
 
-              // 如果有照片
-              if (record.photos && record.photos.length > 0) {
-                const photoSection = document.getElementById('photoSection');
-                const photoGrid = document.getElementById('photoGrid');
-                photoSection.style.display = 'block';
-                photoGrid.innerHTML = record.photos.map(photo => `
-                  <div class="photo-section__item">
-                    <img src="${fileUrl(photo.photo_url || photo.url || photo)}" alt="學習照片">
-                  </div>
-                `).join('');
-              }
+              renderPhotos(record.photos);
 
               document.title = `學習歷程－${courseName}`;
             }

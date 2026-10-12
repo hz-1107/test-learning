@@ -313,6 +313,78 @@
       line-height: 1.6;
     }
 
+    /* 上課照片 */
+    .history-card__photos {
+      margin-top: var(--spacing-md);
+    }
+
+    .history-card__photos-label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .history-card__photos-label svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .history-card__photos-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+    }
+
+    .history-card__photo {
+      width: 120px;
+      height: 90px;
+      padding: 0;
+      border: none;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--color-background);
+      cursor: zoom-in;
+    }
+
+    .history-card__photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s;
+    }
+
+    .history-card__photo:hover img {
+      transform: scale(1.05);
+    }
+
+    /* 照片放大檢視 */
+    .photo-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-xl);
+      background: rgba(0, 0, 0, 0.8);
+      cursor: zoom-out;
+    }
+
+    .photo-lightbox.active {
+      display: flex;
+    }
+
+    .photo-lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: var(--radius-md);
+    }
+
     /* 進階篩選 */
     .filter-popover-wrap {
       position: relative;
@@ -688,6 +760,12 @@
     </main>
   </div>
 
+  <!-- 照片放大檢視 -->
+  <div class="photo-lightbox" id="photoLightbox" onclick="closePhotoLightbox()">
+    <img id="photoLightboxImg" src="" alt="上課照片">
+  </div>
+
+  <script src="../js/file-url.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/notifications.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -792,6 +870,7 @@
         const description = record.performance || record.notes || record.performance_note || record.teacher_comment || '本堂課學習表現良好';
         const recordId = record.id || record.record_id || '';
         const logId = record.log_id || '';
+        const photos = (record.photos || []).filter(p => p.photo_url);
 
         return `
           <div class="history-card" data-category="${courseName}" data-date="${logDate}" data-record-id="${recordId}" data-log-id="${logId}" onclick="openRecordDetail(event, '${recordId}', '${logId}')" title="點擊查看完整資訊">
@@ -839,6 +918,25 @@
             <div class="history-card__description">
               ${description}
             </div>
+            ${photos.length > 0 ? `
+            <div class="history-card__photos">
+              <div class="history-card__photos-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                上課照片
+              </div>
+              <div class="history-card__photos-grid">
+                ${photos.map((photo, i) => `
+                <button type="button" class="history-card__photo" data-photo-url="${fileUrl(photo.photo_url)}" onclick="openPhotoLightbox(event, this)" title="點擊放大">
+                  <img src="${fileUrl(photo.photo_url)}" alt="上課照片 ${i + 1}" loading="lazy">
+                </button>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
           </div>
         `;
       }).join('');
@@ -1038,9 +1136,24 @@
     // 點擊卡片查看完整資訊
     function openRecordDetail(event, recordId, logId) {
       // 點擊匯出按鈕、勾選框等互動元件時不觸發
-      if (event.target.closest('.card-export-btn, .card-select')) return;
+      if (event.target.closest('.card-export-btn, .card-select, .history-card__photo')) return;
       exportSingleRecord(recordId, logId);
     }
+
+    // 點擊上課照片放大檢視
+    function openPhotoLightbox(event, btn) {
+      event.stopPropagation();
+      document.getElementById('photoLightboxImg').src = btn.dataset.photoUrl;
+      document.getElementById('photoLightbox').classList.add('active');
+    }
+
+    function closePhotoLightbox() {
+      document.getElementById('photoLightbox').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closePhotoLightbox();
+    });
   </script>
 </body>
 </html>
