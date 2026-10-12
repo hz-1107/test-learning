@@ -378,12 +378,25 @@
       color: #7c3aed;
     }
 
+    .competition-card__photos {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-sm);
+    }
+
     .competition-card__photo {
       width: 120px;
       height: 90px;
       object-fit: cover;
       border-radius: var(--radius-md);
-      margin-top: var(--spacing-sm);
+    }
+
+    .competition-card__file {
+      font-size: var(--font-size-sm);
+      color: var(--color-primary-dark);
+      text-decoration: underline;
     }
 
     .competition-card__team {
@@ -1174,6 +1187,33 @@
       return 'participant';
     }
 
+    function isImageFile(url) {
+      return /\.(jpe?g|png|gif|webp|bmp|heic|heif)$/i.test(url || '');
+    }
+
+    // 競賽的圖片附件：老師上傳的獎狀/證書與參賽照片、學生自行上傳的照片（非圖片檔不列入）
+    function competitionImages(comp) {
+      return [
+        { url: comp.certificate_url, caption: '獎狀/證書' },
+        { url: comp.photo_url, caption: '參賽照片' },
+        { url: comp.photo_url_2, caption: '參賽照片' }
+      ].filter(item => item.url && isImageFile(item.url));
+    }
+
+    // 卡片上的獎狀與照片縮圖；獎狀若為 PDF / Word 則以連結開啟
+    function renderCardAttachments(comp) {
+      const images = competitionImages(comp);
+      const certificateFile = comp.certificate_url && !isImageFile(comp.certificate_url);
+      if (images.length === 0 && !certificateFile) return '';
+
+      return `
+        <div class="competition-card__photos">
+          ${images.map(item => `<img class="competition-card__photo" src="${fileUrl(item.url)}" alt="${item.caption}" title="${item.caption}">`).join('')}
+          ${certificateFile ? `<a class="competition-card__file" href="${fileUrl(comp.certificate_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">開啟獎狀/證書檔案</a>` : ''}
+        </div>
+      `;
+    }
+
     // 渲染競賽記錄
     function renderCompetitions(competitions) {
       const container = document.querySelector('.competition-list');
@@ -1220,7 +1260,7 @@
                 </span>
                 ` : ''}
               </div>
-              ${comp.photo_url ? `<img class="competition-card__photo" src="${fileUrl(comp.photo_url)}" alt="競賽照片">` : ''}
+              ${renderCardAttachments(comp)}
               ${comp.description ? `
               <div class="competition-card__description">
                 競賽說明：${comp.description}
@@ -1395,8 +1435,10 @@
         const levelEl = card.querySelector('.competition-card__badge');
         const teamEl = card.querySelector('.competition-card__team');
         const scoreEl = card.querySelector('.competition-card__score');
+        const comp = allCompetitionsData.find(c => String(c.id) === String(card.dataset.id));
 
         return {
+          images: comp ? competitionImages(comp).map(item => ({ url: fileUrl(item.url), caption: item.caption })) : [],
           index: i + 1,
           title: card.querySelector('.competition-card__title').textContent.trim(),
           subtitle: subtitleEl ? subtitleEl.textContent.trim() : '',
@@ -1515,7 +1557,11 @@
           <div class="form-group">
             <label class="form-group__label">參賽證明文件（獎狀/證書）</label>
             <div class="upload-area upload-area--certificate">
-              ${comp.certificate_url ? `<img src="${fileUrl(comp.certificate_url)}" alt="參賽證明">` : `<div class="upload-area__text">尚未上傳</div>`}
+              ${!comp.certificate_url
+                ? `<div class="upload-area__text">尚未上傳</div>`
+                : isImageFile(comp.certificate_url)
+                  ? `<img src="${fileUrl(comp.certificate_url)}" alt="參賽證明">`
+                  : `<a class="competition-card__file" href="${fileUrl(comp.certificate_url)}" target="_blank" rel="noopener">開啟獎狀/證書檔案</a>`}
             </div>
           </div>
         `;

@@ -212,8 +212,24 @@
 
     .photo-section__grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      /* 固定兩欄：只有一張圖時不會撐滿整頁，避免匯出 PDF 時被分頁切斷 */
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
+      align-items: start;
+    }
+
+    .photo-section__rows {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .photo-section__caption {
+      padding: 6px 8px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      background: #fff;
     }
 
     .photo-section__item {
@@ -418,6 +434,20 @@
         </div>
       </div>
 
+      <!-- 隊伍與成績 -->
+      <div class="info-section">
+        <div class="info-row info-row--split">
+          <div class="info-group">
+            <span class="info-tag">隊伍名稱</span>
+            <span class="info-value info-value--normal" id="teamName">—</span>
+          </div>
+          <div class="info-group">
+            <span class="info-tag">成績分數</span>
+            <span class="info-value info-value--normal" id="competitionScore">—</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 競賽說明 -->
       <div class="description-section">
         <div class="description-section__tag">
@@ -428,12 +458,12 @@
         </p>
       </div>
 
-      <!-- 參賽證明 -->
+      <!-- 獎狀與參賽照片 -->
       <div class="photo-section" id="photoSection" style="display: none;">
         <div class="photo-section__tag">
-          <span class="info-tag">參賽證明</span>
+          <span class="info-tag">獎狀與參賽照片</span>
         </div>
-        <div class="photo-section__grid" id="photoGrid">
+        <div class="photo-section__rows" id="photoGrid">
           <!-- 動態插入照片 -->
         </div>
       </div>
@@ -536,16 +566,36 @@
               document.getElementById('competitionRank').textContent = competition.rank_name || '—';
               document.getElementById('competitionDescription').textContent = competition.description || '無競賽說明';
 
-              // 如果有照片
-              if (competition.photo_url) {
-                const photoSection = document.getElementById('photoSection');
-                const photoGrid = document.getElementById('photoGrid');
-                photoSection.style.display = 'block';
-                photoGrid.innerHTML = `
-                  <div class="photo-section__item">
-                    <img src="${fileUrl(competition.photo_url)}" alt="參賽證明">
-                  </div>
-                `;
+              document.getElementById('teamName').textContent = competition.team_name || '—';
+              document.getElementById('competitionScore').textContent = competition.score || '—';
+
+              // 獎狀與參賽照片：老師上傳的獎狀/證書、參賽照片，以及學生自行上傳的照片
+              // （PDF / Word 等非圖片檔無法嵌入畫面，故不列入）
+              const images = [
+                { url: competition.certificate_url, caption: '獎狀/證書' },
+                { url: competition.photo_url, caption: '參賽照片' },
+                { url: competition.photo_url_2, caption: '參賽照片' }
+              ].filter(item => item.url && /\.(jpe?g|png|gif|webp|bmp|heic|heif)$/i.test(item.url));
+
+              if (images.length > 0) {
+                // 「獎狀/證書」一橫列、「參賽照片」一橫列
+                const renderRow = caption => {
+                  const rowImages = images.filter(item => item.caption === caption);
+                  if (rowImages.length === 0) return '';
+                  return `
+                    <div class="photo-section__grid">
+                      ${rowImages.map(item => `
+                        <div class="photo-section__item">
+                          <img src="${fileUrl(item.url)}" alt="${item.caption}">
+                          <div class="photo-section__caption">${item.caption}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  `;
+                };
+
+                document.getElementById('photoSection').style.display = 'block';
+                document.getElementById('photoGrid').innerHTML = renderRow('獎狀/證書') + renderRow('參賽照片');
               }
 
               // 更新頁面標題
