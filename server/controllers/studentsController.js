@@ -155,6 +155,9 @@ exports.getOne = async (req, res) => {
   }
 };
 
+// 性別僅接受 students.gender 的 ENUM 值，其餘（含未填寫）一律存 NULL
+const normalizeGender = (gender) => (['male', 'female', 'other'].includes(gender) ? gender : null);
+
 // 新增學生
 exports.create = async (req, res) => {
   try {
@@ -163,7 +166,7 @@ exports.create = async (req, res) => {
       teacher_id, parent_name_father, parent_phone_father,
       parent_name_mother, parent_phone_mother,
       trial_teacher_id, trial_topic,
-      classroom_id, course_type_id, schedule_id
+      classroom_id, course_type_id, schedule_id, gender
     } = req.body;
 
     // 驗證必要欄位
@@ -209,14 +212,14 @@ exports.create = async (req, res) => {
     // 建立學生資料
     const studentId = await db.insert(`
       INSERT INTO students (
-        user_id, birth_date, school, grade, enrollment_date,
+        user_id, birth_date, gender, school, grade, enrollment_date,
         teacher_id, parent_name_father, parent_phone_father,
         parent_name_mother, parent_phone_mother,
         trial_teacher_id, trial_topic,
         classroom_id, course_type_id, lesson_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
-      userId, birthday, school, grade || null, enrollment_date,
+      userId, birthday, normalizeGender(gender), school, grade || null, enrollment_date,
       teacher_id || null, parent_name_father || null, parent_phone_father || null,
       parent_name_mother || null, parent_phone_mother || null,
       trial_teacher_id || null, trial_topic || null,
@@ -257,7 +260,7 @@ exports.update = async (req, res) => {
       teacher_id, parent_name_father, parent_phone_father,
       parent_name_mother, parent_phone_mother,
       trial_teacher_id, trial_topic,
-      classroom_id, course_type_id, schedule_id, status
+      classroom_id, course_type_id, schedule_id, status, gender
     } = req.body;
 
     // 取得學生資料
@@ -292,6 +295,11 @@ exports.update = async (req, res) => {
       trial_teacher_id || null, trial_topic || null,
       classroom_id || null, course_type_id || null, status || 'active', id
     ]);
+
+    // 有帶性別欄位才更新，避免其他未送此欄位的表單把既有性別清空
+    if (gender !== undefined) {
+      await db.update('UPDATE students SET gender = ? WHERE id = ?', [normalizeGender(gender), id]);
+    }
 
     // 如果有更新班級
     if (schedule_id) {
@@ -331,6 +339,80 @@ exports.update = async (req, res) => {
       success: false,
       message: '伺服器錯誤'
     });
+  }
+};
+
+// 更新學生的個人／家長資訊（教師端「查看完整檔案」的編輯用）
+// 只更新請求中有帶的欄位，且僅限個人與家長欄位，不會動到授課老師、教室、班級等設定
+exports.updateProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const body = req.body || {};
+    const has = (key) => body[key] !== undefined;
+
+    const student = await db.queryOne('SELECT user_id FROM students WHERE id = ?', [id]);
+    if (!student) {
+      return res.status(404).json({ success: false, message: '找不到學生' });
+    }
+
+    // 與新增學生相同：姓名、生日、學校為必填
+    const required = { name: '姓名', birthday: '生日', school: '學校' };
+    for (const [key, label] of Object.entries(required)) {
+      if (has(key) && !String(body[key] || '').trim()) {
+        return res.status(400).json({ success: false, message: `請填寫${label}` });
+      }
+    }
+
+    const userFields = {};
+    const studentFields = {};
+
+    if (has('name')) userFields.name = body.name.trim();
+    if (has('birthday')) {
+      userFields.birthday = body.birthday;
+      studentFields.birth_date = body.birthday;
+    }
+    if (has('gender')) studentFields.gender = normalizeGender(body.gender);
+    if (has('school')) studentFields.school = body.school.trim();
+    if (has('grade')) studentFields.grade = body.grade || null;
+    if (has('parent_name_father')) studentFields.parent_name_father = body.parent_name_father || null;
+    if (has('phone')) userFields.phone = body.phone || null;
+    if (has('email')) {
+      const email = String(body.email || '').trim() || null;
+      if (email) {
+        if (!email.includes('@')) {
+          return res.status(400).json({ success: false, message: '電子郵件格式不正確' });
+        }
+        const emailOwner = await db.queryOne(
+          'SELECT id FROM users WHERE email = ? AND id <> ?',
+          [email, student.user_id]
+        );
+        if (emailOwner) {
+          return res.status(400).json({ success: false, message: '此電子郵件已被其他帳號使用' });
+        }
+      }
+      userFields.email = email;
+    }
+    if (has('parent_phone_father')) studentFields.parent_phone_father = body.parent_phone_father || null;
+    if (has('parent_name_mother')) studentFields.parent_name_mother = body.parent_name_mother || null;
+    if (has('parent_phone_mother')) studentFields.parent_phone_mother = body.parent_phone_mother || null;
+
+    // 欄位名稱皆為上方寫死的白名單，可安全組進 SQL
+    const updateTable = async (table, fields, rowId) => {
+      const keys = Object.keys(fields);
+      if (keys.length === 0) return;
+      await db.update(
+        `UPDATE ${table} SET ${keys.map(k => `${k} = ?`).join(', ')} WHERE id = ?`,
+        [...keys.map(k => fields[k]), rowId]
+      );
+    };
+
+    await updateTable('users', userFields, student.user_id);
+    await updateTable('students', studentFields, id);
+
+    res.json({ success: true, message: '學生資料更新成功' });
+  } catch (error) {
+    console.error('更新學生個人資料錯誤:', error);
+    res.status(500).json({ success: false, message: '伺服器錯誤' });
   }
 };
 
@@ -561,30 +643,48 @@ exports.getMe = async (req, res) => {
     attendanceRows.forEach(row => { if (attendanceStats.hasOwnProperty(row.attendance)) attendanceStats[row.attendance] = row.count; });
     const totalLessons = Object.values(attendanceStats).reduce((sum, n) => sum + n, 0);
 
-    // 最新一筆課堂紀錄 (能力雷達與首頁翻轉卡皆取自同一筆最新紀錄)
-    const latestRecord = await db.queryOne(`
-      SELECT DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, slr.performance,
+    // 最新一筆有能力數據的課堂紀錄 (用於能力雷達圖)
+    // 過濾掉所有能力值都是 0 或 NULL 的紀錄
+    const latestSkillRecord = await db.queryOne(`
+      SELECT DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date,
         slr.skill_programming, slr.skill_debugging, slr.skill_creativity,
         slr.skill_structure, slr.skill_teamwork
       FROM student_log_records slr
       JOIN course_logs cl ON slr.log_id = cl.id
       WHERE slr.student_id = ?
+        AND (COALESCE(slr.skill_programming, 0) > 0
+          OR COALESCE(slr.skill_debugging, 0) > 0
+          OR COALESCE(slr.skill_creativity, 0) > 0
+          OR COALESCE(slr.skill_structure, 0) > 0
+          OR COALESCE(slr.skill_teamwork, 0) > 0)
       ORDER BY cl.log_date DESC
       LIMIT 1
     `, [student.id]);
 
-    // 能力雷達 (取最新一筆課堂紀錄的五項能力值，沒有紀錄則全部為 0)
+    // 最新一筆課堂表現紀錄 (用於首頁翻轉卡，不論能力值是否為 0)
+    const latestPerformanceRecord = await db.queryOne(`
+      SELECT DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, slr.performance
+      FROM student_log_records slr
+      JOIN course_logs cl ON slr.log_id = cl.id
+      WHERE slr.student_id = ?
+        AND slr.performance IS NOT NULL
+        AND slr.performance != ''
+      ORDER BY cl.log_date DESC
+      LIMIT 1
+    `, [student.id]);
+
+    // 能力雷達 (取最新一筆有數據的課堂紀錄，沒有紀錄則全部為 0)
     const skills = {
-      programming: Number(latestRecord?.skill_programming) || 0,
-      debugging: Number(latestRecord?.skill_debugging) || 0,
-      creativity: Number(latestRecord?.skill_creativity) || 0,
-      structure: Number(latestRecord?.skill_structure) || 0,
-      teamwork: Number(latestRecord?.skill_teamwork) || 0
+      programming: Number(latestSkillRecord?.skill_programming) || 0,
+      debugging: Number(latestSkillRecord?.skill_debugging) || 0,
+      creativity: Number(latestSkillRecord?.skill_creativity) || 0,
+      structure: Number(latestSkillRecord?.skill_structure) || 0,
+      teamwork: Number(latestSkillRecord?.skill_teamwork) || 0
     };
 
     // 最近一筆課堂表現 (用於首頁翻轉卡)
-    const recentRecord = latestRecord
-      ? { log_date: latestRecord.log_date, performance: latestRecord.performance }
+    const recentRecord = latestPerformanceRecord
+      ? { log_date: latestPerformanceRecord.log_date, performance: latestPerformanceRecord.performance }
       : null;
 
     res.json({

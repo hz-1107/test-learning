@@ -972,7 +972,7 @@ exports.getByScheduleAndDate = async (req, res) => {
     // 取得每個學生的照片
     for (const record of studentRecords) {
       const photos = await db.query(
-        'SELECT * FROM student_log_photos WHERE record_id = ?',
+        'SELECT * FROM student_log_photos WHERE record_id = ? ORDER BY id',
         [record.id]
       );
       record.photos = photos;
@@ -1038,7 +1038,7 @@ exports.getOne = async (req, res) => {
     // 取得每個學生的照片
     for (const record of studentRecords) {
       const photos = await db.query(
-        'SELECT * FROM student_log_photos WHERE record_id = ?',
+        'SELECT * FROM student_log_photos WHERE record_id = ? ORDER BY id',
         [record.id]
       );
       record.photos = photos;
@@ -1235,6 +1235,9 @@ exports.updatePermissions = async (req, res) => {
   }
 };
 
+// 每位學生每篇日誌最多可上傳的照片數
+const MAX_STUDENT_LOG_PHOTOS = 2;
+
 // 新增/更新學生日誌記錄
 exports.updateStudentRecord = async (req, res) => {
   try {
@@ -1244,7 +1247,7 @@ exports.updateStudentRecord = async (req, res) => {
       attendance, performance, notes,
       skill_programming, skill_debugging, skill_creativity,
       skill_structure, skill_teamwork, points_earned,
-      photo_url
+      photo_url, photo_urls
     } = req.body;
 
     if (points_earned !== undefined && points_earned !== null && (points_earned < 0 || points_earned > 7)) {
@@ -1305,8 +1308,21 @@ exports.updateStudentRecord = async (req, res) => {
       );
     }
 
-    // 如果有照片 URL，保存到 student_log_photos 表
-    if (photo_url) {
+    // 照片：photo_urls（陣列，每位學生最多 2 張）會整批取代既有照片；
+    // 未提供 photo_urls 時沿用舊的單張 photo_url 行為
+    if (Array.isArray(photo_urls)) {
+      const urls = photo_urls
+        .filter(u => typeof u === 'string' && u.trim())
+        .slice(0, MAX_STUDENT_LOG_PHOTOS);
+
+      await db.update('DELETE FROM student_log_photos WHERE record_id = ?', [recordId]);
+      for (const url of urls) {
+        await db.insert(`
+          INSERT INTO student_log_photos (record_id, photo_url)
+          VALUES (?, ?)
+        `, [recordId, url]);
+      }
+    } else if (photo_url) {
       // 先刪除舊照片記錄（每個學生記錄只保留一張照片）
       await db.update('DELETE FROM student_log_photos WHERE record_id = ?', [recordId]);
 

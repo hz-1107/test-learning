@@ -6,7 +6,8 @@ const fs = require('fs');
 const { authenticate } = require('../middleware/auth');
 
 // 確保 uploads 目錄存在
-const uploadsDir = path.join(__dirname, '..', 'uploads', 'photos');
+const { UPLOAD_ROOT } = require('../config/uploads');
+const uploadsDir = path.join(UPLOAD_ROOT, 'photos');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

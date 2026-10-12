@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學生管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/ability-chart.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -151,17 +152,19 @@
     }
 
     .filter-select {
-      padding: 10px 36px 10px 16px;
+      padding: 10px 40px 10px 14px;
       background: white;
       border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-      font-size: 14px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-md);
       color: #364153;
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23364153' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
+      background-size: 16px 16px;
       cursor: pointer;
+      min-width: 130px;
     }
 
     /* 學生表格 */
@@ -1018,64 +1021,10 @@
       color: #6a7282;
     }
 
-    .ability-radar-content {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 32px;
-      align-items: center;
+    /* 雷達圖與指標長條圖樣式在共用的 css/ability-chart.css；這裡只縮窄說明提示，避免超出 Modal 內容區 */
+    .profile-main .ability-item__tip {
+      width: 220px;
     }
-
-    .ability-radar-chart {
-      width: 280px;
-      height: 280px;
-    }
-
-    .ability-scores {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .ability-score-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .ability-score-item__label {
-      width: 80px;
-      font-size: 14px;
-      color: #364153;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .ability-score-item__label svg {
-      width: 14px;
-      height: 14px;
-      color: #9ca3af;
-    }
-
-    .ability-score-item__bar {
-      flex: 1;
-      height: 12px;
-      background: #f3f4f6;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    .ability-score-item__fill {
-      height: 100%;
-      border-radius: 6px;
-      transition: width 0.3s ease;
-    }
-
-    .ability-score-item__fill--programming { background: #22c55e; }
-    .ability-score-item__fill--debugging { background: #84cc16; }
-    .ability-score-item__fill--creativity { background: #f97316; }
-    .ability-score-item__fill--structure { background: #3b82f6; }
-    .ability-score-item__fill--teamwork { background: #ef4444; }
 
     /* 能力趨勢圖區塊 */
     .ability-trend-section {
@@ -1129,6 +1078,23 @@
       color: var(--color-primary-dark);
     }
 
+    .trend-apply-btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      background: var(--color-primary);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-primary-dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .trend-apply-btn:hover {
+      background: var(--color-primary-dark);
+      color: white;
+    }
+
     .trend-skill-btn {
       padding: 6px 12px;
       border: 1px solid rgba(0, 0, 0, 0.1);
@@ -1145,12 +1111,6 @@
       border-color: #101828;
       color: white;
     }
-
-    .trend-skill-btn--programming.trend-skill-btn--active { background: #22c55e; border-color: #22c55e; }
-    .trend-skill-btn--debugging.trend-skill-btn--active { background: #84cc16; border-color: #84cc16; }
-    .trend-skill-btn--creativity.trend-skill-btn--active { background: #f97316; border-color: #f97316; }
-    .trend-skill-btn--structure.trend-skill-btn--active { background: #3b82f6; border-color: #3b82f6; }
-    .trend-skill-btn--teamwork.trend-skill-btn--active { background: #ec4899; border-color: #ec4899; }
 
     .trend-chart-container {
       height: 280px;
@@ -1255,20 +1215,6 @@
       margin-bottom: 8px;
     }
 
-    .achievement-item__footer {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 12px;
-      color: #6a7282;
-    }
-
-    .achievement-item__points {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
     .achievement-item__photos {
       display: flex;
       gap: 8px;
@@ -1280,6 +1226,325 @@
       height: 60px;
       border-radius: 6px;
       object-fit: cover;
+      cursor: zoom-in;
+    }
+
+    .achievement-item__file {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      background: #f3f4f6;
+      color: #364153;
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    /* 課程紀錄：可展開的列，比照行政端「課程日誌詳情」的學生列 */
+    .record-item {
+      background: var(--color-background);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .record-item__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      cursor: pointer;
+    }
+
+    .record-item__info,
+    .record-item__aside {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .record-item__date {
+      font-size: 14px;
+      color: var(--color-text-muted);
+    }
+
+    .record-item__course {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .record-item__status {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .record-item__status--present { background: #dcfce7; color: #16a34a; }
+    .record-item__status--makeup { background: #dbeafe; color: #2563eb; }
+    .record-item__status--absent { background: #fee2e2; color: #dc2626; }
+
+    .record-item__points {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f59e0b;
+    }
+
+    .record-item__toggle {
+      color: var(--color-text-muted);
+      transition: transform 0.3s;
+    }
+
+    .record-item.expanded .record-item__toggle {
+      transform: rotate(180deg);
+    }
+
+    .record-item__detail {
+      display: none;
+      padding: 0 var(--spacing-lg) var(--spacing-lg);
+    }
+
+    .record-item.expanded .record-item__detail {
+      display: block;
+    }
+
+    .record-item__section {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .record-item__section:last-child {
+      margin-bottom: 0;
+    }
+
+    .record-item__label {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .record-item__content {
+      background: var(--color-surface);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      font-size: 16px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    .record-item__photos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-md);
+    }
+
+    .record-item__photo {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      cursor: zoom-in;
+    }
+
+    .record-item__photo-placeholder {
+      height: 280px;
+      background: var(--color-surface);
+      border: 1px dashed var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    .record-item__photo-placeholder svg {
+      width: 32px;
+      height: 32px;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .achievement-item--clickable {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .achievement-item--clickable:hover {
+      background: #f0f1f3;
+    }
+
+    .achievement-item__more {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6a7282;
+    }
+
+    /* 編輯個人／家長資訊 Modal（疊在「查看完整檔案」之上） */
+    .profile-edit-modal {
+      z-index: 1100;
+    }
+
+    .profile-edit-modal .modal__content {
+      max-width: 560px;
+    }
+
+    /* 競賽詳情 Modal（疊在「查看完整檔案」之上） */
+    .comp-detail-modal {
+      z-index: 1100;
+    }
+
+    .comp-detail-modal .modal__content {
+      max-width: 640px;
+    }
+
+    .comp-detail__title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #101828;
+      margin-bottom: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .comp-detail__subtitle {
+      font-size: 14px;
+      color: #6a7282;
+      margin-bottom: 16px;
+    }
+
+    .comp-detail__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .comp-detail__field {
+      padding: 12px;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+
+    .comp-detail__label {
+      font-size: 12px;
+      color: #6a7282;
+      margin-bottom: 4px;
+    }
+
+    .comp-detail__value {
+      font-size: 15px;
+      color: #101828;
+      overflow-wrap: anywhere;
+    }
+
+    .comp-detail__section {
+      margin-bottom: 20px;
+    }
+
+    .comp-detail__section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #364153;
+      margin-bottom: 8px;
+    }
+
+    .comp-detail__description {
+      padding: 12px;
+      background: #fafafa;
+      border-radius: 8px;
+      line-height: 1.7;
+      color: #101828;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .comp-detail__images {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .comp-detail__image {
+      margin: 0;
+    }
+
+    .comp-detail__image img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #f3f4f6;
+      border-radius: 8px;
+      cursor: zoom-in;
+    }
+
+    .comp-detail__image figcaption {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #6a7282;
+      text-align: center;
+    }
+
+    .comp-detail__file {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 180px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      color: #364153;
+      text-decoration: none;
+    }
+
+    .comp-detail__empty {
+      color: #6a7282;
+      font-size: 14px;
+    }
+
+    .comp-detail__meta {
+      font-size: 12px;
+      color: #99a1af;
+    }
+
+    @media (max-width: 480px) {
+      .comp-detail__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .image-viewer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.85);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      cursor: zoom-out;
+    }
+
+    .image-viewer--open {
+      display: flex;
+    }
+
+    .image-viewer__img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .image-viewer__close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 32px;
+      line-height: 1;
+      cursor: pointer;
     }
 
     .achievements-more-btn {
@@ -1366,7 +1631,6 @@
     <main class="main-content">
       <div class="page-header">
         <h2>學生管理</h2>
-        <p>管理和查看所有學生資訊</p>
       </div>
 
       <div class="students-layout">
@@ -1629,7 +1893,7 @@
 
         <div class="modal-actions">
           <button class="modal-btn modal-btn--cancel" onclick="closeModal('pointsModal')">取消</button>
-          <button class="modal-btn modal-btn--confirm" onclick="confirmPoints()">確認增加</button>
+          <button class="modal-btn modal-btn--confirm" onclick="confirmPoints()">確認變更</button>
         </div>
       </div>
     </div>
@@ -1778,7 +2042,7 @@
           <div class="profile-sidebar__section">
             <div class="profile-sidebar__section-header">
               <span class="profile-sidebar__section-title">個人資訊</span>
-              <svg class="profile-sidebar__section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg class="profile-sidebar__section-icon" onclick="openProfileEditModal('personal')" role="button" aria-label="編輯個人資訊" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
@@ -1821,7 +2085,7 @@
           <div class="profile-sidebar__section">
             <div class="profile-sidebar__section-header">
               <span class="profile-sidebar__section-title">家長資訊</span>
-              <svg class="profile-sidebar__section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg class="profile-sidebar__section-icon" onclick="openProfileEditModal('parent')" role="button" aria-label="編輯家長資訊" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
@@ -1867,58 +2131,7 @@
               <span class="ability-radar-section__title">能力雷達圖</span>
               <span class="ability-radar-section__date" id="profileModalUpdateDate">*更新時間：—</span>
             </div>
-            <div class="ability-radar-content">
-              <div class="ability-radar-chart">
-                <canvas id="profileRadarChart"></canvas>
-              </div>
-              <div class="ability-scores">
-                <div class="ability-score-item">
-                  <span class="ability-score-item__label">
-                    程式 <span id="profileScoreProgramming">0/5</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                  </span>
-                  <div class="ability-score-item__bar">
-                    <div class="ability-score-item__fill ability-score-item__fill--programming" id="profileBarProgramming" style="width: 0%"></div>
-                  </div>
-                </div>
-                <div class="ability-score-item">
-                  <span class="ability-score-item__label">
-                    除錯 <span id="profileScoreDebugging">0/5</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                  </span>
-                  <div class="ability-score-item__bar">
-                    <div class="ability-score-item__fill ability-score-item__fill--debugging" id="profileBarDebugging" style="width: 0%"></div>
-                  </div>
-                </div>
-                <div class="ability-score-item">
-                  <span class="ability-score-item__label">
-                    創意 <span id="profileScoreCreativity">0/5</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                  </span>
-                  <div class="ability-score-item__bar">
-                    <div class="ability-score-item__fill ability-score-item__fill--creativity" id="profileBarCreativity" style="width: 0%"></div>
-                  </div>
-                </div>
-                <div class="ability-score-item">
-                  <span class="ability-score-item__label">
-                    結構 <span id="profileScoreStructure">0/5</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                  </span>
-                  <div class="ability-score-item__bar">
-                    <div class="ability-score-item__fill ability-score-item__fill--structure" id="profileBarStructure" style="width: 0%"></div>
-                  </div>
-                </div>
-                <div class="ability-score-item">
-                  <span class="ability-score-item__label">
-                    團隊合作 <span id="profileScoreTeamwork">0/5</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                  </span>
-                  <div class="ability-score-item__bar">
-                    <div class="ability-score-item__fill ability-score-item__fill--teamwork" id="profileBarTeamwork" style="width: 0%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div id="profileAbilitySection"></div>
           </div>
 
           <!-- 能力趨勢圖 -->
@@ -1934,18 +2147,18 @@
                 <input type="date" class="form-group__input" id="trendStartDate" style="padding: 6px 12px; width: 130px;">
                 <span style="color: #6a7282;">—</span>
                 <input type="date" class="form-group__input" id="trendEndDate" style="padding: 6px 12px; width: 130px;">
-                <button type="button" class="trend-filter-btn" onclick="applyTrendDateRange()">套用</button>
+                <button type="button" class="trend-apply-btn" onclick="applyTrendDateRange()">套用</button>
               </div>
             </div>
             <div class="ability-trend-filters">
               <div class="ability-trend-filters__group">
                 <span class="ability-trend-filters__label">指標項目</span>
-                <button type="button" class="trend-skill-btn trend-skill-btn--active" data-skill="all" onclick="toggleTrendSkill(this)">全部</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--programming trend-skill-btn--active" data-skill="programming" onclick="toggleTrendSkill(this)">程式</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--debugging trend-skill-btn--active" data-skill="debugging" onclick="toggleTrendSkill(this)">除錯</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--creativity trend-skill-btn--active" data-skill="creativity" onclick="toggleTrendSkill(this)">創意</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--structure trend-skill-btn--active" data-skill="structure" onclick="toggleTrendSkill(this)">結構</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--teamwork trend-skill-btn--active" data-skill="teamwork" onclick="toggleTrendSkill(this)">團隊合作</button>
+                <button type="button" class="trend-skill-btn trend-skill-btn--active" data-skill="all" onclick="selectTrendSkill(this)">全部</button>
+                <button type="button" class="trend-skill-btn trend-skill-btn--programming" data-skill="programming" onclick="selectTrendSkill(this)">程式</button>
+                <button type="button" class="trend-skill-btn trend-skill-btn--debugging" data-skill="debugging" onclick="selectTrendSkill(this)">除錯</button>
+                <button type="button" class="trend-skill-btn trend-skill-btn--creativity" data-skill="creativity" onclick="selectTrendSkill(this)">創意</button>
+                <button type="button" class="trend-skill-btn trend-skill-btn--structure" data-skill="structure" onclick="selectTrendSkill(this)">結構</button>
+                <button type="button" class="trend-skill-btn trend-skill-btn--teamwork" data-skill="teamwork" onclick="selectTrendSkill(this)">團隊合作</button>
               </div>
             </div>
             <div class="trend-chart-container">
@@ -1971,9 +2184,160 @@
     </div>
   </div>
 
+  <!-- 競賽詳情 Modal（查看完整檔案 → 點競賽經歷） -->
+  <div class="modal comp-detail-modal" id="compDetailModal" onclick="if (event.target === this) closeModal('compDetailModal')">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 class="modal__title">競賽詳情</h3>
+        <button class="modal__close" onclick="closeModal('compDetailModal')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body" id="compDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- 編輯個人資訊 Modal（查看完整檔案 → 個人資訊的編輯按鈕） -->
+  <div class="modal profile-edit-modal" id="profileEditPersonalModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 class="modal__title">編輯個人資訊</h3>
+        <button class="modal__close" onclick="closeModal('profileEditPersonalModal')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form class="modal__body" id="profileEditPersonalForm" onsubmit="saveProfileEdit(event, 'personal')">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">姓名<span class="required-mark">*</span></label>
+            <input type="text" class="form-group__input" name="name" placeholder="學生姓名" required>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">性別</label>
+            <select class="form-group__select" name="gender">
+              <option value=""></option>
+              <option value="male">男</option>
+              <option value="female">女</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">生日<span class="required-mark">*</span></label>
+            <input type="date" class="form-group__input" name="birthday" required>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">電話</label>
+            <input type="tel" class="form-group__input" name="phone" placeholder="電話號碼">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-group__label">電子郵件</label>
+          <input type="email" class="form-group__input" name="email" placeholder="電子郵件">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">學校<span class="required-mark">*</span></label>
+            <input type="text" class="form-group__input" name="school" placeholder="就讀學校" required>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">年級</label>
+            <input type="text" class="form-group__input" name="grade" placeholder="例：3年級">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn modal-btn--cancel" onclick="closeModal('profileEditPersonalModal')">取消</button>
+          <button type="submit" class="modal-btn modal-btn--confirm">儲存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 編輯家長資訊 Modal（查看完整檔案 → 家長資訊的編輯按鈕） -->
+  <div class="modal profile-edit-modal" id="profileEditParentModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 class="modal__title">編輯家長資訊</h3>
+        <button class="modal__close" onclick="closeModal('profileEditParentModal')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <form class="modal__body" id="profileEditParentForm" onsubmit="saveProfileEdit(event, 'parent')">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">家長姓名(父)</label>
+            <input type="text" class="form-group__input" name="parent_name_father" placeholder="家長姓名">
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">家長電話(父)</label>
+            <input type="tel" class="form-group__input" name="parent_phone_father" placeholder="電話號碼">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-group__label">家長姓名(母)</label>
+            <input type="text" class="form-group__input" name="parent_name_mother" placeholder="家長姓名">
+          </div>
+          <div class="form-group">
+            <label class="form-group__label">家長電話(母)</label>
+            <input type="tel" class="form-group__input" name="parent_phone_mother" placeholder="電話號碼">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn modal-btn--cancel" onclick="closeModal('profileEditParentModal')">取消</button>
+          <button type="submit" class="modal-btn modal-btn--confirm">儲存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 圖片檢視器（點縮圖看完整圖片） -->
+  <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
+    <button type="button" class="image-viewer__close" aria-label="關閉">&times;</button>
+    <img class="image-viewer__img" id="imageViewerImg" alt="完整圖片" onclick="event.stopPropagation()">
+  </div>
+
+  <script src="../js/file-url.js"></script>
   <script src="../js/main.js"></script>
+  <script src="../js/ability-chart.js"></script>
   <script>
     const API_BASE = 'http://localhost:3000/api';
+    function isImageFile(url) {
+      return /\.(jpe?g|png|gif|webp|bmp|heic|heif)$/i.test(url || '');
+    }
+
+    // 縮圖：圖片可點開看完整大圖；PDF / Word 以新分頁開啟
+    function attachmentThumb(url, alt) {
+      if (!url) return '';
+      const src = fileUrl(url);
+      if (isImageFile(url)) {
+        return `<img src="${src}" alt="${alt}" class="achievement-item__photo" onclick="event.stopPropagation(); openImageViewer('${src}')">`;
+      }
+      return `<a href="${src}" target="_blank" rel="noopener" class="achievement-item__file" title="${alt}" onclick="event.stopPropagation()">開啟檔案</a>`;
+    }
+
+    function openImageViewer(src) {
+      document.getElementById('imageViewerImg').src = src;
+      document.getElementById('imageViewer').classList.add('image-viewer--open');
+    }
+
+    function closeImageViewer() {
+      document.getElementById('imageViewer').classList.remove('image-viewer--open');
+      document.getElementById('imageViewerImg').src = '';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeImageViewer();
+    });
 
     // 從 localStorage 取得 token
     function getAuthToken() {
@@ -2028,16 +2392,7 @@
         const classesRes = await apiRequest('/schedules/my-classes');
         myClasses = classesRes.data.schedules || [];
 
-        if (myClasses.length === 0) {
-          document.getElementById('studentsTableBody').innerHTML = `
-            <tr><td colspan="5" style="text-align: center; padding: 40px; color: #6a7282;">
-              目前沒有指派的班級
-            </td></tr>
-          `;
-          return;
-        }
-
-        // 從每個班級取得學生
+        // 從每個班級取得學生（自己所教的學生）
         const studentMap = new Map(); // 用 Map 避免重複學生
 
         for (const schedule of myClasses) {
@@ -2065,6 +2420,20 @@
               });
             }
           }
+        }
+
+        // 再補上其他學生：Map 會保留加入順序，所以自己所教的學生排在前面
+        const allRes = await apiRequest('/students?status=active&limit=10000');
+        for (const student of allRes.data?.students || []) {
+          if (studentMap.has(student.id)) continue;
+
+          studentMap.set(student.id, {
+            ...student,
+            course_name: student.course_type_name,
+            points: 0
+          });
+          if (student.classroom_name) classrooms.add(student.classroom_name);
+          if (student.course_type_name) courses.add(student.course_type_name);
         }
 
         allStudents = Array.from(studentMap.values());
@@ -2594,7 +2963,12 @@
 
     // ========== 查看完整檔案功能 ==========
     let profileRadarChart = null;
+    document.getElementById('profileAbilitySection').innerHTML = renderAbilitySection('profileRadarChart', {});
     let profileTrendChart = null;
+    let profileTrendRecords = [];
+    let currentTrendSkill = 'all';
+    // 指標名稱與顏色沿用能力雷達圖的共用定義
+    const TREND_SKILLS = ABILITY_THEME.skills.map(skill => ({ ...skill, field: `skill_${skill.key}` }));
     let currentAchievementTab = 'records';
     let achievementPage = 1;
     let profileStudentData = null;
@@ -2634,6 +3008,7 @@
         await loadProfileAbilities(studentId);
 
         // 載入學習成就
+        achievementPage = 1;
         await loadAchievements(studentId, 'records');
 
       } catch (error) {
@@ -2671,10 +3046,10 @@
       document.getElementById('profileModalCourse').textContent = currentCourse?.course_name || '—';
 
       // 家長資訊
-      document.getElementById('profileModalMother').textContent = student.mother_name || '—';
-      document.getElementById('profileModalMotherPhone').textContent = student.mother_phone || '—';
-      document.getElementById('profileModalFather').textContent = student.father_name || '—';
-      document.getElementById('profileModalFatherPhone').textContent = student.father_phone || '—';
+      document.getElementById('profileModalMother').textContent = student.parent_name_mother || '—';
+      document.getElementById('profileModalMotherPhone').textContent = student.parent_phone_mother || '—';
+      document.getElementById('profileModalFather').textContent = student.parent_name_father || '—';
+      document.getElementById('profileModalFatherPhone').textContent = student.parent_phone_father || '—';
 
       // 歷史課程
       const courseHistoryContainer = document.getElementById('profileModalCourseHistory');
@@ -2692,6 +3067,62 @@
         }).join('');
       } else {
         courseHistoryContainer.innerHTML = '<div style="font-size: 13px; color: #6a7282; padding: 8px 0;">無課程記錄</div>';
+      }
+    }
+
+    // 編輯個人／家長資訊：各自的表單與可編輯欄位
+    const PROFILE_EDIT_FORMS = {
+      personal: { modal: 'profileEditPersonalModal', form: 'profileEditPersonalForm', fields: ['name', 'gender', 'email', 'phone', 'birthday', 'school', 'grade'] },
+      parent: { modal: 'profileEditParentModal', form: 'profileEditParentForm', fields: ['parent_name_father', 'parent_phone_father', 'parent_name_mother', 'parent_phone_mother'] }
+    };
+
+    // 開啟編輯 Modal，帶入目前資料（沒有資料的欄位留空）
+    function openProfileEditModal(type) {
+      if (!profileStudentData) return;
+
+      const config = PROFILE_EDIT_FORMS[type];
+      const form = document.getElementById(config.form);
+      config.fields.forEach(field => {
+        const value = field === 'birthday'
+          ? String(profileStudentData.birthday || profileStudentData.birth_date || '').substring(0, 10)
+          : profileStudentData[field];
+        form.elements[field].value = value || '';
+      });
+
+      document.getElementById(config.modal).classList.add('active');
+    }
+
+    // 儲存編輯內容，成功後重新載入完整檔案與學生列表
+    async function saveProfileEdit(event, type) {
+      event.preventDefault();
+
+      const config = PROFILE_EDIT_FORMS[type];
+      const form = document.getElementById(config.form);
+      const payload = {};
+      config.fields.forEach(field => {
+        payload[field] = form.elements[field].value.trim() || null;
+      });
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+
+      try {
+        await apiRequest(`/students/${currentStudentId}/profile`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+
+        showMessage('學生資料更新成功', 'success');
+        closeModal(config.modal);
+
+        const detailRes = await apiRequest(`/students/${currentStudentId}`);
+        profileStudentData = detailRes.data;
+        updateProfileSidebar(profileStudentData);
+        loadMyStudents();
+      } catch (error) {
+        showMessage('更新失敗：' + error.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
       }
     }
 
@@ -2714,10 +3145,8 @@
 
           // 更新時間
           if (recent_records && recent_records.length > 0) {
-            const latestDate = new Date(recent_records[recent_records.length - 1].log_date);
-            const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
             document.getElementById('profileModalUpdateDate').textContent =
-              `*更新時間：${latestDate.getFullYear()} / ${String(latestDate.getMonth() + 1).padStart(2, '0')} / ${String(latestDate.getDate()).padStart(2, '0')}(${dayNames[latestDate.getDay()]})`;
+              formatAbilityUpdateDate(recent_records[recent_records.length - 1].log_date);
           }
         }
       } catch (error) {
@@ -2727,68 +3156,22 @@
 
     // 更新雷達圖
     function updateProfileRadarChart(averages) {
-      const ctx = document.getElementById('profileRadarChart');
-      if (!ctx) return;
-
-      const data = [
-        averages?.programming || 0,
-        averages?.debugging || 0,
-        averages?.creativity || 0,
-        averages?.structure || 0,
-        averages?.teamwork || 0
-      ];
-
       if (profileRadarChart) {
-        profileRadarChart.data.datasets[0].data = data;
+        profileRadarChart.data.datasets[0].data = ABILITY_THEME.skills.map(skill => averages?.[skill.key] || 0);
         profileRadarChart.update();
       } else {
-        profileRadarChart = new Chart(ctx, {
-          type: 'radar',
-          data: {
-            labels: ['程式', '除錯', '創意', '結構', '團隊合作'],
-            datasets: [{
-              data: data,
-              backgroundColor: 'rgba(255, 219, 88, 0.3)',
-              borderColor: 'rgba(255, 219, 88, 1)',
-              borderWidth: 2,
-              pointBackgroundColor: 'rgba(255, 219, 88, 1)',
-              pointRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: { legend: { display: false } },
-            scales: {
-              r: {
-                beginAtZero: true,
-                max: 5,
-                ticks: { stepSize: 1, display: false },
-                grid: { color: 'rgba(0, 0, 0, 0.08)' },
-                angleLines: { color: 'rgba(0, 0, 0, 0.08)' },
-                pointLabels: { font: { size: 12 } }
-              }
-            }
-          }
-        });
+        profileRadarChart = createAbilityRadarChart('profileRadarChart', averages);
       }
     }
 
     // 更新分數條
     function updateProfileScoreBars(averages) {
-      const skills = ['programming', 'debugging', 'creativity', 'structure', 'teamwork'];
-      const skillNames = { programming: 'Programming', debugging: 'Debugging', creativity: 'Creativity', structure: 'Structure', teamwork: 'Teamwork' };
-
-      skills.forEach(skill => {
-        const score = Math.round((averages?.[skill] || 0) * 10) / 10;
-        const percentage = (score / 5) * 100;
-
-        const scoreEl = document.getElementById(`profileScore${skill.charAt(0).toUpperCase() + skill.slice(1)}`);
-        const barEl = document.getElementById(`profileBar${skill.charAt(0).toUpperCase() + skill.slice(1)}`);
-
-        if (scoreEl) scoreEl.textContent = `${score}/5`;
-        if (barEl) barEl.style.width = `${percentage}%`;
+      const scores = {};
+      ABILITY_THEME.skills.forEach(skill => {
+        scores[skill.key] = Math.round((averages?.[skill.key] || 0) * 10) / 10;
       });
+
+      document.querySelector('#profileAbilitySection .ability-list').innerHTML = renderAbilityList(scores);
     }
 
     // 更新趨勢圖
@@ -2796,18 +3179,17 @@
       const ctx = document.getElementById('profileTrendChart');
       if (!ctx) return;
 
+      profileTrendRecords = records;
+
       const labels = records.map(r => {
         const date = new Date(r.log_date);
         return `${date.getMonth() + 1}/${date.getDate()}`;
       });
 
-      const datasets = [
-        { label: '程式', data: records.map(r => r.skill_programming || 0), borderColor: '#22c55e', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, borderWidth: 2 },
-        { label: '除錯', data: records.map(r => r.skill_debugging || 0), borderColor: '#84cc16', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, borderWidth: 2 },
-        { label: '創意', data: records.map(r => r.skill_creativity || 0), borderColor: '#f97316', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, borderWidth: 2 },
-        { label: '結構', data: records.map(r => r.skill_structure || 0), borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, borderWidth: 2 },
-        { label: '團隊合作', data: records.map(r => r.skill_teamwork || 0), borderColor: '#ec4899', backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, borderWidth: 2 }
-      ];
+      // 只建立目前選取指標的線條，圖例也因此只會出現選取的項目
+      const datasets = TREND_SKILLS
+        .filter(s => currentTrendSkill === 'all' || s.key === currentTrendSkill)
+        .map(s => ({ label: s.label, data: records.map(r => r[s.field] || 0), borderColor: s.color, backgroundColor: 'transparent', tension: 0.3, pointRadius: 4, borderWidth: 2 }));
 
       if (profileTrendChart) {
         profileTrendChart.data.labels = labels;
@@ -2824,7 +3206,16 @@
               legend: {
                 display: true,
                 position: 'bottom',
-                labels: { usePointStyle: true, padding: 20 }
+                onClick: null,
+                labels: {
+                  usePointStyle: true,
+                  boxWidth: 8,
+                  boxHeight: 8,
+                  padding: 20,
+                  // 圖例圓點以線條顏色填滿（線上的資料點維持空心）
+                  generateLabels: chart => Chart.defaults.plugins.legend.labels.generateLabels(chart)
+                    .map(label => ({ ...label, fillStyle: label.strokeStyle }))
+                }
               }
             },
             scales: {
@@ -2860,55 +3251,24 @@
       }
     }
 
-    // 切換趨勢圖技能顯示
-    function toggleTrendSkill(btn) {
+    // 選取趨勢圖指標（單選，點選已選中的按鈕不取消）
+    function selectTrendSkill(btn) {
       const skill = btn.dataset.skill;
+      if (skill === currentTrendSkill) return;
 
-      if (skill === 'all') {
-        const isActive = btn.classList.contains('trend-skill-btn--active');
-        document.querySelectorAll('.trend-skill-btn').forEach(b => {
-          if (isActive) {
-            b.classList.remove('trend-skill-btn--active');
-          } else {
-            b.classList.add('trend-skill-btn--active');
-          }
-        });
-      } else {
-        btn.classList.toggle('trend-skill-btn--active');
+      currentTrendSkill = skill;
+      document.querySelectorAll('.trend-skill-btn').forEach(b => {
+        const isActive = b === btn;
+        b.classList.toggle('trend-skill-btn--active', isActive);
 
-        // 檢查是否全選
-        const allSkillBtns = document.querySelectorAll('.trend-skill-btn:not([data-skill="all"])');
-        const activeCount = document.querySelectorAll('.trend-skill-btn:not([data-skill="all"]).trend-skill-btn--active').length;
-        const allBtn = document.querySelector('.trend-skill-btn[data-skill="all"]');
-
-        if (activeCount === allSkillBtns.length) {
-          allBtn?.classList.add('trend-skill-btn--active');
-        } else {
-          allBtn?.classList.remove('trend-skill-btn--active');
-        }
-      }
-
-      // 更新圖表顯示
-      updateTrendChartVisibility();
-    }
-
-    // 更新趨勢圖可見性
-    function updateTrendChartVisibility() {
-      if (!profileTrendChart) return;
-
-      const skillMap = { programming: 0, debugging: 1, creativity: 2, structure: 3, teamwork: 4 };
-
-      document.querySelectorAll('.trend-skill-btn:not([data-skill="all"])').forEach(btn => {
-        const skill = btn.dataset.skill;
-        const isActive = btn.classList.contains('trend-skill-btn--active');
-        const datasetIndex = skillMap[skill];
-
-        if (profileTrendChart.data.datasets[datasetIndex]) {
-          profileTrendChart.data.datasets[datasetIndex].hidden = !isActive;
-        }
+        // 選中的指標按鈕套用該指標的顏色；底色偏淺，文字用深色
+        const color = isActive ? TREND_SKILLS.find(s => s.key === b.dataset.skill)?.color : null;
+        b.style.background = color || '';
+        b.style.borderColor = color || '';
+        b.style.color = color ? '#101828' : '';
       });
 
-      profileTrendChart.update();
+      updateProfileTrendChart(profileTrendRecords);
     }
 
     // 切換成就標籤頁
@@ -2934,15 +3294,21 @@
       try {
         let achievements = [];
 
+        // 每按一次「查看更多」多顯示 5 筆；多抓 1 筆用來判斷後面是否還有資料
+        const visibleCount = achievementPage * 5;
+
         if (tab === 'records') {
           // 載入課程紀錄
-          const response = await apiRequest(`/students/${studentId}/records?page=${achievementPage}&limit=5`);
+          const response = await apiRequest(`/students/${studentId}/records?page=1&limit=${visibleCount + 1}`);
           achievements = response.data?.records || [];
         } else {
           // 載入競賽經歷
-          const response = await apiRequest(`/competitions/student/${studentId}?page=${achievementPage}&limit=5`);
+          const response = await apiRequest(`/competitions/student/${studentId}?page=1&limit=${visibleCount + 1}`);
           achievements = response.data?.competitions || response.data || [];
         }
+
+        const hasMore = achievements.length > visibleCount;
+        achievements = achievements.slice(0, visibleCount);
 
         if (achievements.length === 0) {
           container.innerHTML = `<div style="text-align: center; padding: 40px; color: #6a7282;">
@@ -2960,7 +3326,7 @@
           }
         }).join('');
 
-        document.getElementById('loadMoreAchievements').style.display = 'block';
+        document.getElementById('loadMoreAchievements').style.display = hasMore ? 'block' : 'none';
 
       } catch (error) {
         console.error('載入成就錯誤:', error);
@@ -2969,66 +3335,172 @@
     }
 
     // 渲染課程紀錄項目
-    function renderRecordItem(record) {
-      const date = record.log_date ? new Date(record.log_date) : new Date();
-      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    // 欄位與顯示規則比照行政端「課程日誌詳情」的學生列（資料同為 student_log_records）
+    const RECORD_ATTENDANCE = {
+      present: { variant: 'present', text: '出席' },
+      absent: { variant: 'absent', text: '缺席' },
+      late: { variant: 'makeup', text: '遲到' },
+      leave: { variant: 'makeup', text: '請假' },
+      makeup: { variant: 'makeup', text: '補課' }
+    };
 
-      const statusClass = record.attendance_status === 'present' ? 'present' :
-                          record.attendance_status === 'makeup' ? 'makeup' : 'absent';
-      const statusText = record.attendance_status === 'present' ? '出席' :
-                         record.attendance_status === 'makeup' ? '補課' : '缺席';
+    function renderRecordItem(record) {
+      const attendance = RECORD_ATTENDANCE[record.attendance] || RECORD_ATTENDANCE.present;
+      const points = record.points_earned > 0 ? `+${record.points_earned}點` : '';
+      const photos = (record.photos || []).slice(0, 2);
 
       return `
-        <div class="achievement-item">
-          <div class="achievement-item__header">
-            <span class="achievement-item__date">${dateStr}</span>
-            <span class="achievement-item__course">${record.course_name || '課程'}</span>
-            <span class="achievement-item__status achievement-item__status--${statusClass}">${statusText}</span>
-          </div>
-          <div class="achievement-item__content">
-            ${record.comment || record.teacher_comment || '教師未留下評語'}
-          </div>
-          <div class="achievement-item__footer">
-            <span class="achievement-item__points">⭐ 獲得點數：${record.points || 0}</span>
-            <span>｜</span>
-            <span>備註：${record.notes || '無'}</span>
-          </div>
-          ${record.photo_url ? `
-            <div class="achievement-item__photos">
-              <img src="${record.photo_url}" alt="課堂照片" class="achievement-item__photo">
+        <div class="record-item">
+          <div class="record-item__header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="record-item__info">
+              <span class="record-item__date">${formatDateOnly(record.log_date)}</span>
+              <span class="record-item__course">${escapeHtml(record.course_name || '課程')}</span>
+              <span class="record-item__status record-item__status--${attendance.variant}">${attendance.text}</span>
             </div>
-          ` : ''}
+            <div class="record-item__aside">
+              <span class="record-item__points">${points}</span>
+              <svg class="record-item__toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+          <div class="record-item__detail">
+            <div class="record-item__section">
+              <div class="record-item__label">教師評語</div>
+              <div class="record-item__content">${escapeHtml(record.performance || record.notes || '無')}</div>
+            </div>
+            <div class="record-item__section">
+              <div class="record-item__label">上課照片</div>
+              <div class="record-item__photos">
+                ${photos.length ? photos.map(renderRecordPhoto).join('') : `
+                  <div class="record-item__photo-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    無照片
+                  </div>
+                `}
+              </div>
+            </div>
+          </div>
         </div>
       `;
     }
 
-    // 渲染競賽經歷項目
-    function renderCompetitionItem(comp) {
-      const date = comp.competition_date ? new Date(comp.competition_date) : new Date();
-      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    function renderRecordPhoto(photo) {
+      const src = fileUrl(photo.photo_url);
+      return `<img src="${src}" alt="上課照片" class="record-item__photo" onclick="openImageViewer('${src}')">`;
+    }
 
-      const levelMap = { international: '國際賽', national: '全國賽', regional: '區域賽', county: '縣市賽' };
+    const COMPETITION_LEVELS = { international: '國際賽', national: '全國賽', regional: '區域賽', county: '縣市賽' };
+
+    // 已載入的競賽資料（供點擊開啟詳情時查找）
+    const loadedCompetitions = {};
+
+    // 競賽內容由學生自行輸入，顯示前需跳脫避免被當成 HTML 執行
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatDateOnly(value) {
+      if (!value) return '—';
+      const date = new Date(value);
+      if (isNaN(date)) return '—';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // 渲染競賽經歷項目（點擊開啟完整詳情）
+    function renderCompetitionItem(comp) {
+      loadedCompetitions[comp.id] = comp;
 
       return `
-        <div class="achievement-item">
+        <div class="achievement-item achievement-item--clickable" onclick="openCompetitionDetail(${Number(comp.id)})">
           <div class="achievement-item__header">
-            <span class="achievement-item__date">${dateStr}</span>
-            <span class="achievement-item__course">${comp.title || comp.organizer || '競賽'}</span>
-            <span class="achievement-item__status achievement-item__status--present">${levelMap[comp.level] || comp.level || ''}</span>
+            <span class="achievement-item__date">${formatDateOnly(comp.competition_date)}</span>
+            <span class="achievement-item__course">${escapeHtml(comp.title || comp.organizer || '競賽')}</span>
+            <span class="achievement-item__status achievement-item__status--present">${escapeHtml(COMPETITION_LEVELS[comp.level] || comp.level || '')}</span>
           </div>
           <div class="achievement-item__content">
-            ${comp.description || `主辦單位：${comp.organizer || '—'}`}
-            ${comp.rank_name ? `<br>獲得名次：${comp.rank_name}` : ''}
-            ${comp.score ? ` | 成績：${comp.score}` : ''}
+            ${escapeHtml(comp.description || `主辦單位：${comp.organizer || '—'}`)}
+            ${comp.rank_name ? `<br>獲得名次：${escapeHtml(comp.rank_name)}` : ''}
+            ${comp.score ? ` | 成績：${escapeHtml(comp.score)}` : ''}
           </div>
-          ${comp.photo_url || comp.certificate_url ? `
+          ${comp.photo_url || comp.photo_url_2 || comp.certificate_url ? `
             <div class="achievement-item__photos">
-              ${comp.certificate_url ? `<img src="${comp.certificate_url}" alt="證明文件" class="achievement-item__photo">` : ''}
-              ${comp.photo_url ? `<img src="${comp.photo_url}" alt="競賽照片" class="achievement-item__photo">` : ''}
+              ${attachmentThumb(comp.certificate_url, '證明文件')}
+              ${attachmentThumb(comp.photo_url, '競賽照片')}
+              ${attachmentThumb(comp.photo_url_2, '競賽照片')}
             </div>
           ` : ''}
+          <div class="achievement-item__more">點擊查看完整內容 ›</div>
         </div>
       `;
+    }
+
+    // 詳情中的單張圖片 / 檔案
+    function detailAttachment(url, caption) {
+      const src = fileUrl(url);
+      const body = isImageFile(url)
+        ? `<img src="${src}" alt="${caption}" onclick="openImageViewer('${src}')">`
+        : `<a class="comp-detail__file" href="${src}" target="_blank" rel="noopener">開啟檔案</a>`;
+      return `<figure class="comp-detail__image">${body}<figcaption>${caption}</figcaption></figure>`;
+    }
+
+    // 開啟競賽詳情
+    function openCompetitionDetail(id) {
+      const comp = loadedCompetitions[id];
+      if (!comp) return;
+
+      const field = (label, value) => `
+        <div class="comp-detail__field">
+          <div class="comp-detail__label">${label}</div>
+          <div class="comp-detail__value">${value ? escapeHtml(value) : '—'}</div>
+        </div>`;
+
+      const attachments = [
+        comp.certificate_url && detailAttachment(comp.certificate_url, '參賽證明'),
+        comp.photo_url && detailAttachment(comp.photo_url, '競賽照片 1'),
+        comp.photo_url_2 && detailAttachment(comp.photo_url_2, '競賽照片 2')
+      ].filter(Boolean);
+
+      document.getElementById('compDetailBody').innerHTML = `
+        <div class="comp-detail__title">${escapeHtml(comp.title || '未命名競賽')}</div>
+        ${comp.subtitle ? `<div class="comp-detail__subtitle">${escapeHtml(comp.subtitle)}</div>` : '<div class="comp-detail__subtitle"></div>'}
+
+        <div class="comp-detail__grid">
+          ${field('主辦單位', comp.organizer)}
+          ${field('競賽日期', formatDateOnly(comp.competition_date))}
+          ${field('競賽等級', COMPETITION_LEVELS[comp.level] || comp.level)}
+          ${field('隊伍名稱', comp.team_name)}
+          ${field('獲得名次', comp.rank_name)}
+          ${field('成績/分數', comp.score)}
+        </div>
+
+        <div class="comp-detail__section">
+          <div class="comp-detail__section-title">競賽說明 / 心得</div>
+          <div class="comp-detail__description">${comp.description ? escapeHtml(comp.description) : '<span class="comp-detail__empty">學生未填寫</span>'}</div>
+        </div>
+
+        <div class="comp-detail__section">
+          <div class="comp-detail__section-title">證明文件與照片</div>
+          ${attachments.length
+            ? `<div class="comp-detail__images">${attachments.join('')}</div>`
+            : '<div class="comp-detail__empty">尚未上傳任何檔案</div>'}
+        </div>
+
+        <div class="comp-detail__meta">
+          建立：${formatDateOnly(comp.created_at)}　最後更新：${formatDateOnly(comp.updated_at)}
+        </div>
+      `;
+
+      document.getElementById('compDetailModal').classList.add('active');
     }
 
     // 載入更多成就

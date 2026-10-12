@@ -543,3 +543,333 @@ function parseAIResponse(text, traits) {
     scores
   };
 }
+
+// =====================
+// 科系推薦相關設定
+// =====================
+const db = require('../config/db');
+
+/**
+ * 取得或生成科系推薦及學類介紹
+ * POST /api/ai/generate-department-recommendation
+ *
+ * 邏輯：
+ * 1. 先檢查資料庫是否已有該學生的推薦紀錄
+ * 2. 若有，直接返回（每次登入只生成一次）
+ * 3. 若無，呼叫 AI 生成並存入資料庫
+ */
+exports.generateDepartmentRecommendation = async (req, res) => {
+  try {
+    // 僅限學生角色使用
+    if (req.user.role !== 'student') {
+      return res.status(403).json({
+        success: false,
+        message: '僅限學生角色使用此功能'
+      });
+    }
+
+    // 取得學生資料
+    const student = await db.queryOne(`
+      SELECT s.*, u.name
+      FROM students s
+      JOIN users u ON s.user_id = u.id
+      WHERE s.user_id = ?
+    `, [req.user.id]);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到學生資料'
+      });
+    }
+
+    // 檢查是否已有推薦紀錄
+    const existing = await db.queryOne(`
+      SELECT * FROM department_recommendations WHERE student_id = ?
+    `, [student.id]);
+
+    if (existing) {
+      // 已有紀錄，直接返回
+      return res.json({
+        success: true,
+        data: {
+          department: existing.department,
+          reason: existing.reason,
+          introduction: existing.introduction,
+          career: {
+            directions: existing.career_directions,
+            salary: existing.career_salary
+          },
+          suggestion: existing.suggestion,
+          generatedAt: existing.generated_at,
+          cached: true
+        }
+      });
+    }
+
+    // 檢查 API Key 是否已設定
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: 'Gemini API Key 尚未設定，請在 server/.env 中設定 GEMINI_API_KEY'
+      });
+    }
+
+    // 取得學生的課程歷史
+    const courses = await db.query(`
+      SELECT DISTINCT
+        c.name as course_name,
+        ct.name as course_type_name,
+        ce.status
+      FROM course_enrollments ce
+      JOIN course_schedules cs ON ce.schedule_id = cs.id
+      JOIN courses c ON cs.course_id = c.id
+      LEFT JOIN course_types ct ON c.course_type_id = ct.id
+      WHERE ce.student_id = ?
+    `, [student.id]);
+
+    // 取得學生的能力分數 (取最新一筆有數據的紀錄)
+    const latestSkills = await db.queryOne(`
+      SELECT
+        slr.skill_programming, slr.skill_debugging, slr.skill_creativity,
+        slr.skill_structure, slr.skill_teamwork
+      FROM student_log_records slr
+      JOIN course_logs cl ON slr.log_id = cl.id
+      WHERE slr.student_id = ?
+        AND (COALESCE(slr.skill_programming, 0) > 0
+          OR COALESCE(slr.skill_debugging, 0) > 0
+          OR COALESCE(slr.skill_creativity, 0) > 0
+          OR COALESCE(slr.skill_structure, 0) > 0
+          OR COALESCE(slr.skill_teamwork, 0) > 0)
+      ORDER BY cl.log_date DESC
+      LIMIT 1
+    `, [student.id]);
+
+    // 取得學生的競賽紀錄
+    const competitions = await db.query(`
+      SELECT
+        organizer, title, level, rank_name, score, team_name, description
+      FROM competitions
+      WHERE student_id = ?
+      ORDER BY competition_date DESC
+    `, [student.id]);
+
+    // 構建 prompt
+    const prompt = buildDepartmentRecommendationPrompt(student.name, courses, latestSkills, competitions);
+
+    // 呼叫 Gemini API
+    const data = await callGeminiAPI(prompt);
+    const generatedText = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+
+    if (!generatedText) {
+      return res.status(500).json({
+        success: false,
+        message: 'AI 生成失敗，請稍後再試'
+      });
+    }
+
+    // 解析回應
+    const result = parseDepartmentRecommendation(generatedText);
+
+    // 存入資料庫
+    await db.query(`
+      INSERT INTO department_recommendations
+        (student_id, department, reason, introduction, career_directions, career_salary, suggestion)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      student.id,
+      result.department,
+      result.reason,
+      result.introduction,
+      result.career.directions,
+      result.career.salary,
+      result.suggestion
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        ...result,
+        cached: false
+      }
+    });
+
+  } catch (error) {
+    console.error('生成科系推薦錯誤:', error);
+
+    if (error.statusCode) {
+      return res.status(500).json({
+        success: false,
+        message: 'AI 生成失敗，請稍後再試',
+        error: error.error?.message || JSON.stringify(error.error)
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤',
+      error: error.message || error.error
+    });
+  }
+};
+
+/**
+ * 重新生成科系推薦（刪除舊紀錄後重新生成）
+ * POST /api/ai/regenerate-department-recommendation
+ */
+exports.regenerateDepartmentRecommendation = async (req, res) => {
+  try {
+    if (req.user.role !== 'student') {
+      return res.status(403).json({ success: false, message: '僅限學生角色使用此功能' });
+    }
+
+    const student = await db.queryOne(`
+      SELECT s.id FROM students s WHERE s.user_id = ?
+    `, [req.user.id]);
+
+    if (!student) {
+      return res.status(404).json({ success: false, message: '找不到學生資料' });
+    }
+
+    // 刪除舊紀錄
+    await db.query('DELETE FROM department_recommendations WHERE student_id = ?', [student.id]);
+
+    // 重新呼叫生成邏輯
+    return exports.generateDepartmentRecommendation(req, res);
+  } catch (error) {
+    console.error('重新生成科系推薦錯誤:', error);
+    res.status(500).json({ success: false, message: '伺服器錯誤' });
+  }
+};
+
+/**
+ * 構建科系推薦的 prompt
+ */
+function buildDepartmentRecommendationPrompt(studentName, courses, skills, competitions) {
+  // 整理課程資訊
+  const courseList = courses.length > 0
+    ? courses.map(c => c.course_type_name || c.course_name).filter(Boolean).join('、')
+    : '尚無課程紀錄';
+
+  // 整理能力分數
+  const skillsInfo = skills
+    ? `程式能力：${skills.skill_programming || 0}/5
+除錯能力：${skills.skill_debugging || 0}/5
+創意表現：${skills.skill_creativity || 0}/5
+結構組織：${skills.skill_structure || 0}/5
+團隊合作：${skills.skill_teamwork || 0}/5`
+    : '尚無能力評估紀錄';
+
+  // 整理競賽資訊
+  let competitionInfo = '尚無競賽紀錄';
+  if (competitions.length > 0) {
+    competitionInfo = competitions.map(c => {
+      const levelLabels = { international: '國際賽', national: '全國賽', regional: '區域賽', county: '縣市賽' };
+      return `- ${c.title || '未命名競賽'}（${levelLabels[c.level] || c.level || '其他'}）${c.rank_name ? '，成績：' + c.rank_name : ''}${c.score ? ' ' + c.score : ''}`;
+    }).join('\n');
+  }
+
+  const prompt = `你是一位經驗豐富的升學輔導專家，專精於 STEAM 教育與科技領域的學涯規劃。
+請根據以下學生的學習歷程與表現，推薦最適合的大學科系，並提供完整的學類介紹。
+
+【學生資訊】
+姓名：${studentName}
+
+【修課紀錄】
+${courseList}
+
+【能力評估】
+${skillsInfo}
+
+【競賽經歷】
+${competitionInfo}
+
+【分析要求】
+請根據上述資料進行綜合分析，考量以下面向：
+1. 學生的課程背景顯示的興趣方向
+2. 能力雷達圖顯示的優勢與待加強項目
+3. 競賽經歷反映的實務能力與成就
+
+【輸出格式】
+請嚴格按照以下格式輸出，使用純文字，不要使用 Markdown 符號：
+
+【推薦科系】
+（填寫 1 個最推薦的科系名稱，如：資訊工程學系、電機工程學系、機械工程學系等）
+
+【推薦理由】
+（約 80-120 字，說明為何這個科系適合此學生，需具體連結學生的課程、能力與競賽表現）
+
+【學類介紹】
+（約 100-150 字，介紹該學類的核心課程、學習內容與特色）
+
+【出路分析】
+就業方向：（列出 3-5 個主要就業方向，用頓號分隔）
+薪資範圍：（提供新鮮人起薪參考範圍）
+
+【學習建議】
+（約 60-100 字，根據學生目前的能力分布，建議未來可加強的方向）`;
+
+  return prompt;
+}
+
+/**
+ * 解析科系推薦回應
+ */
+function parseDepartmentRecommendation(text) {
+  const result = {
+    department: '',
+    reason: '',
+    introduction: '',
+    career: {
+      directions: '',
+      salary: ''
+    },
+    suggestion: ''
+  };
+
+  // 解析推薦科系
+  const deptMatch = text.match(/【推薦科系】\s*([\s\S]*?)(?=【推薦理由】|$)/);
+  if (deptMatch) {
+    result.department = deptMatch[1].trim();
+  }
+
+  // 解析推薦理由
+  const reasonMatch = text.match(/【推薦理由】\s*([\s\S]*?)(?=【學類介紹】|$)/);
+  if (reasonMatch) {
+    result.reason = reasonMatch[1].trim();
+  }
+
+  // 解析學類介紹
+  const introMatch = text.match(/【學類介紹】\s*([\s\S]*?)(?=【出路分析】|$)/);
+  if (introMatch) {
+    result.introduction = introMatch[1].trim();
+  }
+
+  // 解析出路分析
+  const careerMatch = text.match(/【出路分析】\s*([\s\S]*?)(?=【學習建議】|$)/);
+  if (careerMatch) {
+    const careerText = careerMatch[1];
+    const dirMatch = careerText.match(/就業方向[：:]\s*(.+)/);
+    const salaryMatch = careerText.match(/薪資範圍[：:]\s*(.+)/);
+    if (dirMatch) result.career.directions = dirMatch[1].trim();
+    if (salaryMatch) result.career.salary = salaryMatch[1].trim();
+  }
+
+  // 解析學習建議
+  const suggestionMatch = text.match(/【學習建議】\s*([\s\S]*?)$/);
+  if (suggestionMatch) {
+    result.suggestion = suggestionMatch[1].trim();
+  }
+
+  // 如果解析失敗，使用預設值
+  if (!result.department) {
+    result.department = '資訊工程學系';
+    result.reason = '根據您的 STEAM 課程背景與程式設計經歷，資訊工程學系是最適合的選擇。';
+    result.introduction = '資訊工程學系培養軟體開發、系統設計與資訊應用的專業人才，課程涵蓋程式設計、資料結構、演算法、人工智慧等領域。';
+    result.career.directions = '軟體工程師、系統分析師、資料科學家、AI工程師、資安工程師';
+    result.career.salary = '新鮮人起薪約 45,000-60,000 元';
+    result.suggestion = '建議持續加強程式邏輯與演算法能力，並多參與團隊專案累積協作經驗。';
+  }
+
+  return result;
+}

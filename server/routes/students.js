@@ -20,6 +20,8 @@ router.get('/', studentsController.getAll);
 router.get('/:id', studentsController.getOne);
 router.post('/', authorize('admin', 'staff'), studentsController.create);
 router.put('/:id', authorize('admin', 'staff'), studentsController.update);
+// 教師端可編輯學生的個人／家長資訊（僅限這些欄位）
+router.put('/:id/profile', authorize('admin', 'staff', 'teacher'), studentsController.updateProfile);
 router.delete('/:id', authorize('admin', 'staff'), studentsController.delete);
 
 // 學生點數

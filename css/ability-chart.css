@@ -1,0 +1,196 @@
+/* ========================================
+   能力評估（雷達圖 + 指標長條圖）共用樣式
+   行政端「課程日誌詳情」與教師端「查看完整檔案」共用，
+   搭配 js/ability-chart.js；顏色定義在該檔的 ABILITY_THEME。
+   ======================================== */
+
+:root {
+  /* 雷達圖邊長，頁面排版需要對齊時可引用 */
+  --ability-radar-size: 340px;
+}
+
+.ability-section {
+  display: flex;
+  gap: var(--spacing-xl);
+  align-items: flex-start;
+}
+
+.ability-section__radar {
+  width: var(--ability-radar-size);
+  height: var(--ability-radar-size);
+  flex-shrink: 0;
+}
+
+.ability-list {
+  flex: 1;
+  max-width: 560px;
+  align-self: center;
+}
+
+.ability-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px 0;
+  font-size: 16px;
+}
+
+.ability-item__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ability-item__name {
+  color: var(--color-text-primary);
+  min-width: 72px;
+}
+
+.ability-item__score {
+  color: var(--color-text-secondary);
+}
+
+/* 較上次變化 */
+.ability-item__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.ability-item__delta--up {
+  color: #15803d;
+  background: rgba(90, 218, 70, 0.18);
+}
+
+.ability-item__delta--down {
+  color: #b91c1c;
+  background: rgba(255, 113, 88, 0.18);
+}
+
+.ability-item__delta--flat {
+  color: var(--color-text-muted);
+  background: rgba(148, 163, 184, 0.2);
+}
+
+/* 橫向進度條 */
+.ability-item__bar {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.25);
+  overflow: hidden;
+}
+
+.ability-item__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.ability-item__help-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ability-item__help {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #1a1a1a;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.ability-item__help svg {
+  display: block;
+}
+
+.ability-item__tip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  white-space: normal;
+  width: 260px;
+  padding: 8px 12px;
+  border: 1px solid #000;
+  border-radius: 2px;
+  background: #fff;
+  color: #000;
+  font-family: 'Inter', var(--font-family, sans-serif);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  display: none;
+}
+
+/* 指向問號的左側箭頭 */
+.ability-item__tip::before,
+.ability-item__tip::after {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-style: solid;
+}
+
+.ability-item__tip::before {
+  border-width: 6px;
+  border-color: transparent #000 transparent transparent;
+}
+
+.ability-item__tip::after {
+  border-width: 5px;
+  border-color: transparent #fff transparent transparent;
+  margin-right: -1px;
+}
+
+.ability-item__help-wrap.tip-open .ability-item__tip {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .ability-item__tip {
+    left: auto;
+    right: 0;
+    top: calc(100% + 8px);
+    transform: none;
+    white-space: normal;
+    max-width: 240px;
+  }
+  .ability-item__tip::before,
+  .ability-item__tip::after {
+    right: auto;
+    left: 12px;
+    top: auto;
+    bottom: 100%;
+    transform: none;
+  }
+  .ability-item__tip::before {
+    border-width: 0 6px 6px 6px;
+    border-color: transparent transparent #000 transparent;
+  }
+  .ability-item__tip::after {
+    border-width: 0 5px 5px 5px;
+    border-color: transparent transparent #fff transparent;
+    margin-right: 0;
+    margin-bottom: -1px;
+  }
+}
+
+/* 標題旁的更新時間 */
+.ability-update-date {
+  margin-left: 12px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6a7282;
+}
