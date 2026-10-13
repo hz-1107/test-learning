@@ -295,8 +295,9 @@
     const trendColors = {
       程式: '#ffdb58', 除錯: '#41e654', 創意: '#ff9f43', 結構: '#54a0ff', 團隊合作: '#ff6b6b'
     };
-    const ATTENDANCE_LABELS = { present: '出席', absent: '缺席', late: '遲到', excused: '請假' };
-    const ATTENDANCE_CLASS = { present: 'achievement-status--present', absent: 'achievement-status--absent', late: 'achievement-status--late', excused: 'achievement-status--absent' };
+    // 出席／請假／補課／未約課（教師日誌的「請假」存為 absent；late、excused、leave 為舊資料）
+    const ATTENDANCE_LABELS = { present: '出席', late: '出席', absent: '請假', excused: '請假', leave: '請假', makeup: '補課', no_class: '未約課' };
+    const ATTENDANCE_CLASS = { present: 'achievement-status--present', late: 'achievement-status--present', absent: 'achievement-status--absent', excused: 'achievement-status--absent', leave: 'achievement-status--absent', makeup: 'achievement-status--late', no_class: 'achievement-status--absent' };
 
     let radarChart = null;
     let trendChart = null;

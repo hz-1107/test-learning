@@ -1,12 +1,102 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { generateUsername, birthdayPassword } = require('../utils/account');
+const { generateUsername, birthdayPassword, syncBirthdayPassword } = require('../utils/account');
+
+// 「實際上過課」的出勤狀態（出席、補課；late 為舊資料）
+const ATTENDED_SQL = "('present', 'late', 'makeup')";
+
+// 同時在多個班級時（正常情況下一位學生只會在一個班級），目前課程的排序：
+// 以「最近有上課紀錄」的課程為準，都沒上過課才取最近加入的。需搭配別名 ce / c 使用。
+const CURRENT_COURSE_ORDER = `
+  ORDER BY (
+    SELECT MAX(cl2.log_date)
+    FROM student_log_records slr2
+    JOIN course_logs cl2 ON slr2.log_id = cl2.id
+    WHERE slr2.student_id = ce.student_id AND cl2.course_id = c.id
+      AND slr2.attendance IN ${ATTENDED_SQL}
+  ) DESC, ce.enrolled_at DESC, ce.id DESC
+`;
+
+// 學生「目前班級」的報名紀錄 id（相依子查詢，studentRef 為外層的學生 id 欄位，如 's.id'）。
+// 課程名稱、教室、授課老師、上課時間一律由目前班級帶出，行政端與教師端才會一致。
+const currentEnrollmentIdSql = (studentRef) => `(
+  SELECT ce.id
+  FROM course_enrollments ce
+  JOIN course_schedules cs ON ce.schedule_id = cs.id
+  JOIN courses c ON cs.course_id = c.id
+  WHERE ce.student_id = ${studentRef} AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
+  ${CURRENT_COURSE_ORDER}
+  LIMIT 1
+)`;
+
+// 上課堂數：由日誌中的出席／補課紀錄即時計算，不另外累計
+const lessonCountSql = (studentRef) => `(
+  SELECT COUNT(*) FROM student_log_records slr
+  WHERE slr.student_id = ${studentRef} AND slr.attendance IN ${ATTENDED_SQL}
+)`;
+
+// 學生上過課的課程（老師日誌中有出席或補課紀錄），最近上課的排前面。
+// 歷史課程以此為準：加錯班級後被移除、從未上過課的課程不會列入；換班升階後自動留存。
+async function getAttendedCourses(studentId) {
+  return db.query(`
+    SELECT c.id as course_id, c.name as course_name,
+      DATE_FORMAT(MIN(cl.log_date), '%Y-%m-%d') as started_at,
+      DATE_FORMAT(MAX(cl.log_date), '%Y-%m-%d') as last_date,
+      COUNT(*) as lesson_count
+    FROM student_log_records slr
+    JOIN course_logs cl ON slr.log_id = cl.id
+    JOIN courses c ON cl.course_id = c.id
+    WHERE slr.student_id = ? AND slr.attendance IN ${ATTENDED_SQL}
+    GROUP BY c.id, c.name
+    ORDER BY MAX(cl.log_date) DESC
+  `, [studentId]);
+}
 
 // 取得所有學生
 exports.getAll = async (req, res) => {
   try {
     const { status, search, classroom_id, course_type_id, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
+
+    // 課程、教室、授課老師、上課時間以「目前班級」為準；尚未加入班級時才用學生資料上的設定
+    const fromSql = `
+      FROM students s
+      JOIN users u ON s.user_id = u.id
+      LEFT JOIN course_enrollments cur ON cur.id = ${currentEnrollmentIdSql('s.id')}
+      LEFT JOIN course_schedules ccs ON ccs.id = cur.schedule_id
+      LEFT JOIN courses cc ON cc.id = ccs.course_id
+      LEFT JOIN teachers t ON t.id = COALESCE(ccs.teacher_id, cc.teacher_id, s.teacher_id)
+      LEFT JOIN users tu ON t.user_id = tu.id
+      LEFT JOIN classrooms cr ON cr.id = COALESCE(ccs.classroom_id, s.classroom_id)
+      LEFT JOIN course_types ct ON ct.id = COALESCE(cc.course_type_id, s.course_type_id)
+      WHERE 1=1
+    `;
+    let whereSql = '';
+    const params = [];
+
+    if (status) {
+      whereSql += ' AND s.status = ?';
+      params.push(status);
+    }
+
+    if (search) {
+      whereSql += ' AND (u.name LIKE ? OR s.student_code LIKE ? OR u.phone LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (classroom_id) {
+      whereSql += ' AND cr.id = ?';
+      params.push(classroom_id);
+    }
+
+    if (course_type_id) {
+      whereSql += ' AND ct.id = ?';
+      params.push(course_type_id);
+    }
+
+    // 計算總數
+    const countResult = await db.query(`SELECT COUNT(*) as total ${fromSql}${whereSql}`, params);
+    const total = countResult[0]?.total || 0;
 
     let sql = `
       SELECT
@@ -18,52 +108,14 @@ exports.getAll = async (req, res) => {
         cr.name as classroom_name,
         ct.id as course_type_id,
         ct.name as course_type_name,
-        (SELECT cs.start_time FROM course_schedules cs
-         JOIN course_enrollments ce ON cs.id = ce.schedule_id
-         WHERE ce.student_id = s.id AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
-         LIMIT 1) as class_start_time,
-        (SELECT cs.end_time FROM course_schedules cs
-         JOIN course_enrollments ce ON cs.id = ce.schedule_id
-         WHERE ce.student_id = s.id AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
-         LIMIT 1) as class_end_time,
-        (SELECT cs.day_of_week FROM course_schedules cs
-         JOIN course_enrollments ce ON cs.id = ce.schedule_id
-         WHERE ce.student_id = s.id AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
-         LIMIT 1) as class_day
-      FROM students s
-      JOIN users u ON s.user_id = u.id
-      LEFT JOIN teachers t ON s.teacher_id = t.id
-      LEFT JOIN users tu ON t.user_id = tu.id
-      LEFT JOIN classrooms cr ON s.classroom_id = cr.id
-      LEFT JOIN course_types ct ON s.course_type_id = ct.id
-      WHERE 1=1
+        COALESCE(cc.name, ct.name) as course_name,
+        ccs.id as current_schedule_id,
+        ccs.start_time as class_start_time,
+        ccs.end_time as class_end_time,
+        ccs.day_of_week as class_day,
+        ${lessonCountSql('s.id')} as lesson_count
+      ${fromSql}${whereSql}
     `;
-    const params = [];
-
-    if (status) {
-      sql += ' AND s.status = ?';
-      params.push(status);
-    }
-
-    if (search) {
-      sql += ' AND (u.name LIKE ? OR s.student_code LIKE ? OR u.phone LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
-    }
-
-    if (classroom_id) {
-      sql += ' AND s.classroom_id = ?';
-      params.push(classroom_id);
-    }
-
-    if (course_type_id) {
-      sql += ' AND s.course_type_id = ?';
-      params.push(course_type_id);
-    }
-
-    // 計算總數
-    const countSql = sql.replace(/SELECT[\s\S]*?FROM students/, 'SELECT COUNT(*) as total FROM students');
-    const countResult = await db.query(countSql, params);
-    const total = countResult[0]?.total || 0;
 
     // 加入分頁
     // 註: LIMIT/OFFSET 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
@@ -143,6 +195,55 @@ exports.getOne = async (req, res) => {
 
     student.enrollments = enrollments;
 
+    // 目前班級：課程、教室、授課老師以此為準（與學生列表、教師端一致）
+    const currentClass = await db.queryOne(`
+      SELECT c.id as course_id, c.name as course_name,
+        DATE_FORMAT(ce.enrolled_at, '%Y-%m-%d') as started_at,
+        cs.id as schedule_id,
+        t.id as teacher_id, tu.name as teacher_name,
+        cr.id as classroom_id, cr.name as classroom_name,
+        ct.id as course_type_id, ct.name as course_type_name
+      FROM course_enrollments ce
+      JOIN course_schedules cs ON ce.schedule_id = cs.id
+      JOIN courses c ON cs.course_id = c.id
+      LEFT JOIN teachers t ON t.id = COALESCE(cs.teacher_id, c.teacher_id)
+      LEFT JOIN users tu ON t.user_id = tu.id
+      LEFT JOIN classrooms cr ON cr.id = cs.classroom_id
+      LEFT JOIN course_types ct ON ct.id = c.course_type_id
+      WHERE ce.student_id = ? AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
+      ${CURRENT_COURSE_ORDER}
+      LIMIT 1
+    `, [id]);
+
+    student.current_schedule_id = currentClass ? currentClass.schedule_id : null;
+    if (currentClass) {
+      // 班級有設定的項目覆蓋學生資料上的設定；班級沒設定的（例如課程未分類）維持原值
+      ['teacher', 'classroom', 'course_type'].forEach(key => {
+        if (currentClass[`${key}_id`]) {
+          student[`${key}_id`] = currentClass[`${key}_id`];
+          student[`${key}_name`] = currentClass[`${key}_name`];
+        }
+      });
+    }
+
+    const lessonCount = await db.queryOne(`SELECT ${lessonCountSql('?')} as lesson_count`, [id]);
+    student.lesson_count = lessonCount.lesson_count;
+
+    const current = currentClass
+      ? { course_id: currentClass.course_id, course_name: currentClass.course_name, started_at: currentClass.started_at }
+      : null;
+
+    // 歷史課程：以「實際上過課」為準
+    const attended = await getAttendedCourses(id);
+
+    student.current_course_name = current ? current.course_name : null;
+    student.course_history = [
+      ...(current ? [{ ...current, is_current: true }] : []),
+      ...attended
+        .filter(row => !current || row.course_id !== current.course_id)
+        .map(row => ({ ...row, is_current: false }))
+    ];
+
     res.json({
       success: true,
       data: student
@@ -156,6 +257,34 @@ exports.getOne = async (req, res) => {
   }
 };
 
+// 學生電子郵件（選填）：檢查格式與是否已被其他帳號使用。
+// 回傳 { email }（未填為 null）或 { error }
+async function checkStudentEmail(rawEmail, excludeUserId = null) {
+  const email = String(rawEmail || '').trim() || null;
+  if (!email) return { email: null };
+  if (!email.includes('@')) return { error: '電子郵件格式不正確' };
+  const owner = await db.queryOne(
+    'SELECT id FROM users WHERE email = ? AND id <> ?',
+    [email, excludeUserId || 0]
+  );
+  if (owner) return { error: '此電子郵件已被其他帳號使用' };
+  return { email };
+}
+
+// 學生加入班級後，學生資料上的授課老師／教室／上課類別一併對齊該班級
+// （班級沒設定的項目維持原值），避免兩處各存一份而不一致
+async function syncStudentWithSchedule(studentId, scheduleId) {
+  await db.update(`
+    UPDATE students s
+    JOIN course_schedules cs ON cs.id = ?
+    JOIN courses c ON c.id = cs.course_id
+    SET s.teacher_id = COALESCE(cs.teacher_id, c.teacher_id, s.teacher_id),
+        s.classroom_id = COALESCE(cs.classroom_id, s.classroom_id),
+        s.course_type_id = COALESCE(c.course_type_id, s.course_type_id)
+    WHERE s.id = ?
+  `, [scheduleId, studentId]);
+}
+
 // 性別僅接受 students.gender 的 ENUM 值，其餘（含未填寫）一律存 NULL
 const normalizeGender = (gender) => (['male', 'female', 'other'].includes(gender) ? gender : null);
 
@@ -167,7 +296,7 @@ exports.create = async (req, res) => {
       teacher_id, parent_name_father, parent_phone_father,
       parent_name_mother, parent_phone_mother,
       trial_teacher_id, trial_topic,
-      classroom_id, course_type_id, schedule_id, gender
+      classroom_id, course_type_id, schedule_id, gender, phone, email
     } = req.body;
 
     // 驗證必要欄位
@@ -180,13 +309,18 @@ exports.create = async (req, res) => {
     }
 
     // 登入帳號為姓名，密碼為西元生日 (格式: YYYYMMDD)
+    const emailCheck = await checkStudentEmail(email);
+    if (emailCheck.error) {
+      return res.status(400).json({ success: false, message: emailCheck.error });
+    }
+
     const username = await generateUsername(name);
     const hashedPassword = await bcrypt.hash(birthdayPassword(birthday), 10);
 
-    // 建立使用者
+    // 建立使用者。users.phone 為「學生本人電話」，與家長電話（父／母）分開儲存，互不帶入
     const userId = await db.insert(
-      'INSERT INTO users (username, password, name, phone, birthday, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [username, hashedPassword, name.trim(), parent_phone_father || null, birthday, 'student']
+      'INSERT INTO users (username, password, name, phone, email, birthday, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [username, hashedPassword, name.trim(), String(phone || '').trim() || null, emailCheck.email, birthday, 'student']
     );
 
     // 建立學生資料
@@ -214,6 +348,7 @@ exports.create = async (req, res) => {
           'INSERT INTO course_enrollments (course_id, schedule_id, student_id, status) VALUES (?, ?, ?, ?)',
           [schedule.course_id, schedule_id, studentId, 'enrolled']
         );
+        await syncStudentWithSchedule(studentId, schedule_id);
       }
     }
 
@@ -240,7 +375,7 @@ exports.update = async (req, res) => {
       teacher_id, parent_name_father, parent_phone_father,
       parent_name_mother, parent_phone_mother,
       trial_teacher_id, trial_topic,
-      classroom_id, course_type_id, schedule_id, status, gender
+      classroom_id, course_type_id, schedule_id, status, gender, phone, email
     } = req.body;
 
     // 取得學生資料
@@ -253,11 +388,34 @@ exports.update = async (req, res) => {
       });
     }
 
-    // 更新使用者資料
+    // 電子郵件（選填）：有帶此欄位才檢查與更新
+    let emailCheck = null;
+    if (email !== undefined) {
+      emailCheck = await checkStudentEmail(email, student.user_id);
+      if (emailCheck.error) {
+        return res.status(400).json({ success: false, message: emailCheck.error });
+      }
+    }
+
+    // 更新使用者資料（生日有更動時，登入密碼同步更新）
+    await syncBirthdayPassword(student.user_id, birthday);
     await db.update(
-      'UPDATE users SET name = ?, birthday = ?, phone = ? WHERE id = ?',
-      [name, birthday || null, parent_phone_father || null, student.user_id]
+      'UPDATE users SET name = ?, birthday = ? WHERE id = ?',
+      [name, birthday || null, student.user_id]
     );
+
+    // users.phone 為「學生本人電話」，與家長電話分開儲存；
+    // 有帶此欄位才更新，避免未送此欄位的表單把既有電話清空或以家長電話覆蓋
+    if (phone !== undefined) {
+      await db.update(
+        'UPDATE users SET phone = ? WHERE id = ?',
+        [String(phone || '').trim() || null, student.user_id]
+      );
+    }
+
+    if (emailCheck) {
+      await db.update('UPDATE users SET email = ? WHERE id = ?', [emailCheck.email, student.user_id]);
+    }
 
     // 更新學生資料
     await db.update(`
@@ -285,10 +443,10 @@ exports.update = async (req, res) => {
     if (schedule_id) {
       const schedule = await db.queryOne('SELECT id, course_id FROM course_schedules WHERE id = ?', [schedule_id]);
       if (schedule) {
-        // 先取消之前的所有班級
+        // 一位學生同時只會在一個班級：換班時原班級的報名標記為已結束（歷史紀錄保留）
         await db.update(
-          'UPDATE course_enrollments SET status = "dropped" WHERE student_id = ?',
-          [id]
+          'UPDATE course_enrollments SET status = "completed" WHERE student_id = ? AND schedule_id <> ? AND status = "enrolled"',
+          [id, schedule_id]
         );
         // 新增新的班級
         const existing = await db.queryOne(
@@ -306,6 +464,7 @@ exports.update = async (req, res) => {
             [schedule.course_id, schedule_id, id, 'enrolled']
           );
         }
+        await syncStudentWithSchedule(id, schedule_id);
       }
     }
 
@@ -386,6 +545,8 @@ exports.updateProfile = async (req, res) => {
       );
     };
 
+    // 生日有更動時，登入密碼同步更新
+    await syncBirthdayPassword(student.user_id, userFields.birthday);
     await updateTable('users', userFields, student.user_id);
     await updateTable('students', studentFields, id);
 
@@ -482,6 +643,11 @@ exports.getStudentRecords = async (req, res) => {
       return res.status(404).json({ success: false, message: '找不到學生' });
     }
 
+    // 可指定 course_id 只看單一課程的紀錄（教師端依查看中的課程顯示）
+    const courseId = parseInt(req.query.course_id) || null;
+    const courseSql = courseId ? ' AND cl.course_id = ?' : '';
+    const params = courseId ? [id, courseId] : [id];
+
     // 註: LIMIT/OFFSET 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
     // (mysql2 prepared statement 對 LIMIT/OFFSET 使用佔位符在部分版本會出錯)
     const records = await db.query(`
@@ -498,10 +664,10 @@ exports.getStudentRecords = async (req, res) => {
       LEFT JOIN course_types ct ON c.course_type_id = ct.id
       LEFT JOIN teachers t ON cl.teacher_id = t.id
       LEFT JOIN users u ON t.user_id = u.id
-      WHERE slr.student_id = ?
+      WHERE slr.student_id = ?${courseSql}
       ORDER BY cl.log_date DESC
       LIMIT ${limit} OFFSET ${offset}
-    `, [id]);
+    `, params);
 
     for (const record of records) {
       record.photos = await db.query(
@@ -515,8 +681,8 @@ exports.getStudentRecords = async (req, res) => {
       FROM student_log_records slr
       JOIN course_logs cl ON slr.log_id = cl.id
       JOIN courses c ON cl.course_id = c.id
-      WHERE slr.student_id = ?
-    `, [id]);
+      WHERE slr.student_id = ?${courseSql}
+    `, params);
 
     res.json({
       success: true,
@@ -591,19 +757,18 @@ exports.getMe = async (req, res) => {
       LEFT JOIN users tu ON t.user_id = tu.id
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
       WHERE ce.student_id = ? AND ce.status = 'enrolled' AND cs.deleted_at IS NULL
-      ORDER BY ce.enrolled_at DESC
+      ${CURRENT_COURSE_ORDER}
       LIMIT 1
     `, [student.id]);
 
-    // 歷史課程 (含目前與過去選讀過的課程)
-    const courseHistory = await db.query(`
-      SELECT DISTINCT c.id as course_id, c.name as course_name, ce.status
-      FROM course_enrollments ce
-      JOIN course_schedules cs ON ce.schedule_id = cs.id
-      JOIN courses c ON cs.course_id = c.id
-      WHERE ce.student_id = ?
-      ORDER BY c.id
-    `, [student.id]);
+    // 歷史課程：目前課程 + 實際上過課的過去課程（與教師端相同規則）
+    const attendedCourses = await getAttendedCourses(student.id);
+    const courseHistory = [
+      ...(enrollment ? [{ course_id: enrollment.course_id, course_name: enrollment.course_name, status: 'enrolled' }] : []),
+      ...attendedCourses
+        .filter(row => !enrollment || row.course_id !== enrollment.course_id)
+        .map(row => ({ course_id: row.course_id, course_name: row.course_name, status: 'completed' }))
+    ];
 
     // 出缺勤統計 (以目前班級課程為主，若無班級則統計全部)
     const attendanceParams = [student.id];
@@ -903,21 +1068,27 @@ exports.getSkillAverages = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // 可指定 course_id 只看單一課程（教師端「歷史課程 → 查看」）
+    const courseId = parseInt(req.query.course_id) || null;
+    const courseSql = courseId ? ' AND cl.course_id = ?' : '';
+    const params = courseId ? [id, courseId] : [id];
+
     // 取得該學生所有課堂的技能分數平均值
     const result = await db.queryOne(`
       SELECT
-        ROUND(AVG(NULLIF(skill_programming, 0)), 1) as avg_programming,
-        ROUND(AVG(NULLIF(skill_debugging, 0)), 1) as avg_debugging,
-        ROUND(AVG(NULLIF(skill_creativity, 0)), 1) as avg_creativity,
-        ROUND(AVG(NULLIF(skill_structure, 0)), 1) as avg_structure,
-        ROUND(AVG(NULLIF(skill_teamwork, 0)), 1) as avg_teamwork,
+        ROUND(AVG(NULLIF(slr.skill_programming, 0)), 1) as avg_programming,
+        ROUND(AVG(NULLIF(slr.skill_debugging, 0)), 1) as avg_debugging,
+        ROUND(AVG(NULLIF(slr.skill_creativity, 0)), 1) as avg_creativity,
+        ROUND(AVG(NULLIF(slr.skill_structure, 0)), 1) as avg_structure,
+        ROUND(AVG(NULLIF(slr.skill_teamwork, 0)), 1) as avg_teamwork,
         COUNT(*) as total_records,
-        COUNT(CASE WHEN skill_programming > 0 OR skill_debugging > 0 OR
-                        skill_creativity > 0 OR skill_structure > 0 OR
-                        skill_teamwork > 0 THEN 1 END) as records_with_skills
-      FROM student_log_records
-      WHERE student_id = ?
-    `, [id]);
+        COUNT(CASE WHEN slr.skill_programming > 0 OR slr.skill_debugging > 0 OR
+                        slr.skill_creativity > 0 OR slr.skill_structure > 0 OR
+                        slr.skill_teamwork > 0 THEN 1 END) as records_with_skills
+      FROM student_log_records slr
+      JOIN course_logs cl ON slr.log_id = cl.id
+      WHERE slr.student_id = ?${courseSql}
+    `, params);
 
     // 取得最近 10 堂課的技能分數（用於趨勢圖）
     const recentRecords = await db.query(`
@@ -932,13 +1103,13 @@ exports.getSkillAverages = async (req, res) => {
       FROM student_log_records slr
       JOIN course_logs cl ON slr.log_id = cl.id
       JOIN courses c ON cl.course_id = c.id
-      WHERE slr.student_id = ?
+      WHERE slr.student_id = ?${courseSql}
         AND (slr.skill_programming > 0 OR slr.skill_debugging > 0 OR
              slr.skill_creativity > 0 OR slr.skill_structure > 0 OR
              slr.skill_teamwork > 0)
       ORDER BY cl.log_date DESC
       LIMIT 10
-    `, [id]);
+    `, params);
 
     res.json({
       success: true,

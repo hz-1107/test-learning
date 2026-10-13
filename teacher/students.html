@@ -353,14 +353,6 @@
       color: var(--color-primary-dark);
     }
 
-    .profile-header__edit {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--color-primary-dark);
-      padding: 4px;
-    }
-
     .profile-content {
       flex: 1;
       overflow-y: auto;
@@ -663,7 +655,7 @@
     }
 
     /* 新增競賽 Modal */
-    /* 編輯競賽時會從「查看完整檔案」開啟，需疊在其上 */
+    /* 編輯競賽時會從學生完整檔案頁開啟 */
     .competition-modal {
       z-index: 1100;
     }
@@ -866,17 +858,50 @@
     }
 
     /* 查看完整檔案 Modal */
+    /* 學生完整檔案：整頁檢視（進入時隱藏學生列表，內容隨頁面捲動） */
+    .profile-view { display: none; }
+    .profile-view.active { display: block; }
+
+    .main-content--profile > .page-header,
+    .main-content--profile > .students-layout { display: none; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #6a7282;
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .back-link:hover { color: var(--color-primary-dark); }
+
     .profile-modal .modal__content {
-      max-width: 1100px;
-      max-height: 90vh;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
     .profile-modal .modal__body {
       display: grid;
-      grid-template-columns: 240px 1fr;
-      gap: 24px;
+      grid-template-columns: 320px 1fr;
+      gap: 0;
       padding: 0;
-      overflow: hidden;
+      overflow: visible;
+    }
+
+    .profile-modal .profile-sidebar {
+      overflow-y: visible;
+      border-radius: 0 0 0 16px;
+    }
+
+    .profile-modal .profile-main { overflow-y: visible; min-width: 0; }
+
+    @media (max-width: 900px) {
+      .profile-modal .modal__body { grid-template-columns: 1fr; }
+      .profile-modal .profile-sidebar { border-right: none; border-radius: 0; }
     }
 
     /* 左側欄 */
@@ -983,8 +1008,8 @@
       padding: 4px 10px;
       border-radius: 4px;
       font-size: 11px;
-      cursor: pointer;
       border: none;
+      white-space: nowrap;
     }
 
     .profile-sidebar__course-btn--view {
@@ -997,9 +1022,46 @@
       color: var(--color-primary-dark);
     }
 
+    button.profile-sidebar__course-btn { cursor: pointer; }
+    button.profile-sidebar__course-btn--view:hover { background: #e5e7eb; }
+
+    .profile-sidebar__course-btn--active {
+      background: var(--color-primary);
+      color: var(--color-primary-dark);
+      font-weight: 600;
+    }
+
+    /* 查看歷史課程時的提示列 */
+    .course-view-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      background: rgba(255, 219, 88, 0.2);
+      border: 1px solid rgba(255, 219, 88, 0.6);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #364153;
+    }
+
+    .course-view-banner[hidden] { display: none; }
+
+    .course-view-banner__btn {
+      flex-shrink: 0;
+      padding: 4px 12px;
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 6px;
+      font-size: 12px;
+      color: #364153;
+      cursor: pointer;
+    }
+
     /* 右側內容區 */
     .profile-main {
-      padding: 24px;
+      padding: 32px 40px;
       overflow-y: auto;
     }
 
@@ -1118,7 +1180,7 @@
     }
 
     .trend-chart-container {
-      height: 280px;
+      height: 360px;
       margin-bottom: 12px;
     }
 
@@ -1381,13 +1443,61 @@
       background: #f0f1f3;
     }
 
+    /* 競賽經歷：左側內容（操作固定在左下角）＋最右側照片預覽 */
+    .achievement-item--competition {
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    .achievement-item__main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
     .achievement-item__more {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-top: 8px;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 4px;
       font-size: 12px;
       color: #6a7282;
+    }
+
+    .achievement-item__preview {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .achievement-item__preview .achievement-item__photo,
+    .achievement-item__preview .achievement-item__file,
+    .achievement-item__no-photo {
+      width: 96px;
+      height: 96px;
+      border-radius: 8px;
+    }
+
+    .achievement-item__no-photo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: #fff;
+      border: 1px dashed #d1d5dc;
+      font-size: 12px;
+      color: #99a1af;
+    }
+
+    .achievement-item__no-photo svg {
+      width: 24px;
+      height: 24px;
     }
 
     .achievement-item__edit {
@@ -1710,7 +1820,7 @@
         <div class="student-profile-panel">
           <div class="profile-header">
             <div class="profile-header__info">
-              <div class="profile-header__avatar">
+              <div class="profile-header__avatar" id="profileAvatar">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
@@ -1718,12 +1828,6 @@
               </div>
               <span class="profile-header__name" id="profileName">-</span>
             </div>
-            <button class="profile-header__edit">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
           </div>
 
           <div class="profile-content">
@@ -1850,6 +1954,171 @@
               </svg>
               查看完整檔案
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 學生完整檔案（整頁檢視：由「查看檔案」進入，取代學生列表，不以懸浮視窗呈現） -->
+      <div class="profile-view profile-modal" id="profileModal">
+        <a href="#" class="back-link" onclick="closeProfileView(); return false;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          返回學生列表
+        </a>
+        <div class="modal__content">
+          <div class="modal__header">
+            <h3 class="modal__title">學生完整檔案</h3>
+          </div>
+          <div class="modal__body">
+            <!-- 左側欄 -->
+            <div class="profile-sidebar">
+              <div class="profile-sidebar__avatar" id="profileModalAvatar">李</div>
+              <div class="profile-sidebar__name" id="profileModalName">李美華</div>
+
+              <!-- 個人資訊 -->
+              <div class="profile-sidebar__section">
+                <div class="profile-sidebar__section-header">
+                  <span class="profile-sidebar__section-title">個人資訊</span>
+                  <svg class="profile-sidebar__section-icon" onclick="openProfileEditModal('personal')" role="button" aria-label="編輯個人資訊" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">電子郵件</span>
+                  <span class="profile-sidebar__info-value" id="profileModalEmail">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">電話</span>
+                  <span class="profile-sidebar__info-value" id="profileModalPhone">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">就讀學校</span>
+                  <span class="profile-sidebar__info-value" id="profileModalSchool">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">年級</span>
+                  <span class="profile-sidebar__info-value" id="profileModalGrade">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">性別</span>
+                  <span class="profile-sidebar__info-value" id="profileModalGender">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">生日</span>
+                  <span class="profile-sidebar__info-value" id="profileModalBirthday">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">累積點數</span>
+                  <span class="profile-sidebar__info-value" id="profileModalPoints">— 點</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">課程階段</span>
+                  <span class="profile-sidebar__course-tag" id="profileModalCourse">—</span>
+                </div>
+              </div>
+
+              <!-- 家長資訊 -->
+              <div class="profile-sidebar__section">
+                <div class="profile-sidebar__section-header">
+                  <span class="profile-sidebar__section-title">家長資訊</span>
+                  <svg class="profile-sidebar__section-icon" onclick="openProfileEditModal('parent')" role="button" aria-label="編輯家長資訊" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">聯絡人(母)</span>
+                  <span class="profile-sidebar__info-value" id="profileModalMother">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">電話</span>
+                  <span class="profile-sidebar__info-value" id="profileModalMotherPhone">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">聯絡人(父)</span>
+                  <span class="profile-sidebar__info-value" id="profileModalFather">—</span>
+                </div>
+                <div class="profile-sidebar__info-row">
+                  <span class="profile-sidebar__info-label">電話</span>
+                  <span class="profile-sidebar__info-value" id="profileModalFatherPhone">—</span>
+                </div>
+              </div>
+
+              <!-- 歷史課程 -->
+              <div class="profile-sidebar__section">
+                <div class="profile-sidebar__section-header">
+                  <span class="profile-sidebar__section-title">歷史課程</span>
+                </div>
+                <div id="profileModalCourseHistory">
+                  <!-- 課程歷史將動態載入 -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 右側內容區 -->
+            <div class="profile-main">
+              <!-- 查看歷史課程時的提示列 -->
+              <div class="course-view-banner" id="courseViewBanner" hidden>
+                <span>正在查看歷史課程「<strong id="courseViewBannerName"></strong>」的能力雷達圖與趨勢圖</span>
+                <button type="button" class="course-view-banner__btn" id="courseViewBannerBack" onclick="viewCourseAbilities(getCurrentCourseId())">返回目前課程</button>
+              </div>
+              <!-- 能力雷達圖 -->
+              <div class="ability-radar-section">
+                <div class="ability-radar-section__header">
+                  <span class="ability-radar-section__title">能力雷達圖</span>
+                  <span class="ability-radar-section__date" id="profileModalUpdateDate">*更新時間：—</span>
+                </div>
+                <div id="profileAbilitySection"></div>
+              </div>
+
+              <!-- 能力趨勢圖 -->
+              <div class="ability-trend-section">
+                <div class="ability-trend-section__title">能力趨勢圖</div>
+                <div class="ability-trend-filters">
+                  <div class="ability-trend-filters__group">
+                    <span class="ability-trend-filters__label">日期區間</span>
+                    <button type="button" class="trend-filter-btn" onclick="setTrendRange(6)">近 6 週</button>
+                    <button type="button" class="trend-filter-btn trend-filter-btn--active" onclick="setTrendRange(12)">近 12 週</button>
+                  </div>
+                  <div class="ability-trend-filters__group">
+                    <input type="date" class="form-group__input" id="trendStartDate" style="padding: 6px 12px; width: 130px;">
+                    <span style="color: #6a7282;">—</span>
+                    <input type="date" class="form-group__input" id="trendEndDate" style="padding: 6px 12px; width: 130px;">
+                    <button type="button" class="trend-apply-btn" onclick="applyTrendDateRange()">套用</button>
+                  </div>
+                </div>
+                <div class="ability-trend-filters">
+                  <div class="ability-trend-filters__group">
+                    <span class="ability-trend-filters__label">指標項目</span>
+                    <button type="button" class="trend-skill-btn trend-skill-btn--active" data-skill="all" onclick="selectTrendSkill(this)">全部</button>
+                    <button type="button" class="trend-skill-btn trend-skill-btn--programming" data-skill="programming" onclick="selectTrendSkill(this)">程式</button>
+                    <button type="button" class="trend-skill-btn trend-skill-btn--debugging" data-skill="debugging" onclick="selectTrendSkill(this)">除錯</button>
+                    <button type="button" class="trend-skill-btn trend-skill-btn--creativity" data-skill="creativity" onclick="selectTrendSkill(this)">創意</button>
+                    <button type="button" class="trend-skill-btn trend-skill-btn--structure" data-skill="structure" onclick="selectTrendSkill(this)">結構</button>
+                    <button type="button" class="trend-skill-btn trend-skill-btn--teamwork" data-skill="teamwork" onclick="selectTrendSkill(this)">團隊合作</button>
+                  </div>
+                </div>
+                <div class="trend-chart-container">
+                  <canvas id="profileTrendChart"></canvas>
+                </div>
+              </div>
+
+              <!-- 學習成就 -->
+              <div class="achievements-section">
+                <div class="achievements-section__title">學習成就</div>
+                <div class="achievements-tabs">
+                  <button type="button" class="achievements-tab achievements-tab--active" onclick="switchAchievementTab('records')">課程紀錄</button>
+                  <button type="button" class="achievements-tab" onclick="switchAchievementTab('competitions')">競賽經歷</button>
+                </div>
+                <div class="achievement-list" id="achievementList">
+                  <!-- 成就列表將動態載入 -->
+                  <div style="text-align: center; padding: 40px; color: #6a7282;">載入中...</div>
+                </div>
+                <button type="button" class="achievements-more-btn" id="loadMoreAchievements" onclick="loadMoreAchievements()">查看更多</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2043,170 +2312,6 @@
     </div>
   </div>
 
-  <!-- 查看完整檔案 Modal -->
-  <div class="modal profile-modal" id="profileModal">
-    <div class="modal__content">
-      <div class="modal__header">
-        <h3 class="modal__title">查看完整檔案</h3>
-        <button class="modal__close" onclick="closeModal('profileModal')">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="modal__body">
-        <!-- 左側欄 -->
-        <div class="profile-sidebar">
-          <div class="profile-sidebar__avatar" id="profileModalAvatar">李</div>
-          <div class="profile-sidebar__name" id="profileModalName">李美華</div>
-
-          <!-- 個人資訊 -->
-          <div class="profile-sidebar__section">
-            <div class="profile-sidebar__section-header">
-              <span class="profile-sidebar__section-title">個人資訊</span>
-              <svg class="profile-sidebar__section-icon" onclick="openProfileEditModal('personal')" role="button" aria-label="編輯個人資訊" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">電子郵件</span>
-              <span class="profile-sidebar__info-value" id="profileModalEmail">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">電話</span>
-              <span class="profile-sidebar__info-value" id="profileModalPhone">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">就讀學校</span>
-              <span class="profile-sidebar__info-value" id="profileModalSchool">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">年級</span>
-              <span class="profile-sidebar__info-value" id="profileModalGrade">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">性別</span>
-              <span class="profile-sidebar__info-value" id="profileModalGender">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">生日</span>
-              <span class="profile-sidebar__info-value" id="profileModalBirthday">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">累積點數</span>
-              <span class="profile-sidebar__info-value" id="profileModalPoints">— 點</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">課程階段</span>
-              <span class="profile-sidebar__course-tag" id="profileModalCourse">—</span>
-            </div>
-          </div>
-
-          <!-- 家長資訊 -->
-          <div class="profile-sidebar__section">
-            <div class="profile-sidebar__section-header">
-              <span class="profile-sidebar__section-title">家長資訊</span>
-              <svg class="profile-sidebar__section-icon" onclick="openProfileEditModal('parent')" role="button" aria-label="編輯家長資訊" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">聯絡人(母)</span>
-              <span class="profile-sidebar__info-value" id="profileModalMother">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">電話</span>
-              <span class="profile-sidebar__info-value" id="profileModalMotherPhone">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">聯絡人(父)</span>
-              <span class="profile-sidebar__info-value" id="profileModalFather">—</span>
-            </div>
-            <div class="profile-sidebar__info-row">
-              <span class="profile-sidebar__info-label">電話</span>
-              <span class="profile-sidebar__info-value" id="profileModalFatherPhone">—</span>
-            </div>
-          </div>
-
-          <!-- 歷史課程 -->
-          <div class="profile-sidebar__section">
-            <div class="profile-sidebar__section-header">
-              <span class="profile-sidebar__section-title">歷史課程</span>
-              <svg class="profile-sidebar__section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-            </div>
-            <div id="profileModalCourseHistory">
-              <!-- 課程歷史將動態載入 -->
-            </div>
-          </div>
-        </div>
-
-        <!-- 右側內容區 -->
-        <div class="profile-main">
-          <!-- 能力雷達圖 -->
-          <div class="ability-radar-section">
-            <div class="ability-radar-section__header">
-              <span class="ability-radar-section__title">能力雷達圖</span>
-              <span class="ability-radar-section__date" id="profileModalUpdateDate">*更新時間：—</span>
-            </div>
-            <div id="profileAbilitySection"></div>
-          </div>
-
-          <!-- 能力趨勢圖 -->
-          <div class="ability-trend-section">
-            <div class="ability-trend-section__title">能力趨勢圖</div>
-            <div class="ability-trend-filters">
-              <div class="ability-trend-filters__group">
-                <span class="ability-trend-filters__label">日期區間</span>
-                <button type="button" class="trend-filter-btn" onclick="setTrendRange(6)">近 6 週</button>
-                <button type="button" class="trend-filter-btn trend-filter-btn--active" onclick="setTrendRange(12)">近 12 週</button>
-              </div>
-              <div class="ability-trend-filters__group">
-                <input type="date" class="form-group__input" id="trendStartDate" style="padding: 6px 12px; width: 130px;">
-                <span style="color: #6a7282;">—</span>
-                <input type="date" class="form-group__input" id="trendEndDate" style="padding: 6px 12px; width: 130px;">
-                <button type="button" class="trend-apply-btn" onclick="applyTrendDateRange()">套用</button>
-              </div>
-            </div>
-            <div class="ability-trend-filters">
-              <div class="ability-trend-filters__group">
-                <span class="ability-trend-filters__label">指標項目</span>
-                <button type="button" class="trend-skill-btn trend-skill-btn--active" data-skill="all" onclick="selectTrendSkill(this)">全部</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--programming" data-skill="programming" onclick="selectTrendSkill(this)">程式</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--debugging" data-skill="debugging" onclick="selectTrendSkill(this)">除錯</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--creativity" data-skill="creativity" onclick="selectTrendSkill(this)">創意</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--structure" data-skill="structure" onclick="selectTrendSkill(this)">結構</button>
-                <button type="button" class="trend-skill-btn trend-skill-btn--teamwork" data-skill="teamwork" onclick="selectTrendSkill(this)">團隊合作</button>
-              </div>
-            </div>
-            <div class="trend-chart-container">
-              <canvas id="profileTrendChart"></canvas>
-            </div>
-          </div>
-
-          <!-- 學習成就 -->
-          <div class="achievements-section">
-            <div class="achievements-section__title">學習成就</div>
-            <div class="achievements-tabs">
-              <button type="button" class="achievements-tab achievements-tab--active" onclick="switchAchievementTab('records')">課程紀錄</button>
-              <button type="button" class="achievements-tab" onclick="switchAchievementTab('competitions')">競賽經歷</button>
-            </div>
-            <div class="achievement-list" id="achievementList">
-              <!-- 成就列表將動態載入 -->
-              <div style="text-align: center; padding: 40px; color: #6a7282;">載入中...</div>
-            </div>
-            <button type="button" class="achievements-more-btn" id="loadMoreAchievements" onclick="loadMoreAchievements()">查看更多</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- 競賽詳情 Modal（查看完整檔案 → 點競賽經歷） -->
   <div class="modal comp-detail-modal" id="compDetailModal" onclick="if (event.target === this) closeModal('compDetailModal')">
     <div class="modal__content">
@@ -2332,6 +2437,7 @@
   <script src="../js/file-url.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/ability-chart.js"></script>
+  <script src="../js/student-avatar.js"></script>
   <script>
     const API_BASE = 'http://localhost:3000/api';
     function isImageFile(url) {
@@ -2452,7 +2558,7 @@
 
           studentMap.set(student.id, {
             ...student,
-            course_name: student.course_type_name,
+            course_name: student.course_name || student.course_type_name,
             points: 0
           });
           if (student.classroom_name) classrooms.add(student.classroom_name);
@@ -2553,12 +2659,7 @@
             class="${currentStudentId === student.id ? 'active' : ''}">
           <td>
             <div class="student-info">
-              <div class="student-avatar">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
+              <div class="student-avatar">${studentAvatarSvg(student.gender)}</div>
               <span class="student-name">${student.name}</span>
             </div>
           </td>
@@ -2621,6 +2722,7 @@
 
       // 更新右側面板基本資訊
       document.getElementById('profileName').textContent = student.name;
+      document.getElementById('profileAvatar').innerHTML = studentAvatarSvg(student.gender);
       document.getElementById('profilePoints').textContent = student.points + ' 點';
 
       // 載入學生詳細資訊
@@ -2657,8 +2759,8 @@
 
       // 課程名稱
       const courseEl = document.querySelector('.profile-info-item:nth-child(5) .profile-info-item__value');
-      if (courseEl && student.enrollments && student.enrollments.length > 0) {
-        courseEl.textContent = student.enrollments[0].course_name || '-';
+      if (courseEl && (student.current_course_name || (student.enrollments && student.enrollments.length > 0))) {
+        courseEl.textContent = student.current_course_name || student.enrollments[0].course_name || '-';
       }
 
       // 到班日期
@@ -3051,25 +3153,63 @@
     let profileStudentData = null;
 
     // 從列表直接查看學生檔案
-    async function viewStudentProfile(studentId) {
+    async function viewStudentProfile(studentId, options) {
       // 先選擇學生
       await selectStudentById(studentId);
-      // 然後開啟檔案 Modal
-      openProfileModal();
+      // 然後開啟完整檔案頁
+      await openProfileModal(options);
     }
 
-    // 開啟查看完整檔案 Modal
-    async function openProfileModal() {
+    // 開啟學生完整檔案（整頁檢視，取代學生列表）。
+    // 網址帶上 ?student_id=，重新整理或按瀏覽器「上一頁」都能回到對應畫面。
+    async function openProfileModal({ pushHistory = true } = {}) {
       if (!currentStudentId) {
         alert('請先選擇學生');
         return;
       }
 
+      document.querySelector('.main-content').classList.add('main-content--profile');
       document.getElementById('profileModal').classList.add('active');
+      window.scrollTo(0, 0);
+      document.querySelector('.main-content').scrollTop = 0;
+
+      if (pushHistory) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('student_id', currentStudentId);
+        history.pushState({ profileStudentId: currentStudentId }, '', url);
+      }
 
       // 載入學生完整資料
       await loadProfileData(currentStudentId);
     }
+
+    function hideProfileView() {
+      document.getElementById('profileModal').classList.remove('active');
+      document.querySelector('.main-content').classList.remove('main-content--profile');
+    }
+
+    // 「返回學生列表」
+    function closeProfileView() {
+      if (history.state && history.state.profileStudentId) {
+        history.back(); // 由 popstate 切回列表
+        return;
+      }
+      // 直接以網址（?student_id=）進入時沒有上一筆紀錄，改為移除參數
+      const url = new URL(window.location.href);
+      url.searchParams.delete('student_id');
+      history.replaceState(null, '', url);
+      hideProfileView();
+    }
+
+    // 瀏覽器上一頁／下一頁：依網址切換列表與檔案頁
+    window.addEventListener('popstate', () => {
+      const studentId = Number(new URLSearchParams(window.location.search).get('student_id'));
+      if (studentId) {
+        viewStudentProfile(studentId, { pushHistory: false });
+      } else {
+        hideProfileView();
+      }
+    });
 
     // 載入學生完整檔案資料
     async function loadProfileData(studentId) {
@@ -3078,7 +3218,9 @@
         const detailRes = await apiRequest(`/students/${studentId}`);
         profileStudentData = detailRes.data;
 
-        // 更新左側欄資訊
+        // 更新左側欄資訊（每次開啟都回到目前課程的能力表現）
+        profileViewCourseId = getCurrentCourseId();
+        updateCourseViewBanner();
         updateProfileSidebar(profileStudentData);
 
         // 載入能力數據
@@ -3097,7 +3239,10 @@
     function updateProfileSidebar(student) {
       // 頭像和姓名
       const nameChar = student.name ? student.name.charAt(0) : '?';
-      document.getElementById('profileModalAvatar').textContent = nameChar;
+      const modalAvatar = document.getElementById('profileModalAvatar');
+      // 有填性別顯示男生／女生頭像，未填則維持姓名首字
+      if (studentGenderKey(student.gender)) modalAvatar.innerHTML = studentAvatarSvg(student.gender);
+      else modalAvatar.textContent = nameChar;
       document.getElementById('profileModalName').textContent = student.name || '—';
 
       // 個人資訊
@@ -3120,7 +3265,8 @@
 
       // 目前課程
       const currentCourse = allStudents.find(s => s.id === currentStudentId);
-      document.getElementById('profileModalCourse').textContent = currentCourse?.course_name || '—';
+      document.getElementById('profileModalCourse').textContent =
+        student.current_course_name || currentCourse?.course_name || '—';
 
       // 家長資訊
       document.getElementById('profileModalMother').textContent = student.parent_name_mother || '—';
@@ -3129,22 +3275,37 @@
       document.getElementById('profileModalFatherPhone').textContent = student.parent_phone_father || '—';
 
       // 歷史課程
-      const courseHistoryContainer = document.getElementById('profileModalCourseHistory');
-      if (student.enrollments && student.enrollments.length > 0) {
-        courseHistoryContainer.innerHTML = student.enrollments.map((enrollment, index) => {
-          const isCurrent = index === 0;
-          return `
+      renderCourseHistory();
+    }
+
+    // 歷史課程列表（自動產生）：目前課程排在最上方；上過課的舊課程（換班升階後）列為歷史課程。
+    // 正在查看的課程顯示標籤，其餘顯示「查看」可切換右側的雷達圖與趨勢圖。
+    function renderCourseHistory() {
+      const container = document.getElementById('profileModalCourseHistory');
+      const courseHistory = (profileStudentData && profileStudentData.course_history) || [];
+      if (courseHistory.length === 0) {
+        container.innerHTML = '<div style="font-size: 13px; color: #6a7282; padding: 8px 0;">無課程記錄</div>';
+        return;
+      }
+
+      container.innerHTML = courseHistory.map(course => {
+        const courseId = Number(course.course_id);
+        const viewing = courseId === profileViewCourseId;
+        let action;
+        if (viewing) {
+          action = course.is_current
+            ? '<span class="profile-sidebar__course-btn profile-sidebar__course-btn--current">目前課程</span>'
+            : '<span class="profile-sidebar__course-btn profile-sidebar__course-btn--active">查看中</span>';
+        } else {
+          action = `<button type="button" class="profile-sidebar__course-btn profile-sidebar__course-btn--view" onclick="viewCourseAbilities(${courseId})">查看</button>`;
+        }
+        return `
             <div class="profile-sidebar__course-item">
-              <span class="profile-sidebar__course-name">${enrollment.course_name}</span>
-              <button class="profile-sidebar__course-btn ${isCurrent ? 'profile-sidebar__course-btn--current' : 'profile-sidebar__course-btn--view'}">
-                ${isCurrent ? '目前課程' : '查看'}
-              </button>
+              <span class="profile-sidebar__course-name">${escapeHtml(course.course_name || '課程')}</span>
+              ${action}
             </div>
           `;
-        }).join('');
-      } else {
-        courseHistoryContainer.innerHTML = '<div style="font-size: 13px; color: #6a7282; padding: 8px 0;">無課程記錄</div>';
-      }
+      }).join('');
     }
 
     // 編輯個人／家長資訊：各自的表單與可編輯欄位
@@ -3206,7 +3367,9 @@
     // 載入能力數據（雷達圖和趨勢圖）
     async function loadProfileAbilities(studentId) {
       try {
-        const response = await apiRequest(`/students/${studentId}/skill-averages`);
+        // profileViewCourseId：正在查看的課程（預設為目前課程）；學生沒有目前課程時為 null＝全部課程
+        const courseQuery = profileViewCourseId ? `?course_id=${profileViewCourseId}` : '';
+        const response = await apiRequest(`/students/${studentId}/skill-averages${courseQuery}`);
 
         if (response.success && response.data) {
           const { averages, recent_records } = response.data;
@@ -3221,14 +3384,47 @@
           updateProfileTrendChart(recent_records || []);
 
           // 更新時間
-          if (recent_records && recent_records.length > 0) {
-            document.getElementById('profileModalUpdateDate').textContent =
-              formatAbilityUpdateDate(recent_records[recent_records.length - 1].log_date);
-          }
+          document.getElementById('profileModalUpdateDate').textContent =
+            recent_records && recent_records.length > 0
+              ? formatAbilityUpdateDate(recent_records[recent_records.length - 1].log_date)
+              : '*更新時間：—';
         }
       } catch (error) {
         console.error('載入能力數據錯誤:', error);
       }
+    }
+
+    // 歷史課程「查看」：右側雷達圖與趨勢圖切換為該課程的能力表現。
+    // 查看歷史課程時，目前課程那一列會變成「查看」，按下即可切回目前課程。
+    let profileViewCourseId = null;
+
+    function getCurrentCourseId() {
+      const current = ((profileStudentData && profileStudentData.course_history) || []).find(c => c.is_current);
+      return current ? Number(current.course_id) : null;
+    }
+
+    async function viewCourseAbilities(courseId) {
+      profileViewCourseId = courseId ? Number(courseId) : null;
+      updateCourseViewBanner();
+      renderCourseHistory();
+      if (!currentStudentId) return;
+      await loadProfileAbilities(currentStudentId);
+      // 下方課程紀錄一併切換為該課程
+      if (currentAchievementTab === 'records') {
+        achievementPage = 1;
+        await loadAchievements(currentStudentId, 'records');
+      }
+    }
+
+    // 只有在查看「非目前課程」時顯示提示列
+    function updateCourseViewBanner() {
+      const banner = document.getElementById('courseViewBanner');
+      const currentId = getCurrentCourseId();
+      const course = ((profileStudentData && profileStudentData.course_history) || [])
+        .find(c => Number(c.course_id) === profileViewCourseId);
+      banner.hidden = !profileViewCourseId || profileViewCourseId === currentId;
+      document.getElementById('courseViewBannerName').textContent = course ? course.course_name : '';
+      document.getElementById('courseViewBannerBack').textContent = currentId ? '返回目前課程' : '返回全部課程';
     }
 
     // 更新雷達圖
@@ -3375,8 +3571,9 @@
         const visibleCount = achievementPage * 5;
 
         if (tab === 'records') {
-          // 載入課程紀錄
-          const response = await apiRequest(`/students/${studentId}/records?page=1&limit=${visibleCount + 1}`);
+          // 載入課程紀錄（只列出查看中課程的紀錄，與上方雷達圖、趨勢圖一致）
+          const courseQuery = profileViewCourseId ? `&course_id=${profileViewCourseId}` : '';
+          const response = await apiRequest(`/students/${studentId}/records?page=1&limit=${visibleCount + 1}${courseQuery}`);
           achievements = response.data?.records || [];
         } else {
           // 載入競賽經歷
@@ -3499,28 +3696,43 @@
     function renderCompetitionItem(comp) {
       loadedCompetitions[comp.id] = comp;
 
+      // 版面：左側為內容，操作（查看完整內容、編輯 / 上傳獎狀）固定在左下角；
+      // 最右側為照片預覽，沒有任何照片或檔案時顯示「無照片」
+      const hasAttachment = comp.photo_url || comp.photo_url_2 || comp.certificate_url;
+
       return `
-        <div class="achievement-item achievement-item--clickable" onclick="openCompetitionDetail(${Number(comp.id)})">
-          <div class="achievement-item__header">
-            <span class="achievement-item__date">${formatDateOnly(comp.competition_date)}</span>
-            <span class="achievement-item__course">${escapeHtml(comp.title || comp.organizer || '競賽')}</span>
-            <span class="achievement-item__status achievement-item__status--present">${escapeHtml(COMPETITION_LEVELS[comp.level] || comp.level || '')}</span>
+        <div class="achievement-item achievement-item--clickable achievement-item--competition" onclick="openCompetitionDetail(${Number(comp.id)})">
+          <div class="achievement-item__main">
+            <div class="achievement-item__header">
+              <span class="achievement-item__date">${formatDateOnly(comp.competition_date)}</span>
+              <span class="achievement-item__course">${escapeHtml(comp.title || comp.organizer || '競賽')}</span>
+              <span class="achievement-item__status achievement-item__status--present">${escapeHtml(COMPETITION_LEVELS[comp.level] || comp.level || '')}</span>
+            </div>
+            <div class="achievement-item__content">
+              ${escapeHtml(comp.description || `主辦單位：${comp.organizer || '—'}`)}
+              ${comp.rank_name ? `<br>獲得名次：${escapeHtml(comp.rank_name)}` : ''}
+              ${comp.score ? ` | 成績：${escapeHtml(comp.score)}` : ''}
+            </div>
+            <div class="achievement-item__more">
+              <span>點擊查看完整內容 ›</span>
+              <button type="button" class="achievement-item__edit" onclick="event.stopPropagation(); openCompetitionEdit(${Number(comp.id)})">編輯 / 上傳獎狀</button>
+            </div>
           </div>
-          <div class="achievement-item__content">
-            ${escapeHtml(comp.description || `主辦單位：${comp.organizer || '—'}`)}
-            ${comp.rank_name ? `<br>獲得名次：${escapeHtml(comp.rank_name)}` : ''}
-            ${comp.score ? ` | 成績：${escapeHtml(comp.score)}` : ''}
-          </div>
-          ${comp.photo_url || comp.photo_url_2 || comp.certificate_url ? `
-            <div class="achievement-item__photos">
+          <div class="achievement-item__preview">
+            ${hasAttachment ? `
               ${attachmentThumb(comp.certificate_url, '證明文件')}
               ${attachmentThumb(comp.photo_url, '競賽照片')}
               ${attachmentThumb(comp.photo_url_2, '競賽照片')}
-            </div>
-          ` : ''}
-          <div class="achievement-item__more">
-            <span>點擊查看完整內容 ›</span>
-            <button type="button" class="achievement-item__edit" onclick="event.stopPropagation(); openCompetitionEdit(${Number(comp.id)})">編輯 / 上傳獎狀</button>
+            ` : `
+              <div class="achievement-item__no-photo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                無照片
+              </div>
+            `}
           </div>
         </div>
       `;
@@ -3880,7 +4092,11 @@
 
       loadUserInfo();
       initCharts();
-      loadMyStudents();
+      // 網址帶有 ?student_id= 時（重新整理、直接開連結），載入後直接進入該生的完整檔案
+      Promise.resolve(loadMyStudents()).then(() => {
+        const studentId = Number(new URLSearchParams(window.location.search).get('student_id'));
+        if (studentId) viewStudentProfile(studentId, { pushHistory: false });
+      });
     });
   </script>
   <script src="js/notifications.js"></script>

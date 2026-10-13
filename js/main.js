@@ -513,3 +513,10 @@ function init() {
 
 // DOM 載入完成後初始化
 document.addEventListener('DOMContentLoaded', init);
+
+// 日期欄位統一以 yyyy/mm/dd 顯示（各頁面共用，見 js/date-field.js）
+(function loadDateField() {
+  const script = document.createElement('script');
+  script.src = new URL('date-field.js', document.currentScript.src).href;
+  document.head.appendChild(script);
+})();

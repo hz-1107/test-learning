@@ -129,13 +129,13 @@ async function seed() {
         `, [courseId, teacherId, room, day, `${start}:00`, `${end}:00`]);
         scheduleCount++;
 
-        // 每個時段分配 3~5 位示範學生（同一門課內學生不重複）
+        // 每個時段分配 3~5 位示範學生（一位學生同時只會在一個班級，已在班的學生不再分配）
         const size = 3 + (scheduleId % 3);
         for (let i = 0; i < size && demoStudents.length; i++) {
           const studentId = demoStudents[studentCursor % demoStudents.length];
           studentCursor++;
           const dup = await db.queryOne(
-            'SELECT id FROM course_enrollments WHERE course_id = ? AND student_id = ?', [courseId, studentId]
+            "SELECT id FROM course_enrollments WHERE student_id = ? AND status = 'enrolled'", [studentId]
           );
           if (dup) continue;
           await db.insert(

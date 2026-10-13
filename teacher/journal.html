@@ -361,6 +361,7 @@
     .attendance-legend__dot--present { background: #00c950; }
     .attendance-legend__dot--makeup { background: #2b7fff; }
     .attendance-legend__dot--absent { background: #fb2c36; }
+    .attendance-legend__dot--none { background: #FE8028; }
 
     .attendance-legend__label {
       font-size: 14px;
@@ -531,7 +532,7 @@
       display: block;
     }
 
-    /* 未約課：不需填寫評語、照片、點數、備註 */
+    /* 未約課、請假：不需填寫評語、照片、點數、備註 */
     .student-card--no-class .student-card__expand,
     .student-card--no-class .student-card__footer,
     .student-card--no-class .student-card__details {
@@ -1520,6 +1521,10 @@
                 <div class="attendance-legend__dot attendance-legend__dot--absent"></div>
                 <span class="attendance-legend__label">請假</span>
               </div>
+              <div class="attendance-legend__item">
+                <div class="attendance-legend__dot attendance-legend__dot--none"></div>
+                <span class="attendance-legend__label">未約課</span>
+              </div>
             </div>
           </div>
 
@@ -2044,7 +2049,7 @@
 
           <!-- 按鈕 -->
           <div class="journal-actions">
-            <button class="btn btn--outline" onclick="clearForm()">清除</button>
+            <button class="btn btn--outline" onclick="leaveJournal()">返回</button>
             <button class="btn btn--primary" onclick="submitJournal()">提交出席記錄</button>
           </div>
         </section>
@@ -2172,7 +2177,7 @@
           <div class="ai-modal__section ai-modal__section--radar">
             <h4 class="ai-modal__section-title">雷達圖 <span style="color: #888; font-weight: normal;">*僅智能生成1次，可手動修改分數</span></h4>
             <div class="radar-chart-container">
-              <svg class="radar-chart" viewBox="0 0 200 200">
+              <svg class="radar-chart" viewBox="-35 0 270 200">
                 <!-- 背景網格 - 五邊形 (5層，半徑分別為 80, 64, 48, 32, 16) -->
                 <polygon class="radar-grid" points="100,20 176,75 147,165 53,165 24,75" fill="none" stroke="#e5e7eb" stroke-width="1"/>
                 <polygon class="radar-grid" points="100,36 161,80 138,152 62,152 39,80" fill="none" stroke="#e5e7eb" stroke-width="1"/>
@@ -2574,9 +2579,11 @@
       padding: 8px 0 16px 0;
     }
 
+    /* viewBox 左右各加寬 35，容納兩側的指標文字（除錯、團隊合作） */
     .radar-chart {
-      width: 180px;
-      height: 180px;
+      width: 243px;
+      max-width: 100%;
+      height: auto;
     }
 
     .radar-scores-grid {
@@ -4111,12 +4118,12 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
       return !!pointsInput && pointsInput.dataset.touched === '1' && parseInt(pointsInput.value) > 0;
     }
 
-    // 未約課的學生不需填寫評語、照片、點數
+    // 未約課、請假的學生不需填寫評語、照片、點數（請假改為補課後才需填寫）
     function isNoClass(card) {
-      return !!card.querySelector('.attendance-btn--active.attendance-btn--none');
+      return !!card.querySelector('.attendance-btn--active.attendance-btn--none, .attendance-btn--active.attendance-btn--absent');
     }
 
-    // 計算日誌完成度：出缺席以全部學生計，評語/照片/點數只計有約課的學生
+    // 計算日誌完成度：出缺席以全部學生計，評語/照片/點數只計有上課（出席、補課）的學生
     function calcJournalProgress(studentCards) {
       const progress = { totalStudents: studentCards.length, bookedStudents: 0, attendance: 0, comments: 0, photos: 0, points: 0 };
 
@@ -4261,38 +4268,10 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
       input.click();
     }
 
-    // 清除表單
-    function clearForm() {
-      if (confirm('確定要清除所有填寫的內容嗎？')) {
-        // 重置日誌 ID（變成新建模式）
-        currentLogId = null;
-        currentStudentRecords = [];
-
-        // 清除課程主題和大綱
-        document.getElementById('journalTopic').value = '';
-        document.getElementById('journalOutline').value = '';
-
-        const studentList = document.getElementById('studentList');
-        if (studentList) {
-          studentList.querySelectorAll('.attendance-btn--active').forEach(btn => {
-            btn.classList.remove('attendance-btn--active');
-          });
-          studentList.querySelectorAll('.detail-input').forEach(input => {
-            input.value = '';
-          });
-          studentList.querySelectorAll('.points-input input').forEach(input => {
-            input.value = '1';
-            delete input.dataset.touched;
-          });
-          studentList.querySelectorAll('.student-card').forEach(card => {
-            delete card.dataset.attendanceTouched;
-          });
-        }
-        updateAttendanceStats();
-        updateProgressStats();
-        if (typeof showMessage === 'function') {
-          showMessage('表單已清除', 'success');
-        }
+    // 返回日誌管理：未儲存的內容不會保留，先請老師確認
+    function leaveJournal() {
+      if (confirm('尚未儲存，是否返回？')) {
+        window.location.href = 'records.html';
       }
     }
 
@@ -4476,8 +4455,8 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
 
             const pointsInput = details.querySelector('.points-input input');
             if (pointsInput) pointsEarned = Math.max(0, Math.min(7, parseInt(pointsInput.value) || 0));
-            // 未約課不給點數
-            if (attendance === 'no_class') pointsEarned = 0;
+            // 未約課、請假不給點數
+            if (attendance === 'no_class' || attendance === 'absent') pointsEarned = 0;
 
             // 取得照片 URL（最多 2 張）
             const photoUpload = details.querySelector('.photo-upload');
@@ -4580,7 +4559,7 @@ ${input || '透過積木組裝體驗力學原理，讓學生在實作中學習�
         return;
       }
 
-      // 未約課的學生隱藏填寫區塊
+      // 未約課、請假的學生隱藏填寫區塊
       studentCards.forEach(card => {
         const noClass = isNoClass(card);
         card.classList.toggle('student-card--no-class', noClass);

@@ -271,6 +271,16 @@
           </div>
           <div class="form-row">
             <div class="form-group">
+              <label>電話</label>
+              <input type="tel" name="phone" placeholder="學生本人電話">
+            </div>
+            <div class="form-group">
+              <label>電子郵件</label>
+              <input type="email" name="email" placeholder="電子郵件">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
               <label>到班日期＊</label>
               <input type="date" name="enrollment_date" required>
             </div>
@@ -332,6 +342,7 @@
             <select name="schedule_id" id="addScheduleSelect">
               <option value="">搜尋班級，例：動力機器人・陳老師・週一・14:00-16:00</option>
             </select>
+            <small style="display: block; margin-top: 6px; font-size: 13px; color: #6a7282;">選擇班級後，授課老師、教室、上課類別會依班級自動帶入</small>
           </div>
         </div>
         <div class="modal__footer">
@@ -375,6 +386,16 @@
             <div class="form-group">
               <label>年級</label>
               <input type="text" name="grade" id="editGrade" placeholder="例：3年級">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>電話</label>
+              <input type="tel" name="phone" id="editPhone" placeholder="學生本人電話">
+            </div>
+            <div class="form-group">
+              <label>電子郵件</label>
+              <input type="email" name="email" id="editEmail" placeholder="電子郵件">
             </div>
           </div>
           <div class="form-row">
@@ -440,6 +461,7 @@
             <select name="schedule_id" id="editScheduleSelect">
               <option value="">搜尋班級，例：動力機器人・陳老師・週一・14:00-16:00</option>
             </select>
+            <small style="display: block; margin-top: 6px; font-size: 13px; color: #6a7282;">選擇班級後，授課老師、教室、上課類別會依班級自動帶入</small>
           </div>
         </div>
         <div class="modal__footer">
@@ -647,7 +669,7 @@
         return `
           <tr>
             <td>${student.name || '-'}</td>
-            <td><span class="course-tag">${student.course_type_name || '-'}</span></td>
+            <td><span class="course-tag">${student.course_name || student.course_type_name || '-'}</span></td>
             <td>${student.lesson_count || 0}</td>
             <td>${timeSlot}</td>
             <td>${student.classroom_name || '-'}</td>
@@ -715,9 +737,32 @@
       el.innerHTML = STUDENT_SHARED_FIELDS[el.dataset.studentField];
     });
 
+    // 授課老師、教室、上課類別以所選班級為準：選了班級就自動帶入並鎖定，
+    // 班級沒設定的項目（或未選班級）才開放手動選擇
+    function applyScheduleToForm(prefix) {
+      const scheduleId = document.getElementById(`${prefix}ScheduleSelect`).value;
+      const schedule = schedulesData.find(sc => String(sc.id) === String(scheduleId));
+      const fields = [
+        [`${prefix}TeacherSelect`, schedule && schedule.teacher_id],
+        [`${prefix}ClassroomSelect`, schedule && schedule.classroom_id],
+        [`${prefix}CourseTypeSelect`, schedule && schedule.course_type_id]
+      ];
+      fields.forEach(([id, value]) => {
+        const select = document.getElementById(id);
+        if (value) select.value = value;
+        select.disabled = !!value;
+        select.title = value ? '依所選班級自動帶入' : '';
+      });
+    }
+
+    ['add', 'edit'].forEach(prefix => {
+      document.getElementById(`${prefix}ScheduleSelect`).addEventListener('change', () => applyScheduleToForm(prefix));
+    });
+
     // Modal 功能
     function openAddStudentModal() {
       document.getElementById('addStudentForm').reset();
+      applyScheduleToForm('add');
       // 設定預設日期為今天
       document.querySelector('#addStudentForm [name="enrollment_date"]').value = new Date().toISOString().split('T')[0];
       document.getElementById('addStudentModal').classList.add('active');
@@ -737,6 +782,8 @@
         document.getElementById('editEnrollmentDate').value = student.enrollment_date ? student.enrollment_date.substring(0, 10) : '';
         document.getElementById('editTeacherSelect').value = student.teacher_id || '';
         document.getElementById('editParentNameFather').value = student.parent_name_father || '';
+        document.getElementById('editPhone').value = student.phone || '';
+        document.getElementById('editEmail').value = student.email || '';
         document.getElementById('editParentPhoneFather').value = student.parent_phone_father || '';
         document.getElementById('editParentNameMother').value = student.parent_name_mother || '';
         document.getElementById('editParentPhoneMother').value = student.parent_phone_mother || '';
@@ -744,6 +791,9 @@
         document.getElementById('editTrialTopic').value = student.trial_topic || '';
         document.getElementById('editClassroomSelect').value = student.classroom_id || '';
         document.getElementById('editCourseTypeSelect').value = student.course_type_id || '';
+        // 帶入目前班級，授課老師／教室／上課類別依班級鎖定
+        document.getElementById('editScheduleSelect').value = student.current_schedule_id || '';
+        applyScheduleToForm('edit');
 
         document.getElementById('editStudentModal').classList.add('active');
       } catch (error) {

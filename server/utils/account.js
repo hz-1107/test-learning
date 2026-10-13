@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const db = require('../config/db');
 
 // 登入以「姓名 + 生日」驗證（見 authController.login），users.username 僅作為內部唯一識別。
@@ -18,4 +19,18 @@ function birthdayPassword(birthday) {
   return String(birthday).slice(0, 10).replace(/-/g, '');
 }
 
-module.exports = { generateUsername, birthdayPassword };
+// 生日有更動時，登入密碼同步改為新生日（登入以「姓名 + 生日」驗證）。
+// 需在更新 users.birthday「之前」呼叫，才能比對出是否有更動。
+async function syncBirthdayPassword(userId, newBirthday) {
+  if (!newBirthday) return;
+  const user = await db.queryOne('SELECT birthday FROM users WHERE id = ?', [userId]);
+  if (!user) return;
+
+  const newPassword = birthdayPassword(newBirthday);
+  if (user.birthday && birthdayPassword(user.birthday) === newPassword) return;
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await db.update('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
+}
+
+module.exports = { generateUsername, birthdayPassword, syncBirthdayPassword };
