@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
+const { generateUsername, birthdayPassword } = require('../utils/account');
 
 // 取得所有學生
 exports.getAll = async (req, res) => {
@@ -170,43 +171,22 @@ exports.create = async (req, res) => {
     } = req.body;
 
     // 驗證必要欄位
-    if (!name || !birthday || !school || !enrollment_date || !classroom_id || !course_type_id) {
+    // 家長姓名／電話、學校、教室、上課類別皆為選填
+    if (!name || !birthday || !enrollment_date) {
       return res.status(400).json({
         success: false,
-        message: '請提供必要欄位（姓名、生日、學校、到班日期、教室、上課類別）'
+        message: '請提供必要欄位（姓名、生日、到班日期）'
       });
     }
 
-    // 使用父親電話作為帳號
-    const username = parent_phone_father ? parent_phone_father.replace(/-/g, '') : null;
-    if (!username) {
-      return res.status(400).json({
-        success: false,
-        message: '請提供家長電話(父)作為登入帳號'
-      });
-    }
-
-    // 檢查帳號是否已存在
-    const existingUser = await db.queryOne(
-      'SELECT id FROM users WHERE username = ?',
-      [username]
-    );
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: '此電話號碼已被使用作為帳號'
-      });
-    }
-
-    // 使用生日作為密碼 (格式: YYYYMMDD)
-    const password = birthday.replace(/-/g, '');
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 登入帳號為姓名，密碼為西元生日 (格式: YYYYMMDD)
+    const username = await generateUsername(name);
+    const hashedPassword = await bcrypt.hash(birthdayPassword(birthday), 10);
 
     // 建立使用者
     const userId = await db.insert(
       'INSERT INTO users (username, password, name, phone, birthday, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [username, hashedPassword, name, parent_phone_father || null, birthday, 'student']
+      [username, hashedPassword, name.trim(), parent_phone_father || null, birthday, 'student']
     );
 
     // 建立學生資料
@@ -219,11 +199,11 @@ exports.create = async (req, res) => {
         classroom_id, course_type_id, lesson_count
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
-      userId, birthday, normalizeGender(gender), school, grade || null, enrollment_date,
+      userId, birthday, normalizeGender(gender), school || null, grade || null, enrollment_date,
       teacher_id || null, parent_name_father || null, parent_phone_father || null,
       parent_name_mother || null, parent_phone_mother || null,
       trial_teacher_id || null, trial_topic || null,
-      classroom_id, course_type_id, 0
+      classroom_id || null, course_type_id || null, 0
     ]);
 
     // 如果有選擇班級，自動加入班級
@@ -355,8 +335,8 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: '找不到學生' });
     }
 
-    // 與新增學生相同：姓名、生日、學校為必填
-    const required = { name: '姓名', birthday: '生日', school: '學校' };
+    // 與新增學生相同：姓名、生日為必填（學校為選填）
+    const required = { name: '姓名', birthday: '生日' };
     for (const [key, label] of Object.entries(required)) {
       if (has(key) && !String(body[key] || '').trim()) {
         return res.status(400).json({ success: false, message: `請填寫${label}` });
@@ -372,7 +352,7 @@ exports.updateProfile = async (req, res) => {
       studentFields.birth_date = body.birthday;
     }
     if (has('gender')) studentFields.gender = normalizeGender(body.gender);
-    if (has('school')) studentFields.school = body.school.trim();
+    if (has('school')) studentFields.school = String(body.school || '').trim() || null;
     if (has('grade')) studentFields.grade = body.grade || null;
     if (has('parent_name_father')) studentFields.parent_name_father = body.parent_name_father || null;
     if (has('phone')) userFields.phone = body.phone || null;

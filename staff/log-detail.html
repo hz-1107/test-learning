@@ -427,6 +427,11 @@
       color: #dc2626;
     }
 
+    .student-item__status--none {
+      background: #f0f0f0;
+      color: #666;
+    }
+
     .student-item__points {
       font-size: var(--font-size-md);
       font-weight: 600;
@@ -964,11 +969,14 @@
         const initial = record.student_name ? record.student_name.charAt(0) : '?';
 
         const attendanceMap = {
+          // 出席／請假／補課／未約課（教師日誌的「請假」存為 absent；late、leave、excused 為舊資料）
           'present': { class: 'student-item__status--present', text: '出席' },
-          'absent': { class: 'student-item__status--absent', text: '缺席' },
-          'late': { class: 'student-item__status--makeup', text: '遲到' },
-          'leave': { class: 'student-item__status--makeup', text: '請假' },
-          'makeup': { class: 'student-item__status--makeup', text: '補課' }
+          'late': { class: 'student-item__status--present', text: '出席' },
+          'absent': { class: 'student-item__status--absent', text: '請假' },
+          'leave': { class: 'student-item__status--absent', text: '請假' },
+          'excused': { class: 'student-item__status--absent', text: '請假' },
+          'makeup': { class: 'student-item__status--makeup', text: '補課' },
+          'no_class': { class: 'student-item__status--none', text: '未約課' }
         };
         const attendance = attendanceMap[record.attendance] || attendanceMap['present'];
         const points = record.points_earned > 0 ? `+${record.points_earned}點` : '';

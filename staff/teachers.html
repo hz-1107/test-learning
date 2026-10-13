@@ -800,14 +800,14 @@
               <input type="text" id="teacherName" name="name" required placeholder="老師姓名">
             </div>
             <div class="form-group">
-              <label for="teacherSchool">畢業學校＊</label>
+              <label for="teacherSchool">畢業學校</label>
               <input type="text" id="teacherSchool" name="school" placeholder="畢業學校">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="teacherLineId">LINE ID＊</label>
-              <input type="text" id="teacherLineId" name="line_id" required placeholder="LINE ID">
+              <label for="teacherLineId">LINE ID</label>
+              <input type="text" id="teacherLineId" name="line_id" maxlength="50" placeholder="LINE ID">
             </div>
             <div class="form-group">
               <label for="teacherPhone">電話＊</label>
@@ -857,14 +857,14 @@
               <input type="text" id="editTeacherName" name="name" required placeholder="老師姓名">
             </div>
             <div class="form-group">
-              <label for="editTeacherSchool">畢業學校＊</label>
+              <label for="editTeacherSchool">畢業學校</label>
               <input type="text" id="editTeacherSchool" name="school" placeholder="畢業學校">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="editTeacherLineId">LINE ID＊</label>
-              <input type="text" id="editTeacherLineId" name="line_id" readonly style="background: #e5e5e5; cursor: not-allowed;">
+              <label for="editTeacherLineId">LINE ID</label>
+              <input type="text" id="editTeacherLineId" name="line_id" maxlength="50" placeholder="LINE ID">
             </div>
             <div class="form-group">
               <label for="editTeacherPhone">電話＊</label>
@@ -927,8 +927,8 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="staffLineId">LINE ID＊</label>
-              <input type="text" id="staffLineId" required maxlength="50" placeholder="LINE ID">
+              <label for="staffLineId">LINE ID</label>
+              <input type="text" id="staffLineId" maxlength="50" placeholder="LINE ID">
             </div>
             <div class="form-group">
               <label for="staffPhone">電話</label>
@@ -953,7 +953,7 @@
             <label for="staffNotes">備註</label>
             <textarea id="staffNotes" placeholder="負責業務、班別等說明"></textarea>
           </div>
-          <p class="form-hint">建立後以 LINE ID 登入，預設密碼為生日（格式：YYYYMMDD）。</p>
+          <p class="form-hint">建立後以姓名登入，密碼為西元生日（格式：YYYYMMDD）。</p>
         </div>
         <div class="modal__footer">
           <button type="button" class="btn-secondary" onclick="closeModal('addStaffModal')">取消</button>
@@ -989,8 +989,8 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="editStaffLineId">LINE ID＊</label>
-              <input type="text" id="editStaffLineId" readonly>
+              <label for="editStaffLineId">LINE ID</label>
+              <input type="text" id="editStaffLineId" maxlength="50" placeholder="LINE ID">
             </div>
             <div class="form-group">
               <label for="editStaffPhone">電話</label>
@@ -1134,7 +1134,7 @@
       const formData = {
         name: document.getElementById('teacherName').value,
         school: document.getElementById('teacherSchool').value || null,
-        line_id: document.getElementById('teacherLineId').value,
+        line_id: document.getElementById('teacherLineId').value.trim() || null,
         phone: document.getElementById('teacherPhone').value || null,
         birthday: document.getElementById('teacherBirthday').value,
         hire_date: document.getElementById('teacherHireDate').value || null,
@@ -1144,7 +1144,7 @@
       try {
         const result = await api.teachers.create(formData);
         if (result.success) {
-          showMessage('老師新增成功！帳號為 LINE ID，密碼為生日（格式：YYYYMMDD）', 'success');
+          showMessage('老師新增成功！帳號為姓名，密碼為西元生日（格式：YYYYMMDD）', 'success');
           closeModal('addTeacherModal');
           loadTeachers();
         }
@@ -1160,7 +1160,7 @@
       document.getElementById('editTeacherId').value = teacher.id;
       document.getElementById('editTeacherName').value = teacher.name || '';
       document.getElementById('editTeacherSchool').value = teacher.school || '';
-      document.getElementById('editTeacherLineId').value = teacher.username || '';
+      document.getElementById('editTeacherLineId').value = teacher.line_id || '';
       document.getElementById('editTeacherPhone').value = teacher.phone || '';
       document.getElementById('editTeacherBirthday').value = teacher.birthday ? teacher.birthday.split('T')[0] : '';
       document.getElementById('editTeacherHireDate').value = teacher.hire_date ? teacher.hire_date.split('T')[0] : '';
@@ -1175,6 +1175,7 @@
       const formData = {
         name: document.getElementById('editTeacherName').value,
         school: document.getElementById('editTeacherSchool').value || null,
+        line_id: document.getElementById('editTeacherLineId').value.trim() || null,
         phone: document.getElementById('editTeacherPhone').value || null,
         birthday: document.getElementById('editTeacherBirthday').value,
         hire_date: document.getElementById('editTeacherHireDate').value || null,
@@ -1253,7 +1254,7 @@
             <div class="teacher-card__contacts">
               <span class="teacher-card__contact">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                LINE: ${teacher.username || '未設定'}
+                LINE: ${teacher.line_id || '未設定'}
               </span>
               <span class="teacher-card__contact">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
@@ -1349,7 +1350,7 @@
             <div class="teacher-card__contacts">
               <span class="teacher-card__contact">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                LINE: ${escapeHtml(s.username || '未設定')}
+                LINE: ${escapeHtml(s.line_id || '未設定')}
               </span>
               <span class="teacher-card__contact">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
@@ -1386,13 +1387,13 @@
 
     document.getElementById('addStaffForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const formData = { ...staffFormData('staff'), line_id: document.getElementById('staffLineId').value.trim() };
+      const formData = { ...staffFormData('staff'), line_id: document.getElementById('staffLineId').value.trim() || null };
       const submitBtn = this.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       try {
         const result = await api.staff.create(formData);
         if (result.success) {
-          showMessage('行政人員新增成功！帳號為 LINE ID，密碼為生日（格式：YYYYMMDD）', 'success');
+          showMessage('行政人員新增成功！帳號為姓名，密碼為西元生日（格式：YYYYMMDD）', 'success');
           closeModal('addStaffModal');
           loadStaff();
         }
@@ -1408,7 +1409,7 @@
       document.getElementById('editStaffId').value = s.id;
       document.getElementById('editStaffName').value = s.name || '';
       document.getElementById('editStaffTitle').value = s.title || '';
-      document.getElementById('editStaffLineId').value = s.username || '';
+      document.getElementById('editStaffLineId').value = s.line_id || '';
       document.getElementById('editStaffPhone').value = s.phone || '';
       document.getElementById('editStaffEmail').value = s.email || '';
       document.getElementById('editStaffBirthday').value = s.birthday ? s.birthday.split('T')[0] : '';
@@ -1428,6 +1429,7 @@
       const staffId = document.getElementById('editStaffId').value;
       const formData = {
         ...staffFormData('editStaff'),
+        line_id: document.getElementById('editStaffLineId').value.trim() || null,
         is_active: document.getElementById('editStaffActive').checked
       };
       const submitBtn = this.querySelector('button[type="submit"]');
