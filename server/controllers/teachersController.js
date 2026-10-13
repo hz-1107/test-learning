@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
+const { generateUsername, birthdayPassword } = require('../utils/account');
 
 // 取得所有教師
 exports.getAll = async (req, res) => {
@@ -7,7 +8,7 @@ exports.getAll = async (req, res) => {
     const { status, search } = req.query;
 
     let sql = `
-      SELECT t.*, t.hire_date, u.username, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active,
+      SELECT t.*, t.hire_date, u.username, u.line_id, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active,
         (SELECT COUNT(*) FROM course_logs cl
          WHERE cl.teacher_id = t.id
            AND cl.log_date <= CURDATE()
@@ -51,7 +52,7 @@ exports.getOne = async (req, res) => {
     const { id } = req.params;
 
     const teacher = await db.queryOne(`
-      SELECT t.*, u.username, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active
+      SELECT t.*, u.username, u.line_id, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active
       FROM teachers t
       JOIN users u ON t.user_id = u.id
       WHERE t.id = ?
@@ -98,37 +99,21 @@ exports.create = async (req, res) => {
       name, school, line_id, phone, birthday, hire_date, notes
     } = req.body;
 
-    if (!name || !line_id || !birthday) {
+    if (!name || !birthday) {
       return res.status(400).json({
         success: false,
-        message: '請提供必要欄位（姓名、LINE ID、生日）'
+        message: '請提供必要欄位（姓名、生日）'
       });
     }
 
-    // 使用 LINE ID 作為帳號
-    const username = line_id;
-
-    // 檢查帳號是否已存在
-    const existingUser = await db.queryOne(
-      'SELECT id FROM users WHERE username = ?',
-      [username]
-    );
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: '此 LINE ID 已被使用'
-      });
-    }
-
-    // 使用生日作為密碼 (格式: YYYYMMDD)
-    const password = birthday.replace(/-/g, '');
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 登入帳號為姓名，密碼為西元生日 (格式: YYYYMMDD)
+    const username = await generateUsername(name);
+    const hashedPassword = await bcrypt.hash(birthdayPassword(birthday), 10);
 
     // 建立使用者
     const userId = await db.insert(
-      'INSERT INTO users (username, password, name, phone, birthday, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [username, hashedPassword, name, phone || null, birthday, 'teacher']
+      'INSERT INTO users (username, password, name, phone, line_id, birthday, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [username, hashedPassword, name.trim(), phone || null, (line_id || '').trim() || null, birthday, 'teacher']
     );
 
     // 建立教師資料
@@ -155,7 +140,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, birthday, school, hire_date, notes } = req.body;
+    const { name, phone, birthday, school, line_id, hire_date, notes } = req.body;
 
     const teacher = await db.queryOne('SELECT user_id FROM teachers WHERE id = ?', [id]);
 
@@ -171,6 +156,14 @@ exports.update = async (req, res) => {
       'UPDATE users SET name = ?, phone = ?, birthday = ? WHERE id = ?',
       [name, phone || null, birthday || null, teacher.user_id]
     );
+
+    // 有帶 LINE ID 欄位才更新，避免其他未送此欄位的表單把既有資料清空
+    if (line_id !== undefined) {
+      await db.update(
+        'UPDATE users SET line_id = ? WHERE id = ?',
+        [(line_id || '').trim() || null, teacher.user_id]
+      );
+    }
 
     // 更新教師資料
     await db.update(`

@@ -157,6 +157,9 @@ const api = {
     // 取得學生點數記錄
     getPoints: (id, params = {}) => apiClient.get(`/students/${id}/points`, { params }),
 
+    // 取得學生課程紀錄（含出缺席）
+    getRecords: (id, params = {}) => apiClient.get(`/students/${id}/records`, { params }),
+
     // 取得課程類型列表
     getCourseTypes: () => apiClient.get('/students/course-types'),
 

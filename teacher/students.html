@@ -1290,6 +1290,7 @@
     .record-item__status--present { background: #dcfce7; color: #16a34a; }
     .record-item__status--makeup { background: #dbeafe; color: #2563eb; }
     .record-item__status--absent { background: #fee2e2; color: #dc2626; }
+    .record-item__status--none { background: #f0f0f0; color: #666; }
 
     .record-item__points {
       font-size: 16px;
@@ -2265,8 +2266,8 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-group__label">學校<span class="required-mark">*</span></label>
-            <input type="text" class="form-group__input" name="school" placeholder="就讀學校" required>
+            <label class="form-group__label">學校</label>
+            <input type="text" class="form-group__input" name="school" placeholder="就讀學校">
           </div>
           <div class="form-group">
             <label class="form-group__label">年級</label>
@@ -3414,10 +3415,12 @@
     // 欄位與顯示規則比照行政端「課程日誌詳情」的學生列（資料同為 student_log_records）
     const RECORD_ATTENDANCE = {
       present: { variant: 'present', text: '出席' },
-      absent: { variant: 'absent', text: '缺席' },
-      late: { variant: 'makeup', text: '遲到' },
-      leave: { variant: 'makeup', text: '請假' },
-      makeup: { variant: 'makeup', text: '補課' }
+      late: { variant: 'present', text: '出席' },
+      absent: { variant: 'absent', text: '請假' },
+      leave: { variant: 'absent', text: '請假' },
+      excused: { variant: 'absent', text: '請假' },
+      makeup: { variant: 'makeup', text: '補課' },
+      no_class: { variant: 'none', text: '未約課' }
     };
 
     function renderRecordItem(record) {

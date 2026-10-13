@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role` enum('admin','staff','teacher','student') NOT NULL DEFAULT 'student',
   `name` varchar(100) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
+  `line_id` varchar(50) DEFAULT NULL COMMENT 'LINE ID（聯絡用，選填）',
   `birthday` date DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT 1,
@@ -70,18 +71,6 @@ CREATE TABLE IF NOT EXISTS `teachers` (
 
 -- ----------------------------
 -- 教室表
-<<<<<<< HEAD
-CREATE TABLE classrooms (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    location VARCHAR(50) COMMENT '地點（如 西屯、沙鹿）',
-    address TEXT,
-    capacity INT DEFAULT 20,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-=======
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `classrooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -94,7 +83,6 @@ CREATE TABLE IF NOT EXISTS `classrooms` (
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
->>>>>>> main
 
 -- ----------------------------
 -- 課程類型表
@@ -517,12 +505,6 @@ CREATE TABLE IF NOT EXISTS `system_settings` (
   UNIQUE KEY `setting_key` (`setting_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-<<<<<<< HEAD
--- 插入預設教室
-INSERT INTO classrooms (name, location, address) VALUES
-('西屯263', '西屯', '台中市西屯區西屯路二段123號'),
-('沙鹿708', '沙鹿', '台中市沙鹿區中山路456號');
-=======
 -- ----------------------------
 -- AI 科系推薦記錄表
 -- ----------------------------
@@ -540,6 +522,5 @@ CREATE TABLE IF NOT EXISTS `department_recommendations` (
   UNIQUE KEY `idx_student` (`student_id`),
   KEY `idx_generated_at` (`generated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI科系推薦紀錄';
->>>>>>> main
 
 SET FOREIGN_KEY_CHECKS = 1;

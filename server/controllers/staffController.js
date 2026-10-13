@@ -1,9 +1,10 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
+const { generateUsername, birthdayPassword } = require('../utils/account');
 
 // 行政人員 = users.role 為 'staff' 的帳號；職稱等延伸資料存於 staff_profiles
 const BASE_SELECT = `
-  SELECT u.id, u.username, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active, u.created_at,
+  SELECT u.id, u.username, u.line_id, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active, u.created_at,
          sp.title, sp.hire_date, sp.notes
   FROM users u
   LEFT JOIN staff_profiles sp ON sp.user_id = u.id
@@ -23,7 +24,7 @@ exports.getAll = async (req, res) => {
     const params = [];
 
     if (search) {
-      sql += ' AND (u.name LIKE ? OR u.phone LIKE ? OR u.username LIKE ?)';
+      sql += ' AND (u.name LIKE ? OR u.phone LIKE ? OR u.line_id LIKE ?)';
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
@@ -69,37 +70,24 @@ exports.getOne = async (req, res) => {
   }
 };
 
-// 新增行政人員（比照教師：帳號 = LINE ID，預設密碼 = 生日 YYYYMMDD）
+// 新增行政人員（比照教師：登入帳號 = 姓名，密碼 = 西元生日 YYYYMMDD）
 exports.create = async (req, res) => {
   try {
     const { name, line_id, phone, email, birthday, title, hire_date, notes } = req.body;
 
-    if (!name || !line_id || !birthday) {
+    if (!name || !birthday) {
       return res.status(400).json({
         success: false,
-        message: '請提供必要欄位（姓名、LINE ID、生日）'
+        message: '請提供必要欄位（姓名、生日）'
       });
     }
 
-    const username = line_id.trim();
-
-    const existingUser = await db.queryOne(
-      'SELECT id FROM users WHERE username = ?',
-      [username]
-    );
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: '此 LINE ID 已被使用'
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(birthday.replace(/-/g, ''), 10);
+    const username = await generateUsername(name);
+    const hashedPassword = await bcrypt.hash(birthdayPassword(birthday), 10);
 
     const userId = await db.insert(
-      'INSERT INTO users (username, password, name, phone, email, birthday, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [username, hashedPassword, name, phone || null, email || null, birthday, 'staff']
+      'INSERT INTO users (username, password, name, phone, line_id, email, birthday, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [username, hashedPassword, name.trim(), phone || null, (line_id || '').trim() || null, email || null, birthday, 'staff']
     );
 
     await db.insert(
@@ -125,7 +113,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, email, birthday, title, hire_date, notes, is_active } = req.body;
+    const { name, line_id, phone, email, birthday, title, hire_date, notes, is_active } = req.body;
 
     const staff = await findStaff(id);
 
@@ -156,6 +144,10 @@ exports.update = async (req, res) => {
       'UPDATE users SET name = ?, phone = ?, email = ?, birthday = ?, is_active = ? WHERE id = ?',
       [name, phone || null, email || null, birthday, active, id]
     );
+
+    if (line_id !== undefined) {
+      await db.update('UPDATE users SET line_id = ? WHERE id = ?', [(line_id || '').trim() || null, id]);
+    }
 
     await db.query(`
       INSERT INTO staff_profiles (user_id, title, hire_date, notes)

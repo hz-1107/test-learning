@@ -15,22 +15,23 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 查詢使用者
-    const user = await db.queryOne(
-      'SELECT * FROM users WHERE username = ? AND is_active = TRUE',
-      [username]
+    // 登入帳號為姓名（既有帳號仍可用原本的 username）；
+    // 同名時以密碼（西元生日 YYYYMMDD）區分
+    const account = String(username).trim();
+    const candidates = await db.query(
+      'SELECT * FROM users WHERE (name = ? OR username = ?) AND is_active = TRUE ORDER BY id',
+      [account, account]
     );
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: '帳號或密碼錯誤'
-      });
+    let user = null;
+    for (const candidate of candidates) {
+      if (await bcrypt.compare(password, candidate.password)) {
+        user = candidate;
+        break;
+      }
     }
 
-    // 驗證密碼
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: '帳號或密碼錯誤'
