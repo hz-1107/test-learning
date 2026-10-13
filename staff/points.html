@@ -418,7 +418,7 @@
 
       pointsTableBody.innerHTML = pageStudents.length ? pageStudents.map(s => {
         const points = s.points_balance ?? 0;
-        const courseName = s.course_type_name || '未指定';
+        const courseName = s.course_name || s.course_type_name || '未指定';
         const classroomName = s.classroom_name || '未指定';
         return `
           <tr data-id="${s.id}" data-name="${s.name}" data-points="${points}">

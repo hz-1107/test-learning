@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { generateUsername, birthdayPassword } = require('../utils/account');
+const { generateUsername, birthdayPassword, syncBirthdayPassword } = require('../utils/account');
 
 // 取得所有教師
 exports.getAll = async (req, res) => {
@@ -151,7 +151,8 @@ exports.update = async (req, res) => {
       });
     }
 
-    // 更新使用者資料
+    // 更新使用者資料（生日有更動時，登入密碼同步更新）
+    await syncBirthdayPassword(teacher.user_id, birthday);
     await db.update(
       'UPDATE users SET name = ?, phone = ?, birthday = ? WHERE id = ?',
       [name, phone || null, birthday || null, teacher.user_id]

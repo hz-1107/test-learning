@@ -10,6 +10,7 @@ exports.getAll = async (req, res) => {
         cs.*,
         c.name as course_name,
         c.status as course_status,
+        c.course_type_id,
         COALESCE(cs.teacher_id, c.teacher_id) as teacher_id,
         u.name as teacher_name,
         cr.name as classroom_name,
@@ -388,7 +389,7 @@ exports.getStudents = async (req, res) => {
     // 取得該班級的學生
     const students = await db.query(`
       SELECT
-        s.id, s.school, s.grade,
+        s.id, s.school, s.grade, s.gender,
         u.name,
         ct.name as course_type_name, ct.color as course_type_color
       FROM course_enrollments ce
@@ -506,8 +507,16 @@ exports.enrollStudents = async (req, res) => {
 
     const scheduleId = id;
     let enrolledCount = 0;
+    let transferredCount = 0;
 
     for (const studentId of student_ids) {
+      // 一位學生同時只會在一個班級：加入此班級即視為轉班，原班級的報名標記為已結束
+      const transferred = await db.update(
+        'UPDATE course_enrollments SET status = "completed" WHERE student_id = ? AND schedule_id <> ? AND status = "enrolled"',
+        [studentId, scheduleId]
+      );
+      if (transferred > 0) transferredCount++;
+
       // 檢查是否已加入此班級
       const existing = await db.queryOne(
         'SELECT id, status FROM course_enrollments WHERE schedule_id = ? AND student_id = ?',
@@ -517,7 +526,7 @@ exports.enrollStudents = async (req, res) => {
       if (existing) {
         if (existing.status !== 'enrolled') {
           await db.update(
-            'UPDATE course_enrollments SET status = "enrolled" WHERE id = ?',
+            'UPDATE course_enrollments SET status = "enrolled", enrolled_at = NOW() WHERE id = ?',
             [existing.id]
           );
           enrolledCount++;
@@ -533,7 +542,7 @@ exports.enrollStudents = async (req, res) => {
 
     res.json({
       success: true,
-      message: `已成功加入 ${enrolledCount} 名學生`
+      message: `已成功加入 ${enrolledCount} 名學生` + (transferredCount ? `（其中 ${transferredCount} 名由原班級轉入）` : '')
     });
   } catch (error) {
     console.error('批量加入學生錯誤:', error);

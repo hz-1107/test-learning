@@ -1376,7 +1376,7 @@
             <circle cx="12" cy="6" r="1"/>
           </svg>
           公告管理
-        </a>
+        </a>
       </nav>
     </aside>
 
@@ -1670,7 +1670,7 @@
           <div class="detail-panel">
             <div class="detail-panel__header">
               <div class="detail-panel__user">
-                <div class="detail-panel__avatar">
+                <div class="detail-panel__avatar" id="detailPanelAvatar">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
@@ -2261,6 +2261,7 @@
 
   <script src="../js/main.js"></script>
   <script src="../js/admin-notifications.js"></script>
+  <script src="../js/student-avatar.js"></script>
   <script>
     // 教室選單：由系統設定的教室資料載入，與其它頁面名稱一致
     (async function loadClassroomOptions() {
@@ -2297,7 +2298,20 @@
       S005: { name: '林志豪', email: 'zhihao@example.com', gender: '男', phone: '0956-789-012', school: '新光國小', grade: '小一', birthday: '2019 / 08 / 17', enrollDate: '2024 / 09 / 01', courses: ['科創機器人', '幼兒簡易機械'], emergencyContact: '', classroom: '沙鹿708', teacher: '顏老師', classType: '常態班', fatherName: '', fatherPhone: '', motherName: '', motherPhone: '', notes: '', history: [{ date: '2024/09/01', text: '帳號建立（由 嚴大明 建立）' }], abilities: { 程式: 3.5, 除錯: 3.5, 創意: 4, 結構: 3, 團隊合作: 3.5 } }
     };
 
-    const ALL_COURSES = ['程式機械', '科創機器人', '動力機械', '幼兒簡易機械'];
+    // 依性別更新列表列與詳細資料面板的學生頭像
+    function syncStudentAvatar(studentId) {
+      const student = STUDENTS[studentId];
+      if (!student) return;
+      const svg = studentAvatarSvg(student.gender);
+      const rowAvatar = document.querySelector(`.data-table tbody tr[data-student-id="${studentId}"] .student-avatar`);
+      if (rowAvatar) rowAvatar.innerHTML = svg;
+      if (document.getElementById('detailPanelId').textContent === studentId) {
+        document.getElementById('detailPanelAvatar').innerHTML = svg;
+      }
+    }
+    Object.keys(STUDENTS).forEach(syncStudentAvatar);
+
+    const ALL_COURSES =['程式機械', '科創機器人', '動力機械', '幼兒簡易機械'];
 
     // ------- 能力雷達圖／能力趨勢圖／學習紀錄摘要（假資料） -------
 
@@ -2532,6 +2546,7 @@
 
       document.getElementById('detailPanelName').textContent = student.name;
       document.getElementById('detailPanelId').textContent = studentId;
+      syncStudentAvatar(studentId);
       document.getElementById('detailEmail').textContent = student.email || '-';
       document.getElementById('detailGender').textContent = student.gender || '-';
       document.getElementById('detailPhone').textContent = student.phone || '-';
@@ -2765,6 +2780,7 @@
       student.emergencyContact = document.getElementById('editStudentEmergencyContact').value;
 
       syncStudentRow(editingStudentId);
+      syncStudentAvatar(editingStudentId);
       if (selectedStudentId === editingStudentId) {
         renderDetailPanel(editingStudentId);
       }
@@ -2912,12 +2928,7 @@
       tr.innerHTML = `
         <td>
           <div class="student-info">
-            <div class="student-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
+            <div class="student-avatar">${studentAvatarSvg(student.gender)}</div>
             <div>
               <div class="student-name">${student.name}</div>
               <div class="student-id">${studentId}</div>
