@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { listScheduleLogs, groupLogsBySchedule, loadCalendar } = require('../utils/expectedLogs');
 
 // 以「當地時區」格式化日期字串（YYYY-MM-DD）。
 // 不可用 date.toISOString().split('T')[0]：toISOString() 會先轉成 UTC，
@@ -14,112 +15,86 @@ function formatLocalDate(date) {
 // 自動建立日誌記錄
 // =====================
 
+// 自動建立日誌時要用到的排程欄位
+const AUTO_CREATE_SCHEDULES_SQL = `
+  SELECT
+    cs.id as schedule_id,
+    cs.course_id,
+    cs.teacher_id,
+    cs.classroom_id,
+    cs.day_of_week,
+    cs.start_time,
+    cs.end_time,
+    cs.start_date,
+    cs.created_at,
+    c.name as course_name
+  FROM course_schedules cs
+  JOIN courses c ON cs.course_id = c.id
+  WHERE cs.is_active = 1 AND c.status = 'active'
+    AND cs.deleted_at IS NULL
+    AND cs.teacher_id IS NOT NULL
+`;
+
+/**
+ * 為排程補建所有缺少的待填寫日誌
+ * 範圍為開課日期起至今天（規則見 utils/expectedLogs），今天的課需已開始才建立
+ * 回傳建立的筆數
+ */
+async function createMissingLogs(schedules) {
+  if (schedules.length === 0) return 0;
+
+  const now = new Date();
+  const today = formatLocalDate(now);
+  const currentTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
+
+  const logs = await db.query(
+    'SELECT schedule_id, log_date, status FROM course_logs WHERE schedule_id IN (?)',
+    [schedules.map(s => s.schedule_id)]
+  );
+  const logsBySchedule = groupLogsBySchedule(logs);
+  const calendar = await loadCalendar();
+
+  let createdCount = 0;
+
+  for (const schedule of schedules) {
+    const entries = listScheduleLogs(schedule, logsBySchedule.get(schedule.schedule_id) || new Map(), { calendar });
+
+    for (const { log_date: logDate, log } of entries) {
+      if (log) continue;
+      // 今天的課尚未開始則不建立
+      if (logDate === today && !(schedule.start_time && currentTime >= schedule.start_time)) continue;
+
+      await db.insert(`
+        INSERT INTO course_logs (
+          course_id, schedule_id, log_date, start_time, end_time,
+          classroom_id, teacher_id, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
+      `, [
+        schedule.course_id,
+        schedule.schedule_id,
+        logDate,
+        schedule.start_time,
+        schedule.end_time,
+        schedule.classroom_id,
+        schedule.teacher_id
+      ]);
+
+      createdCount++;
+      console.log(`  ✓ 自動建立日誌: ${schedule.course_name} (${logDate})`);
+    }
+  }
+
+  return createdCount;
+}
+
 // 自動為已開始的課程建立待填寫日誌
 exports.autoCreatePendingLogs = async () => {
   try {
-    const now = new Date();
-    const today = formatLocalDate(now);
-    const currentTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
-    const currentDayOfWeek = now.getDay(); // 0-6 (Sunday-Saturday)
-
-    console.log(`[${now.toISOString()}] 執行自動建立日誌檢查...`);
+    console.log(`[${new Date().toISOString()}] 執行自動建立日誌檢查...`);
 
     // 取得所有啟用中且有指定教師的課程排程
-    const schedules = await db.query(`
-      SELECT
-        cs.id as schedule_id,
-        cs.course_id,
-        cs.teacher_id,
-        cs.classroom_id,
-        cs.day_of_week,
-        cs.start_time,
-        cs.end_time,
-        c.name as course_name
-      FROM course_schedules cs
-      JOIN courses c ON cs.course_id = c.id
-      WHERE cs.is_active = 1
-        AND cs.deleted_at IS NULL
-        AND cs.teacher_id IS NOT NULL
-    `);
-
-    let createdCount = 0;
-
-    for (const schedule of schedules) {
-      // 跳過沒有指定教師的排程
-      if (!schedule.teacher_id) {
-        continue;
-      }
-
-      // 檢查今天是否是該課程的上課日
-      if (schedule.day_of_week === currentDayOfWeek) {
-        // 檢查課程是否已開始（當前時間 >= 開始時間）
-        if (schedule.start_time && currentTime >= schedule.start_time) {
-          // 檢查是否已存在該日期的日誌
-          const existingLog = await db.queryOne(`
-            SELECT id FROM course_logs
-            WHERE schedule_id = ? AND log_date = ?
-          `, [schedule.schedule_id, today]);
-
-          if (!existingLog) {
-            // 建立新的待填寫日誌
-            await db.insert(`
-              INSERT INTO course_logs (
-                course_id, schedule_id, log_date, start_time, end_time,
-                classroom_id, teacher_id, status
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
-            `, [
-              schedule.course_id,
-              schedule.schedule_id,
-              today,
-              schedule.start_time,
-              schedule.end_time,
-              schedule.classroom_id,
-              schedule.teacher_id
-            ]);
-
-            createdCount++;
-            console.log(`  ✓ 自動建立日誌: ${schedule.course_name} (${today})`);
-          }
-        }
-      }
-
-      // 同時檢查過去7天內是否有遺漏的日誌
-      for (let daysAgo = 1; daysAgo <= 7; daysAgo++) {
-        const pastDate = new Date(now);
-        pastDate.setDate(pastDate.getDate() - daysAgo);
-        const pastDateStr = formatLocalDate(pastDate);
-        const pastDayOfWeek = pastDate.getDay();
-
-        if (schedule.day_of_week === pastDayOfWeek) {
-          // 檢查是否已存在該日期的日誌
-          const existingLog = await db.queryOne(`
-            SELECT id FROM course_logs
-            WHERE schedule_id = ? AND log_date = ?
-          `, [schedule.schedule_id, pastDateStr]);
-
-          if (!existingLog) {
-            // 建立新的待填寫日誌
-            await db.insert(`
-              INSERT INTO course_logs (
-                course_id, schedule_id, log_date, start_time, end_time,
-                classroom_id, teacher_id, status
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
-            `, [
-              schedule.course_id,
-              schedule.schedule_id,
-              pastDateStr,
-              schedule.start_time,
-              schedule.end_time,
-              schedule.classroom_id,
-              schedule.teacher_id
-            ]);
-
-            createdCount++;
-            console.log(`  ✓ 自動建立遺漏日誌: ${schedule.course_name} (${pastDateStr})`);
-          }
-        }
-      }
-    }
+    const schedules = await db.query(AUTO_CREATE_SCHEDULES_SQL);
+    const createdCount = await createMissingLogs(schedules);
 
     if (createdCount > 0) {
       console.log(`[自動建立日誌] 共建立 ${createdCount} 筆待填寫日誌`);
@@ -167,92 +142,9 @@ exports.autoCreateMyLogs = async (req, res) => {
       return res.json({ success: true, message: '非教師身分', created: 0 });
     }
 
-    const teacherId = teacher.id;
-    const now = new Date();
-    const today = formatLocalDate(now);
-    const currentTime = now.toTimeString().split(' ')[0];
-    const currentDayOfWeek = now.getDay();
-
     // 取得該教師的課程排程
-    const schedules = await db.query(`
-      SELECT
-        cs.id as schedule_id,
-        cs.course_id,
-        cs.teacher_id,
-        cs.classroom_id,
-        cs.day_of_week,
-        cs.start_time,
-        cs.end_time,
-        c.name as course_name
-      FROM course_schedules cs
-      JOIN courses c ON cs.course_id = c.id
-      WHERE cs.teacher_id = ? AND cs.is_active = 1 AND cs.deleted_at IS NULL
-    `, [teacherId]);
-
-    let createdCount = 0;
-
-    for (const schedule of schedules) {
-      // 檢查今天是否是該課程的上課日且已開始
-      if (schedule.day_of_week === currentDayOfWeek) {
-        if (schedule.start_time && currentTime >= schedule.start_time) {
-          const existingLog = await db.queryOne(
-            'SELECT id FROM course_logs WHERE schedule_id = ? AND log_date = ?',
-            [schedule.schedule_id, today]
-          );
-
-          if (!existingLog) {
-            await db.insert(`
-              INSERT INTO course_logs (
-                course_id, schedule_id, log_date, start_time, end_time,
-                classroom_id, teacher_id, status
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
-            `, [
-              schedule.course_id,
-              schedule.schedule_id,
-              today,
-              schedule.start_time,
-              schedule.end_time,
-              schedule.classroom_id,
-              schedule.teacher_id
-            ]);
-            createdCount++;
-          }
-        }
-      }
-
-      // 檢查過去7天內是否有遺漏的日誌
-      for (let daysAgo = 1; daysAgo <= 7; daysAgo++) {
-        const pastDate = new Date(now);
-        pastDate.setDate(pastDate.getDate() - daysAgo);
-        const pastDateStr = formatLocalDate(pastDate);
-        const pastDayOfWeek = pastDate.getDay();
-
-        if (schedule.day_of_week === pastDayOfWeek) {
-          const existingLog = await db.queryOne(
-            'SELECT id FROM course_logs WHERE schedule_id = ? AND log_date = ?',
-            [schedule.schedule_id, pastDateStr]
-          );
-
-          if (!existingLog) {
-            await db.insert(`
-              INSERT INTO course_logs (
-                course_id, schedule_id, log_date, start_time, end_time,
-                classroom_id, teacher_id, status
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
-            `, [
-              schedule.course_id,
-              schedule.schedule_id,
-              pastDateStr,
-              schedule.start_time,
-              schedule.end_time,
-              schedule.classroom_id,
-              schedule.teacher_id
-            ]);
-            createdCount++;
-          }
-        }
-      }
-    }
+    const schedules = await db.query(AUTO_CREATE_SCHEDULES_SQL + ' AND cs.teacher_id = ?', [teacher.id]);
+    const createdCount = await createMissingLogs(schedules);
 
     res.json({
       success: true,
@@ -297,7 +189,7 @@ async function ensureTablesExist() {
           topic VARCHAR(255),
           content TEXT,
           outline TEXT,
-          status ENUM('pending', 'progress', 'completed') DEFAULT 'pending',
+          status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
@@ -415,36 +307,84 @@ async function ensureTablesExist() {
       `);
     }
 
-    // 檢查 log_permissions 表是否存在
-    const permissionsExists = await db.queryOne(`
-      SELECT COUNT(*) as count
-      FROM information_schema.tables
-      WHERE table_schema = DATABASE()
-      AND table_name = 'log_permissions'
-    `);
-
-    if (!permissionsExists || permissionsExists.count === 0) {
-      console.log('創建 log_permissions 表...');
-      await db.query(`
-        CREATE TABLE IF NOT EXISTS log_permissions (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          log_id INT NOT NULL,
-          teacher_id INT NOT NULL,
-          granted_by INT,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (log_id) REFERENCES course_logs(id) ON DELETE CASCADE,
-          FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
-          UNIQUE KEY unique_log_teacher (log_id, teacher_id)
-        )
-      `);
-    }
-
     tablesChecked = true;
     console.log('日誌相關資料表檢查完成');
   } catch (error) {
     console.error('檢查/創建日誌資料表錯誤:', error);
   }
 }
+
+// 取得當前教師未完成的日誌（教師端首頁用）
+// 與行政端「老師管理」未完成數、「日誌管理」列表共用 utils/expectedLogs 的規則：
+// 自開課日期起至今天，每一堂課沒有日誌或日誌尚未完成都算一則未完成
+exports.getMyIncompleteLogs = async (req, res) => {
+  try {
+    const teacher = await db.queryOne('SELECT id FROM teachers WHERE user_id = ?', [req.user.id]);
+    if (!teacher) {
+      return res.json({ success: true, data: { logs: [], total: 0, in_progress: 0 } });
+    }
+
+    const schedules = await db.query(`
+      SELECT
+        cs.id as schedule_id,
+        cs.day_of_week,
+        cs.start_time,
+        cs.end_time,
+        cs.start_date,
+        cs.created_at,
+        c.name as course_name
+      FROM course_schedules cs
+      JOIN courses c ON cs.course_id = c.id
+      WHERE cs.is_active = 1 AND c.status = 'active' AND cs.deleted_at IS NULL AND cs.teacher_id = ?
+    `, [teacher.id]);
+
+    const logs = schedules.length > 0
+      ? await db.query(
+        'SELECT id, schedule_id, log_date, status FROM course_logs WHERE schedule_id IN (?)',
+        [schedules.map(s => s.schedule_id)]
+      )
+      : [];
+    const logsBySchedule = groupLogsBySchedule(logs);
+    const calendar = await loadCalendar();
+
+    const incomplete = [];
+    for (const schedule of schedules) {
+      const entries = listScheduleLogs(schedule, logsBySchedule.get(schedule.schedule_id) || new Map(), { calendar });
+      for (const { log_date: logDate, log } of entries) {
+        if (log && log.status === 'completed') continue;
+        incomplete.push({
+          schedule_id: schedule.schedule_id,
+          course_name: schedule.course_name,
+          start_time: schedule.start_time,
+          end_time: schedule.end_time,
+          log_date: logDate,
+          log_id: log ? log.id : null,
+          status: log ? log.status : 'not_filled'
+        });
+      }
+    }
+
+    // 依日期、時間由近到遠排序
+    incomplete.sort((a, b) =>
+      b.log_date.localeCompare(a.log_date) || (b.start_time || '').localeCompare(a.start_time || '')
+    );
+
+    res.json({
+      success: true,
+      data: {
+        logs: incomplete,
+        total: incomplete.length,
+        in_progress: incomplete.filter(l => l.status === 'in_progress' || l.status === 'progress').length
+      }
+    });
+  } catch (error) {
+    console.error('取得未完成日誌錯誤:', error);
+    res.status(500).json({
+      success: false,
+      message: '伺服器錯誤'
+    });
+  }
+};
 
 // 取得教師的課程日誌狀態（依日期範圍）
 exports.getMyLogsStatus = async (req, res) => {
@@ -480,6 +420,8 @@ exports.getMyLogsStatus = async (req, res) => {
         cs.day_of_week,
         cs.start_time,
         cs.end_time,
+        cs.start_date,
+        cs.created_at,
         cs.teacher_id,
         u.name as teacher_name
       FROM course_schedules cs
@@ -487,7 +429,7 @@ exports.getMyLogsStatus = async (req, res) => {
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
       JOIN teachers t ON cs.teacher_id = t.id
       JOIN users u ON t.user_id = u.id
-      WHERE cs.is_active = 1 AND cs.deleted_at IS NULL
+      WHERE cs.is_active = 1 AND c.status = 'active' AND cs.deleted_at IS NULL
     `;
     const scheduleParams = [];
 
@@ -500,63 +442,56 @@ exports.getMyLogsStatus = async (req, res) => {
 
     const schedules = await db.query(schedulesSql, scheduleParams);
 
-    if (!start_date || !end_date) {
-      return res.json({
-        success: true,
-        data: {
-          schedules: schedules.map(s => ({
-            ...s,
-            log_status: 'pending',
-            expected_logs: 0,
-            completed_logs: 0,
-            in_progress_logs: 0
-          }))
-        }
+    // 依課表推算每一堂課並合併既有日誌（規則見 utils/expectedLogs，與首頁、行政端共用）
+    // 未指定起始日則從各班開課日起算；結束日不超過今天，今天的課開始後才列入
+    const logs = schedules.length > 0
+      ? await db.query(
+        'SELECT id, schedule_id, log_date, status FROM course_logs WHERE schedule_id IN (?)',
+        [schedules.map(s => s.schedule_id)]
+      )
+      : [];
+    const logsBySchedule = groupLogsBySchedule(logs);
+    const calendar = await loadCalendar();
+
+    const schedulesWithStatus = schedules.map(schedule => {
+      const entries = listScheduleLogs(schedule, logsBySchedule.get(schedule.schedule_id) || new Map(), {
+        from: start_date || undefined,
+        to: end_date || undefined,
+        calendar
       });
-    }
+      const dates = entries.map(({ log_date: logDate, log }) => ({
+        log_date: logDate,
+        log_id: log ? log.id : null,
+        status: log ? log.status : 'pending'
+      }));
 
-    // 計算每個排程在日期範圍內的預期日誌數和實際狀態
-    const schedulesWithStatus = await Promise.all(schedules.map(async (schedule) => {
-      // 計算在日期範圍內該排程應該有多少堂課
-      const expectedDates = getExpectedDates(start_date, end_date, schedule.day_of_week);
-      const expectedLogs = expectedDates.length;
-
-      // 查詢已存在的日誌
-      const logs = await db.query(`
-        SELECT id, log_date, status
-        FROM course_logs
-        WHERE schedule_id = ? AND log_date >= ? AND log_date <= ?
-      `, [schedule.schedule_id, start_date, end_date]);
-
-      const completedLogs = logs.filter(l => l.status === 'completed').length;
-      const inProgressLogs = logs.filter(l => l.status === 'progress').length;
-      const pendingLogs = logs.filter(l => l.status === 'pending').length;
-      const totalExistingLogs = logs.length;
+      const completedLogs = dates.filter(d => d.status === 'completed').length;
+      const inProgressLogs = dates.filter(d => d.status === 'in_progress' || d.status === 'progress').length;
 
       // 決定整體狀態
       let overallStatus = 'pending';
-      if (expectedLogs > 0) {
-        if (completedLogs >= expectedLogs) {
-          overallStatus = 'completed';
-        } else if (completedLogs > 0 || inProgressLogs > 0 || pendingLogs > 0) {
-          // 有任何日誌記錄（不論狀態）都算進行中
-          overallStatus = 'in-progress';
-        }
+      if (dates.length > 0 && completedLogs === dates.length) {
+        overallStatus = 'completed';
+      } else if (completedLogs > 0 || inProgressLogs > 0) {
+        overallStatus = 'in-progress';
       }
 
       return {
         ...schedule,
         log_status: overallStatus,
-        expected_logs: expectedLogs,
+        expected_logs: dates.length,
         completed_logs: completedLogs,
         in_progress_logs: inProgressLogs,
-        logs: logs
+        // 每一堂課及其日誌狀態（status: pending / in_progress / completed）
+        dates
       };
-    }));
+    });
 
     res.json({
       success: true,
       data: {
+        // 登入教師的 ID，前端用來把自己的日誌排在最上面
+        teacher_id: teacher.id,
         schedules: schedulesWithStatus
       }
     });
@@ -568,23 +503,6 @@ exports.getMyLogsStatus = async (req, res) => {
     });
   }
 };
-
-// 輔助函數：計算日期範圍內的特定星期幾有多少天
-function getExpectedDates(startDate, endDate, dayOfWeek) {
-  const dates = [];
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const current = new Date(start);
-
-  while (current <= end) {
-    if (current.getDay() === dayOfWeek) {
-      dates.push(formatLocalDate(current));
-    }
-    current.setDate(current.getDate() + 1);
-  }
-
-  return dates;
-}
 
 // 取得特定班級的上課日期列表（含日誌狀態）
 exports.getScheduleDates = async (req, res) => {
@@ -608,6 +526,8 @@ exports.getScheduleDates = async (req, res) => {
         cs.day_of_week,
         cs.start_time,
         cs.end_time,
+        cs.start_date,
+        cs.created_at,
         cs.classroom_id,
         cr.name as classroom_name,
         cs.teacher_id
@@ -624,59 +544,38 @@ exports.getScheduleDates = async (req, res) => {
       });
     }
 
-    // 設定日期範圍（預設過去60天到未來7天）
-    const today = new Date();
-    const defaultStart = new Date(today);
-    defaultStart.setDate(defaultStart.getDate() - 60);
-    const defaultEnd = new Date(today);
-    defaultEnd.setDate(defaultEnd.getDate() + 7);
-
-    const startDateStr = start_date || formatLocalDate(defaultStart);
-    const endDateStr = end_date || formatLocalDate(defaultEnd);
-
-    // 計算該日期範圍內的上課日期
-    const expectedDates = getExpectedDates(startDateStr, endDateStr, schedule.day_of_week);
-
-    // 查詢這些日期的日誌狀態
-    const logs = await db.query(`
-      SELECT id, log_date, topic, status, created_at, updated_at
-      FROM course_logs
-      WHERE schedule_id = ? AND log_date >= ? AND log_date <= ?
-      ORDER BY log_date DESC
-    `, [schedule_id, startDateStr, endDateStr]);
-
-    // 建立日期到日誌的映射
-    const logMap = {};
-    logs.forEach(log => {
-      logMap[log.log_date.split('T')[0]] = log;
+    // 依課表推算每一堂課並合併既有日誌（規則見 utils/expectedLogs，與首頁、行政端共用）
+    // 未指定起始日則從開課日起算；結束日不超過今天，今天的課開始後才列入
+    const logs = await db.query(
+      'SELECT id, schedule_id, log_date, topic, status, created_at, updated_at FROM course_logs WHERE schedule_id = ?',
+      [schedule_id]
+    );
+    const entries = listScheduleLogs(schedule, groupLogsBySchedule(logs).get(schedule.schedule_id) || new Map(), {
+      from: start_date || undefined,
+      to: end_date || undefined,
+      calendar: await loadCalendar()
     });
 
-    // 組合日期列表
-    const dateList = expectedDates.map(date => {
-      const log = logMap[date];
-      const dateObj = new Date(date);
-      const isPast = dateObj <= today;
-
-      return {
-        date,
-        day_of_week: schedule.day_of_week,
-        is_past: isPast,
-        has_log: !!log,
-        log_id: log ? log.id : null,
-        log_status: log ? log.status : null,
-        topic: log ? log.topic : null
-      };
-    }).sort((a, b) => new Date(b.date) - new Date(a.date)); // 依日期降序排列
+    // 組合日期列表（依日期降序）
+    const dateList = entries.map(({ log_date: logDate, log }) => ({
+      date: logDate,
+      day_of_week: schedule.day_of_week,
+      is_past: true,
+      has_log: !!log,
+      log_id: log ? log.id : null,
+      log_status: log ? log.status : 'pending',
+      topic: log ? log.topic : null
+    })).reverse();
 
     res.json({
       success: true,
       data: {
         schedule,
         dates: dateList,
-        total_dates: expectedDates.length,
-        completed_count: logs.filter(l => l.status === 'completed').length,
-        in_progress_count: logs.filter(l => l.status === 'in_progress' || l.status === 'progress').length,
-        pending_count: expectedDates.filter(d => new Date(d) <= today).length - logs.length
+        total_dates: dateList.length,
+        completed_count: dateList.filter(d => d.log_status === 'completed').length,
+        in_progress_count: dateList.filter(d => d.log_status === 'in_progress' || d.log_status === 'progress').length,
+        pending_count: dateList.filter(d => d.log_status === 'pending').length
       }
     });
   } catch (error) {
@@ -692,18 +591,14 @@ exports.getScheduleDates = async (req, res) => {
 exports.getAll = async (req, res) => {
   await ensureTablesExist();
   try {
-    const { start_date, end_date, teacher_id, course_id, classroom_id, status, page = 1, limit = 20 } = req.query;
+    const { start_date, end_date, log_date, teacher_id, course_id, classroom_id, status, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
-    // 設定日期範圍
-    const today = new Date();
-    const defaultEnd = formatLocalDate(today);
-    const defaultStart = new Date(today);
-    defaultStart.setDate(defaultStart.getDate() - 30);
-    const startDateStr = start_date || formatLocalDate(defaultStart);
-    const endDateStr = end_date || defaultEnd;
+    // 設定日期範圍：未指定起始日則從各班開課日起算（與老師管理的未完成日誌數一致）
+    const startDateStr = log_date || start_date || null;
+    const endDateStr = log_date || end_date || formatLocalDate(new Date());
 
-    // 步驟1: 取得日期範圍內所有的排程
+    // 步驟1: 取得所有啟用中的排程
     let schedulesSql = `
       SELECT
         cs.id as schedule_id,
@@ -713,6 +608,8 @@ exports.getAll = async (req, res) => {
         cs.day_of_week,
         cs.start_time,
         cs.end_time,
+        cs.start_date,
+        cs.created_at,
         c.name as course_name,
         ct.name as course_type,
         cr.name as classroom_name,
@@ -723,7 +620,7 @@ exports.getAll = async (req, res) => {
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
       JOIN teachers t ON cs.teacher_id = t.id
       JOIN users u ON t.user_id = u.id
-      WHERE cs.is_active = 1 AND cs.deleted_at IS NULL
+      WHERE cs.is_active = 1 AND c.status = 'active' AND cs.deleted_at IS NULL
     `;
     const scheduleParams = [];
 
@@ -742,18 +639,53 @@ exports.getAll = async (req, res) => {
 
     const schedules = await db.query(schedulesSql, scheduleParams);
 
-    // 步驟2: 計算每個排程在日期範圍內的所有上課日期
-    const allExpectedLogs = [];
-    const startD = new Date(startDateStr);
-    const endD = new Date(endDateStr);
-    const todayStr = formatLocalDate(today);
+    // 步驟2: 取得這些排程已存在的日誌
+    // 以排程比對（不以日誌的 teacher_id 篩選），換過老師的班級也能對上原本的日誌
+    const scheduleIds = schedules.map(s => s.schedule_id);
+    const logsSql = `
+      SELECT
+        cl.*,
+        c.name as course_name,
+        ct.name as course_type,
+        cr.name as classroom_name,
+        u.name as teacher_name
+      FROM course_logs cl
+      JOIN courses c ON cl.course_id = c.id
+      LEFT JOIN course_types ct ON c.course_type_id = ct.id
+      LEFT JOIN classrooms cr ON cl.classroom_id = cr.id
+      LEFT JOIN teachers t ON cl.teacher_id = t.id
+      LEFT JOIN users u ON t.user_id = u.id
+      WHERE cl.schedule_id IN (?) AND cl.log_date <= ?
+    `;
+    const existingLogs = scheduleIds.length > 0
+      ? await db.query(logsSql, [scheduleIds, endDateStr])
+      : [];
+    const logsBySchedule = groupLogsBySchedule(existingLogs);
+
+    // 步驟3: 依課表推算每一堂課並合併既有日誌（規則見 utils/expectedLogs）
+    // 沒有日誌記錄的課堂（尚未自動建立）一律列為「待填寫」，與已建立的空白日誌視為同一狀態
+    const combinedLogs = [];
+    const calendar = await loadCalendar();
 
     for (const schedule of schedules) {
-      const current = new Date(startD);
-      while (current <= endD) {
-        const dateStr = formatLocalDate(current);
-        if (current.getDay() === schedule.day_of_week && dateStr <= todayStr) {
-          allExpectedLogs.push({
+      const entries = listScheduleLogs(schedule, logsBySchedule.get(schedule.schedule_id) || new Map(), {
+        from: startDateStr,
+        to: endDateStr,
+        calendar
+      });
+
+      for (const { log_date: logDate, log: existingLog } of entries) {
+        if (existingLog) {
+          // 有日誌記錄
+          combinedLogs.push({
+            ...existingLog,
+            log_date: logDate,
+            has_log: true
+          });
+        } else {
+          // 尚未建立日誌記錄，狀態同樣視為待填寫
+          combinedLogs.push({
+            id: null,
             schedule_id: schedule.schedule_id,
             course_id: schedule.course_id,
             teacher_id: schedule.teacher_id,
@@ -764,122 +696,31 @@ exports.getAll = async (req, res) => {
             teacher_name: schedule.teacher_name,
             start_time: schedule.start_time,
             end_time: schedule.end_time,
-            log_date: dateStr
-          });
-        }
-        current.setDate(current.getDate() + 1);
-      }
-    }
-
-    // 步驟3: 取得已存在的日誌
-    let logsSql = `
-      SELECT
-        cl.*,
-        c.name as course_name,
-        ct.name as course_type,
-        cr.name as classroom_name,
-        u.name as teacher_name,
-        (SELECT GROUP_CONCAT(CONCAT(u2.name) SEPARATOR ', ')
-         FROM log_permissions lp
-         JOIN teachers t2 ON lp.teacher_id = t2.id
-         JOIN users u2 ON t2.user_id = u2.id
-         WHERE lp.log_id = cl.id) as additional_teachers
-      FROM course_logs cl
-      JOIN courses c ON cl.course_id = c.id
-      LEFT JOIN course_types ct ON c.course_type_id = ct.id
-      LEFT JOIN classrooms cr ON cl.classroom_id = cr.id
-      JOIN teachers t ON cl.teacher_id = t.id
-      JOIN users u ON t.user_id = u.id
-      WHERE cl.log_date >= ? AND cl.log_date <= ?
-    `;
-    const logsParams = [startDateStr, endDateStr];
-
-    if (teacher_id) {
-      logsSql += ' AND cl.teacher_id = ?';
-      logsParams.push(teacher_id);
-    }
-    if (course_id) {
-      logsSql += ' AND cl.course_id = ?';
-      logsParams.push(course_id);
-    }
-    if (classroom_id) {
-      logsSql += ' AND cl.classroom_id = ?';
-      logsParams.push(classroom_id);
-    }
-
-    const existingLogs = await db.query(logsSql, logsParams);
-
-    // 步驟4: 建立已存在日誌的映射 (schedule_id + log_date)
-    const logMap = new Map();
-    for (const log of existingLogs) {
-      const logDateStr = log.log_date instanceof Date
-        ? log.log_date.toISOString().split('T')[0]
-        : (log.log_date ? log.log_date.split('T')[0] : '');
-      const key = `${log.schedule_id}_${logDateStr}`;
-      logMap.set(key, log);
-    }
-
-    // 步驟5: 合併結果 - 已存在的日誌 + 未填寫的排程（僅限過去7天內）
-    const combinedLogs = [];
-
-    // 計算7天前的日期（自動建立的範圍）
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const sevenDaysAgoStr = formatLocalDate(sevenDaysAgo);
-
-    for (const expected of allExpectedLogs) {
-      const key = `${expected.schedule_id}_${expected.log_date}`;
-      const existingLog = logMap.get(key);
-
-      if (existingLog) {
-        // 有日誌記錄
-        combinedLogs.push({
-          ...existingLog,
-          log_date: expected.log_date,
-          has_log: true
-        });
-      } else {
-        // 未填寫 - 只對過去7天內的日期顯示
-        if (expected.log_date >= sevenDaysAgoStr) {
-          combinedLogs.push({
-            id: null,
-            schedule_id: expected.schedule_id,
-            course_id: expected.course_id,
-            teacher_id: expected.teacher_id,
-            classroom_id: expected.classroom_id,
-            course_name: expected.course_name,
-            course_type: expected.course_type,
-            classroom_name: expected.classroom_name,
-            teacher_name: expected.teacher_name,
-            start_time: expected.start_time,
-            end_time: expected.end_time,
-            log_date: expected.log_date,
-            status: 'not_filled',
+            log_date: logDate,
+            status: 'pending',
             topic: null,
             content: null,
-            additional_teachers: null,
             has_log: false
           });
         }
-        // 超過7天且沒有日誌記錄的就不顯示
       }
     }
 
     // 步驟6: 依狀態篩選
     let filteredLogs = combinedLogs;
     if (status) {
-      if (status === 'not_filled') {
-        // 未建立：沒有日誌記錄
-        filteredLogs = combinedLogs.filter(log => !log.has_log);
-      } else if (status === 'pending') {
-        // 待填寫：有日誌記錄但狀態為 pending，或沒有日誌記錄
-        filteredLogs = combinedLogs.filter(log => !log.has_log || log.status === 'pending');
+      if (status === 'pending' || status === 'not_filled') {
+        // 待填寫：狀態為 pending（含尚未建立日誌記錄的課堂）
+        filteredLogs = combinedLogs.filter(log => log.status === 'pending');
       } else if (status === 'progress' || status === 'in_progress') {
         // 填寫中
         filteredLogs = combinedLogs.filter(log => log.status === 'progress' || log.status === 'in_progress');
       } else if (status === 'completed') {
         // 已完成
         filteredLogs = combinedLogs.filter(log => log.status === 'completed');
+      } else if (status === 'incomplete') {
+        // 未完成：待填寫＋填寫中（與老師管理的未完成日誌數一致）
+        filteredLogs = combinedLogs.filter(log => log.status !== 'completed');
       }
     }
 
@@ -993,6 +834,16 @@ exports.getByScheduleAndDate = async (req, res) => {
   }
 };
 
+// 學生本人在指定日誌中的紀錄（學生帳號存取日誌時用來確認權限）
+async function findOwnLogRecord(userId, logId) {
+  return db.queryOne(`
+    SELECT slr.*
+    FROM student_log_records slr
+    JOIN students s ON slr.student_id = s.id
+    WHERE s.user_id = ? AND slr.log_id = ?
+  `, [userId, logId]);
+}
+
 // 取得單一日誌
 exports.getOne = async (req, res) => {
   try {
@@ -1022,6 +873,21 @@ exports.getOne = async (req, res) => {
       });
     }
 
+    // 學生只能查看自己有上課紀錄的日誌，且只回傳本人的紀錄（不含同學資料與教師備註）
+    if (req.user.role === 'student') {
+      const ownRecord = await findOwnLogRecord(req.user.id, id);
+      if (!ownRecord) {
+        return res.status(403).json({ success: false, message: '無權限查看此日誌' });
+      }
+      delete ownRecord.notes;
+      ownRecord.photos = await db.query(
+        'SELECT * FROM student_log_photos WHERE record_id = ? ORDER BY id',
+        [ownRecord.id]
+      );
+      log.student_records = [ownRecord];
+      return res.json({ success: true, data: log });
+    }
+
     // 取得學生記錄
     const studentRecords = await db.query(`
       SELECT
@@ -1045,17 +911,6 @@ exports.getOne = async (req, res) => {
     }
 
     log.student_records = studentRecords;
-
-    // 取得權限設定
-    const permissions = await db.query(`
-      SELECT lp.*, u.name as teacher_name
-      FROM log_permissions lp
-      JOIN teachers t ON lp.teacher_id = t.id
-      JOIN users u ON t.user_id = u.id
-      WHERE lp.log_id = ?
-    `, [id]);
-
-    log.permissions = permissions;
 
     res.json({
       success: true,
@@ -1203,38 +1058,6 @@ exports.update = async (req, res) => {
   }
 };
 
-// 更新日誌權限
-exports.updatePermissions = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { teacher_ids } = req.body;
-
-    // 刪除舊的權限
-    await db.update('DELETE FROM log_permissions WHERE log_id = ?', [id]);
-
-    // 新增新的權限
-    if (teacher_ids && teacher_ids.length > 0) {
-      for (const teacherId of teacher_ids) {
-        await db.insert(
-          'INSERT INTO log_permissions (log_id, teacher_id, granted_by) VALUES (?, ?, ?)',
-          [id, teacherId, req.user.id]
-        );
-      }
-    }
-
-    res.json({
-      success: true,
-      message: '權限更新成功'
-    });
-  } catch (error) {
-    console.error('更新日誌權限錯誤:', error);
-    res.status(500).json({
-      success: false,
-      message: '伺服器錯誤'
-    });
-  }
-};
-
 // 每位學生每篇日誌最多可上傳的照片數
 const MAX_STUDENT_LOG_PHOTOS = 2;
 
@@ -1259,8 +1082,9 @@ exports.updateStudentRecord = async (req, res) => {
 
     let recordId;
     const newAttendance = attendance || 'present';
-    // 上課堂數計算規則：出席、遲到算有上到課；缺席、請假不算
-    const ATTENDED_STATUSES = ['present', 'late'];
+    // 上課堂數計算規則：出席、補課（遲到為舊資料）算有上到課；缺席、未約課不算
+    // 需與 studentsController 的 ATTENDED_SQL 一致
+    const ATTENDED_STATUSES = ['present', 'late', 'makeup'];
     const newAttended = ATTENDED_STATUSES.includes(newAttendance);
 
     // 檢查是否已有記錄
@@ -1398,6 +1222,10 @@ exports.updateStudentRecord = async (req, res) => {
 exports.getPhotos = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (req.user.role === 'student' && !(await findOwnLogRecord(req.user.id, id))) {
+      return res.status(403).json({ success: false, message: '無權限查看此日誌' });
+    }
 
     const photos = await db.query(`
       SELECT clp.*, u.name as uploaded_by_name

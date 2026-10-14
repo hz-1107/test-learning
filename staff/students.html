@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學生管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -207,6 +208,11 @@
           </select>
           <select class="filter-select" id="filterCourseType" onchange="loadStudents()">
             <option value="">全部課程</option>
+          </select>
+          <select class="filter-select" id="filterStatus" onchange="currentPage = 1; loadStudents()">
+            <option value="active" selected>在學</option>
+            <option value="graduated">結業</option>
+            <option value="">全部狀態</option>
           </select>
         </div>
 
@@ -457,6 +463,14 @@
             </div>
           </div>
           <div class="form-group">
+            <label>在學狀態</label>
+            <select name="status" id="editStatus">
+              <option value="active">在學</option>
+              <option value="graduated">結業</option>
+            </select>
+            <small style="display: block; margin-top: 6px; font-size: 13px; color: #6a7282;">改為結業後，學生會從目前班級名單移除（歷史紀錄保留）</small>
+          </div>
+          <div class="form-group">
             <label>班級</label>
             <select name="schedule_id" id="editScheduleSelect">
               <option value="">搜尋班級，例：動力機器人・陳老師・週一・14:00-16:00</option>
@@ -568,9 +582,12 @@
         select.innerHTML = '';
         select.appendChild(firstOption);
         teachersData.forEach(teacher => {
+          // 新增時不列出離職的老師；編輯時保留，才能顯示學生原本的老師
+          const inactive = teacher.status && teacher.status !== 'active';
+          if (inactive && id.startsWith('add')) return;
           const option = document.createElement('option');
           option.value = teacher.id;
-          option.textContent = teacher.name;
+          option.textContent = inactive ? `${teacher.name}（離職）` : teacher.name;
           select.appendChild(option);
         });
       });
@@ -634,8 +651,10 @@
         const search = document.getElementById('searchInput').value.trim();
         const classroomId = document.getElementById('filterClassroom').value;
         const courseTypeId = document.getElementById('filterCourseType').value;
+        const status = document.getElementById('filterStatus').value;
 
         if (search) params.search = search;
+        if (status) params.status = status;
         if (classroomId) params.classroom_id = classroomId;
         if (courseTypeId) params.course_type_id = courseTypeId;
 
@@ -764,7 +783,10 @@
       document.getElementById('addStudentForm').reset();
       applyScheduleToForm('add');
       // 設定預設日期為今天
-      document.querySelector('#addStudentForm [name="enrollment_date"]').value = new Date().toISOString().split('T')[0];
+      // 以當地時區取得今天（toISOString 會轉 UTC，台灣早上 8 點前會變成前一天）
+      const now = new Date();
+      document.querySelector('#addStudentForm [name="enrollment_date"]').value =
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       document.getElementById('addStudentModal').classList.add('active');
     }
 
@@ -792,6 +814,7 @@
         document.getElementById('editClassroomSelect').value = student.classroom_id || '';
         document.getElementById('editCourseTypeSelect').value = student.course_type_id || '';
         // 帶入目前班級，授課老師／教室／上課類別依班級鎖定
+        document.getElementById('editStatus').value = student.status || 'active';
         document.getElementById('editScheduleSelect').value = student.current_schedule_id || '';
         applyScheduleToForm('edit');
 

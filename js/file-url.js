@@ -5,7 +5,7 @@
  * 頁面若由 Live Server (5500) 開啟，相對路徑會指向 5500 而讀不到圖片，
  * 因此顯示前一律補上後端網址。
  */
-const FILE_SERVER_BASE = 'http://localhost:3000';
+const FILE_SERVER_BASE = window.API_ORIGIN;
 
 function fileUrl(url) {
   if (!url) return '';

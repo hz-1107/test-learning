@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
+const db = require('../config/db');
 
 // 驗證 JWT Token
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -14,6 +15,15 @@ const authenticate = (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 帳號被停用（例如老師離職）後，已登入的 Token 也立即失效
+    const user = await db.queryOne('SELECT is_active FROM users WHERE id = ?', [decoded.id]);
+    if (!user || !user.is_active) {
+      return res.status(401).json({
+        success: false,
+        message: '帳號已停用，請聯絡行政人員'
+      });
+    }
 
     req.user = decoded;
     next();

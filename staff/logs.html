@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>日誌管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -451,200 +452,6 @@
       background: var(--color-background);
     }
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal {
-      background: var(--color-surface);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 600px;
-      max-height: calc(100vh - 40px);
-      display: flex;
-      flex-direction: column;
-      transform: translateY(20px);
-      transition: transform 0.3s;
-      margin: auto;
-    }
-
-    .modal-overlay.active .modal {
-      transform: translateY(0);
-    }
-
-    .modal form { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
-
-    .modal__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--spacing-lg);
-      border-bottom: 1px solid var(--color-surface-alt);
-      flex-shrink: 0;
-    }
-
-    .modal__body { overflow-y: auto; flex: 1; padding: var(--spacing-lg); }
-    .modal__footer { flex-shrink: 0; display: flex; justify-content: flex-end; gap: var(--spacing-md); padding: var(--spacing-lg); border-top: 1px solid var(--color-surface-alt); }
-
-    .modal__title {
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      color: var(--color-text-primary);
-    }
-
-    .modal__close {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--color-text-muted);
-      padding: var(--spacing-xs);
-    }
-
-    .modal__body {
-      padding: var(--spacing-lg);
-    }
-
-    .modal__info-bar {
-      background: #fffbeb;
-      padding: var(--spacing-md);
-      border-radius: var(--radius-md);
-      font-size: var(--font-size-sm);
-      color: var(--color-text-secondary);
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .modal__option {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-md);
-      background: var(--color-background);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .modal__option-checkbox {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--color-primary-dark);
-    }
-
-    .modal__option-content {
-      flex: 1;
-    }
-
-    .modal__option-title {
-      font-size: var(--font-size-md);
-      color: var(--color-text-primary);
-    }
-
-    .modal__option-subtitle {
-      font-size: var(--font-size-sm);
-      color: var(--color-text-muted);
-    }
-
-    .modal__option-note {
-      font-size: var(--font-size-xs);
-      color: var(--color-text-muted);
-      margin-left: var(--spacing-xs);
-    }
-
-    .modal__search {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-sm) var(--spacing-md);
-      background: var(--color-background);
-      border: 1px solid var(--color-surface-alt);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .modal__search input {
-      border: none;
-      background: transparent;
-      font-size: var(--font-size-sm);
-      width: 100%;
-    }
-
-    .modal__list-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--spacing-sm) 0;
-      font-size: var(--font-size-sm);
-      color: var(--color-text-muted);
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .modal__list-header a {
-      color: var(--color-primary-dark);
-      text-decoration: none;
-    }
-
-    .modal__teacher-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-md);
-      background: var(--color-background);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .modal__footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--spacing-md);
-      padding: var(--spacing-lg);
-      border-top: 1px solid var(--color-surface-alt);
-    }
-
-    .modal__btn {
-      padding: var(--spacing-sm) var(--spacing-xl);
-      border-radius: var(--radius-md);
-      font-size: var(--font-size-md);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .modal__btn--cancel {
-      background: transparent;
-      border: 1px solid var(--color-surface-alt);
-      color: var(--color-text-secondary);
-    }
-
-    .modal__btn--primary {
-      background: var(--color-primary);
-      border: none;
-      color: var(--color-primary-dark);
-    }
-
-    .modal__btn--primary:hover {
-      background: var(--color-primary-dark);
-      color: white;
-    }
-
     /* 響應式 */
     @media (max-width: 1200px) {
       .filters-row {
@@ -795,7 +602,7 @@
             <div class="filter-group">
               <label class="filter-label">時間區間</label>
               <div class="filter-date-range">
-                <input type="date" class="filter-input" id="startDate">
+                <input type="date" class="filter-input" id="startDate" title="留空表示從開課日起">
                 <span>至</span>
                 <input type="date" class="filter-input" id="endDate">
                 <button class="filter-btn">套用</button>
@@ -835,6 +642,7 @@
               <label class="filter-label">填寫狀態</label>
               <div class="status-tabs">
                 <button class="status-tab status-tab--active" data-status="all">全部</button>
+                <button class="status-tab" data-status="incomplete">未完成</button>
                 <button class="status-tab" data-status="completed">已完成</button>
                 <button class="status-tab" data-status="progress">填寫中</button>
                 <button class="status-tab" data-status="pending">待填寫</button>
@@ -875,14 +683,17 @@
 
   <script src="../js/main.js"></script>
   <script>
-    const API_BASE = window.API_BASE || 'http://localhost:3000';
+    const API_BASE = window.API_BASE || window.API_ORIGIN;
 
     // 狀態
     let currentPage = 1;
     let totalPages = 1;
     let currentStatus = 'all';
-    let allTeachers = [];
-    let currentLogId = null;
+
+    // 由其他頁面帶入的篩選條件（例：老師管理「尚有 N 則日誌未完成」→ ?teacher_id=3&status=incomplete）
+    const pageParams = new URLSearchParams(window.location.search);
+    let presetTeacherId = pageParams.get('teacher_id') || '';
+    if (pageParams.get('status')) currentStatus = pageParams.get('status');
 
     // 初始化
     document.addEventListener('DOMContentLoaded', function() {
@@ -898,13 +709,8 @@
       const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
       document.getElementById('currentDate').textContent = dateStr;
 
-      // 設定預設日期範圍（過去30天）
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
-
-      document.getElementById('startDate').value = formatDateForInput(startDate);
-      document.getElementById('endDate').value = formatDateForInput(endDate);
+      // 預設日期範圍：起始日留空＝從各班開課日起算（與老師管理的未完成日誌數一致），結束日為今天
+      document.getElementById('endDate').value = formatDateForInput(new Date());
 
       // 清空靜態資料，顯示載入中
       document.getElementById('logsTableBody').innerHTML = `
@@ -914,6 +720,11 @@
           </td>
         </tr>
       `;
+
+      // 套用帶入的狀態分頁
+      document.querySelectorAll('.status-tab').forEach(tab => {
+        tab.classList.toggle('status-tab--active', tab.dataset.status === currentStatus);
+      });
 
       // 載入使用者資訊
       loadUserProfile();
@@ -970,8 +781,12 @@
       }
     }
 
+    // 以當地時區格式化（toISOString 會轉 UTC，台灣凌晨會變成前一天）
     function formatDateForInput(date) {
-      return date.toISOString().split('T')[0];
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
     function getAuthToken() {
@@ -998,10 +813,10 @@
         const teacherSelect = document.getElementById('teacherFilter');
         teacherSelect.innerHTML = '<option value="">全部老師</option>';
         if (teachersData.success && teachersData.data) {
-          allTeachers = teachersData.data;
           teachersData.data.forEach(teacher => {
             teacherSelect.innerHTML += `<option value="${teacher.id}">${teacher.name}</option>`;
           });
+          if (presetTeacherId) teacherSelect.value = presetTeacherId;
         }
 
         // 填充課程選項
@@ -1042,7 +857,8 @@
       // 取得篩選條件
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
-      const teacherId = document.getElementById('teacherFilter').value;
+      // 老師選單尚未載入完成時，先使用帶入的老師
+      const teacherId = document.getElementById('teacherFilter').value || presetTeacherId;
       const courseId = document.getElementById('courseFilter').value;
       const classroomId = document.getElementById('classroomFilter').value;
 
@@ -1112,8 +928,9 @@
       }
 
       tbody.innerHTML = logs.map(log => {
+        // 尚未建立日誌記錄的課堂也統一顯示為「待填寫」
         const statusMap = {
-          'not_filled': { class: 'status-badge--pending', text: '未建立' },
+          'not_filled': { class: 'status-badge--pending', text: '待填寫' },
           'pending': { class: 'status-badge--pending', text: '待填寫' },
           'progress': { class: 'status-badge--progress', text: '填寫中' },
           'in_progress': { class: 'status-badge--progress', text: '填寫中' },
@@ -1131,9 +948,9 @@
             <button class="action-btn action-btn--primary" onclick="viewLog(${log.id})">查看</button>
           `;
         } else {
-          // 未建立日誌 - 顯示提示
+          // 尚未建立日誌記錄（今天的課還沒開始），上課後會自動建立
           actionButtons = `
-            <span style="color: var(--color-text-muted); font-size: var(--font-size-xs);">待自動建立</span>
+            <span style="color: var(--color-text-muted); font-size: var(--font-size-xs);">上課後可查看</span>
           `;
         }
 
@@ -1214,138 +1031,12 @@
       // 篩選下拉選單變更時自動載入
       ['teacherFilter', 'courseFilter', 'classroomFilter'].forEach(id => {
         document.getElementById(id).addEventListener('change', function() {
+          if (id === 'teacherFilter') presetTeacherId = '';
           currentPage = 1;
           loadLogs();
         });
       });
 
-      // 點擊 Modal 外部關閉
-      document.getElementById('permissionModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closePermissionModal();
-        }
-      });
-    }
-
-    // 權限 Modal
-    function openPermissionModal(logId, logDate, logTime, courseName, teacherName, mainTeacherId) {
-      currentLogId = logId;
-
-      // 更新 Modal 資訊欄
-      const infoBar = document.querySelector('.modal__info-bar');
-      const displayTime = logTime ? logTime.substring(0, 5) : '';
-      infoBar.textContent = `${logDate} ${displayTime} • ${courseName} • ${teacherName}`;
-
-      // 更新主開課教師
-      document.querySelector('.modal__option-subtitle').textContent = teacherName;
-      document.getElementById('defaultTeacher').checked = true;
-      document.getElementById('defaultTeacher').dataset.teacherId = mainTeacherId;
-
-      // 載入其他教師選項
-      loadTeacherOptions(mainTeacherId, logId);
-
-      document.getElementById('permissionModal').classList.add('active');
-    }
-
-    async function loadTeacherOptions(excludeTeacherId, logId) {
-      const teacherListContainer = document.querySelector('.modal__body');
-
-      // 移除舊的教師列表
-      const oldItems = teacherListContainer.querySelectorAll('.modal__teacher-item');
-      oldItems.forEach(item => item.remove());
-
-      // 取得目前權限
-      let currentPermissions = [];
-      try {
-        const token = getAuthToken();
-        const response = await fetch(`${API_BASE}/api/logs/${logId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const result = await response.json();
-        if (result.success && result.data.permissions) {
-          currentPermissions = result.data.permissions.map(p => p.teacher_id);
-        }
-      } catch (error) {
-        console.error('載入權限失敗:', error);
-      }
-
-      // 建立教師列表 HTML
-      const listHeader = document.querySelector('.modal__list-header');
-
-      allTeachers.filter(t => t.id !== excludeTeacherId).forEach(teacher => {
-        const isChecked = currentPermissions.includes(teacher.id);
-        const item = document.createElement('div');
-        item.className = 'modal__teacher-item';
-        item.innerHTML = `
-          <input type="checkbox" class="modal__option-checkbox teacher-permission-checkbox"
-                 data-teacher-id="${teacher.id}" ${isChecked ? 'checked' : ''}>
-          <div class="modal__option-content">
-            <div class="modal__option-title">${teacher.name}</div>
-            <div class="modal__option-subtitle">${teacher.school || ''}</div>
-          </div>
-        `;
-        listHeader.parentNode.insertBefore(item, listHeader.nextSibling);
-      });
-
-      // 更新已選老師數量
-      updateSelectedCount();
-
-      // 綁定複選框變更事件
-      document.querySelectorAll('.teacher-permission-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', updateSelectedCount);
-      });
-
-      // 全選功能
-      const selectAllLink = document.querySelector('.modal__list-header a');
-      selectAllLink.onclick = function(e) {
-        e.preventDefault();
-        const checkboxes = document.querySelectorAll('.teacher-permission-checkbox');
-        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-        checkboxes.forEach(cb => cb.checked = !allChecked);
-        updateSelectedCount();
-      };
-    }
-
-    function updateSelectedCount() {
-      const checked = document.querySelectorAll('.teacher-permission-checkbox:checked').length;
-      document.querySelector('.modal__list-header span').textContent = `已選老師（${checked} 位）`;
-    }
-
-    function closePermissionModal() {
-      document.getElementById('permissionModal').classList.remove('active');
-      currentLogId = null;
-    }
-
-    async function savePermission() {
-      if (!currentLogId) return;
-
-      const token = getAuthToken();
-      const teacherIds = Array.from(document.querySelectorAll('.teacher-permission-checkbox:checked'))
-        .map(cb => parseInt(cb.dataset.teacherId));
-
-      try {
-        const response = await fetch(`${API_BASE}/api/logs/${currentLogId}/permissions`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ teacher_ids: teacherIds })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          showMessage('權限設定已儲存', 'success');
-          closePermissionModal();
-          loadLogs(); // 重新載入列表以更新權限顯示
-        } else {
-          showMessage(result.message || '儲存失敗', 'error');
-        }
-      } catch (error) {
-        console.error('儲存權限錯誤:', error);
-        showMessage('儲存權限失敗', 'error');
-      }
     }
 
     // 查看日誌
@@ -1380,14 +1071,6 @@
       }
     }
 
-    // 搜尋教師
-    document.querySelector('.modal__search input').addEventListener('input', function(e) {
-      const keyword = e.target.value.toLowerCase();
-      document.querySelectorAll('.modal__teacher-item').forEach(item => {
-        const name = item.querySelector('.modal__option-title').textContent.toLowerCase();
-        item.style.display = name.includes(keyword) ? '' : 'none';
-      });
-    });
   </script>
   <script src="../js/admin-notifications.js"></script>
 </body>

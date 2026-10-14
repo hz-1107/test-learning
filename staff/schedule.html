@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>課表排程 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -363,7 +364,8 @@
       try {
         // 載入老師到「代課老師」選單
         const subTeacherSelect = document.getElementById('adjustSubTeacher');
-        teachers.forEach(t => {
+        // 離職的老師不列入代課人選
+        teachers.filter(t => !t.status || t.status === 'active').forEach(t => {
           subTeacherSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
         });
 
@@ -738,7 +740,25 @@
     });
 
     // 開啟課程詳情（點課表方塊）→ 開啟調課 Modal 並帶入該堂課
-    function openScheduleDetail(schedule) {
+    async function openScheduleDetail(schedule) {
+      // 已調課的課：同一堂課不能重複調課，改為詢問是否取消這次調課（恢復原課表）後再重新設定
+      if (schedule.is_adjusted && schedule.adjustment_id) {
+        const typeLabels = { time: '調時段', teacher: '代課', time_teacher: '調時段及代課', reschedule: '改期', makeup: '補課', cancel: '停課' };
+        const detail = [
+          typeLabels[schedule.adjustment_type] || '調課',
+          schedule.original_date ? `原課日 ${String(schedule.original_date).substring(0, 10)}` : '',
+          schedule.adjustment_reason ? `原因：${schedule.adjustment_reason}` : ''
+        ].filter(Boolean).join('｜');
+        if (!confirm(`「${schedule.course_name}」這堂課已調課（${detail}）。\n\n要取消這次調課、恢復原本的課表嗎？\n取消後可以重新設定調課。`)) return;
+        try {
+          await api.scheduleCalendar.adjustments.delete(schedule.adjustment_id);
+          showMessage('已取消調課，恢復原本的課表', 'success');
+          await board.reload();
+        } catch (error) {
+          showMessage('取消調課失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
+        }
+        return;
+      }
       openAdjustmentModal(schedule);
     }
 
@@ -895,6 +915,7 @@
       try {
         await api.scheduleCalendar.adjustments.create(data);
         closeModal('adjustmentModal');
+        showMessage('調課已建立（點選該堂課可取消調課）', 'success');
         await board.reload();
       } catch (error) {
         setAdjustError('調課建立失敗：' + (error.response?.data?.message || '未知錯誤'));

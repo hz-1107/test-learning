@@ -13,7 +13,7 @@ router.get('/classrooms', schedulesController.getClassrooms);
 router.get('/my-classes', schedulesController.getMyClasses);
 
 // 取得已刪除的班級（垃圾桶）
-router.get('/deleted', schedulesController.getDeleted);
+router.get('/deleted', authorize('admin', 'staff', 'teacher'), schedulesController.getDeleted);
 
 // 班級時段管理路由
 router.get('/', schedulesController.getAll);
@@ -29,8 +29,8 @@ router.post('/:id/restore', authorize('admin', 'staff'), schedulesController.res
 router.delete('/:id/permanent', authorize('admin', 'staff'), schedulesController.permanentDelete);
 
 // 學生管理
-router.get('/:id/students', schedulesController.getStudents);
-router.get('/:id/available-students', schedulesController.getAvailableStudents);
+router.get('/:id/students', authorize('admin', 'staff', 'teacher'), schedulesController.getStudents);
+router.get('/:id/available-students', authorize('admin', 'staff', 'teacher'), schedulesController.getAvailableStudents);
 router.post('/:id/students', authorize('admin', 'staff'), schedulesController.enrollStudents);
 router.delete('/:id/students/:student_id', authorize('admin', 'staff'), schedulesController.removeStudent);
 

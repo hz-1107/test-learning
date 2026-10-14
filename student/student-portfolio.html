@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學習歷程 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -772,7 +773,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="../js/pdf-export.js"></script>
   <script>
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = window.API_ORIGIN;
     const searchInput = document.getElementById('portfolioSearchInput');
     let allHistoryCards = [];
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
@@ -798,6 +799,11 @@
         if (profileRes.ok) {
           const profile = await profileRes.json();
           document.querySelector('.student-sidebar__name').textContent = profile.data.student?.name || '學生';
+          // 頁首頭像與「學習概況」頁一致（過去這頁固定顯示預設頭像）
+          const me = profile.data.student || {};
+          document.querySelector('.student-header__avatar img').src = me.avatar
+            ? fileUrl(me.avatar)
+            : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(me.username || 'student')}`;
         }
       } catch (e) {
         console.error('載入學生資訊失敗:', e);
@@ -813,14 +819,22 @@
       const container = document.getElementById('historyList');
 
       try {
-        const response = await fetch(`${API_BASE}/api/students/me/records`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // 逐頁取回全部紀錄（過去只取預設的 10 筆，較舊的上課紀錄看不到也無法匯出）
+        // 學習歷程只列出實際上過課（出席、補課）的紀錄，請假、未約課不列入
+        recordsData = [];
+        let page = 1;
+        let totalPages = 1;
+        do {
+          const response = await fetch(`${API_BASE}/api/students/me/records?attended=1&limit=100&page=${page}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (!response.ok) throw new Error('載入學習歷程失敗');
 
-        if (!response.ok) throw new Error('載入學習歷程失敗');
-
-        const result = await response.json();
-        recordsData = result.data?.records || [];
+          const result = await response.json();
+          recordsData.push(...(result.data?.records || []));
+          totalPages = result.data?.pagination?.totalPages || 1;
+          page++;
+        } while (page <= totalPages);
 
         // 更新課程分類篩選選項
         updateCategoryOptions();
@@ -841,12 +855,30 @@
 
     // 更新課程分類選項
     function updateCategoryOptions() {
-      const categories = [...new Set(recordsData.map(r => r.course_name || r.course_type))];
+      // 選項值需與卡片的 data-category 相同（過去一邊用課程名稱、一邊用課程分類，選了也篩不出來）
+      const categories = [...new Set(recordsData.map(recordCategory))];
       const select = document.getElementById('categoryFilterSelect');
       select.innerHTML = '<option value="">全部</option>';
       categories.forEach(cat => {
-        select.innerHTML += `<option value="${cat}">${cat}</option>`;
+        select.innerHTML += `<option value="${escapeAttr(cat)}">${escapeAttr(cat)}</option>`;
       });
+    }
+
+    function recordCategory(record) {
+      return record.course_type_name || record.course_name || '課程';
+    }
+
+    function escapeAttr(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // 上課時數：依日誌的上課起訖時間計算，沒有時間資料時不顯示
+    function recordHours(record) {
+      if (!record.start_time || !record.end_time) return null;
+      const toMinutes = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+      const minutes = toMinutes(record.end_time) - toMinutes(record.start_time);
+      return minutes > 0 ? Math.round(minutes / 6) / 10 : null;
     }
 
     // 渲染學習歷程記錄
@@ -863,11 +895,12 @@
       }
 
       container.innerHTML = recordsData.map(record => {
-        const courseName = record.course_type_name || record.course_name || record.course_type || '課程';
+        const courseName = escapeAttr(recordCategory(record));
         const logDate = record.log_date ? record.log_date.split('T')[0] : '';
-        const duration = record.duration || 2;
-        const topic = record.topic || record.course_content || '學習內容';
-        const description = record.performance || record.notes || record.performance_note || record.teacher_comment || '本堂課學習表現良好';
+        const duration = recordHours(record);
+        const topic = escapeAttr(record.topic || '學習內容');
+        // 只顯示老師的課堂評語；老師尚未填寫時如實呈現，不自動補上評語
+        const description = escapeAttr(record.performance || '老師尚未填寫課堂表現');
         const recordId = record.id || record.record_id || '';
         const logId = record.log_id || '';
         const photos = (record.photos || []).filter(p => p.photo_url);
@@ -898,20 +931,22 @@
                 </svg>
                 ${logDate}
               </span>
-              <span class="history-card__meta-item">
+              ${duration ? `
+              <span class="history-card__meta-item history-card__meta-item--duration">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="12 6 12 12 16 14"/>
                 </svg>
                 ${duration}小時
               </span>
+              ` : ''}
               ${record.teacher_name ? `
               <span class="history-card__meta-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                ${record.teacher_name}
+                ${escapeAttr(record.teacher_name)}
               </span>
               ` : ''}
             </div>
@@ -1081,8 +1116,8 @@
         const category = card.dataset.category || card.querySelector('.history-card__title').textContent.trim();
         const style = CATEGORY_STYLES[category] || DEFAULT_CATEGORY_STYLE;
         const subtitle = card.querySelector('.history-card__subtitle').textContent.trim();
-        const metaItems = card.querySelectorAll('.history-card__meta-item');
-        const duration = metaItems.length > 1 ? metaItems[1].textContent.trim() : '';
+        const durationEl = card.querySelector('.history-card__meta-item--duration');
+        const duration = durationEl ? durationEl.textContent.trim() : '';
         const hoursMatch = duration.match(/(\d+(\.\d+)?)/);
         if (hoursMatch) totalHours += parseFloat(hoursMatch[1]);
         categories.add(category);

@@ -424,23 +424,34 @@ exports.update = async (req, res) => {
         teacher_id = ?, parent_name_father = ?, parent_phone_father = ?,
         parent_name_mother = ?, parent_phone_mother = ?,
         trial_teacher_id = ?, trial_topic = ?,
-        classroom_id = ?, course_type_id = ?, status = ?
+        classroom_id = ?, course_type_id = ?, status = IF(?, ?, status)
       WHERE id = ?
     `, [
       birthday || null, school || null, grade || null, enrollment_date || null,
       teacher_id || null, parent_name_father || null, parent_phone_father || null,
       parent_name_mother || null, parent_phone_mother || null,
       trial_teacher_id || null, trial_topic || null,
-      classroom_id || null, course_type_id || null, status || 'active', id
+      classroom_id || null, course_type_id || null,
+      // 未傳 status 時保留原值，避免其他表單把結業的學生改回在學
+      status !== undefined, status || 'active', id
     ]);
+
+    // 改為結業：結束目前的班級（從班級名單移除，歷史紀錄保留）
+    const isLeaving = status !== undefined && status !== 'active';
+    if (isLeaving) {
+      await db.update(
+        'UPDATE course_enrollments SET status = "completed" WHERE student_id = ? AND status = "enrolled"',
+        [id]
+      );
+    }
 
     // 有帶性別欄位才更新，避免其他未送此欄位的表單把既有性別清空
     if (gender !== undefined) {
       await db.update('UPDATE students SET gender = ? WHERE id = ?', [normalizeGender(gender), id]);
     }
 
-    // 如果有更新班級
-    if (schedule_id) {
+    // 如果有更新班級（結業的學生不再加入班級）
+    if (schedule_id && !isLeaving) {
       const schedule = await db.queryOne('SELECT id, course_id FROM course_schedules WHERE id = ?', [schedule_id]);
       if (schedule) {
         // 一位學生同時只會在一個班級：換班時原班級的報名標記為已結束（歷史紀錄保留）
@@ -784,9 +795,16 @@ exports.getMe = async (req, res) => {
     }
     attendanceSql += ' GROUP BY slr.attendance';
     const attendanceRows = await db.query(attendanceSql, attendanceParams);
-    const attendanceStats = { present: 0, absent: 0, late: 0, leave: 0, makeup: 0 };
-    attendanceRows.forEach(row => { if (attendanceStats.hasOwnProperty(row.attendance)) attendanceStats[row.attendance] = row.count; });
+    const attendanceStats = { present: 0, absent: 0, late: 0, leave: 0, excused: 0, makeup: 0, no_class: 0 };
+    attendanceRows.forEach(row => { if (attendanceStats.hasOwnProperty(row.attendance)) attendanceStats[row.attendance] = Number(row.count); });
     const totalLessons = Object.values(attendanceStats).reduce((sum, n) => sum + n, 0);
+    // 教師日誌的「請假」存為 absent（excused、leave 為舊資料），補課後改為 makeup：
+    // 待補課 = 仍是請假狀態的堂數；請假 = 待補課 + 已補課
+    const pendingMakeup = attendanceStats.absent + attendanceStats.excused + attendanceStats.leave;
+    const leaveCount = pendingMakeup + attendanceStats.makeup;
+    // 上課堂數與行政端學生列表一致（出席＋補課，跨所有課程）
+    const lessonCountRow = await db.queryOne(`SELECT ${lessonCountSql('?')} as lesson_count`, [student.id]);
+    const lessonCount = Number(lessonCountRow.lesson_count) || 0;
 
     // 最新一筆有能力數據的課堂紀錄 (用於能力雷達圖)
     // 過濾掉所有能力值都是 0 或 NULL 的紀錄
@@ -849,7 +867,10 @@ exports.getMe = async (req, res) => {
         courseHistory,
         attendance: {
           stats: attendanceStats,
-          totalLessons
+          totalLessons,
+          lessonCount,
+          leaveCount,
+          pendingMakeup
         },
         recentRecord
       }
@@ -909,10 +930,10 @@ exports.getMyRecords = async (req, res) => {
       return res.status(403).json({ success: false, message: '僅限學生角色使用此端點' });
     }
 
-    const limit = Math.max(1, parseInt(req.query.limit) || 10);
+    const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 10));
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const offset = (page - 1) * limit;
-    const { course_type_id, start_date, end_date, search } = req.query;
+    const { course_type_id, start_date, end_date, search, record_id, log_id, attended } = req.query;
 
     const studentId = await getSelfStudentId(req.user.id);
     if (!studentId) {
@@ -921,6 +942,21 @@ exports.getMyRecords = async (req, res) => {
 
     let filterSql = ' WHERE slr.student_id = ?';
     const filterParams = [studentId];
+
+    // 指定單筆紀錄（匯出頁使用，避免只在最近 N 筆裡找而找不到較舊的紀錄）
+    if (record_id) {
+      filterSql += ' AND slr.id = ?';
+      filterParams.push(record_id);
+    }
+    if (log_id) {
+      filterSql += ' AND slr.log_id = ?';
+      filterParams.push(log_id);
+    }
+
+    // 只列出實際上過課（出席、補課）的紀錄，學習歷程不列入請假、未約課
+    if (attended === '1' || attended === 'true') {
+      filterSql += ` AND slr.attendance IN ${ATTENDED_SQL}`;
+    }
 
     if (course_type_id) {
       filterSql += ' AND c.course_type_id = ?';
@@ -933,18 +969,20 @@ exports.getMyRecords = async (req, res) => {
     }
 
     if (search) {
-      filterSql += ' AND (c.name LIKE ? OR cl.topic LIKE ? OR slr.notes LIKE ? OR slr.performance LIKE ?)';
-      filterParams.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+      filterSql += ' AND (c.name LIKE ? OR cl.topic LIKE ? OR slr.performance LIKE ?)';
+      filterParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     // 註: LIMIT/OFFSET 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
     // (mysql2 prepared statement 對 LIMIT/OFFSET 使用佔位符在部分版本會出錯)
+    // 備註 (slr.notes) 僅限教師/行政端查閱，不回傳給學生
     const records = await db.query(`
       SELECT
-        slr.id, slr.log_id, slr.attendance, slr.performance, slr.notes, slr.points_earned,
+        slr.id, slr.log_id, slr.attendance, slr.performance, slr.points_earned,
         slr.skill_programming, slr.skill_debugging, slr.skill_creativity,
         slr.skill_structure, slr.skill_teamwork,
         DATE_FORMAT(cl.log_date, '%Y-%m-%d') as log_date, cl.topic, cl.content, cl.outline,
+        cl.start_time, cl.end_time,
         c.name as course_name, ct.name as course_type_name,
         u.name as teacher_name
       FROM student_log_records slr
@@ -1011,18 +1049,33 @@ exports.getMyTrend = async (req, res) => {
         slr.skill_structure, slr.skill_teamwork
       FROM student_log_records slr
       JOIN course_logs cl ON slr.log_id = cl.id
-      WHERE slr.student_id = ? AND slr.attendance != 'excused'
+      WHERE slr.student_id = ? AND slr.attendance IN ${ATTENDED_SQL}
+        AND (COALESCE(slr.skill_programming, 0) > 0
+          OR COALESCE(slr.skill_debugging, 0) > 0
+          OR COALESCE(slr.skill_creativity, 0) > 0
+          OR COALESCE(slr.skill_structure, 0) > 0
+          OR COALESCE(slr.skill_teamwork, 0) > 0)
     `;
     const params = [studentId];
+
+    // 只看單一課程（儀表板的課程下拉選單）
+    const courseId = parseInt(req.query.course_id) || null;
+    if (courseId) {
+      sql += ' AND cl.course_id = ?';
+      params.push(courseId);
+    }
 
     if (start_date && end_date) {
       sql += ' AND cl.log_date BETWEEN ? AND ?';
       params.push(start_date, end_date);
+    } else {
+      // 「近 N 週」以日期區間計算（過去是取最近 N 筆，與按鈕文字不符）
+      // 註: weeks 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
+      const safeWeeks = Math.min(104, Math.max(1, parseInt(weeks) || 6));
+      sql += ` AND cl.log_date > DATE_SUB(CURDATE(), INTERVAL ${safeWeeks} WEEK) AND cl.log_date <= CURDATE()`;
     }
 
-    // 註: LIMIT 已用 parseInt 驗證為安全整數，故直接內嵌於 SQL 字串
-    const safeLimit = start_date && end_date ? 1000 : (Math.max(1, parseInt(weeks) || 6));
-    sql += ` ORDER BY cl.log_date DESC LIMIT ${safeLimit}`;
+    sql += ' ORDER BY cl.log_date DESC';
 
     const rows = await db.query(sql, params);
     rows.reverse();

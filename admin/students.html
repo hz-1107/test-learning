@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學生管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -2268,7 +2269,7 @@
       const token = localStorage.getItem('authToken');
       if (!token) return;
       try {
-        const res = await fetch(`${window.API_BASE || 'http://localhost:3000'}/api/settings/classrooms`, {
+        const res = await fetch(`${window.API_BASE || window.API_ORIGIN}/api/settings/classrooms`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return;

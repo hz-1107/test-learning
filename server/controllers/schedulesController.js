@@ -142,7 +142,7 @@ exports.getOne = async (req, res) => {
 // 新增班級時段
 exports.create = async (req, res) => {
   try {
-    const { course_id, teacher_id, day_of_week, start_time, end_time, classroom_id } = req.body;
+    const { course_id, teacher_id, day_of_week, start_time, end_time, classroom_id, start_date, is_active } = req.body;
 
     if (!course_id || day_of_week === undefined || !start_time || !end_time) {
       return res.status(400).json({
@@ -152,9 +152,12 @@ exports.create = async (req, res) => {
     }
 
     const scheduleId = await db.insert(`
-      INSERT INTO course_schedules (course_id, teacher_id, day_of_week, start_time, end_time, classroom_id, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, TRUE)
-    `, [course_id, teacher_id || null, day_of_week, start_time, end_time, classroom_id || null]);
+      INSERT INTO course_schedules (course_id, teacher_id, day_of_week, start_time, end_time, start_date, classroom_id, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      course_id, teacher_id || null, day_of_week, start_time, end_time, start_date || null, classroom_id || null,
+      is_active === undefined ? true : !!is_active
+    ]);
 
     res.status(201).json({
       success: true,
@@ -174,7 +177,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { course_id, teacher_id, day_of_week, start_time, end_time, classroom_id, is_active } = req.body;
+    const { course_id, teacher_id, day_of_week, start_time, end_time, classroom_id, is_active, start_date } = req.body;
 
     const schedule = await db.queryOne('SELECT id FROM course_schedules WHERE id = ?', [id]);
 
@@ -188,11 +191,16 @@ exports.update = async (req, res) => {
     await db.update(`
       UPDATE course_schedules SET
         course_id = ?, teacher_id = ?, day_of_week = ?, start_time = ?, end_time = ?,
-        classroom_id = ?, is_active = ?
+        classroom_id = ?,
+        is_active = IF(?, ?, is_active),
+        start_date = IF(?, ?, start_date)
       WHERE id = ?
     `, [
       course_id, teacher_id || null, day_of_week, start_time, end_time,
-      classroom_id || null, is_active !== undefined ? is_active : true, id
+      classroom_id || null,
+      // 未傳 is_active / start_date 時保留原值，避免其他呼叫端更新班級時把停課班級改回開課、或把開課日期清空
+      is_active !== undefined, !!is_active,
+      start_date !== undefined, start_date || null, id
     ]);
 
     res.json({
@@ -317,12 +325,17 @@ exports.getMyClasses = async (req, res) => {
         cs.classroom_id,
         c.name as course_name,
         COALESCE(cs.teacher_id, c.teacher_id) as teacher_id,
+        u.name as teacher_name,
         cr.name as classroom_name,
         (SELECT COUNT(*) FROM course_enrollments WHERE schedule_id = cs.id AND status = 'enrolled') as student_count
       FROM course_schedules cs
       JOIN courses c ON cs.course_id = c.id
       LEFT JOIN classrooms cr ON cs.classroom_id = cr.id
-      WHERE cs.deleted_at IS NULL AND COALESCE(cs.teacher_id, c.teacher_id) = ?
+      LEFT JOIN teachers t ON COALESCE(cs.teacher_id, c.teacher_id) = t.id
+      LEFT JOIN users u ON t.user_id = u.id
+      -- 停用的班級／課程不列出，與日誌規則一致，避免點進去顯示「找不到該排程」
+      WHERE cs.deleted_at IS NULL AND cs.is_active = 1 AND c.status = 'active'
+        AND COALESCE(cs.teacher_id, c.teacher_id) = ?
       ORDER BY cs.day_of_week, cs.start_time
     `, [teacherId]);
 

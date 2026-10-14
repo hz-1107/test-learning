@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>老師與行政人員 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -882,6 +883,14 @@
             </div>
           </div>
           <div class="form-group">
+            <label for="editTeacherStatus">在職狀態</label>
+            <select id="editTeacherStatus" name="status">
+              <option value="active">在職</option>
+              <option value="inactive">離職</option>
+            </select>
+            <small style="display: block; margin-top: 6px; font-size: 13px; color: #6a7282;">設為離職後，此老師將無法登入系統</small>
+          </div>
+          <div class="form-group">
             <label for="editTeacherNotes">備註</label>
             <textarea id="editTeacherNotes" name="notes" placeholder="備註說明"></textarea>
           </div>
@@ -1165,6 +1174,7 @@
       document.getElementById('editTeacherBirthday').value = teacher.birthday ? teacher.birthday.split('T')[0] : '';
       document.getElementById('editTeacherHireDate').value = teacher.hire_date ? teacher.hire_date.split('T')[0] : '';
       document.getElementById('editTeacherNotes').value = teacher.notes || '';
+      document.getElementById('editTeacherStatus').value = teacher.status || 'active';
       document.getElementById('editTeacherModal').classList.add('active');
     }
 
@@ -1179,8 +1189,26 @@
         phone: document.getElementById('editTeacherPhone').value || null,
         birthday: document.getElementById('editTeacherBirthday').value,
         hire_date: document.getElementById('editTeacherHireDate').value || null,
-        notes: document.getElementById('editTeacherNotes').value || null
+        notes: document.getElementById('editTeacherNotes').value || null,
+        status: document.getElementById('editTeacherStatus').value
       };
+
+      // 改為離職時，提醒仍負責的班級需改派老師（否則仍會產生該老師的日誌）
+      if (formData.status !== 'active') {
+        try {
+          const classes = (await api.schedules.getAll({ teacher_id: teacherId })).data || [];
+          const activeClasses = classes.filter(c => Number(c.is_active) && c.course_status === 'active');
+          if (activeClasses.length > 0 &&
+              !confirm(`${formData.name} 目前仍負責 ${activeClasses.length} 個開課中的班級，這些班級仍會產生此老師的日誌。
+請記得到「課程管理 → 班級管理」改派老師。
+
+確定要儲存嗎？`)) {
+            return;
+          }
+        } catch (error) {
+          console.error('檢查老師班級失敗:', error);
+        }
+      }
 
       try {
         const result = await api.teachers.update(teacherId, formData);
@@ -1212,6 +1240,9 @@
       }
     }
 
+    // 離職狀態的標示（在職不顯示）
+    const TEACHER_STATUS_LABELS = { inactive: '離職' };
+
     function renderTeachers() {
         const teacherGrid = document.getElementById('teacherGrid');
         const subtitle = document.getElementById('pageSubtitle');
@@ -1240,7 +1271,7 @@
               <div class="teacher-card__info">
                 <div class="teacher-card__avatar">${firstChar}</div>
                 <div class="teacher-card__details">
-                  <span class="teacher-card__name">${teacher.name}</span>
+                  <span class="teacher-card__name">${teacher.name}${TEACHER_STATUS_LABELS[teacher.status] ? ` <span style="font-size: 12px; font-weight: normal; color: #b45309; background: #fef3c7; padding: 1px 6px; border-radius: 8px;">${TEACHER_STATUS_LABELS[teacher.status]}</span>` : ''}</span>
                   <span class="teacher-card__school">${teacher.school || '未設定學校'}</span>
                 </div>
               </div>
@@ -1272,6 +1303,7 @@
             <div class="teacher-card__log-status">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="19" x2="12.01" y2="19"/></svg>
               至今尚有 <strong>${incompleteLogs}</strong> 則上課日誌未完成
+              <a href="logs.html?teacher_id=${teacher.id}&status=incomplete" style="margin-left: auto; color: inherit; font-weight: 600; white-space: nowrap;">查看 ›</a>
             </div>` : `
             <div class="teacher-card__log-status teacher-card__log-status--ok">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>

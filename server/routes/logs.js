@@ -15,6 +15,9 @@ router.post('/auto-create-my', authorize('admin', 'staff', 'teacher'), logsContr
 // 取得教師的課程日誌狀態
 router.get('/my-status', authorize('admin', 'staff', 'teacher'), logsController.getMyLogsStatus);
 
+// 取得當前教師未完成的日誌（教師端首頁用）
+router.get('/my-incomplete', authorize('admin', 'staff', 'teacher'), logsController.getMyIncompleteLogs);
+
 // 根據排程和日期取得日誌
 router.get('/by-schedule', authorize('admin', 'staff', 'teacher'), logsController.getByScheduleAndDate);
 
@@ -22,13 +25,10 @@ router.get('/by-schedule', authorize('admin', 'staff', 'teacher'), logsControlle
 router.get('/schedule-dates', authorize('admin', 'staff', 'teacher'), logsController.getScheduleDates);
 
 // 日誌管理路由
-router.get('/', logsController.getAll);
+router.get('/', authorize('admin', 'staff', 'teacher'), logsController.getAll);
 router.get('/:id', logsController.getOne);
 router.post('/', authorize('admin', 'staff', 'teacher'), logsController.create);
 router.put('/:id', authorize('admin', 'staff', 'teacher'), logsController.update);
-
-// 日誌權限
-router.put('/:id/permissions', authorize('admin', 'staff'), logsController.updatePermissions);
 
 // 學生記錄
 router.put('/:id/students/:student_id', authorize('admin', 'staff', 'teacher'), logsController.updateStudentRecord);

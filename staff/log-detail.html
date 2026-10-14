@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>課程日誌詳情 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -751,7 +752,7 @@
 
         <div class="page-header">
           <h2 class="page-title">課程日誌詳情</h2>
-          <span class="status-badge status-badge--progress">進行中</span>
+          <span class="status-badge status-badge--progress">載入中</span>
         </div>
 
         <!-- 課程資訊卡 -->
@@ -788,7 +789,7 @@
   <script src="../js/main.js"></script>
   <script src="../js/ability-chart.js"></script>
   <script>
-    const API_BASE = window.API_BASE || 'http://localhost:3000';
+    const API_BASE = window.API_BASE || window.API_ORIGIN;
     let currentLogData = null;
     let radarCharts = {};
 
@@ -840,8 +841,9 @@
       // 更新頁面標題區的狀態
       const statusBadge = document.querySelector('.page-header .status-badge');
       const statusMap = {
-        'pending': { class: 'status-badge--pending', text: '未填寫' },
-        'progress': { class: 'status-badge--progress', text: '進行中' },
+        'pending': { class: 'status-badge--pending', text: '待填寫' },
+        'progress': { class: 'status-badge--progress', text: '填寫中' },
+        'in_progress': { class: 'status-badge--progress', text: '填寫中' },
         'completed': { class: 'status-badge--completed', text: '已完成' }
       };
       const status = statusMap[log.status] || statusMap['pending'];
@@ -930,11 +932,20 @@
           outlineItems = [log.outline];
         }
 
-        if (Array.isArray(outlineItems) && outlineItems.length > 0) {
+        // 教師端存的是一段純文字大綱（AI 生成或手動輸入）；舊資料可能是 JSON 陣列
+        const escapeHtml = str => String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        if (!Array.isArray(outlineItems)) outlineItems = [String(outlineItems)];
+        if (outlineItems.length === 1) {
+          outlineContainer.innerHTML = `
+            <div class="course-outline__title">課程大綱</div>
+            <p style="white-space: pre-line; line-height: 1.7; margin: 0;">${escapeHtml(outlineItems[0])}</p>
+          `;
+          outlineContainer.style.display = 'block';
+        } else if (outlineItems.length > 1) {
           outlineContainer.innerHTML = `
             <div class="course-outline__title">課程大綱</div>
             <ol class="course-outline__list">
-              ${outlineItems.map((item, index) => `<li>${index + 1}. ${item}</li>`).join('')}
+              ${outlineItems.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
             </ol>
           `;
           outlineContainer.style.display = 'block';
@@ -1008,7 +1019,7 @@
               <div class="student-detail__section">
                 <div class="student-detail__label">教師評語</div>
                 <div class="student-detail__content">
-                  ${record.performance || record.notes || '無'}
+                  ${record.performance || '無'}
                 </div>
               </div>
 
