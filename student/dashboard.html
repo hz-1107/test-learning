@@ -652,10 +652,17 @@
       flex-wrap: wrap;
     }
 
+    /* 日期區間、近6週、近12週、日期與套用維持同一橫列 */
     .trend-filter {
       display: flex;
       align-items: center;
-      gap: var(--spacing-sm);
+      gap: 6px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    .trend-filter > * {
+      flex-shrink: 0;
     }
 
     .trend-filter__label {
@@ -669,7 +676,7 @@
     }
 
     .trend-filter__btn {
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: var(--radius-sm);
       font-size: var(--font-size-sm);
       color: var(--color-text-secondary);
@@ -690,11 +697,12 @@
     }
     
     .trend-date-input {
-        padding: 6px 12px;
+        width: 132px;
+        padding: 5px 6px;
         border-radius: var(--radius-sm);
         border: 1px solid var(--color-surface-alt);
         background: var(--color-surface);
-        font-size: var(--font-size-sm);
+        font-size: 13px;
         color: var(--color-text-secondary);
     }
 
@@ -704,7 +712,7 @@
     }
 
     .trend-apply-btn {
-        padding: 6px 16px;
+        padding: 6px 12px;
         border-radius: var(--radius-sm);
         border: none;
         background: var(--color-primary);
