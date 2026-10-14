@@ -53,7 +53,8 @@ exports.getAll = async (req, res) => {
       params.push(course_type_id);
     }
 
-    sql += ' ORDER BY c.name';
+    // 依課程類型排序（幼兒簡易機械 → 動力機械 → 程式機械 → 科創機器人 → 比賽專班 → 無人機課程）
+    sql += ' ORDER BY c.course_type_id IS NULL, c.course_type_id, c.id';
 
     const courses = await db.query(sql, params);
 
@@ -263,7 +264,7 @@ exports.delete = async (req, res) => {
 exports.getTypes = async (req, res) => {
   try {
     const types = await db.query(
-      'SELECT * FROM course_types WHERE is_active = TRUE ORDER BY name'
+      'SELECT * FROM course_types WHERE is_active = TRUE ORDER BY id'
     );
 
     res.json({

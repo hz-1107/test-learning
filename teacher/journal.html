@@ -3814,21 +3814,14 @@
 
     // 備用課程大綱生成（當 API 無法使用時）
     function generateOutlineFallback(principles, input) {
-      const result = `【課程大綱】
-
-一、課程主題
-本堂課程以${principles.join('、') || '機械原理'}為核心，透過實作體驗讓學生理解基礎物理原理。
-
-二、教學目標
-1. 認識${principles[0] || '機械原理'}的基本概念
-2. 能夠動手組裝並調整機械結構
-3. 培養觀察力與問題解決能力
-
-三、課程內容
-${input || '透過積木組裝體驗力學原理，讓學生在實作中學習。'}
-
-四、學習成果
-學生能夠理解並應用所學原理，完成指定的機械作品。`;
+      // 與 AI 生成一致：只寫課程主題與學習成果，限制 50~60 字
+      const buildText = topic => `本課以${topic}為主題，引導學生動手組裝並測試機構作品；學生能理解其運作原理，並獨立完成指定的機械作品。`;
+      let text = buildText(principles.slice(0, 2).join('、') || '機械原理');
+      if (Array.from(text).length > 60) {
+        text = buildText(principles[0]);
+      }
+      const chars = Array.from(text);
+      const result = chars.length > 60 ? chars.slice(0, 59).join('') + '。' : text;
 
       document.getElementById('outlineResult').value = result;
 

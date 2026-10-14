@@ -68,6 +68,12 @@ function getTraitScenarios(traits) {
   return scenarios;
 }
 
+// 課程大綱字數範圍（含標點符號）
+const OUTLINE_MIN_LENGTH = 50;
+const OUTLINE_MAX_LENGTH = 60;
+// 字數不符時重新生成的最多次數
+const OUTLINE_MAX_ATTEMPTS = 3;
+
 // Gemini 暫時性錯誤（流量過高、限流）時的重試設定
 const GEMINI_RETRY_STATUS = [429, 500, 503];
 const GEMINI_MAX_RETRIES = 2;
@@ -248,11 +254,20 @@ exports.generateOutline = async (req, res) => {
     // 構建 prompt
     const prompt = buildOutlinePrompt(principles || [], manualInput);
 
-    // 呼叫 Gemini API
-    const data = await callGeminiAPI(prompt);
-
-    // 解析回應
-    const outline = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+    // 呼叫 Gemini API，字數不在 50~60 字範圍內時重新生成
+    let outline = '';
+    for (let attempt = 0; attempt < OUTLINE_MAX_ATTEMPTS; attempt++) {
+      const data = await callGeminiAPI(prompt);
+      const result = fitOutlineLength((data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim());
+      if (result.valid) {
+        outline = result.text;
+        break;
+      }
+      // 保留最接近範圍的結果，重試都失敗時使用
+      if (result.text.length > outline.length) {
+        outline = result.text;
+      }
+    }
 
     if (!outline) {
       return res.status(500).json({
@@ -393,18 +408,33 @@ ${principles.length > 0 ? principles.join('、') : '（教師未特別勾選原�
 
   prompt += `
 【撰寫要求】
-1. 使用純文字撰寫，不要使用 Markdown 符號（如 **、##、-）
-2. 依序包含以下四個段落，並以「一、」「二、」「三、」「四、」作為段落標題：
-   一、課程主題：簡述本堂課的核心主題與運用的原理
-   二、教學目標：條列 2-3 項具體、可觀察的學習目標
-   三、課程內容：依教師補充說明延伸描述實際教學活動與操作步驟；若教師未補充，則依所選原理合理設計活動
-   四、學習成果：描述學生完成課程後應能達成的具體成果
-3. 內容需符合國小/國中程式設計與機器人實作課程情境，語氣專業但易讀
-4. 禁止捏造教師補充說明中沒有提到的具體人名、日期或分數
-5. 總字數約 200-350 字
-6. 直接輸出大綱內容，不要加上開場白或說明文字`;
+1. 嚴格限制在 ${OUTLINE_MIN_LENGTH}~${OUTLINE_MAX_LENGTH} 字之間（含標點符號），少於 ${OUTLINE_MIN_LENGTH} 字或超過 ${OUTLINE_MAX_LENGTH} 字皆不合格
+2. 只寫兩個重點：課程主題（本堂課做什麼、運用什麼原理）與學習成果（學生能學會或完成什麼），兩者篇幅約各半
+3. 以一到兩句完整的句子呈現，不要分段、不要條列、不要加「課程主題」「學習成果」等標題
+4. 使用純文字撰寫，不要使用 Markdown 符號（如 **、##、-）
+5. 內容需符合國小/國中程式設計與機器人實作課程情境，語氣專業但易讀
+6. 禁止捏造教師補充說明中沒有提到的具體人名、日期或分數
+7. 直接輸出大綱內容，不要加上開場白或說明文字`;
 
   return prompt;
+}
+
+/**
+ * 將大綱調整到 50~60 字範圍：超過上限時截在範圍內最後一個標點並以句號結尾，避免斷在句子中間
+ * 回傳 { text, valid }，valid 為 false 表示無法調整到範圍內（需重新生成）
+ */
+function fitOutlineLength(text) {
+  const chars = Array.from(text.replace(/\s+/g, ''));
+  if (chars.length <= OUTLINE_MAX_LENGTH) {
+    return { text: chars.join(''), valid: chars.length >= OUTLINE_MIN_LENGTH };
+  }
+  // 截斷後長度為 i + 1（含補上的句號），須落在範圍內
+  for (let i = OUTLINE_MAX_LENGTH - 1; i >= OUTLINE_MIN_LENGTH - 1; i--) {
+    if ('。！；，、'.includes(chars[i])) {
+      return { text: chars.slice(0, i).join('') + '。', valid: true };
+    }
+  }
+  return { text: chars.slice(0, OUTLINE_MAX_LENGTH - 1).join('') + '。', valid: false };
 }
 
 /**
