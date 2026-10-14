@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>點數管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -261,7 +262,7 @@
   <script src="../js/main.js"></script>
   <script>
     // API 基礎網址
-    const POINTS_API_BASE = window.API_BASE || 'http://localhost:3000';
+    const POINTS_API_BASE = window.API_BASE || window.API_ORIGIN;
 
     const dateEl = document.getElementById('currentDate');
     const now = new Date();
@@ -533,10 +534,20 @@
 
       const meta = POINT_REASON_META[reason];
       const delta = meta.sign * amount;
-      const finalPoints = Math.max(0, currentPoints + delta);
+      const finalPoints = currentPoints + delta;
 
       deltaEl.textContent = `${delta > 0 ? '+' : ''}${delta}`;
       deltaEl.style.color = meta.color;
+
+      // 扣除超過目前餘額：後端會拒絕，這裡先提示並停用確認按鈕
+      if (finalPoints < 0) {
+        finalEl.textContent = `點數不足（目前 ${currentPoints} 點）`;
+        confirmBtn.textContent = meta.confirmLabel;
+        confirmBtn.style.background = '#c4c4c4';
+        confirmBtn.disabled = true;
+        return;
+      }
+
       finalEl.textContent = finalPoints;
       confirmBtn.textContent = meta.confirmLabel;
       confirmBtn.style.background = meta.color;
@@ -585,11 +596,11 @@
 
         renderPointsPage(currentPointsPage);
         closePointsManageModal();
-        alert(`${delta > 0 ? '增加' : '扣除'}點數成功！新餘額：${result.data.new_balance} 點`);
+        showMessage(`${delta > 0 ? '增加' : '扣除'}點數成功！新餘額：${result.data.new_balance} 點`, 'success');
 
       } catch (error) {
         console.error('點數操作錯誤:', error);
-        alert('操作失敗：' + error.message);
+        showMessage('操作失敗：' + error.message, 'error');
         confirmBtn.disabled = false;
         confirmBtn.textContent = meta.confirmLabel;
       }

@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學生管理 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -2439,7 +2440,7 @@
   <script src="../js/ability-chart.js"></script>
   <script src="../js/student-avatar.js"></script>
   <script>
-    const API_BASE = 'http://localhost:3000/api';
+    const API_BASE = window.API_ORIGIN + '/api';
     function isImageFile(url) {
       return /\.(jpe?g|png|gif|webp|bmp|heic|heif)$/i.test(url || '');
     }

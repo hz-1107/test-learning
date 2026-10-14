@@ -18,8 +18,9 @@ exports.login = async (req, res) => {
     // 登入帳號為姓名（既有帳號仍可用原本的 username）；
     // 同名時以密碼（西元生日 YYYYMMDD）區分
     const account = String(username).trim();
+    // 啟用中的帳號優先比對；停用帳號只用來提示「帳號已停用」
     const candidates = await db.query(
-      'SELECT * FROM users WHERE (name = ? OR username = ?) AND is_active = TRUE ORDER BY id',
+      'SELECT * FROM users WHERE (name = ? OR username = ?) ORDER BY is_active DESC, id',
       [account, account]
     );
 
@@ -35,6 +36,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: '帳號或密碼錯誤'
+      });
+    }
+
+    // 帳號已停用（例如老師離職）
+    if (!user.is_active) {
+      return res.status(403).json({
+        success: false,
+        message: '帳號已停用，請聯絡行政人員'
       });
     }
 

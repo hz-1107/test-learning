@@ -5,7 +5,7 @@
  */
 
 // API 基底路徑
-const NOTIFICATION_API_BASE = window.API_BASE || 'http://localhost:3000';
+const NOTIFICATION_API_BASE = window.API_BASE || window.API_ORIGIN;
 
 // 公告資料
 let announcements = [];

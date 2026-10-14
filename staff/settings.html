@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>系統設定 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -269,7 +270,7 @@
               <svg class="settings-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="8" y1="18" x2="8" y2="18.01"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
               <div>
                 <div class="settings-card__title">國定假日與休假日設定</div>
-                <div class="settings-card__desc">設定之假日將於課表排程中以紅色標記</div>
+                <div class="settings-card__desc">設定之假日將於課表排程中以紅色標記，當天所有課程停課、不產生日誌；颱風假等臨時停課也在這裡設定（選「單次」）</div>
               </div>
             </div>
             <div class="settings-card__body">
@@ -290,7 +291,7 @@
                       <option value="0">單次</option>
                       <option value="1">每年</option>
                     </select>
-                    <input type="text" class="field-input field-input--name" id="holidayName" placeholder="輸入假日名稱" maxlength="100" aria-label="假日名稱" required>
+                    <input type="text" class="field-input field-input--name" id="holidayName" placeholder="輸入假日名稱（例：颱風假）" maxlength="100" aria-label="假日名稱" required>
                     <button type="submit" class="btn-yellow" id="addHolidayBtn">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                       新增

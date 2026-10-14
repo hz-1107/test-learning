@@ -4,7 +4,7 @@
  */
 
 // API 基礎設定
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = window.API_ORIGIN + '/api';
 
 // 建立 Axios 實例
 const apiClient = axios.create({
@@ -281,9 +281,6 @@ const api = {
 
     // 更新日誌
     update: (id, data) => apiClient.put(`/logs/${id}`, data),
-
-    // 更新日誌權限
-    updatePermissions: (id, teacherIds) => apiClient.put(`/logs/${id}/permissions`, { teacher_ids: teacherIds }),
 
     // 更新學生日誌記錄
     updateStudentRecord: (logId, studentId, data) => apiClient.put(`/logs/${logId}/students/${studentId}`, data)

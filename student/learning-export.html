@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學習歷程匯出 - 智慧學習歷程系統</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -155,7 +156,9 @@
     .info-row--split {
       display: flex;
       justify-content: flex-start;
-      gap: 48px;
+      /* 學生姓名、學習時間、課程名稱同一列；課程名稱過長時自動換行 */
+      flex-wrap: wrap;
+      gap: 16px 32px;
     }
 
     .info-group {
@@ -454,20 +457,16 @@
         <div class="info-row info-row--split">
           <div class="info-group">
             <span class="info-tag">學生姓名</span>
-            <span class="info-value" id="studentName">載入中</span>
+            <span class="info-value info-value--normal" id="studentName">載入中</span>
           </div>
           <div class="info-group">
             <span class="info-tag">學習時間</span>
             <span class="info-value info-value--date" id="learningDate">----.--.--</span>
           </div>
-        </div>
-      </div>
-
-      <!-- 課程名稱 -->
-      <div class="info-section">
-        <div class="info-row">
-          <span class="info-tag">課程名稱</span>
-          <span class="info-value info-value--normal" id="courseName">載入中</span>
+          <div class="info-group">
+            <span class="info-tag">課程名稱</span>
+            <span class="info-value info-value--normal" id="courseName">載入中</span>
+          </div>
         </div>
       </div>
 
@@ -479,6 +478,14 @@
         <p class="description-section__content" id="courseDescription">
           載入中...
         </p>
+      </div>
+
+      <!-- 教師評語（老師在教師日誌為該學生填寫的評語；沒有評語時整個區塊維持隱藏） -->
+      <div class="description-section" id="commentSection" style="display: none;">
+        <div class="description-section__tag">
+          <span class="info-tag">教師評語</span>
+        </div>
+        <p class="description-section__content" id="teacherComment"></p>
       </div>
 
       <!-- 上課照片 -->
@@ -544,7 +551,7 @@
   <script src="../js/file-url.js"></script>
   <script src="../js/api.js"></script>
   <script>
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = window.API_ORIGIN;
 
     // 從 URL 取得參數
     function getUrlParams() {
@@ -581,16 +588,28 @@
       `).join('');
     }
 
+    // 顯示教師評語（沒有評語時整個區塊維持隱藏）
+    function renderTeacherComment(record) {
+      const comment = (record?.performance || '').trim();
+      if (!comment) return;
+
+      document.getElementById('teacherComment').textContent = comment;
+      document.getElementById('commentSection').style.display = 'block';
+    }
+
     // 取得本人在指定課堂的學習紀錄（含老師為該學生上傳的照片）
     async function fetchMyRecord(token, params) {
-      const recordRes = await fetch(`${API_BASE}/api/students/me/records?limit=100`, {
+      // 直接以紀錄編號查詢（過去只在最近 100 筆中尋找，較舊的紀錄會找不到評語與照片）
+      const query = params.recordId
+        ? `record_id=${encodeURIComponent(params.recordId)}`
+        : `log_id=${encodeURIComponent(params.logId)}`;
+      const recordRes = await fetch(`${API_BASE}/api/students/me/records?${query}&limit=1`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!recordRes.ok) return null;
 
       const recordData = await recordRes.json();
-      const records = recordData.data?.records || [];
-      return records.find(r => params.recordId ? r.id == params.recordId : r.log_id == params.logId) || null;
+      return recordData.data?.records?.[0] || null;
     }
 
     // 載入學習紀錄資料
@@ -613,9 +632,9 @@
           const profile = await profileRes.json();
           const studentData = profile.data.student;
           const studentName = studentData?.name || '學生';
-          const studentNo = studentData?.student_no || '';
+          const studentNo = studentData?.student_code || '';
 
-          document.getElementById('studentName').textContent = studentName.split('').join(' ');
+          document.getElementById('studentName').textContent = studentName;
           document.getElementById('topBarStudentId').textContent = studentNo ? `${studentNo}${studentName}` : studentName;
         }
 
@@ -645,14 +664,18 @@
             }
             document.getElementById('courseDescription').textContent = description.trim() || '無課程說明';
 
+            // 本人在這堂課的學習紀錄：教師評語、老師為該學生上傳的照片
+            let record = null;
+            try {
+              record = await fetchMyRecord(token, params);
+            } catch (e) {
+              console.log('無法取得學習紀錄:', e);
+            }
+            renderTeacherComment(record);
+
             // 上課照片：老師為該學生上傳的照片（教師日誌）＋ 課堂活動照片
             const photos = [];
-            try {
-              const record = await fetchMyRecord(token, params);
-              if (record?.photos) photos.push(...record.photos);
-            } catch (e) {
-              console.log('無法取得學生照片:', e);
-            }
+            if (record?.photos) photos.push(...record.photos);
             try {
               const photosRes = await fetch(`${API_BASE}/api/logs/${params.logId}/photos`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -685,11 +708,11 @@
               let description = (record.outline || '').trim();
               if (!description) {
                 if (record.topic) description += record.topic + '\n\n';
-                if (record.content) description += record.content + '\n\n';
-                if (record.performance) description += '課堂表現：' + record.performance;
+                if (record.content) description += record.content;
               }
               document.getElementById('courseDescription').textContent = description.trim() || '無課程說明';
 
+              renderTeacherComment(record);
               renderPhotos(record.photos);
 
               document.title = `學習歷程－${courseName}`;

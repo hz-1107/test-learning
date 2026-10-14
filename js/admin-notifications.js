@@ -2,7 +2,7 @@
 // 行政端通知公告系統
 // ============================================
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = window.API_ORIGIN + '/api';
 
 // 公告資料快取
 let announcementsCache = [];

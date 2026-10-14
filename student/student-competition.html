@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>競賽歷程 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -1076,7 +1077,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="../js/pdf-export.js"></script>
   <script>
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = window.API_ORIGIN;
     const searchInput = document.getElementById('competitionSearchInput');
     let allCompetitionCards = Array.from(document.querySelectorAll('.competition-card'));
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
@@ -1109,6 +1110,11 @@
         if (profileRes.ok) {
           const profile = await profileRes.json();
           document.querySelector('.student-sidebar__name').textContent = profile.data.student?.name || '學生';
+          // 頁首頭像與「學習概況」頁一致（過去這頁固定顯示預設頭像）
+          const me = profile.data.student || {};
+          document.querySelector('.student-header__avatar img').src = me.avatar
+            ? fileUrl(me.avatar)
+            : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(me.username || 'student')}`;
         }
       } catch (e) {
         console.error('載入學生資訊失敗:', e);
@@ -1129,8 +1135,7 @@
         });
 
         if (!response.ok) {
-          console.log('使用靜態競賽資料');
-          return; // 使用靜態 HTML
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const result = await response.json();

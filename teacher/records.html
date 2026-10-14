@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>教師日誌 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -531,8 +532,8 @@
           <select class="filter-group__select" id="statusFilter">
             <option value="all">全部</option>
             <option value="completed">已完成</option>
-            <option value="in-progress">進行中</option>
-            <option value="pending">未填寫</option>
+            <option value="in-progress">填寫中</option>
+            <option value="pending">待填寫</option>
           </select>
         </div>
         <div class="filter-group">
@@ -580,6 +581,7 @@
   <script>
     // 全域變數
     let allClasses = [];
+    let myTeacherId = null; // 登入教師的 ID（自己的日誌排在最上面）
     let filteredClasses = [];
     let currentPage = 1;
     const itemsPerPage = 10;
@@ -600,11 +602,8 @@
         document.getElementById('teacherName').textContent = userName + ' 老師';
       }
 
-      // 設定日期篩選器為「本月月初至今日」
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      document.getElementById('startDate').value = formatLocalDate(firstDay);
-      document.getElementById('endDate').value = formatLocalDate(now);
+      // 日期篩選器預設：起始日留空（從各班開課日起算），結束日為今天
+      document.getElementById('endDate').value = formatLocalDate(new Date());
 
       // 自動建立已開始課程的日誌，然後載入列表
       autoCreateAndLoadClasses();
@@ -633,7 +632,7 @@
     }
 
     // API 基礎網址
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = window.API_ORIGIN;
 
     // 從 API 載入教師的課程與日誌狀態
     async function loadMyClasses() {
@@ -648,7 +647,11 @@
         const endDate = document.getElementById('endDate').value;
 
         // 使用 API 端點取得所有教師的課程日誌狀態
-        const url = `${API_BASE}/api/logs/my-status?start_date=${startDate}&end_date=${endDate}&all=true`;
+        // 起始日留空則從各班開課日起算（規則與首頁、行政端共用）
+        const params = new URLSearchParams({ all: 'true' });
+        if (startDate) params.set('start_date', startDate);
+        if (endDate) params.set('end_date', endDate);
+        const url = `${API_BASE}/api/logs/my-status?${params.toString()}`;
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -669,6 +672,7 @@
         const result = await response.json();
         console.log('API 回應:', result);
         allClasses = result.data?.schedules || [];
+        myTeacherId = result.data?.teacher_id ?? null;
 
         // 更新篩選下拉選單
         updateFilterOptions();
@@ -726,28 +730,18 @@
     // 展開所有課程的日期列表
     function expandAllDates() {
       const allItems = [];
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
-      const today = formatLocalDate(new Date());
 
       allClasses.forEach(cls => {
-        // 計算該排程在日期範圍內的所有日期
-        const expectedDates = getExpectedDatesInRange(startDate, endDate, cls.day_of_week);
-
-        expectedDates.forEach(dateStr => {
-          // 查找該日期是否有日誌
-          const log = cls.logs ? cls.logs.find(l => l.log_date.split('T')[0] === dateStr) : null;
-          const isPast = dateStr <= today;
+        // 每一堂課及其日誌狀態由後端依共用規則推算（自開課日起至今天，今天的課開始後才列入）
+        (cls.dates || []).forEach(({ log_date: dateStr, log_id: logId, status: logStatus }) => {
+          const log = logId ? { id: logId, status: logStatus } : null;
+          const isPast = true;
 
           let status = 'pending';
-          if (log) {
-            if (log.status === 'completed') {
-              status = 'completed';
-            } else if (log.status === 'in_progress') {
-              status = 'in-progress';
-            } else {
-              status = 'pending';
-            }
+          if (logStatus === 'completed') {
+            status = 'completed';
+          } else if (logStatus === 'in_progress' || logStatus === 'progress') {
+            status = 'in-progress';
           }
 
           allItems.push({
@@ -760,31 +754,18 @@
         });
       });
 
-      // 按日期排序（最新的在前）
-      allItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+      // 排序：自己未完成的日誌在最上面，其餘（含自己已完成的）跟其他老師一起；各組再依日期、上課時間由新到舊
+      // 未完成＝已到上課日期且尚未完成（尚未到課的不算）
+      const isMyIncomplete = item => item.teacher_id == myTeacherId && item.isPast && item.dateStatus !== 'completed';
+      allItems.sort((a, b) => {
+        const aFirst = isMyIncomplete(a) ? 0 : 1;
+        const bFirst = isMyIncomplete(b) ? 0 : 1;
+        if (aFirst !== bFirst) return aFirst - bFirst;
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return (b.start_time || '').localeCompare(a.start_time || '');
+      });
 
       return allItems;
-    }
-
-    // 計算日期範圍內的特定星期幾
-    function getExpectedDatesInRange(startDate, endDate, dayOfWeek) {
-      const dates = [];
-      const start = new Date(startDate + 'T00:00:00');
-      const end = new Date(endDate + 'T00:00:00');
-      const current = new Date(start);
-
-      while (current <= end) {
-        if (current.getDay() === dayOfWeek) {
-          // 使用本地日期格式，避免時區轉換問題
-          const year = current.getFullYear();
-          const month = String(current.getMonth() + 1).padStart(2, '0');
-          const day = String(current.getDate()).padStart(2, '0');
-          dates.push(`${year}-${month}-${day}`);
-        }
-        current.setDate(current.getDate() + 1);
-      }
-
-      return dates;
     }
 
     // 渲染班級列表
@@ -854,7 +835,7 @@
 
         // 取得狀態顯示
         let statusClass = 'pending';
-        let statusText = '未填寫';
+        let statusText = '待填寫';
         if (!item.isPast) {
           statusClass = 'future';
           statusText = '尚未到課';
@@ -863,7 +844,7 @@
           statusText = '已完成';
         } else if (item.dateStatus === 'in-progress') {
           statusClass = 'in-progress';
-          statusText = '進行中';
+          statusText = '填寫中';
         }
 
         const futureClass = !item.isPast ? 'diary-card--future' : '';
@@ -894,6 +875,15 @@
                   </svg>
                   ${item.classroom_name}
                 </span>
+                ${item.teacher_name ? `
+                <span class="diary-card__meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  ${item.teacher_name}
+                </span>
+                ` : ''}
               </div>
             </div>
             ${item.isPast ? `

@@ -1,6 +1,41 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const { generateUsername, birthdayPassword, syncBirthdayPassword } = require('../utils/account');
+const { listScheduleLogs, groupLogsBySchedule, loadCalendar } = require('../utils/expectedLogs');
+
+/**
+ * 計算每位教師未完成的上課日誌數量
+ * 依課表推算每一堂課（規則見 utils/expectedLogs，與「日誌管理」列表共用），
+ * 該堂課沒有日誌或日誌尚未完成都算一則未完成
+ * 回傳 { teacher_id: count }
+ */
+async function countIncompleteLogsByTeacher() {
+  const schedules = await db.query(`
+    SELECT cs.id, cs.teacher_id, cs.day_of_week, cs.start_time, cs.start_date, cs.created_at
+    FROM course_schedules cs
+    JOIN courses c ON cs.course_id = c.id
+    WHERE cs.is_active = 1 AND c.status = 'active' AND cs.deleted_at IS NULL AND cs.teacher_id IS NOT NULL
+  `);
+  if (schedules.length === 0) return {};
+
+  const logs = await db.query(
+    'SELECT schedule_id, log_date, status FROM course_logs WHERE schedule_id IN (?)',
+    [schedules.map(s => s.id)]
+  );
+  const logsBySchedule = groupLogsBySchedule(logs);
+  const calendar = await loadCalendar();
+
+  const counts = {};
+  schedules.forEach(schedule => {
+    listScheduleLogs(schedule, logsBySchedule.get(schedule.id) || new Map(), { calendar }).forEach(({ log }) => {
+      if (!log || log.status !== 'completed') {
+        counts[schedule.teacher_id] = (counts[schedule.teacher_id] || 0) + 1;
+      }
+    });
+  });
+
+  return counts;
+}
 
 // 取得所有教師
 exports.getAll = async (req, res) => {
@@ -8,11 +43,7 @@ exports.getAll = async (req, res) => {
     const { status, search } = req.query;
 
     let sql = `
-      SELECT t.*, t.hire_date, u.username, u.line_id, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active,
-        (SELECT COUNT(*) FROM course_logs cl
-         WHERE cl.teacher_id = t.id
-           AND cl.log_date <= CURDATE()
-           AND (cl.status IS NULL OR cl.status <> 'completed')) AS incomplete_logs_count
+      SELECT t.*, t.hire_date, u.username, u.line_id, u.name, u.email, u.phone, u.birthday, u.avatar, u.is_active
       FROM teachers t
       JOIN users u ON t.user_id = u.id
       WHERE 1=1
@@ -32,6 +63,25 @@ exports.getAll = async (req, res) => {
     sql += ' ORDER BY u.name';
 
     const teachers = await db.query(sql, params);
+
+    // 教師端只需要同事名單（例如日誌的「師資異動」選單），不提供電話、生日、備註等個資
+    if (!['admin', 'staff'].includes(req.user.role)) {
+      return res.json({
+        success: true,
+        data: teachers.map(t => ({
+          id: t.id,
+          name: t.name,
+          avatar: t.avatar,
+          is_active: t.is_active,
+          status: t.status
+        }))
+      });
+    }
+
+    const incompleteCounts = await countIncompleteLogsByTeacher();
+    teachers.forEach(t => {
+      t.incomplete_logs_count = incompleteCounts[t.id] || 0;
+    });
 
     res.json({
       success: true,
@@ -140,7 +190,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, phone, birthday, school, line_id, hire_date, notes } = req.body;
+    const { name, phone, birthday, school, line_id, hire_date, notes, status } = req.body;
 
     const teacher = await db.queryOne('SELECT user_id FROM teachers WHERE id = ?', [id]);
 
@@ -166,11 +216,17 @@ exports.update = async (req, res) => {
       );
     }
 
-    // 更新教師資料
+    // 更新教師資料（未傳 status 時保留原值）
+    const hasStatus = ['active', 'inactive'].includes(status);
     await db.update(`
-      UPDATE teachers SET school = ?, hire_date = ?, notes = ?
+      UPDATE teachers SET school = ?, hire_date = ?, notes = ?, status = IF(?, ?, status)
       WHERE id = ?
-    `, [school || null, hire_date || null, notes || null, id]);
+    `, [school || null, hire_date || null, notes || null, hasStatus, status || 'active', id]);
+
+    // 離職的老師停用帳號（無法登入）；改回在職則重新啟用
+    if (hasStatus) {
+      await db.update('UPDATE users SET is_active = ? WHERE id = ?', [status === 'active', teacher.user_id]);
+    }
 
     res.json({
       success: true,

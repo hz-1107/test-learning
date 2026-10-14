@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>課程資訊 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -635,7 +636,7 @@
         <a href="logs.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>日誌管理</a>
         <a href="courses.html" class="staff-sidebar__nav-item staff-sidebar__nav-item--active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>課程資訊</a>
         <a href="schedule.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>課表排程</a>
-        <a href="points.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>點數管理</a>
+        <a href="points.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>點數管理</a>
         <a href="settings.html" class="staff-sidebar__nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系統設定</a>
       </nav>
       <div class="staff-sidebar__footer">
@@ -930,10 +931,9 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="classStatus">狀態＊</label>
+              <label for="classStatus">班級狀態＊</label>
               <select id="classStatus" name="status" required>
-                <option value="">選擇狀態</option>
-                <option value="active">開課</option>
+                <option value="active" selected>開課</option>
                 <option value="inactive">停課</option>
               </select>
             </div>
@@ -959,6 +959,11 @@
               <label for="classEndTime">結束時間＊</label>
               <input type="time" id="classEndTime" name="end_time" required>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="classStartDate">開課日期＊</label>
+            <input type="date" id="classStartDate" name="start_date" required>
+            <small style="color: var(--color-text-muted);">此日期以前不會產生課程日誌</small>
           </div>
         </div>
         <div class="modal__footer">
@@ -1003,7 +1008,7 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="editClassStatus">狀態＊</label>
+              <label for="editClassStatus">班級狀態＊</label>
               <select id="editClassStatus" name="status" required>
                 <option value="">選擇狀態</option>
                 <option value="active">開課</option>
@@ -1032,6 +1037,11 @@
               <label for="editClassEndTime">結束時間＊</label>
               <input type="time" id="editClassEndTime" name="end_time" required>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="editClassStartDate">開課日期＊</label>
+            <input type="date" id="editClassStartDate" name="start_date" required>
+            <small style="color: var(--color-text-muted);">此日期以前不會產生課程日誌</small>
           </div>
         </div>
         <div class="modal__footer">
@@ -1386,9 +1396,12 @@
         select.innerHTML = '';
         select.appendChild(firstOption);
         teachersData.forEach(teacher => {
+          // 新增班級時不列出離職的老師；編輯時保留，才能顯示班級原本的老師
+          const inactive = teacher.status && teacher.status !== 'active';
+          if (inactive && id === 'classTeacher') return;
           const option = document.createElement('option');
           option.value = teacher.id;
-          option.textContent = teacher.name;
+          option.textContent = inactive ? `${teacher.name}（離職）` : teacher.name;
           select.appendChild(option);
         });
       });
@@ -1408,25 +1421,14 @@
       });
     }
 
-    // 課程選擇變更時更新狀態
-    document.getElementById('classCourse').addEventListener('change', function() {
-      const selectedOption = this.options[this.selectedIndex];
-      const statusSelect = document.getElementById('classStatus');
-
-      if (this.value) {
-        const status = selectedOption.dataset.status;
-        statusSelect.value = status || 'active';
-      }
-    });
-
-    document.getElementById('editClassCourse').addEventListener('change', function() {
-      const selectedOption = this.options[this.selectedIndex];
-      const statusSelect = document.getElementById('editClassStatus');
-
-      if (this.value) {
-        const status = selectedOption.dataset.status;
-        statusSelect.value = status || 'active';
-      }
+    // 選到停課中的課程時提醒：課程停課時，底下所有班級都不會產生日誌
+    ['classCourse', 'editClassCourse'].forEach(id => {
+      document.getElementById(id).addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (this.value && selectedOption.dataset.status === 'inactive') {
+          showMessage(`「${selectedOption.textContent}」課程目前為停課狀態，班級不會產生日誌`, 'warning');
+        }
+      });
     });
 
     // ==================
@@ -1449,6 +1451,10 @@
     async function openAddClassModal() {
       document.getElementById('addClassForm').reset();
       document.querySelectorAll('#addWeekdaySelector .weekday-btn').forEach(btn => btn.classList.remove('active'));
+      // 開課日期預設為今天
+      const now = new Date();
+      document.getElementById('classStartDate').value =
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       // 重新載入課程／老師下拉選單，確保剛新增的課程也會出現
       await loadDropdownData();
       document.getElementById('addClassModal').classList.add('active');
@@ -1465,9 +1471,10 @@
       teacherSelect.value = schedule.teacher_id || '';
 
       document.getElementById('editClassClassroom').value = schedule.classroom_id || '';
-      document.getElementById('editClassStatus').value = schedule.course_status || 'active';
+      document.getElementById('editClassStatus').value = Number(schedule.is_active) ? 'active' : 'inactive';
       document.getElementById('editClassStartTime').value = schedule.start_time ? schedule.start_time.substring(0, 5) : '';
       document.getElementById('editClassEndTime').value = schedule.end_time ? schedule.end_time.substring(0, 5) : '';
+      document.getElementById('editClassStartDate').value = schedule.start_date ? schedule.start_date.substring(0, 10) : '';
 
       // 設定星期
       document.querySelectorAll('#editWeekdaySelector .weekday-btn').forEach(btn => {
@@ -1498,23 +1505,18 @@
         day_of_week: parseInt(activeWeekday.dataset.day),
         start_time: document.getElementById('classStartTime').value,
         end_time: document.getElementById('classEndTime').value,
-        classroom_id: document.getElementById('classClassroom').value || null
+        start_date: document.getElementById('classStartDate').value,
+        classroom_id: document.getElementById('classClassroom').value || null,
+        // 狀態只套用在此班級，不影響同課程的其他班級
+        is_active: document.getElementById('classStatus').value !== 'inactive'
       };
-
-      // 如果選擇停課，需要更新課程狀態
-      const status = document.getElementById('classStatus').value;
 
       try {
         const result = await api.schedules.create(formData);
         if (result.success) {
-          // 如果需要更新課程狀態
-          if (status) {
-            await api.courses.update(formData.course_id, { status });
-          }
           showMessage('班級新增成功！', 'success');
           closeModal('addClassModal');
           loadClasses();
-          loadDropdownData(); // 重新載入以更新課程狀態
         }
       } catch (error) {
         showMessage('新增班級失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
@@ -1541,22 +1543,18 @@
         day_of_week: parseInt(activeWeekday.dataset.day),
         start_time: document.getElementById('editClassStartTime').value,
         end_time: document.getElementById('editClassEndTime').value,
-        classroom_id: document.getElementById('editClassClassroom').value || null
+        start_date: document.getElementById('editClassStartDate').value,
+        classroom_id: document.getElementById('editClassClassroom').value || null,
+        // 狀態只套用在此班級，不影響同課程的其他班級
+        is_active: document.getElementById('editClassStatus').value !== 'inactive'
       };
-
-      const status = document.getElementById('editClassStatus').value;
 
       try {
         const result = await api.schedules.update(scheduleId, formData);
         if (result.success) {
-          // 更新課程狀態
-          if (status) {
-            await api.courses.update(courseId, { status });
-          }
           showMessage('班級更新成功！', 'success');
           closeModal('editClassModal');
           loadClasses();
-          loadDropdownData();
         }
       } catch (error) {
         showMessage('更新班級失敗：' + (error.response?.data?.message || '未知錯誤'), 'error');
@@ -1567,7 +1565,7 @@
     // 刪除班級
     // ==================
     async function deleteClass(id) {
-      if (!confirm('確定要刪除這個班級嗎？')) return;
+      if (!confirm('確定要刪除這個班級嗎？\n班級會移到垃圾桶，30 天內可以還原；刪除後此班級不再產生日誌。')) return;
 
       try {
         const result = await api.schedules.delete(id);
@@ -1617,25 +1615,35 @@
         }
 
         const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+        // 依星期（週一在前、週日在後）與上課時間排序
+        const weekdayOrder = day => (day + 6) % 7;
+        const classes = [...result.data].sort((a, b) =>
+          weekdayOrder(a.day_of_week) - weekdayOrder(b.day_of_week) ||
+          (a.start_time || '').localeCompare(b.start_time || '')
+        );
 
-        tbody.innerHTML = result.data.map(schedule => {
+        tbody.innerHTML = classes.map(schedule => {
           const dayName = weekdays[schedule.day_of_week];
           const startTime = schedule.start_time ? schedule.start_time.substring(0, 5) : '';
           const endTime = schedule.end_time ? schedule.end_time.substring(0, 5) : '';
           const timeSlot = `${dayName} ${startTime}-${endTime}`;
-          const isActive = schedule.course_status === 'active';
+          const startDate = schedule.start_date ? schedule.start_date.substring(0, 10).replace(/-/g, '/') : '';
+          // 班級停課，或所屬課程停課，都視為停課（不產生日誌）
+          const courseInactive = schedule.course_status !== 'active';
+          const isActive = Number(schedule.is_active) && !courseInactive;
+          const statusText = isActive ? '開課' : (courseInactive ? '課程停課' : '停課');
 
           return `
             <tr>
               <td>${schedule.course_name || '-'}</td>
               <td>${schedule.teacher_name || '-'}</td>
-              <td>${timeSlot}</td>
+              <td>${timeSlot}${startDate ? `<div style="font-size: 12px; color: var(--color-text-muted);">${startDate} 開課</div>` : ''}</td>
               <td>${schedule.classroom_name || '-'}</td>
               <td>${schedule.student_count || 0}</td>
               <td>
                 <span class="class-status class-status--${isActive ? 'active' : 'inactive'}">
                   <span class="class-status__dot"></span>
-                  ${isActive ? '開課' : '停課'}
+                  ${statusText}
                 </span>
               </td>
               <td>
@@ -1783,7 +1791,7 @@
         document.getElementById('studentListInfo').innerHTML = `
           <span>老師：${schedule.teacher_name || '未指派'}</span>
           <span>教室：${schedule.classroom_name || '未指定'}</span>
-          <span>時間：${startTime}–${endTime}</span>
+          <span>時間：週${dayName} ${startTime}–${endTime}</span>
         `;
 
         // 渲染學生列表
@@ -2006,6 +2014,8 @@
       if (typeName.includes('程式')) return '程式';
       if (typeName.includes('科創')) return '科創';
       if (typeName.includes('幼兒')) return '幼兒';
+      if (typeName.includes('比賽')) return '比賽';
+      if (typeName.includes('無人機')) return '無人機';
       if (typeName.includes('專題')) return '專題';
       return typeName.substring(0, 2);
     }

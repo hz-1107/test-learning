@@ -10,16 +10,15 @@ const https = require('https');
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_HOST = 'generativelanguage.googleapis.com';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-const GEMINI_API_PATH = `/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // =====================
 // 隨機元素設定（增加生成靈活性）
 // =====================
 const WRITING_STYLES = [
-  '像是寫給家長的暖心小語，讓家長感受到孩子的成長',
+  '像是寫給家長的課堂回饋，平實說明孩子的表現',
   '像是學期末的成長紀錄，著重描述學生的進步軌跡',
-  '像是班導師的觀察日記，記錄學生的獨特表現',
-  '像是給學生的鼓勵信，激發學生的學習動力'
+  '像是教師的觀察紀錄，記錄學生的實際表現',
+  '像是給學生的回饋，具體指出做得好的地方'
 ];
 
 const OPENING_STYLES = [
@@ -30,7 +29,7 @@ const OPENING_STYLES = [
 ];
 
 const SENTENCE_PATTERNS = [
-  '使用生動的動詞描述學生的行為',
+  '使用具體的動詞描述學生的行為',
   '用概括性的描述展現學生特質',
   '描述學生的學習態度和成長',
   '著重描述能力表現而非具體事件'
@@ -68,36 +67,56 @@ function getTraitScenarios(traits) {
   return scenarios;
 }
 
-// 課程大綱字數範圍（含標點符號）
-const OUTLINE_MIN_LENGTH = 50;
-const OUTLINE_MAX_LENGTH = 60;
+// 評語字數範圍（含標點符號）
+const COMMENT_MIN_LENGTH = 100;
+const COMMENT_MAX_LENGTH = 120;
 // 字數不符時重新生成的最多次數
+const COMMENT_MAX_ATTEMPTS = 3;
+
+// 課程大綱字數範圍（含標點符號）
+const OUTLINE_MIN_LENGTH = 90;
+const OUTLINE_MAX_LENGTH = 100;
 const OUTLINE_MAX_ATTEMPTS = 3;
 
-// Gemini 暫時性錯誤（流量過高、限流）時的重試設定
-const GEMINI_RETRY_STATUS = [429, 500, 503];
-const GEMINI_MAX_RETRIES = 2;
+// 主要模型忙碌（503）、限流（429）或逾時時，依序改用的備援模型（可在 .env 以逗號分隔設定）
+const GEMINI_FALLBACK_MODELS = (process.env.GEMINI_FALLBACK_MODELS || 'gemini-3.5-flash-lite,gemini-3.1-flash-lite')
+  .split(',').map(m => m.trim()).filter(m => m && m !== GEMINI_MODEL);
+// 暫時性錯誤：同一模型重試，仍失敗則換下一個模型
+const GEMINI_RETRY_STATUS = [500, 503, 504];
+const GEMINI_ATTEMPTS_PER_MODEL = 2;
+// 單次請求逾時（毫秒），避免模型無回應時前端一直等待
+const GEMINI_TIMEOUT_MS = 30000;
 
 /**
- * 呼叫 Gemini API，遇到暫時性錯誤時自動重試
+ * 呼叫 Gemini API：暫時性錯誤自動重試，主要模型不可用時改用備援模型
  */
 async function callGeminiAPI(prompt) {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      return await requestGemini(prompt);
-    } catch (error) {
-      if (attempt >= GEMINI_MAX_RETRIES || !GEMINI_RETRY_STATUS.includes(error.statusCode)) {
-        throw error;
+  const models = [GEMINI_MODEL, ...GEMINI_FALLBACK_MODELS];
+  let lastError;
+  for (const model of models) {
+    for (let attempt = 0; attempt < GEMINI_ATTEMPTS_PER_MODEL; attempt++) {
+      try {
+        return await requestGemini(model, prompt);
+      } catch (error) {
+        lastError = error;
+        console.warn(`Gemini ${model} 呼叫失敗 (${error.statusCode || '連線錯誤'})：${error.error?.message || error.error}`);
+        // 模型已下架（404）或額度用完（429，通常要隔天才重置）直接換下一個模型；
+        // 其他非暫時性錯誤（如 API Key 錯誤）直接回報
+        if (error.statusCode === 404 || error.statusCode === 429) break;
+        if (error.statusCode && !GEMINI_RETRY_STATUS.includes(error.statusCode)) throw error;
+        if (attempt < GEMINI_ATTEMPTS_PER_MODEL - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+        }
       }
-      await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
     }
   }
+  throw lastError;
 }
 
 /**
  * 送出單次 Gemini API 請求（使用 https 模組）
  */
-function requestGemini(prompt) {
+function requestGemini(model, prompt) {
   return new Promise((resolve, reject) => {
     const requestBody = JSON.stringify({
       contents: [{
@@ -109,16 +128,14 @@ function requestGemini(prompt) {
         temperature: 0.75,       // 平衡創意與穩定
         topP: 0.9,
         topK: 40,
-        maxOutputTokens: 2048,   // 增加上限，避免截斷
-        // 關閉思考：思考 token 會佔用 maxOutputTokens，導致回覆被截斷或變成空白
-        thinkingConfig: { thinkingBudget: 0 }
+        maxOutputTokens: 2048    // 增加上限，避免截斷
       }
     });
 
     const options = {
       hostname: GEMINI_API_HOST,
       port: 443,
-      path: `${GEMINI_API_PATH}?key=${GEMINI_API_KEY}`,
+      path: `/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -150,6 +167,11 @@ function requestGemini(prompt) {
       });
     });
 
+    req.setTimeout(GEMINI_TIMEOUT_MS, () => {
+      req.destroy();
+      reject({ statusCode: 504, error: { message: `請求逾時（${GEMINI_TIMEOUT_MS / 1000} 秒）` } });
+    });
+
     req.on('error', (error) => {
       reject({ error: error.message });
     });
@@ -165,7 +187,7 @@ function requestGemini(prompt) {
  */
 exports.generateComment = async (req, res) => {
   try {
-    const { studentName, traits, improvements, manualInput } = req.body;
+    const { studentName, traits, improvements, manualInput, courseTopic, courseOutline } = req.body;
 
     // 驗證必要參數
     if (!studentName) {
@@ -191,16 +213,33 @@ exports.generateComment = async (req, res) => {
     }
 
     // 構建 prompt
-    const prompt = buildCommentPrompt(studentName, traits, improvements, manualInput);
+    const prompt = buildCommentPrompt(studentName, traits, improvements, manualInput, courseTopic, courseOutline);
 
-    // 呼叫 Gemini API
-    const data = await callGeminiAPI(prompt);
+    // 呼叫 Gemini API，評語字數不在 100~120 字範圍內時重新生成
+    let result = null;
+    for (let attempt = 0; attempt < COMMENT_MAX_ATTEMPTS; attempt++) {
+      const data = await callGeminiAPI(prompt);
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // 解析回應
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      // 解析評語和分數
+      const parsed = parseAIResponse(generatedText, traits);
+      const fitted = fitCommentLength(parsed.comment);
+      parsed.comment = fitted.text;
+      // 保留最接近範圍的結果，重試都失敗時使用
+      if (!result || parsed.comment.length > result.comment.length) {
+        result = parsed;
+      }
+      if (fitted.valid) {
+        result = parsed;
+        break;
+      }
+    }
 
-    // 解析評語和分數
-    const result = parseAIResponse(generatedText, traits);
+    // 評語太短（AI 回應異常）則使用備用評語
+    if (result.comment.length < 30) {
+      const traitsText = traits.slice(0, 2).join('、');
+      result.comment = fitCommentLength(`${studentName}在課程中展現出${traitsText}的特質，能依照步驟完成實作任務，遇到問題時也願意主動嘗試解決，不輕易放棄。課堂上能專注投入，願意與同學交流想法，也會仔細檢查自己的作品。期待持續累積實作經驗，挑戰更多不同類型的專案。`).text;
+    }
 
     res.json({
       success: true,
@@ -254,22 +293,27 @@ exports.generateOutline = async (req, res) => {
     // 構建 prompt
     const prompt = buildOutlinePrompt(principles || [], manualInput);
 
-    // 呼叫 Gemini API，字數不在 50~60 字範圍內時重新生成
+    // 呼叫 Gemini API，大綱字數不在 90~100 字範圍內時重新生成
     let outline = '';
     for (let attempt = 0; attempt < OUTLINE_MAX_ATTEMPTS; attempt++) {
       const data = await callGeminiAPI(prompt);
-      const result = fitOutlineLength((data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim());
-      if (result.valid) {
-        outline = result.text;
-        break;
-      }
+      const generatedText = (data.candidates?.[0]?.content?.parts?.[0]?.text || '')
+        .replace(/[*#`>]/g, '')           // 移除 Markdown 符號
+        .replace(/^\s*[-•]\s*/gm, '')
+        .trim();
+      const fitted = fitTextLength(generatedText, OUTLINE_MIN_LENGTH, OUTLINE_MAX_LENGTH);
       // 保留最接近範圍的結果，重試都失敗時使用
-      if (result.text.length > outline.length) {
-        outline = result.text;
+      if (fitted.text.length > outline.length) {
+        outline = fitted.text;
+      }
+      if (fitted.valid) {
+        outline = fitted.text;
+        break;
       }
     }
 
-    if (!outline) {
+    // 大綱太短（AI 回應異常）視為生成失敗
+    if (Array.from(outline).length < OUTLINE_MIN_LENGTH / 2) {
       return res.status(500).json({
         success: false,
         message: 'AI 生成失敗，請稍後再試'
@@ -409,38 +453,23 @@ ${principles.length > 0 ? principles.join('、') : '（教師未特別勾選原�
   prompt += `
 【撰寫要求】
 1. 嚴格限制在 ${OUTLINE_MIN_LENGTH}~${OUTLINE_MAX_LENGTH} 字之間（含標點符號），少於 ${OUTLINE_MIN_LENGTH} 字或超過 ${OUTLINE_MAX_LENGTH} 字皆不合格
-2. 只寫兩個重點：課程主題（本堂課做什麼、運用什麼原理）與學習成果（學生能學會或完成什麼），兩者篇幅約各半
-3. 以一到兩句完整的句子呈現，不要分段、不要條列、不要加「課程主題」「學習成果」等標題
+2. 只寫兩個重點：課程主題（本堂課做什麼、運用什麼原理）與學習成果（學生能學會或完成什麼）
+3. 以兩句完整的句子呈現，不要分段、不要條列、不要加「課程主題」「學習成果」等標題
 4. 使用純文字撰寫，不要使用 Markdown 符號（如 **、##、-）
 5. 內容需符合國小/國中程式設計與機器人實作課程情境，語氣專業但易讀
 6. 禁止捏造教師補充說明中沒有提到的具體人名、日期或分數
-7. 直接輸出大綱內容，不要加上開場白或說明文字`;
+7. 直接輸出大綱內容，不要加上開場白或說明文字
+
+【範例參考】（${OUTLINE_MIN_LENGTH}~${OUTLINE_MAX_LENGTH}字）
+「本課以槓桿與滑輪為主題，學生分組組裝積木吊車，並實際調整支點位置與滑輪組合，比較不同配置下吊起重物所需的力量大小。學生能說明槓桿與滑輪的省力原理，並獨立完成可穩定吊起重物的吊車作品。」`;
 
   return prompt;
 }
 
 /**
- * 將大綱調整到 50~60 字範圍：超過上限時截在範圍內最後一個標點並以句號結尾，避免斷在句子中間
- * 回傳 { text, valid }，valid 為 false 表示無法調整到範圍內（需重新生成）
- */
-function fitOutlineLength(text) {
-  const chars = Array.from(text.replace(/\s+/g, ''));
-  if (chars.length <= OUTLINE_MAX_LENGTH) {
-    return { text: chars.join(''), valid: chars.length >= OUTLINE_MIN_LENGTH };
-  }
-  // 截斷後長度為 i + 1（含補上的句號），須落在範圍內
-  for (let i = OUTLINE_MAX_LENGTH - 1; i >= OUTLINE_MIN_LENGTH - 1; i--) {
-    if ('。！；，、'.includes(chars[i])) {
-      return { text: chars.slice(0, i).join('') + '。', valid: true };
-    }
-  }
-  return { text: chars.slice(0, OUTLINE_MAX_LENGTH - 1).join('') + '。', valid: false };
-}
-
-/**
  * 構建評語生成的 prompt（優化版）
  */
-function buildCommentPrompt(studentName, traits, improvements, manualInput) {
+function buildCommentPrompt(studentName, traits, improvements, manualInput, courseTopic, courseOutline) {
   // 隨機選擇寫作風格和開頭方式
   const writingStyle = randomPick(WRITING_STYLES);
   const openingStyle = randomPick(OPENING_STYLES);
@@ -462,9 +491,19 @@ function buildCommentPrompt(studentName, traits, improvements, manualInput) {
 正面特質：${traits.join('、')}
 `;
 
-  // 加入特質情境提示
+  // 本堂課的主題與大綱：評語需以此為背景，描述學生在本堂課中如何展現特質
+  const topic = (courseTopic || '').trim();
+  const outline = (courseOutline || '').trim();
+  const hasCourseInfo = !!(topic || outline);
+  if (hasCourseInfo) {
+    prompt += `\n【本堂課程資訊】\n`;
+    if (topic) prompt += `課程主題：${topic}\n`;
+    if (outline) prompt += `課程大綱：${outline}\n`;
+  }
+
+  // 加入特質情境提示（有課程資訊時以本堂課內容為主）
   if (traitScenarios.length > 0) {
-    prompt += `\n【特質展現情境參考】\n${traitScenarios.join('\n')}\n`;
+    prompt += `\n【特質展現情境參考${hasCourseInfo ? '（若與本堂課內容不符則忽略）' : ''}】\n${traitScenarios.join('\n')}\n`;
   }
 
   if (improvements && improvements.length > 0) {
@@ -478,23 +517,25 @@ function buildCommentPrompt(studentName, traits, improvements, manualInput) {
   prompt += `
 
 【撰寫要求】
-1. 字數約 100-150 字，不要太短也不要太長
-2. 語氣溫暖正向，具有鼓勵性
-3. 避免使用「該生」、「該同學」等生硬用語，直接稱呼學生姓名
-4. 用概括性描述展現學生特質，不要虛構具體事件
-5. 避免制式化用語如「在...方面表現優異」，改用生動描述
+1. 嚴格限制在 ${COMMENT_MIN_LENGTH}~${COMMENT_MAX_LENGTH} 字之間（含標點符號），少於 ${COMMENT_MIN_LENGTH} 字或超過 ${COMMENT_MAX_LENGTH} 字皆不合格
+2. 語氣平實、客觀且正向，如實描述學生的表現
+3. 禁止誇大的形容，如「非常優秀」「表現優異」「天才」「完美」「無比」「一定能成為」等，也不要使用驚嘆號
+4. 避免使用「該生」、「該同學」等生硬用語，直接稱呼學生姓名
+5. 用概括性描述展現學生特質，不要虛構具體事件
 6. 如有待加強項目，用正面期許的方式提出，不要過度強調缺點
-7. 結尾以對未來的期許或鼓勵作結
+7. 結尾以一句具體的期許作結
 8. 禁止虛構對話內容（如「老師，...」或學生說的話）
 9. 禁止編造特定日期、次數、具體事件等不存在的細節
-10. 評語必須是純文字敘述，禁止出現數字編號、括號數字等
+10. 評語必須是純文字敘述，禁止出現數字編號、括號數字等${hasCourseInfo ? `
+11. 必須結合【本堂課程資訊】，描述學生在本堂課的主題與活動中如何展現所選特質，讓評語明確對應這堂課的內容
+12. 只能引用課程主題與大綱中提到的活動、作品與原理，不可自行增加大綱沒有的活動` : ''}
 
-【優秀範例參考】
+【範例參考】
 範例1（特質：思維邏輯靈活、積極主動）：
-「小明在這學期的程式課中展現了優秀的邏輯思維能力。面對複雜的程式問題時，他能夠冷靜分析、逐步拆解，找出解決方案。課堂上積極參與討論，勇於提出自己的想法和疑問，這份主動學習的態度非常可貴。期待他在未來繼續挑戰更進階的專案！」
+「小明能有條理地拆解程式問題，遇到錯誤時會逐步檢查每個步驟並找出原因，不輕易放棄。課堂上願意主動發問與分享自己的想法，也會嘗試用不同的方法完成任務，展現出靈活的思考。期待他持續累積實作經驗，挑戰更進階的專案。」
 
 範例2（特質：同儕小老師、細心謹慎）：
-「小華是班上熱心助人的好夥伴，常常主動協助同學解決程式上的困難。她的程式碼總是整齊有序、結構清晰，展現出細心謹慎的特質。在團隊合作中能夠有效溝通，帶領同學一起完成任務。希望她繼續保持這份熱忱，未來一定能成為優秀的團隊領袖。」
+「小華常主動協助同學排除程式問題，說明時耐心清楚，撰寫的程式碼整齊易讀，做事細心謹慎。小組合作時能清楚表達想法，並留意每位組員的進度，讓團隊順利完成任務。希望她持續保持這份用心，並多嘗試帶領團隊完成較大型的專題。」
 
 【評分要求】
 根據學生特質，給出五個面向的評分（1-5分，5分最高）：
@@ -511,7 +552,7 @@ function buildCommentPrompt(studentName, traits, improvements, manualInput) {
 
 【輸出格式】嚴格按照以下格式輸出，不要加入其他文字：
 【評語】
-(你的評語內容，100-150字)
+(你的評語內容，${COMMENT_MIN_LENGTH}~${COMMENT_MAX_LENGTH}字)
 
 【分數】
 程式：X
@@ -521,6 +562,40 @@ function buildCommentPrompt(studentName, traits, improvements, manualInput) {
 團隊合作：X`;
 
   return prompt;
+}
+
+/**
+ * 將評語調整到 100~120 字範圍
+ */
+function fitCommentLength(text) {
+  return fitTextLength(text, COMMENT_MIN_LENGTH, COMMENT_MAX_LENGTH);
+}
+
+/**
+ * 將文字調整到 min~max 字範圍：超過上限時截在範圍內最後一個標點並以句號結尾，避免斷在句子中間
+ * 回傳 { text, valid }，valid 為 false 表示無法調整到範圍內（需重新生成）
+ */
+function fitTextLength(text, min, max) {
+  const chars = Array.from(text
+    .replace(/\s+/g, '')
+    .replace(/[（(]約?\d+字[）)]/g, '')   // 移除 AI 自行附加的字數標註，如「（98字）」
+    .replace(/！/g, '。'));
+  if (chars.length <= max) {
+    return { text: chars.join(''), valid: chars.length >= min };
+  }
+  // 截斷後長度為 i + 1（含補上的句號），須落在範圍內
+  for (let i = max - 1; i >= min - 1; i--) {
+    if ('。；，、'.includes(chars[i])) {
+      return { text: chars.slice(0, i).join('') + '。', valid: true };
+    }
+  }
+  // 範圍內找不到標點：改截在更前面的最後一個標點（字數會略少於下限，但不會斷在句子中間）
+  for (let i = min - 2; i > 0; i--) {
+    if ('。；，、'.includes(chars[i])) {
+      return { text: chars.slice(0, i).join('') + '。', valid: false };
+    }
+  }
+  return { text: chars.slice(0, max - 1).join('') + '。', valid: false };
 }
 
 /**
@@ -570,12 +645,6 @@ function parseAIResponse(text, traits) {
     .replace(/^\d+\.\s*/gm, '')        // 移除行首 1. 2. 等
     .replace(/\s{2,}/g, ' ')           // 多餘空白合併
     .trim();
-
-  // 檢查評語長度，若太短則使用備用評語
-  if (comment.length < 30) {
-    const traitsText = traits.length > 0 ? traits.join('、') : '認真學習';
-    comment = `在本學期的課程中展現了${traitsText}等優秀特質，學習態度積極認真，能夠主動思考並嘗試解決問題。期待在未來的課程中繼續保持這份學習熱忱，挑戰更多有趣的專案！`;
-  }
 
   // 根據特質調整分數（作為備用邏輯）
   if (traits.includes('Debug大師') || traits.includes('Debug 大師')) {
@@ -641,7 +710,7 @@ exports.generateDepartmentRecommendation = async (req, res) => {
       SELECT * FROM department_recommendations WHERE student_id = ?
     `, [student.id]);
 
-    if (existing) {
+    if (existing && !req.forceRegenerate) {
       // 已有紀錄，直接返回
       return res.json({
         success: true,
@@ -724,7 +793,8 @@ exports.generateDepartmentRecommendation = async (req, res) => {
     // 解析回應
     const result = parseDepartmentRecommendation(generatedText);
 
-    // 存入資料庫
+    // 存入資料庫（重新分析時，新結果產生成功後才取代舊紀錄）
+    await db.query('DELETE FROM department_recommendations WHERE student_id = ?', [student.id]);
     await db.query(`
       INSERT INTO department_recommendations
         (student_id, department, reason, introduction, career_directions, career_salary, suggestion)
@@ -784,10 +854,9 @@ exports.regenerateDepartmentRecommendation = async (req, res) => {
       return res.status(404).json({ success: false, message: '找不到學生資料' });
     }
 
-    // 刪除舊紀錄
-    await db.query('DELETE FROM department_recommendations WHERE student_id = ?', [student.id]);
-
-    // 重新呼叫生成邏輯
+    // 重新呼叫生成邏輯；舊紀錄等新結果成功產生後才會被取代，
+    // AI 失敗時學生仍保有原本的推薦
+    req.forceRegenerate = true;
     return exports.generateDepartmentRecommendation(req, res);
   } catch (error) {
     console.error('重新生成科系推薦錯誤:', error);

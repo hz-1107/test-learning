@@ -8,7 +8,7 @@
 // 不是從 http://localhost:3000 這個來源開啟（例如用編輯器內建的靜態伺服器預覽），
 // 相對路徑就會抓到錯誤的來源，伺服器回傳的 404 HTML 頁面會讓 response.json() 直接拋出
 // 「Unexpected token '<'」的錯誤。統一改成絕對路徑可避免這個問題。
-const NOTIFICATION_API_BASE = (window.API_BASE || 'http://localhost:3000/api').replace(/\/api\/?$/, '');
+const NOTIFICATION_API_BASE = (window.API_BASE || window.API_ORIGIN + '/api').replace(/\/api\/?$/, '');
 
 // 通知面板 HTML 模板
 const notificationPanelTemplate = `

@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>教師日誌 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -116,6 +117,21 @@
     .form-input--readonly {
       background: #f1f2f4;
       cursor: not-allowed;
+    }
+
+    /* 班級欄位：由點擊的日誌自動帶入，外觀與其他唯讀欄位一致（移除下拉箭頭、停用時文字不變淡） */
+    .form-select--locked {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: none;
+      color: #1e2939;
+      opacity: 1;
+    }
+
+    .form-select--locked:disabled {
+      color: #1e2939;
+      opacity: 1;
     }
 
     .form-input--placeholder {
@@ -1274,8 +1290,8 @@
           <select class="filter-select" id="filterStatus">
             <option value="">全部</option>
             <option value="completed">已完成</option>
-            <option value="in_progress">進行中</option>
-            <option value="pending">未填寫</option>
+            <option value="in_progress">填寫中</option>
+            <option value="pending">待填寫</option>
           </select>
         </div>
         <div class="filter-group">
@@ -1361,8 +1377,8 @@
             <input type="hidden" id="journalEndTime" value="">
 
             <div class="form-group">
-              <label class="form-label form-label--required">選擇班級</label>
-              <select id="journalScheduleSelect" class="form-input" onchange="onScheduleChange()">
+              <label class="form-label">班級</label>
+              <select id="journalScheduleSelect" class="form-input form-input--readonly form-select--locked" onchange="onScheduleChange()">
                 <option value="">-- 請選擇班級 --</option>
               </select>
             </div>
@@ -2542,6 +2558,15 @@
       color: white;
     }
 
+    /* 生成中：按鈕停用並淡化，避免重複點擊 */
+    .ai-modal__generate-btn:disabled,
+    .ai-modal__generate-btn:disabled:hover {
+      background: var(--color-primary);
+      color: #1e2939;
+      opacity: 0.6;
+      cursor: wait;
+    }
+
     .ai-modal__result {
       margin-top: 8px;
       flex: 1;
@@ -2635,7 +2660,7 @@
   <script src="../js/main.js"></script>
   <script>
     // API 基礎網址（用絕對網址，避免此頁若非從後端伺服器開啟時，相對路徑打錯位置）
-    const API_BASE = 'http://localhost:3000/api';
+    const API_BASE = window.API_ORIGIN + '/api';
 
     // 當前編輯的學生
     let currentStudent = null;
@@ -2679,10 +2704,7 @@
       // 設定今天日期為預設
       const today = formatLocalDate(new Date());
 
-      // 設定篩選器預設日期範圍（過去30天到今天）
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      document.getElementById('filterStartDate').value = formatLocalDate(thirtyDaysAgo);
+      // 篩選器預設：起始日留空（從開課日起算），結束日為今天
       document.getElementById('filterEndDate').value = today;
 
       // 載入教師的班級列表
@@ -2723,7 +2745,7 @@
     }
 
     // 顯示日誌填寫視圖
-    function showJournalFormView(scheduleId, date = null) {
+    async function showJournalFormView(scheduleId, date = null) {
       document.getElementById('classListView').classList.add('hidden');
       document.getElementById('journalFormView').classList.add('active');
 
@@ -2743,8 +2765,11 @@
       document.getElementById('journalDateInput').value = logDate;
       document.getElementById('journalLogDate').value = logDate;
 
-      // 選擇對應的班級
-      document.getElementById('journalScheduleSelect').value = scheduleId;
+      // 直接帶入該日誌的班級（含代課的其他老師班級），並鎖定不可更換，避免填到別班
+      const select = document.getElementById('journalScheduleSelect');
+      const loaded = scheduleId ? await ensureScheduleLoaded(scheduleId) : false;
+      select.value = loaded ? scheduleId : '';
+      select.disabled = loaded;
       onScheduleChange();
     }
 
@@ -2879,7 +2904,11 @@
         const startDate = document.getElementById('filterStartDate').value;
         const endDate = document.getElementById('filterEndDate').value;
 
-        const response = await fetch(`${API_BASE}/logs/schedule-dates?schedule_id=${scheduleId}&start_date=${startDate}&end_date=${endDate}`, {
+        // 起始日留空則從開課日起算（規則與首頁、行政端共用）
+        const params = new URLSearchParams({ schedule_id: scheduleId });
+        if (startDate) params.set('start_date', startDate);
+        if (endDate) params.set('end_date', endDate);
+        const response = await fetch(`${API_BASE}/logs/schedule-dates?${params.toString()}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -2914,11 +2943,11 @@
               </span>
               <span class="date-list__stat">
                 <span class="date-list__stat-dot date-list__stat-dot--progress"></span>
-                進行中 ${in_progress_count}
+                填寫中 ${in_progress_count}
               </span>
               <span class="date-list__stat">
                 <span class="date-list__stat-dot date-list__stat-dot--pending"></span>
-                未填寫 ${pending_count}
+                待填寫 ${pending_count}
               </span>
             </div>
           </div>
@@ -2933,20 +2962,14 @@
               const shortDateStr = `${month}月${day}日`;
 
               let statusClass = 'pending';
-              let statusText = '未填寫';
+              let statusText = '待填寫';
 
-              if (item.has_log) {
-                if (item.log_status === 'completed') {
-                  statusClass = 'completed';
-                  statusText = '已完成';
-                } else if (item.log_status === 'in_progress') {
-                  statusClass = 'progress';
-                  statusText = '進行中';
-                } else {
-                  // pending 狀態
-                  statusClass = 'pending';
-                  statusText = '未填寫';
-                }
+              if (item.log_status === 'completed') {
+                statusClass = 'completed';
+                statusText = '已完成';
+              } else if (item.log_status === 'in_progress' || item.log_status === 'progress') {
+                statusClass = 'progress';
+                statusText = '填寫中';
               }
 
               const isFuture = !item.is_past;
@@ -3075,6 +3098,62 @@
         classrooms.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     }
 
+    // 代課時開啟的其他老師班級（不列入「我的班級」列表，只供日誌填寫使用）
+    let otherSchedules = [];
+
+    // 依 ID 找班級：自己的班級或代課開啟的其他老師班級
+    function findSchedule(scheduleId) {
+      return schedulesData.find(s => s.schedule_id == scheduleId)
+        || otherSchedules.find(s => s.schedule_id == scheduleId);
+    }
+
+    // 班級下拉選單顯示文字：課程・教師・星期・時間
+    function formatScheduleOption(schedule) {
+      const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      const dayName = dayNames[schedule.day_of_week] || '';
+      const timeStr = `${(schedule.start_time || '').slice(0, 5)} - ${(schedule.end_time || '').slice(0, 5)}`;
+      return [schedule.course_name, schedule.teacher_name, `${dayName} ${timeStr}`].filter(Boolean).join('・');
+    }
+
+    // 確保班級資料已載入：不是自己的班級（代課）時，另外向後端取得該班級資料並加入下拉選單
+    async function ensureScheduleLoaded(scheduleId) {
+      if (findSchedule(scheduleId)) return true;
+
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/schedules/${scheduleId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (!result.success || !result.data) {
+          showMessage(result.message || '找不到該班級', 'error');
+          return false;
+        }
+
+        const s = result.data;
+        const schedule = {
+          schedule_id: s.id,
+          course_id: s.course_id,
+          day_of_week: s.day_of_week,
+          start_time: s.start_time,
+          end_time: s.end_time,
+          classroom_id: s.classroom_id,
+          course_name: s.course_name,
+          teacher_id: s.teacher_id,
+          teacher_name: s.teacher_name,
+          classroom_name: s.classroom_name
+        };
+        otherSchedules.push(schedule);
+        document.getElementById('journalScheduleSelect')
+          .appendChild(new Option(formatScheduleOption(schedule), schedule.schedule_id));
+        return true;
+      } catch (error) {
+        console.error('載入班級資料錯誤:', error);
+        showMessage('載入班級資料失敗', 'error');
+        return false;
+      }
+    }
+
     // 載入教師的班級列表
     async function loadMySchedules() {
       try {
@@ -3103,15 +3182,8 @@
         const select = document.getElementById('journalScheduleSelect');
         select.innerHTML = '<option value="">-- 請選擇班級 --</option>';
 
-        const dayNames = ['', '週一', '週二', '週三', '週四', '週五', '週六', '週日'];
-
         schedulesData.forEach(schedule => {
-          const option = document.createElement('option');
-          option.value = schedule.schedule_id;
-          const dayName = dayNames[schedule.day_of_week] || `星期${schedule.day_of_week}`;
-          const timeStr = `${schedule.start_time.slice(0,5)} - ${schedule.end_time.slice(0,5)}`;
-          option.textContent = `${schedule.course_name} (${dayName} ${timeStr}) - ${schedule.classroom_name || '未指定教室'}`;
-          select.appendChild(option);
+          select.appendChild(new Option(formatScheduleOption(schedule), schedule.schedule_id));
         });
 
         if (schedulesData.length === 0) {
@@ -3149,7 +3221,7 @@
       }
 
       // 找到選中的班級資料
-      const schedule = schedulesData.find(s => s.schedule_id == scheduleId);
+      const schedule = findSchedule(scheduleId);
       if (!schedule) return;
 
       // 填入隱藏欄位
@@ -3671,7 +3743,7 @@
       // 重新觸發班級選擇以更新時間顯示
       const scheduleId = document.getElementById('journalScheduleSelect').value;
       if (scheduleId) {
-        const schedule = schedulesData.find(s => s.schedule_id == scheduleId);
+        const schedule = findSchedule(scheduleId);
         if (schedule) {
           const dateStr = new Date(this.value + 'T00:00:00').toLocaleDateString('zh-TW');
           const timeStr = `${schedule.start_time.slice(0,5)} - ${schedule.end_time.slice(0,5)}`;
@@ -3814,14 +3886,12 @@
 
     // 備用課程大綱生成（當 API 無法使用時）
     function generateOutlineFallback(principles, input) {
-      // 與 AI 生成一致：只寫課程主題與學習成果，限制 50~60 字
-      const buildText = topic => `本課以${topic}為主題，引導學生動手組裝並測試機構作品；學生能理解其運作原理，並獨立完成指定的機械作品。`;
+      // 與 AI 生成一致：只寫課程主題與學習成果，限制 90~100 字
+      const buildText = topic => `本課以${topic}為主題，學生透過積木組裝與實際動手操作，觀察並比較不同結構設計帶來的變化，親身體驗其中的運作原理。學生能理解並清楚說明所學原理，運用於實際組裝過程中，並完成指定的機械作品。`;
       let text = buildText(principles.slice(0, 2).join('、') || '機械原理');
-      if (Array.from(text).length > 60) {
-        text = buildText(principles[0]);
-      }
-      const chars = Array.from(text);
-      const result = chars.length > 60 ? chars.slice(0, 59).join('') + '。' : text;
+      // 原理名稱太長超過 100 字時，只帶第一個原理；仍超過則截斷
+      if (Array.from(text).length > 100) text = buildText(principles[0]);
+      const result = Array.from(text).slice(0, 100).join('');
 
       document.getElementById('outlineResult').value = result;
 
@@ -3846,7 +3916,14 @@
       }
 
       const studentName = currentStudent?.name || '學生';
-      const generateBtn = document.querySelector('.ai-modal__generate-btn');
+      // 評語需結合本堂課的主題與大綱
+      const courseTopic = document.getElementById('journalTopic').value.trim();
+      const courseOutline = document.getElementById('journalOutline').value.trim();
+      if (!courseTopic && !courseOutline && typeof showMessage === 'function') {
+        showMessage('尚未填寫課程主題與大綱，評語將無法結合本堂課內容', 'warning');
+      }
+      // 需指定評語視窗內的按鈕；只寫 class 會選到頁面上第一個（課程大綱視窗）的按鈕
+      const generateBtn = document.querySelector('#commentModal .ai-modal__generate-btn');
       const originalBtnText = generateBtn.textContent;
 
       // 顯示載入狀態
@@ -3865,7 +3942,9 @@
             studentName,
             traits,
             improvements,
-            manualInput: input
+            manualInput: input,
+            courseTopic,
+            courseOutline
           })
         });
 
@@ -3904,7 +3983,15 @@
 
     // 備用評語生成（當 API 無法使用時）
     function generateCommentFallback(studentName, traits, improvements, input) {
-      const result = `${studentName}同學在本次課程中表現優異，展現出${traits.join('、')}等特質。在團隊合作環節中積極參與，能夠獨立完成機器人組裝任務，展現出良好的邏輯思維能力。${improvements.length > 0 ? '在' + improvements.join('、') + '方面持續成長中，建議持續關注與引導。' : '建議繼續保持這樣的學習態度。'}${input ? '\n\n補充：' + input : ''}`;
+      // 與 AI 生成一致：語氣平實不誇大，限制 100~120 字
+      const ending = improvements.length > 0 ? `期待在${improvements[0]}上持續練習，逐步累積並穩定進步。` : '期待持續累積實作經驗，挑戰更多不同的專案。';
+      const body = `${studentName}在課程中展現出${traits.slice(0, 2).join('、')}的特質，能依照步驟完成組裝任務，遇到問題時也願意主動嘗試解決，不輕易放棄。課堂上能專注投入，願意與同學交流想法，也會仔細檢查自己的作品。`;
+      // 超過 120 字時去掉結尾期許的後半句，仍超過則截斷
+      let chars = Array.from(body + ending);
+      if (chars.length > 120) {
+        chars = Array.from(body + ending.split('，')[0] + '。');
+      }
+      const result = chars.length > 120 ? chars.slice(0, 119).join('') + '。' : chars.join('');
 
       document.getElementById('commentResult').value = result;
 
@@ -4333,8 +4420,8 @@
         const startTime = document.getElementById('journalStartTime').value || null;
         const endTime = document.getElementById('journalEndTime').value || null;
 
-        // 取得教師 ID (從 localStorage 或 token)
-        let teacherId = document.getElementById('journalTeacherId').value;
+        // 取得教師 ID：日誌歸屬於該班級的老師（代課時仍記在原班級老師名下，由「師資異動」註記代課老師）
+        let teacherId = findSchedule(scheduleId)?.teacher_id || document.getElementById('journalTeacherId').value;
         if (!teacherId) {
           // 嘗試從 localStorage 取得用戶資訊
           const userInfo = localStorage.getItem('userInfo');
@@ -4516,8 +4603,8 @@
         });
 
         const statusMessages = {
-          'pending': '日誌已儲存（未填寫）',
-          'in_progress': '日誌已儲存（進行中）',
+          'pending': '日誌已儲存（待填寫）',
+          'in_progress': '日誌已儲存（填寫中）',
           'completed': '日誌已成功完成！'
         };
         showMessage(statusMessages[finalStatus], 'success');

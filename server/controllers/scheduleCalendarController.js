@@ -127,6 +127,7 @@ exports.getWeeklySchedule = async (req, res) => {
           teacher_id: adjustment?.adjusted_teacher_id || schedule.teacher_id,
           teacher_name: adjustment?.adjusted_teacher_name || schedule.teacher_name,
           is_adjusted: !!adjustment,
+          adjustment_id: adjustment?.id || null,
           adjustment_type: adjustment?.adjustment_type || null,
           adjustment_reason: adjustment?.reason || null
         };
@@ -156,6 +157,7 @@ exports.getWeeklySchedule = async (req, res) => {
                 teacher_id: adj.adjusted_teacher_id || originalSchedule.teacher_id,
                 teacher_name: adj.adjusted_teacher_name || originalSchedule.teacher_name,
                 is_adjusted: true,
+                adjustment_id: adj.id,
                 adjustment_type: adj.adjustment_type || 'makeup',
                 adjustment_reason: adj.reason,
                 original_date: adj.original_date
@@ -285,6 +287,7 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
           teacher_id: adj.adjusted_teacher_id || s.teacher_id,
           teacher_name: adj.adjusted_teacher_name || s.teacher_name,
           is_adjusted: true,
+          adjustment_id: adj.id,
           adjustment_type: adj.adjustment_type,
           adjustment_reason: adj.reason
         };
@@ -320,6 +323,7 @@ exports.getDailyScheduleByTeacher = async (req, res) => {
           teacher_id: adj.adjusted_teacher_id || originalSchedule.teacher_id,
           teacher_name: adj.adjusted_teacher_name || originalSchedule.teacher_name,
           is_adjusted: true,
+          adjustment_id: adj.id,
           adjustment_type: adj.adjustment_type,
           adjustment_reason: adj.reason,
           original_date: adj.original_date

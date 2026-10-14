@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>教師端管理頁面 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -396,7 +397,7 @@
 
   <script src="../js/main.js"></script>
   <script>
-    const API_BASE = 'http://localhost:3000/api';
+    const API_BASE = window.API_ORIGIN + '/api';
 
     // 從 localStorage 取得 token
     function getAuthToken() {
@@ -621,64 +622,21 @@
       const journalContent = document.getElementById('journalContent');
 
       try {
-        // 取得最近 14 天內的日誌狀態
-        const now = new Date();
-        const startDate = new Date(now);
-        startDate.setDate(now.getDate() - 14);
-        const endDate = new Date(now);
+        const todayStr = formatLocalDate(new Date());
 
-        const startDateStr = formatLocalDate(startDate);
-        const endDateStr = formatLocalDate(endDate);
-        const todayStr = formatLocalDate(now);
+        // 未完成日誌由後端計算（自開課日期起至今天，今天的課開始後才算），
+        // 與行政端「老師管理」未完成數、「日誌管理」列表使用同一套規則
+        const logResponse = await apiRequest('/logs/my-incomplete');
+        const incompleteJournals = logResponse.data?.logs || [];
 
-        const logResponse = await apiRequest(`/logs/my-status?start_date=${startDateStr}&end_date=${endDateStr}`);
-        const schedules = logResponse.data?.schedules || [];
-
-        // 展開每個排程的未完成日誌
-        const incompleteJournals = [];
-
-        schedules.forEach(schedule => {
-          // 計算該排程在日期範圍內應該有的日期
-          const expectedDates = getExpectedDatesForSchedule(startDateStr, endDateStr, schedule.day_of_week);
-          const logs = schedule.logs || [];
-
-          // 找出每個預期日期的日誌狀態
-          expectedDates.forEach(dateStr => {
-            const existingLog = logs.find(l => {
-              const logDateStr = l.log_date ? l.log_date.split('T')[0] : '';
-              return logDateStr === dateStr;
-            });
-
-            // 如果沒有日誌或日誌未完成
-            if (!existingLog || existingLog.status !== 'completed') {
-              // 只顯示今天及之前的（不顯示未來的）；以本地日期字串比較，避免時區轉換造成當日凌晨被誤判為未來
-              if (dateStr <= todayStr) {
-                incompleteJournals.push({
-                  schedule_id: schedule.schedule_id,
-                  course_name: schedule.course_name,
-                  start_time: schedule.start_time,
-                  end_time: schedule.end_time,
-                  log_date: dateStr,
-                  status: existingLog ? existingLog.status : 'not_filled'
-                });
-              }
-            }
-          });
-        });
-
-        // 按日期排序（最近的在前）
-        incompleteJournals.sort((a, b) => {
-          return new Date(b.log_date) - new Date(a.log_date);
-        });
-
-        // 統計進行中／未完成數量並更新標題旁的徽章
-        // 「未完成」為累積總數（與下方「還有 N 筆未完成」的口徑一致），「進行中」為其中已開始填寫的子集
-        const inProgressCount = incompleteJournals.filter(j => j.status === 'progress' || j.status === 'in_progress').length;
+        // 統計填寫中／未完成數量並更新標題旁的徽章
+        // 「未完成」為累積總數（與下方「還有 N 筆未完成」的口徑一致），「填寫中」為其中已開始填寫的子集
+        const inProgressCount = logResponse.data?.in_progress || 0;
         const incompleteTotal = incompleteJournals.length;
         const journalBadges = document.getElementById('journalBadges');
         if (journalBadges) {
           journalBadges.innerHTML = incompleteTotal > 0 ? `
-            <span class="journal-badge journal-badge--in-progress">進行中 ${inProgressCount}</span>
+            <span class="journal-badge journal-badge--in-progress">填寫中 ${inProgressCount}</span>
             <span class="journal-badge journal-badge--not-started">未完成 ${incompleteTotal}</span>
           ` : '';
         }
@@ -747,23 +705,6 @@
           </div>
         `;
       }
-    }
-
-    // 輔助函數：計算日期範圍內特定星期幾的所有日期
-    function getExpectedDatesForSchedule(startDateStr, endDateStr, dayOfWeek) {
-      const dates = [];
-      const start = new Date(startDateStr);
-      const end = new Date(endDateStr);
-      const current = new Date(start);
-
-      while (current <= end) {
-        if (current.getDay() === dayOfWeek) {
-          dates.push(formatLocalDate(current));
-        }
-        current.setDate(current.getDate() + 1);
-      }
-
-      return dates;
     }
 
     // 填充課程／教師篩選下拉選單
@@ -849,7 +790,8 @@
       const token = getAuthToken();
       try {
         // 先自動建立已開始課程的日誌（靜默執行）
-        await fetch(`${API_BASE}/api/logs/auto-create-my`, {
+        // API_BASE 已包含 /api，路徑不可再加 /api
+        await fetch(`${API_BASE}/logs/auto-create-my`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });

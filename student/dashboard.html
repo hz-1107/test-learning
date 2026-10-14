@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <script src="../js/config.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>學習概況 - 智慧學習歷程系統</title>
   <link rel="stylesheet" href="../css/styles.css">
@@ -1420,27 +1421,18 @@
                   <div class="flip-card__front recommendation-card">
                     <span class="recommendation-card__tag">學類介紹</span>
                     <p class="recommendation-card__description" id="recommendIntro"></p>
-                    <div class="flip-card__link" onclick="toggleFlipCard('introFlipCard')">翻閱出路分析</div>
+                    <div class="flip-card__link" onclick="toggleFlipCard('introFlipCard')">翻閱學習建議</div>
                   </div>
                   <div class="flip-card__back recommendation-card">
-                    <span class="recommendation-card__tag">出路分析</span>
-                    <p class="recommendation-card__description" id="recommendCareer"></p>
+                    <span class="recommendation-card__tag">學習建議</span>
+                    <p class="recommendation-card__description" id="recommendSuggestion"></p>
                     <div class="flip-card__link" onclick="toggleFlipCard('introFlipCard')">返回介紹</div>
                   </div>
                 </div>
               </div>
-
-              <!-- 學習建議卡片 -->
-              <div class="recommendation-card" id="suggestionCard" style="display: none;">
-                <span class="recommendation-card__tag">學習建議</span>
-                <p class="recommendation-card__description" id="recommendSuggestion"></p>
-              </div>
             </div>
           </div>
         </section>
-      </div>
-    </main>
-  </div>
       </div>
     </main>
   </div>
@@ -1542,6 +1534,8 @@
     let radarChart = null;
     let trendChart = null;
     let currentTrendRange = 6; // 週數
+    let currentTrendParams = { weeks: 6 }; // 目前趨勢圖的日期條件（切換課程時沿用）
+    let selectedTrendCourseId = ''; // 空字串 = 全部課程
 
     function formatMD(dateStr) {
       // 'YYYY-MM-DD' -> 'M/D'
@@ -1567,10 +1561,11 @@
     // 渲染出缺勤 / 學習階段卡片
     function renderStageCard(me) {
       document.getElementById('stageCourseTypeName').textContent = me.enrollment ? (me.enrollment.course_type_name || me.enrollment.course_name) : '尚未分班';
-      document.getElementById('stageLessonCount').textContent = me.attendance.totalLessons;
-      document.getElementById('badgeLeaveCount').textContent = me.attendance.stats.excused;
-      // 「待補課」以缺席堂數估算 (資料庫暫無獨立補課欄位)
-      document.getElementById('badgeAbsentCount').textContent = me.attendance.stats.absent;
+      // 上課堂數只計出席、補課（與行政端「上課堂數」一致，請假、未約課不列入）
+      document.getElementById('stageLessonCount').textContent = me.attendance.lessonCount;
+      // 請假 = 待補課 + 已補課；待補課 = 仍是請假狀態、尚未補課的堂數
+      document.getElementById('badgeLeaveCount').textContent = me.attendance.leaveCount;
+      document.getElementById('badgeAbsentCount').textContent = me.attendance.pendingMakeup;
     }
 
     // 渲染班級資訊翻轉卡
@@ -1606,29 +1601,56 @@
     }
 
     // 渲染點數卡片
+    let pointTransactions = [];
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str == null ? '' : str;
+      return div.innerHTML;
+    }
+
     function renderPointsCard(me) {
       document.getElementById('pointsBalance').textContent = me.points.balance;
+      pointTransactions = me.points.transactions || [];
+      renderPointsList();
+    }
 
+    // 點數紀錄清單（依搜尋框關鍵字篩選事由與日期）
+    function renderPointsList() {
       const listEl = document.getElementById('pointsDetailList');
-      if (!me.points.transactions.length) {
-        listEl.innerHTML = '<div class="points-detail__item"><span class="points-detail__reason">尚無點數紀錄</span></div>';
+      const keyword = document.getElementById('pointsSearchInput').value.trim().toLowerCase();
+      const formatDate = (value) => {
+        const date = new Date(value);
+        return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+      };
+      const items = pointTransactions.filter(t =>
+        !keyword ||
+        (t.reason || '').toLowerCase().includes(keyword) ||
+        (t.description || '').toLowerCase().includes(keyword) ||
+        formatDate(t.created_at).includes(keyword)
+      );
+
+      if (!items.length) {
+        const emptyText = pointTransactions.length ? '找不到符合的點數紀錄' : '尚無點數紀錄';
+        listEl.innerHTML = `<div class="points-detail__item"><span class="points-detail__reason">${emptyText}</span></div>`;
         return;
       }
 
-      listEl.innerHTML = me.points.transactions.map(t => {
+      listEl.innerHTML = items.map(t => {
         const amount = t.amount || 0;
         const isPositive = amount >= 0;
-        const date = new Date(t.created_at);
-        const dateStr = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+        const dateStr = formatDate(t.created_at);
         return `
           <div class="points-detail__item">
             <span class="points-detail__date">${dateStr}</span>
-            <span class="points-detail__reason">${t.reason || ''}</span>
+            <span class="points-detail__reason">${escapeHtml(t.reason || '')}</span>
             <span class="points-detail__value points-detail__value--${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${amount}</span>
           </div>
         `;
       }).join('');
     }
+
+    document.getElementById('pointsSearchInput').addEventListener('input', renderPointsList);
 
     // 渲染能力雷達圖
     function renderRadar(me) {
@@ -1703,15 +1725,22 @@
         return;
       }
 
-      labelEl.textContent = history[0].course_name;
-      listEl.innerHTML = history.map(c =>
-        `<div class="course-dropdown__item" onclick="selectCourse('${c.course_name.replace(/'/g, "\\'")}')">${c.course_name}</div>`
+      // 「全部課程」為預設，選擇單一課程時趨勢圖只顯示該課程的評分
+      const options = history.length > 1
+        ? [{ course_id: '', course_name: '全部課程' }, ...history]
+        : history;
+      labelEl.textContent = options[0].course_name;
+      selectedTrendCourseId = options[0].course_id || '';
+      listEl.innerHTML = options.map(c =>
+        `<div class="course-dropdown__item" data-course-id="${c.course_id || ''}" onclick="selectCourse(this)">${escapeHtml(c.course_name)}</div>`
       ).join('');
     }
 
-    function selectCourse(courseName) {
-      document.getElementById('courseDropdownLabel').textContent = courseName;
+    function selectCourse(itemEl) {
+      document.getElementById('courseDropdownLabel').textContent = itemEl.textContent;
       document.getElementById('courseDropdown').classList.remove('course-dropdown--open');
+      selectedTrendCourseId = itemEl.dataset.courseId || '';
+      fetchAndRenderTrend(currentTrendParams);
     }
 
     // 建立趨勢圖表資料集
@@ -1727,8 +1756,11 @@
     }
 
     async function fetchAndRenderTrend(params) {
+      currentTrendParams = params;
       try {
-        const result = await api.students.getMyTrend(params);
+        const query = { ...params };
+        if (selectedTrendCourseId) query.course_id = selectedTrendCourseId;
+        const result = await api.students.getMyTrend(query);
         const trendData = result.data;
         const labels = trendData.labels.map(formatMD);
 
@@ -1737,8 +1769,13 @@
         } else {
           trendChart.data.labels = labels;
           trendChart.data.datasets = buildTrendDatasets(trendData);
-          trendChart.update();
         }
+        // 重新查詢後保留使用者已關閉的指標
+        document.querySelectorAll('.trend-indicator-tag').forEach(tag => {
+          const index = SKILL_KEYS.indexOf(tag.textContent.trim());
+          if (index >= 0) trendChart.getDatasetMeta(index).hidden = !tag.classList.contains('trend-indicator-tag--active');
+        });
+        trendChart.update();
       } catch (error) {
         console.error('取得學習趨勢失敗', error);
       }
@@ -1842,7 +1879,7 @@
 
       try {
         const token = localStorage.getItem('authToken');
-        const response = await axios.post('http://localhost:3000/api/ai/generate-department-recommendation', {}, {
+        const response = await axios.post(window.API_ORIGIN + '/api/ai/generate-department-recommendation', {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -1859,7 +1896,10 @@
       }
     }
 
+    let lastRecommendation = null;
+
     function renderRecommendation(data) {
+      lastRecommendation = data;
       const loadingEl = document.getElementById('recommendLoading');
       const departmentEl = document.getElementById('recommendDepartment');
       const flipLinkEl = document.getElementById('careerFlipLink');
@@ -1878,17 +1918,8 @@
       // 更新學類介紹
       document.getElementById('recommendIntro').textContent = data.introduction;
 
-      // 更新出路分析
-      document.getElementById('recommendCareer').innerHTML = `
-        <strong>就業方向：</strong>${data.career.directions || '—'}<br><br>
-        <strong>薪資範圍：</strong>${data.career.salary || '—'}
-      `;
-
-      // 顯示學習建議卡片
-      if (data.suggestion) {
-        document.getElementById('recommendSuggestion').textContent = data.suggestion;
-        document.getElementById('suggestionCard').style.display = 'block';
-      }
+      // 更新學習建議（學類介紹翻轉卡背面）
+      document.getElementById('recommendSuggestion').textContent = data.suggestion || '—';
     }
 
     function showRecommendationError(message) {
@@ -1904,6 +1935,16 @@
       document.getElementById('recommendIntro').textContent = message;
     }
 
+    // 重新分析失敗時，後端仍保留原本的推薦，畫面也還原成原本的結果
+    function restoreRecommendationAfterError(message) {
+      if (lastRecommendation) {
+        renderRecommendation(lastRecommendation);
+        showMessage(`${message}，已保留原本的推薦結果`, 'error');
+      } else {
+        showRecommendationError(message);
+      }
+    }
+
     async function regenerateDepartmentRecommendation() {
       const btn = document.getElementById('aiRegenerateBtn');
       btn.disabled = true;
@@ -1912,7 +1953,6 @@
       document.getElementById('recommendLoading').style.display = 'flex';
       document.getElementById('recommendDepartment').style.display = 'none';
       document.getElementById('careerFlipLink').style.display = 'none';
-      document.getElementById('suggestionCard').style.display = 'none';
 
       // 重置翻轉卡片狀態
       document.getElementById('careerFlipCard').classList.remove('flip-card--flipped');
@@ -1920,7 +1960,7 @@
 
       try {
         const token = localStorage.getItem('authToken');
-        const response = await axios.post('http://localhost:3000/api/ai/regenerate-department-recommendation', {}, {
+        const response = await axios.post(window.API_ORIGIN + '/api/ai/regenerate-department-recommendation', {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -1928,11 +1968,11 @@
           renderRecommendation(response.data.data);
           showMessage('已重新分析科系推薦！', 'success');
         } else {
-          showRecommendationError(response.data.message || '重新生成失敗');
+          restoreRecommendationAfterError(response.data.message || '重新生成失敗');
         }
       } catch (error) {
         console.error('重新生成科系推薦錯誤:', error);
-        showRecommendationError(error.response?.data?.message || '重新生成失敗');
+        restoreRecommendationAfterError(error.response?.data?.message || '重新生成失敗');
       } finally {
         btn.disabled = false;
       }
