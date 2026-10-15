@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { generateUsername, birthdayPassword, syncBirthdayPassword } = require('../utils/account');
+const { generateUsername, birthdayPassword, syncBirthdayPassword, checkLoginConflict } = require('../utils/account');
 
 // 「實際上過課」的出勤狀態（出席、補課；late 為舊資料）
 const ATTENDED_SQL = "('present', 'late', 'makeup')";
@@ -314,6 +314,11 @@ exports.create = async (req, res) => {
       return res.status(400).json({ success: false, message: emailCheck.error });
     }
 
+    const conflict = await checkLoginConflict(name, birthday);
+    if (conflict) {
+      return res.status(400).json({ success: false, message: conflict });
+    }
+
     const username = await generateUsername(name);
     const hashedPassword = await bcrypt.hash(birthdayPassword(birthday), 10);
 
@@ -395,6 +400,11 @@ exports.update = async (req, res) => {
       if (emailCheck.error) {
         return res.status(400).json({ success: false, message: emailCheck.error });
       }
+    }
+
+    const conflict = await checkLoginConflict(name, birthday, student.user_id);
+    if (conflict) {
+      return res.status(400).json({ success: false, message: conflict });
     }
 
     // 更新使用者資料（生日有更動時，登入密碼同步更新）
@@ -555,6 +565,13 @@ exports.updateProfile = async (req, res) => {
         [...keys.map(k => fields[k]), rowId]
       );
     };
+
+    if (userFields.name !== undefined || userFields.birthday !== undefined) {
+      const conflict = await checkLoginConflict(userFields.name, userFields.birthday, student.user_id);
+      if (conflict) {
+        return res.status(400).json({ success: false, message: conflict });
+      }
+    }
 
     // 生日有更動時，登入密碼同步更新
     await syncBirthdayPassword(student.user_id, userFields.birthday);

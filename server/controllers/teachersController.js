@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { generateUsername, birthdayPassword, syncBirthdayPassword } = require('../utils/account');
+const { generateUsername, birthdayPassword, syncBirthdayPassword, checkLoginConflict } = require('../utils/account');
 const { listScheduleLogs, groupLogsBySchedule, loadCalendar } = require('../utils/expectedLogs');
 
 /**
@@ -156,6 +156,11 @@ exports.create = async (req, res) => {
       });
     }
 
+    const conflict = await checkLoginConflict(name, birthday);
+    if (conflict) {
+      return res.status(400).json({ success: false, message: conflict });
+    }
+
     // 登入帳號為姓名，密碼為西元生日 (格式: YYYYMMDD)
     const username = await generateUsername(name);
     const hashedPassword = await bcrypt.hash(birthdayPassword(birthday), 10);
@@ -199,6 +204,11 @@ exports.update = async (req, res) => {
         success: false,
         message: '找不到教師'
       });
+    }
+
+    const conflict = await checkLoginConflict(name, birthday, teacher.user_id);
+    if (conflict) {
+      return res.status(400).json({ success: false, message: conflict });
     }
 
     // 更新使用者資料（生日有更動時，登入密碼同步更新）

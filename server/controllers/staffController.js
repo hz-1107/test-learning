@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { generateUsername, birthdayPassword, syncBirthdayPassword } = require('../utils/account');
+const { generateUsername, birthdayPassword, syncBirthdayPassword, checkLoginConflict } = require('../utils/account');
 
 // 行政人員 = users.role 為 'staff' 的帳號；職稱等延伸資料存於 staff_profiles
 const BASE_SELECT = `
@@ -82,6 +82,11 @@ exports.create = async (req, res) => {
       });
     }
 
+    const conflict = await checkLoginConflict(name, birthday);
+    if (conflict) {
+      return res.status(400).json({ success: false, message: conflict });
+    }
+
     const username = await generateUsername(name);
     const hashedPassword = await bcrypt.hash(birthdayPassword(birthday), 10);
 
@@ -138,6 +143,11 @@ exports.update = async (req, res) => {
         success: false,
         message: '無法停用目前登入的帳號'
       });
+    }
+
+    const conflict = await checkLoginConflict(name, birthday, Number(id));
+    if (conflict) {
+      return res.status(400).json({ success: false, message: conflict });
     }
 
     // 生日有更動時，登入密碼同步更新
